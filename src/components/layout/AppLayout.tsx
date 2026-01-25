@@ -4,14 +4,17 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { NeuronParticles } from '@/components/effects/NeuronParticles';
+
 export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  return <div className="flex min-h-screen bg-background relative overflow-hidden">
+
+  return (
+    <div className="flex min-h-screen bg-background relative overflow-hidden">
       {/* Neuron Particles Background */}
       <NeuronParticles />
 
       {/* Desktop Sidebar - above particles */}
-      <div className="hidden md:block relative z-10 shadow-inner">
+      <div className="hidden md:block relative z-10">
         <Sidebar />
       </div>
 
@@ -29,5 +32,6 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
-    </div>;
+    </div>
+  );
 }
