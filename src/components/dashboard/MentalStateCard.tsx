@@ -27,7 +27,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       </div>
 
       {/* Insight Card */}
-      <div className="p-4 rounded-xl border border-border bg-card space-y-3">
+      <div className="p-4 rounded-xl glass-card space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -52,7 +52,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       </div>
 
       {/* Ritual Completed */}
-      <div className="p-4 rounded-xl border border-success/20 bg-success/5 flex items-center gap-3">
+      <div className="p-4 rounded-xl border border-success/20 bg-success/5 backdrop-blur-sm flex items-center gap-3">
         <div className="p-2 rounded-lg bg-success/20">
           <CheckCircle2 className="h-5 w-5 text-success" />
         </div>
@@ -67,7 +67,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       </div>
 
       {/* Weekly Summary */}
-      <div className="p-4 rounded-xl border border-border bg-card">
+      <div className="p-4 rounded-xl glass-card">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-primary" />
           <p className="text-xs font-medium uppercase tracking-wider">Resumen Semanal</p>

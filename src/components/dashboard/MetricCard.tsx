@@ -27,7 +27,7 @@ export function MetricCard({
   };
 
   return (
-    <div className={cn('flex items-center gap-4 p-5 rounded-xl border border-border bg-card', className)}>
+    <div className={cn('flex items-center gap-4 p-5 rounded-xl glass-card', className)}>
       <div className={cn('p-3 rounded-xl', iconStyles[iconColor])}>
         <Icon className="h-6 w-6" />
       </div>

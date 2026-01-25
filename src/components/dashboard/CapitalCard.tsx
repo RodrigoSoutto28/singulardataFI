@@ -22,7 +22,7 @@ export function CapitalCard({
     : value;
 
   return (
-    <div className={cn('p-5 rounded-xl border border-border bg-card', className)}>
+    <div className={cn('p-5 rounded-xl glass-card', className)}>
       <div className="flex items-start justify-between mb-4">
         <div className={cn(
           'p-3 rounded-xl',

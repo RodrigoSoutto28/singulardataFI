@@ -42,7 +42,7 @@ export function TasksCard({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn('p-5 rounded-xl border border-border bg-card', className)}>
+    <div className={cn('p-5 rounded-xl glass-card', className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export function TasksCard({ className }: { className?: string }) {
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addTask()}
-          className="flex-1 bg-muted/50 border-transparent text-sm"
+          className="flex-1 bg-muted/30 backdrop-blur-sm border-border/30 text-sm"
         />
         <Button 
           size="icon" 

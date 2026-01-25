@@ -23,7 +23,7 @@ interface EquityChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-border bg-popover p-3 shadow-lg">
+      <div className="rounded-lg bg-popover/80 backdrop-blur-xl border border-border/50 p-3 shadow-lg">
         <p className="text-xs text-muted-foreground mb-1">{label}</p>
         <p className="text-sm font-semibold font-mono">
           ${payload[0].value.toLocaleString()}
@@ -49,7 +49,7 @@ export function EquityChart({ data, className }: EquityChartProps) {
   const isPositiveTrend = data.length > 1 && data[data.length - 1].equity >= data[0].equity;
 
   return (
-    <div className={cn('p-5 rounded-xl border border-border bg-card', className)}>
+    <div className={cn('p-5 rounded-xl glass-card', className)}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className={cn('h-5 w-5', isPositiveTrend ? 'text-success' : 'text-destructive')} />
