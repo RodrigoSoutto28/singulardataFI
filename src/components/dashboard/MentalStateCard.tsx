@@ -14,7 +14,7 @@ export function MentalStateCard({
     if (score >= 60) return 'text-warning bg-warning/10';
     return 'text-destructive bg-destructive/10';
   };
-  return <div className={cn("space-y-4 my-0 mx-0 border-2 border-card", className)}>
+  return <div className={cn("space-y-4 my-0 mx-0 border-card border-0", className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
