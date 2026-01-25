@@ -64,12 +64,12 @@ export default function Dashboard() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Mental State */}
-        <div className="lg:col-span-1 border-0">
+        <div className="lg:col-span-1">
           <MentalStateCard disciplineScore={45} />
         </div>
 
         {/* Right Column - Capital & Performance */}
-        <div className="lg:col-span-2 space-y-6 px-0 mx-[25px] my-0 border-2">
+        <div className="lg:col-span-2 space-y-6 px-0 mx-[25px] my-0 border-0">
           {/* Section Header */}
           <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Capital & Riesgo
