@@ -47,20 +47,20 @@ export function AchievementBadges() {
     switch (status) {
       case 'completed':
         return {
-          container: 'border-success/30 bg-success/5',
+          container: 'border-success/30 bg-success/5 backdrop-blur-sm',
           icon: 'bg-success/20 text-success',
           text: 'text-foreground',
         };
       case 'in-progress':
         return {
-          container: 'border-primary/30 bg-primary/5',
+          container: 'border-primary/30 bg-primary/5 backdrop-blur-sm',
           icon: 'bg-primary/20 text-primary',
           text: 'text-foreground',
         };
       default:
         return {
-          container: 'border-border bg-card',
-          icon: 'bg-muted text-muted-foreground',
+          container: 'border-border/40 bg-card/50 backdrop-blur-sm',
+          icon: 'bg-muted/50 text-muted-foreground',
           text: 'text-muted-foreground',
         };
     }

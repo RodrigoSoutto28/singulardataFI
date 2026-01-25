@@ -55,7 +55,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 h-16 border-b border-border/50 bg-background/60 backdrop-blur-xl">
       <div className="flex items-center justify-between h-full px-4 md:px-6">
         {/* Left - Date & Time */}
         <div className="flex items-center gap-4">
@@ -98,7 +98,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           </Button>
 
           {/* Language Selector */}
-          <div className="hidden sm:flex items-center bg-muted rounded-full p-0.5">
+          <div className="hidden sm:flex items-center bg-muted/50 backdrop-blur-sm rounded-full p-0.5 border border-border/30">
             <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full bg-primary text-primary-foreground text-xs">
               ES
             </Button>
@@ -125,7 +125,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-popover/80 backdrop-blur-xl border-border/50">
               <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Perfil</DropdownMenuItem>
