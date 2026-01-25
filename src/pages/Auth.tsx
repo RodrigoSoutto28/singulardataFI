@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, TrendingUp, Brain, Shield, BarChart3 } from 'lucide-react';
+import { TrendingUp, Brain, Shield, BarChart3, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Auth() {
@@ -29,9 +29,9 @@ export default function Auth() {
     const { error } = await signIn(email, password);
 
     if (error) {
-      toast.error('Sign in failed', { description: error.message });
+      toast.error('Error al iniciar sesión', { description: error.message });
     } else {
-      toast.success('Welcome back!');
+      toast.success('¡Bienvenido de nuevo!');
     }
 
     setIsLoading(false);
@@ -49,33 +49,33 @@ export default function Auth() {
     const { error } = await signUp(email, password, fullName);
 
     if (error) {
-      toast.error('Sign up failed', { description: error.message });
+      toast.error('Error al crear cuenta', { description: error.message });
     } else {
-      toast.success('Account created!', { description: 'Welcome to Analítica!' });
+      toast.success('¡Cuenta creada!', { description: '¡Bienvenido a Analítica!' });
     }
 
     setIsLoading(false);
   };
 
   const features = [
-    { icon: BarChart3, title: 'Advanced Analytics', description: 'Deep insights into your trading performance' },
-    { icon: Brain, title: 'AI-Powered Insights', description: 'Machine learning detects patterns and edges' },
-    { icon: TrendingUp, title: 'Equity Tracking', description: 'Visualize your growth over time' },
-    { icon: Shield, title: 'Psychology Tracking', description: 'Master your trading mindset' },
+    { icon: BarChart3, title: 'Analítica Avanzada', description: 'Insights profundos de tu rendimiento' },
+    { icon: Brain, title: 'Insights con IA', description: 'Machine learning detecta patrones' },
+    { icon: TrendingUp, title: 'Curva de Equidad', description: 'Visualiza tu crecimiento' },
+    { icon: Shield, title: 'Psicología Trading', description: 'Domina tu mentalidad' },
   ];
 
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-gradient-to-br from-primary/10 via-background to-background p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-gradient-to-br from-primary/5 via-background to-background p-12 flex-col justify-between relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-3xl" />
 
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
           <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary shadow-glow">
-            <Zap className="h-7 w-7 text-primary-foreground" />
+            <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Analítica</h1>
@@ -87,10 +87,11 @@ export default function Auth() {
         <div className="space-y-8 relative z-10 max-w-md">
           <div>
             <h2 className="text-3xl font-bold mb-4">
-              Trade smarter with <span className="gradient-text">AI-powered</span> insights
+              Opera más inteligente con insights{' '}
+              <span className="gradient-text">potenciados por IA</span>
             </h2>
             <p className="text-muted-foreground">
-              Join thousands of traders who use Analítica to track, analyze, and improve their trading performance.
+              Únete a miles de traders que usan Analítica para rastrear, analizar y mejorar su rendimiento.
             </p>
           </div>
 
@@ -112,71 +113,70 @@ export default function Auth() {
         {/* Stats */}
         <div className="flex items-center gap-12 relative z-10">
           <div>
-            <p className="text-3xl font-bold">10K+</p>
-            <p className="text-sm text-muted-foreground">Active traders</p>
+            <p className="text-3xl font-bold font-mono">10K+</p>
+            <p className="text-sm text-muted-foreground">Traders activos</p>
           </div>
           <div>
-            <p className="text-3xl font-bold">2M+</p>
-            <p className="text-sm text-muted-foreground">Trades analyzed</p>
+            <p className="text-3xl font-bold font-mono">2M+</p>
+            <p className="text-sm text-muted-foreground">Trades analizados</p>
           </div>
           <div>
-            <p className="text-3xl font-bold">94%</p>
-            <p className="text-sm text-muted-foreground">User satisfaction</p>
+            <p className="text-3xl font-bold font-mono">94%</p>
+            <p className="text-sm text-muted-foreground">Satisfacción</p>
           </div>
         </div>
       </div>
 
       {/* Right Side - Auth Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <Card className="w-full max-w-md border-border/50 shadow-elevated">
+        <Card className="w-full max-w-md border-border bg-card shadow-elevated">
           <CardHeader className="text-center pb-2">
             <div className="flex items-center justify-center mb-4 lg:hidden">
               <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary">
-                <Zap className="h-7 w-7 text-primary-foreground" />
+                <Sparkles className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl">Welcome to Analítica</CardTitle>
-            <CardDescription>Sign in to access your trading journal</CardDescription>
+            <CardTitle className="text-2xl">Bienvenido a Analítica</CardTitle>
+            <CardDescription>Inicia sesión para acceder a tu diario de trading</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
+                <TabsTrigger value="signup">Registrarse</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email">Correo electrónico</Label>
                     <Input
                       id="signin-email"
                       name="email"
                       type="email"
                       placeholder="trader@example.com"
                       required
-                      className="bg-muted/50"
+                      className="bg-muted/50 border-border"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="signin-password">Contraseña</Label>
                     <Input
                       id="signin-password"
                       name="password"
                       type="password"
                       placeholder="••••••••"
                       required
-                      className="bg-muted/50"
+                      className="bg-muted/50 border-border"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full"
-                    variant="glow"
+                    className="w-full bg-primary hover:bg-primary/90"
                     size="lg"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Signing in...' : 'Sign In'}
+                    {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                   </Button>
                 </form>
               </TabsContent>
@@ -184,29 +184,29 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">Nombre completo</Label>
                     <Input
                       id="signup-name"
                       name="fullName"
                       type="text"
                       placeholder="John Trader"
                       required
-                      className="bg-muted/50"
+                      className="bg-muted/50 border-border"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">Correo electrónico</Label>
                     <Input
                       id="signup-email"
                       name="email"
                       type="email"
                       placeholder="trader@example.com"
                       required
-                      className="bg-muted/50"
+                      className="bg-muted/50 border-border"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">Contraseña</Label>
                     <Input
                       id="signup-password"
                       name="password"
@@ -214,20 +214,19 @@ export default function Auth() {
                       placeholder="••••••••"
                       minLength={6}
                       required
-                      className="bg-muted/50"
+                      className="bg-muted/50 border-border"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full"
-                    variant="glow"
+                    className="w-full bg-primary hover:bg-primary/90"
                     size="lg"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Creating account...' : 'Create Account'}
+                    {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    By signing up, you agree to our Terms of Service and Privacy Policy
+                    Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad
                   </p>
                 </form>
               </TabsContent>
