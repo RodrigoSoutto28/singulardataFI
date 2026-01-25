@@ -1,21 +1,20 @@
 import { cn } from '@/lib/utils';
 import { Brain, Lightbulb, CheckCircle2, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
 interface MentalStateCardProps {
   disciplineScore: number;
   className?: string;
 }
-
-export function MentalStateCard({ disciplineScore, className }: MentalStateCardProps) {
+export function MentalStateCard({
+  disciplineScore,
+  className
+}: MentalStateCardProps) {
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success bg-success/10';
     if (score >= 60) return 'text-warning bg-warning/10';
     return 'text-destructive bg-destructive/10';
   };
-
-  return (
-    <div className={cn('space-y-4', className)}>
+  return <div className={cn("space-y-4 my-0 mx-0 border-2 border-card", className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -81,6 +80,5 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
           Sin operaciones aún. La paciencia también es una posición.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 }
