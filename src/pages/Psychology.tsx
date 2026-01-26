@@ -16,6 +16,14 @@ import {
   Calendar,
   Plus,
   BookOpen,
+  Shield,
+  Leaf,
+  Minus,
+  Zap,
+  AlertCircle,
+  ShieldAlert,
+  Flame,
+  type LucideIcon,
 } from 'lucide-react';
 import {
   Select,
@@ -31,18 +39,18 @@ interface EmotionOption {
   value: Emotion;
   label: string;
   color: string;
-  icon: string;
+  Icon: LucideIcon;
 }
 
 const emotions: EmotionOption[] = [
-  { value: 'confident', label: 'Confident', color: 'bg-success/20 text-success border-success/30', icon: '💪' },
-  { value: 'calm', label: 'Calm', color: 'bg-primary/20 text-primary border-primary/30', icon: '😌' },
-  { value: 'neutral', label: 'Neutral', color: 'bg-muted text-muted-foreground border-border', icon: '😐' },
-  { value: 'excited', label: 'Excited', color: 'bg-warning/20 text-warning border-warning/30', icon: '🎯' },
-  { value: 'anxious', label: 'Anxious', color: 'bg-warning/20 text-warning border-warning/30', icon: '😰' },
-  { value: 'fearful', label: 'Fearful', color: 'bg-destructive/20 text-destructive border-destructive/30', icon: '😨' },
-  { value: 'greedy', label: 'Greedy', color: 'bg-destructive/20 text-destructive border-destructive/30', icon: '🤑' },
-  { value: 'frustrated', label: 'Frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', icon: '😤' },
+  { value: 'confident', label: 'Confident', color: 'bg-success/20 text-success border-success/30', Icon: Shield },
+  { value: 'calm', label: 'Calm', color: 'bg-primary/20 text-primary border-primary/30', Icon: Leaf },
+  { value: 'neutral', label: 'Neutral', color: 'bg-muted text-muted-foreground border-border', Icon: Minus },
+  { value: 'excited', label: 'Excited', color: 'bg-warning/20 text-warning border-warning/30', Icon: Zap },
+  { value: 'anxious', label: 'Anxious', color: 'bg-warning/20 text-warning border-warning/30', Icon: AlertCircle },
+  { value: 'fearful', label: 'Fearful', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: ShieldAlert },
+  { value: 'greedy', label: 'Greedy', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: TrendingUp },
+  { value: 'frustrated', label: 'Frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: Flame },
 ];
 
 interface DailyEntry {
@@ -97,9 +105,11 @@ function EmotionBadge({ emotion }: { emotion: Emotion }) {
   const emotionData = emotions.find((e) => e.value === emotion);
   if (!emotionData) return null;
 
+  const IconComponent = emotionData.Icon;
   return (
-    <span className={cn('px-2 py-1 rounded-full text-xs font-medium border', emotionData.color)}>
-      {emotionData.icon} {emotionData.label}
+    <span className={cn('px-2 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1', emotionData.color)}>
+      <IconComponent className="h-3 w-3" />
+      {emotionData.label}
     </span>
   );
 }
@@ -232,7 +242,7 @@ export default function Psychology() {
                         : 'bg-muted/30 border-border hover:border-primary/30'
                     )}
                   >
-                    <span className="text-xl">{emotion.icon}</span>
+                    <emotion.Icon className="h-5 w-5" />
                     <p className="text-sm font-medium mt-1">{emotion.label}</p>
                   </button>
                 ))}
