@@ -4,29 +4,32 @@ import { CheckSquare, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Task {
   id: string;
+  titleKey?: string;
   title: string;
   category: string;
   completed: boolean;
 }
 
-const initialTasks: Task[] = [
-  { id: '1', title: 'Estudiar', category: 'Pre-Market', completed: false },
-  { id: '2', title: 'Backtesting / analizar mercado', category: 'Pre-Market', completed: false },
-  { id: '3', title: 'Lectura 30 mins', category: 'Pre-Market', completed: false },
+const getInitialTasks = (): Task[] => [
+  { id: '1', titleKey: 'study', title: 'Estudiar', category: 'Pre-Market', completed: false },
+  { id: '2', titleKey: 'backtest', title: 'Backtesting / analizar mercado', category: 'Pre-Market', completed: false },
+  { id: '3', titleKey: 'reading', title: 'Lectura 30 mins', category: 'Pre-Market', completed: false },
 ];
 
 export function TasksCard({ className }: { className?: string }) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { t } = useLanguage();
+  const [tasks, setTasks] = useState<Task[]>(getInitialTasks());
   const [newTask, setNewTask] = useState('');
 
   const pendingCount = tasks.filter(t => !t.completed).length;
 
   const toggleTask = (id: string) => {
-    setTasks(prev => prev.map(t => 
-      t.id === id ? { ...t, completed: !t.completed } : t
+    setTasks(prev => prev.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
     ));
   };
 
@@ -47,17 +50,17 @@ export function TasksCard({ className }: { className?: string }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-success" />
-          <h3 className="text-sm font-medium">Tareas del Día</h3>
+          <h3 className="text-sm font-medium">{t.dashboard.dailyTasks}</h3>
         </div>
         <Badge className="bg-primary/10 text-primary text-xs">
-          {pendingCount} Pendientes
+          {pendingCount} {t.common.pending}
         </Badge>
       </div>
 
       {/* Add Task */}
       <div className="flex gap-2 mb-4">
         <Input
-          placeholder="Nueva tarea..."
+          placeholder={t.dashboard.newTask}
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addTask()}
@@ -110,7 +113,7 @@ export function TasksCard({ className }: { className?: string }) {
         {tasks.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Lista vacía</p>
+            <p className="text-sm">{t.dashboard.emptyList}</p>
           </div>
         )}
       </div>

@@ -18,6 +18,7 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Insight {
   id: string;
@@ -131,59 +132,60 @@ const severityColors = {
   high: 'bg-destructive/20 text-destructive',
 };
 
-function InsightCard({ insight }: { insight: Insight }) {
-  const Icon = insightIcons[insight.type];
-  const colors = insightColors[insight.type];
-
-  return (
-    <Card className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
-      <CardContent className="pt-6">
-        <div className="flex items-start gap-4">
-          <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
-            <Icon className={cn('h-6 w-6', colors.icon)} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold">{insight.title}</h3>
-              {insight.isNew && (
-                <Badge className="bg-primary/20 text-primary text-[10px] h-5">NEW</Badge>
-              )}
-              <Badge className={cn('text-[10px] h-5', severityColors[insight.severity])}>
-                {insight.severity.toUpperCase()}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">{insight.description}</p>
-            <p className="text-xs text-muted-foreground/80 mb-4">{insight.details}</p>
-            
-            {insight.confidence && (
-              <div className="mb-4">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">AI Confidence</span>
-                  <span className="font-medium font-mono-numbers">{insight.confidence}%</span>
-                </div>
-                <Progress value={insight.confidence} className="h-1.5" />
-              </div>
-            )}
-
-            <div className="flex items-center gap-3">
-              <Button size="sm" variant="outline" className="gap-2">
-                {insight.actionLabel}
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-              <Button size="sm" variant="ghost" className="text-muted-foreground">
-                Dismiss
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function Insights() {
+  const { t } = useLanguage();
   const newInsights = mockInsights.filter((i) => i.isNew);
   const allInsights = mockInsights;
+
+  function InsightCard({ insight }: { insight: Insight }) {
+    const Icon = insightIcons[insight.type];
+    const colors = insightColors[insight.type];
+
+    return (
+      <Card className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
+              <Icon className={cn('h-6 w-6', colors.icon)} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold">{insight.title}</h3>
+                {insight.isNew && (
+                  <Badge className="bg-primary/20 text-primary text-[10px] h-5">{t.common.new}</Badge>
+                )}
+                <Badge className={cn('text-[10px] h-5', severityColors[insight.severity])}>
+                  {insight.severity.toUpperCase()}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">{insight.description}</p>
+              <p className="text-xs text-muted-foreground/80 mb-4">{insight.details}</p>
+              
+              {insight.confidence && (
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">{t.insights.aiConfidence}</span>
+                    <span className="font-medium font-mono-numbers">{insight.confidence}%</span>
+                  </div>
+                  <Progress value={insight.confidence} className="h-1.5" />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <Button size="sm" variant="outline" className="gap-2">
+                  {insight.actionLabel}
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="ghost" className="text-muted-foreground">
+                  {t.common.dismiss}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -191,16 +193,16 @@ export default function Insights() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold">AI Insights</h1>
-            <Badge className="bg-primary/20 text-primary">Powered by AI</Badge>
+            <h1 className="text-2xl font-bold">{t.insights.title}</h1>
+            <Badge className="bg-primary/20 text-primary">{t.insights.poweredByAI}</Badge>
           </div>
           <p className="text-muted-foreground">
-            Machine learning analysis of your trading patterns
+            {t.insights.subtitle}
           </p>
         </div>
         <Button variant="outline" className="gap-2">
           <RefreshCw className="h-4 w-4" />
-          Refresh Analysis
+          {t.insights.refreshAnalysis}
         </Button>
       </div>
 
@@ -213,7 +215,7 @@ export default function Insights() {
                 <Brain className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Patterns Detected</p>
+                <p className="text-sm text-muted-foreground">{t.insights.patternsDetected}</p>
                 <p className="text-2xl font-bold font-mono-numbers">23</p>
               </div>
             </div>
@@ -227,7 +229,7 @@ export default function Insights() {
                 <Target className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Edges Found</p>
+                <p className="text-sm text-muted-foreground">{t.insights.edgesFound}</p>
                 <p className="text-2xl font-bold font-mono-numbers">7</p>
               </div>
             </div>
@@ -241,7 +243,7 @@ export default function Insights() {
                 <AlertTriangle className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Warnings</p>
+                <p className="text-sm text-muted-foreground">{t.insights.warnings}</p>
                 <p className="text-2xl font-bold font-mono-numbers">4</p>
               </div>
             </div>
@@ -255,7 +257,7 @@ export default function Insights() {
                 <Zap className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Actions Taken</p>
+                <p className="text-sm text-muted-foreground">{t.insights.actionsTaken}</p>
                 <p className="text-2xl font-bold font-mono-numbers">12</p>
               </div>
             </div>
@@ -265,22 +267,22 @@ export default function Insights() {
 
       {/* Insight Categories */}
       <div className="flex flex-wrap gap-2">
-        <Button variant="default" size="sm">All Insights</Button>
+        <Button variant="default" size="sm">{t.insights.allInsights}</Button>
         <Button variant="outline" size="sm" className="gap-2">
           <Clock className="h-4 w-4 text-destructive" />
-          Overtrading
+          {t.insights.overtrading}
         </Button>
         <Button variant="outline" size="sm" className="gap-2">
           <Repeat className="h-4 w-4 text-primary" />
-          Patterns
+          {t.insights.patterns}
         </Button>
         <Button variant="outline" size="sm" className="gap-2">
           <Target className="h-4 w-4 text-accent" />
-          Edges
+          {t.insights.edges}
         </Button>
         <Button variant="outline" size="sm" className="gap-2">
           <AlertTriangle className="h-4 w-4 text-warning" />
-          Warnings
+          {t.insights.warnings}
         </Button>
       </div>
 
@@ -289,7 +291,7 @@ export default function Insights() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            New Insights
+            {t.insights.newInsights}
             <Badge className="bg-destructive text-destructive-foreground text-xs">
               {newInsights.length}
             </Badge>
@@ -304,7 +306,7 @@ export default function Insights() {
 
       {/* All Insights */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">All Insights</h2>
+        <h2 className="text-lg font-semibold">{t.insights.allInsights}</h2>
         <div className="grid gap-4">
           {allInsights
             .filter((i) => !i.isNew)
@@ -319,52 +321,52 @@ export default function Insights() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            AI Analysis Capabilities
+            {t.insights.aiCapabilities}
           </CardTitle>
-          <CardDescription>What our AI engine analyzes</CardDescription>
+          <CardDescription>{t.insights.whatAiAnalyzes}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Overtrading Detection</p>
-                <p className="text-xs text-muted-foreground">Monitors trade frequency and quality</p>
+                <p className="font-medium text-sm">{t.insights.overtradingDetection}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.overtradingDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Pattern Recognition</p>
-                <p className="text-xs text-muted-foreground">Finds recurring errors and patterns</p>
+                <p className="font-medium text-sm">{t.insights.patternRecognition}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.patternDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Edge Discovery</p>
-                <p className="text-xs text-muted-foreground">Identifies statistical advantages</p>
+                <p className="font-medium text-sm">{t.insights.edgeDiscovery}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.edgeDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Risk Analysis</p>
-                <p className="text-xs text-muted-foreground">Monitors risk management behavior</p>
+                <p className="font-medium text-sm">{t.insights.riskAnalysis}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.riskDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Time Analysis</p>
-                <p className="text-xs text-muted-foreground">Best and worst trading times</p>
+                <p className="font-medium text-sm">{t.insights.timeAnalysis}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.timeDesc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50">
               <CheckCircle className="h-5 w-5 text-success mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Psychology Correlation</p>
-                <p className="text-xs text-muted-foreground">Links emotions to performance</p>
+                <p className="font-medium text-sm">{t.insights.psychologyCorrelation}</p>
+                <p className="text-xs text-muted-foreground">{t.insights.psychologyDesc}</p>
               </div>
             </div>
           </div>
