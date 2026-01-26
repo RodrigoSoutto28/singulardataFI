@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   User,
   Bell,
@@ -27,50 +28,63 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface PlanFeature {
-  name: string;
-  free: boolean | string;
-  pro: boolean | string;
-  power: boolean | string;
-}
-
-const plans = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    description: 'Get started with basic trading journal',
-    icon: Zap,
-    features: ['50 trades/month', 'Basic analytics', 'Psychology tracking', '7-day data retention'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 29,
-    description: 'Advanced features for serious traders',
-    icon: Crown,
-    popular: true,
-    features: ['Unlimited trades', 'AI insights', 'Advanced analytics', 'Export reports', 'Multiple accounts', 'Priority support'],
-  },
-  {
-    id: 'power',
-    name: 'Power',
-    price: 79,
-    description: 'Full suite for professional traders',
-    icon: Rocket,
-    features: ['Everything in Pro', 'Backtesting module', 'API access', 'Custom integrations', 'Dedicated support', 'White-label option'],
-  },
-];
-
 export default function Settings() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
+
+  const plans = [
+    {
+      id: 'free',
+      name: t.settings.plans.free,
+      price: 0,
+      description: t.settings.plans.freeDesc,
+      icon: Zap,
+      features: [
+        t.settings.plans.features.tradesPerMonth,
+        t.settings.plans.features.basicAnalytics,
+        t.settings.plans.features.psychologyTracking,
+        t.settings.plans.features.dataRetention,
+      ],
+    },
+    {
+      id: 'pro',
+      name: t.settings.plans.pro,
+      price: 29,
+      description: t.settings.plans.proDesc,
+      icon: Crown,
+      popular: true,
+      features: [
+        t.settings.plans.features.unlimited,
+        t.settings.plans.features.aiInsights,
+        t.settings.plans.features.advancedAnalytics,
+        t.settings.plans.features.exportReports,
+        t.settings.plans.features.multipleAccounts,
+        t.settings.plans.features.prioritySupport,
+      ],
+    },
+    {
+      id: 'power',
+      name: t.settings.plans.power,
+      price: 79,
+      description: t.settings.plans.powerDesc,
+      icon: Rocket,
+      features: [
+        t.settings.plans.features.everythingInPro,
+        t.settings.plans.features.backtesting,
+        t.settings.plans.features.apiAccess,
+        t.settings.plans.features.customIntegrations,
+        t.settings.plans.features.dedicatedSupport,
+        t.settings.plans.features.whiteLabel,
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and preferences</p>
+        <h1 className="text-2xl font-bold">{t.settings.title}</h1>
+        <p className="text-muted-foreground">{t.settings.subtitle}</p>
       </div>
 
       {/* Profile Section */}
@@ -78,22 +92,22 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
-            Profile
+            {t.settings.profile}
           </CardTitle>
-          <CardDescription>Your personal information</CardDescription>
+          <CardDescription>{t.settings.personalInfo}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Full Name</Label>
+              <Label>{t.settings.fullName}</Label>
               <Input
                 defaultValue={profile?.full_name || ''}
-                placeholder="Your name"
+                placeholder={t.settings.yourName}
                 className="bg-muted/50"
               />
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t.settings.email}</Label>
               <Input
                 defaultValue={profile?.email || ''}
                 disabled
@@ -101,7 +115,7 @@ export default function Settings() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Timezone</Label>
+              <Label>{t.settings.timezone}</Label>
               <Select defaultValue={profile?.timezone || 'UTC'}>
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue />
@@ -117,7 +131,7 @@ export default function Settings() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Currency</Label>
+              <Label>{t.settings.currency}</Label>
               <Select defaultValue={profile?.currency || 'USD'}>
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue />
@@ -131,7 +145,7 @@ export default function Settings() {
               </Select>
             </div>
           </div>
-          <Button variant="glow">Save Changes</Button>
+          <Button variant="glow">{t.settings.saveChanges}</Button>
         </CardContent>
       </Card>
 
@@ -140,39 +154,39 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
-            Notifications
+            {t.settings.notifications}
           </CardTitle>
-          <CardDescription>Configure how you receive alerts</CardDescription>
+          <CardDescription>{t.settings.configureAlerts}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">AI Insights</p>
-              <p className="text-sm text-muted-foreground">Get notified when new insights are available</p>
+              <p className="font-medium">{t.settings.aiInsights}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.aiInsightsDesc}</p>
             </div>
             <Switch defaultChecked />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Trade Reminders</p>
-              <p className="text-sm text-muted-foreground">Daily reminder to log your trades</p>
+              <p className="font-medium">{t.settings.tradeReminders}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.tradeRemindersDesc}</p>
             </div>
             <Switch defaultChecked />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Weekly Reports</p>
-              <p className="text-sm text-muted-foreground">Receive weekly performance summaries</p>
+              <p className="font-medium">{t.settings.weeklyReports}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.weeklyReportsDesc}</p>
             </div>
             <Switch defaultChecked />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Overtrading Alerts</p>
-              <p className="text-sm text-muted-foreground">Get warned when trading too frequently</p>
+              <p className="font-medium">{t.settings.overtradingAlerts}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.overtradingAlertsDesc}</p>
             </div>
             <Switch defaultChecked />
           </div>
@@ -184,9 +198,9 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-primary" />
-            Subscription
+            {t.settings.subscription}
           </CardTitle>
-          <CardDescription>Manage your plan and billing</CardDescription>
+          <CardDescription>{t.settings.managePlan}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -207,7 +221,7 @@ export default function Settings() {
                 >
                   {plan.popular && (
                     <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
-                      Most Popular
+                      {t.common.mostPopular}
                     </Badge>
                   )}
 
@@ -237,7 +251,7 @@ export default function Settings() {
                     className="w-full"
                     disabled={isCurrentPlan}
                   >
-                    {isCurrentPlan ? 'Current Plan' : 'Upgrade'}
+                    {isCurrentPlan ? t.common.currentPlan : t.common.upgrade}
                   </Button>
                 </div>
               );
@@ -251,33 +265,33 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Security
+            {t.settings.security}
           </CardTitle>
-          <CardDescription>Protect your account</CardDescription>
+          <CardDescription>{t.settings.protectAccount}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Two-Factor Authentication</p>
-              <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+              <p className="font-medium">{t.settings.twoFactor}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.twoFactorDesc}</p>
             </div>
-            <Button variant="outline" size="sm">Enable</Button>
+            <Button variant="outline" size="sm">{t.common.enable}</Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Change Password</p>
-              <p className="text-sm text-muted-foreground">Update your password regularly</p>
+              <p className="font-medium">{t.settings.changePassword}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.changePasswordDesc}</p>
             </div>
-            <Button variant="outline" size="sm">Change</Button>
+            <Button variant="outline" size="sm">{t.common.change}</Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Active Sessions</p>
-              <p className="text-sm text-muted-foreground">Manage your logged in devices</p>
+              <p className="font-medium">{t.settings.activeSessions}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.activeSessionsDesc}</p>
             </div>
-            <Button variant="outline" size="sm">View All</Button>
+            <Button variant="outline" size="sm">{t.settings.viewAll}</Button>
           </div>
         </CardContent>
       </Card>
@@ -285,24 +299,24 @@ export default function Settings() {
       {/* Danger Zone */}
       <Card className="bg-destructive/5 border-destructive/30">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>Irreversible actions</CardDescription>
+          <CardTitle className="text-destructive">{t.settings.dangerZone}</CardTitle>
+          <CardDescription>{t.settings.irreversibleActions}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Export All Data</p>
-              <p className="text-sm text-muted-foreground">Download all your trades and settings</p>
+              <p className="font-medium">{t.settings.exportAllData}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.exportDataDesc}</p>
             </div>
-            <Button variant="outline" size="sm">Export</Button>
+            <Button variant="outline" size="sm">{t.common.export}</Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-destructive">Delete Account</p>
-              <p className="text-sm text-muted-foreground">Permanently delete your account and data</p>
+              <p className="font-medium text-destructive">{t.settings.deleteAccount}</p>
+              <p className="text-sm text-muted-foreground">{t.settings.deleteAccountDesc}</p>
             </div>
-            <Button variant="destructive" size="sm">Delete</Button>
+            <Button variant="destructive" size="sm">{t.common.delete}</Button>
           </div>
         </CardContent>
       </Card>

@@ -29,6 +29,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Mock data
 const monthlyPnlData = [
@@ -87,6 +88,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Analytics() {
+  const { t } = useLanguage();
+  
   const totalPnl = monthlyPnlData.reduce((sum, m) => sum + m.pnl, 0);
   const totalTrades = monthlyPnlData.reduce((sum, m) => sum + m.trades, 0);
   const winRate = ((winLossData[0].value / (winLossData[0].value + winLossData[1].value)) * 100).toFixed(1);
@@ -97,14 +100,14 @@ export default function Analytics() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground">Deep dive into your trading performance</p>
+          <h1 className="text-2xl font-bold">{t.analytics.title}</h1>
+          <p className="text-muted-foreground">{t.analytics.subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">Last 30 Days</Button>
-          <Button variant="outline" size="sm">Last 90 Days</Button>
-          <Button variant="default" size="sm">6 Months</Button>
-          <Button variant="outline" size="sm">All Time</Button>
+          <Button variant="outline" size="sm">{t.analytics.last30Days}</Button>
+          <Button variant="outline" size="sm">{t.analytics.last90Days}</Button>
+          <Button variant="default" size="sm">{t.analytics.sixMonths}</Button>
+          <Button variant="outline" size="sm">{t.analytics.allTime}</Button>
         </div>
       </div>
 
@@ -114,7 +117,7 @@ export default function Analytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total P&L</p>
+                <p className="text-sm text-muted-foreground">{t.analytics.totalPnl}</p>
                 <p className={cn(
                   'text-2xl font-bold font-mono-numbers',
                   totalPnl >= 0 ? 'text-profit' : 'text-loss'
@@ -133,7 +136,7 @@ export default function Analytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Win Rate</p>
+                <p className="text-sm text-muted-foreground">{t.analytics.winRate}</p>
                 <p className="text-2xl font-bold font-mono-numbers text-primary">{winRate}%</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -147,7 +150,7 @@ export default function Analytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Profit Factor</p>
+                <p className="text-sm text-muted-foreground">{t.analytics.profitFactor}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{profitFactor}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
@@ -161,7 +164,7 @@ export default function Analytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Trades</p>
+                <p className="text-sm text-muted-foreground">{t.analytics.totalTrades}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{totalTrades}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
@@ -179,9 +182,9 @@ export default function Analytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Monthly P&L
+              {t.analytics.monthlyPnl}
             </CardTitle>
-            <CardDescription>Profit and loss by month</CardDescription>
+            <CardDescription>{t.analytics.monthlyPnlDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -214,9 +217,9 @@ export default function Analytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Win/Loss Ratio
+              {t.analytics.winLossRatio}
             </CardTitle>
-            <CardDescription>Distribution of outcomes</CardDescription>
+            <CardDescription>{t.analytics.distributionOutcomes}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[250px]">
@@ -240,13 +243,16 @@ export default function Analytics() {
               </ResponsiveContainer>
             </div>
             <div className="flex justify-center gap-6 mt-4">
-              {winLossData.map((item) => (
-                <div key={item.name} className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-muted-foreground">{item.name}</span>
-                  <span className="text-sm font-semibold font-mono-numbers">{item.value}</span>
-                </div>
-              ))}
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: winLossData[0].color }} />
+                <span className="text-sm text-muted-foreground">{t.analytics.winning}</span>
+                <span className="text-sm font-semibold font-mono-numbers">{winLossData[0].value}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: winLossData[1].color }} />
+                <span className="text-sm text-muted-foreground">{t.analytics.losing}</span>
+                <span className="text-sm font-semibold font-mono-numbers">{winLossData[1].value}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -259,9 +265,9 @@ export default function Analytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              Weekday Performance
+              {t.analytics.weekdayPerformance}
             </CardTitle>
-            <CardDescription>Win rate by day of week</CardDescription>
+            <CardDescription>{t.analytics.winRateByDay}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -296,9 +302,9 @@ export default function Analytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary" />
-              Time of Day Analysis
+              {t.analytics.timeAnalysis}
             </CardTitle>
-            <CardDescription>Best trading hours</CardDescription>
+            <CardDescription>{t.analytics.bestTradingHours}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -317,7 +323,7 @@ export default function Analytics() {
                     </div>
                   </div>
                   <span className="w-16 text-right text-xs text-muted-foreground">
-                    {time.trades} trades
+                    {time.trades} {t.analytics.trades}
                   </span>
                 </div>
               ))}
@@ -331,9 +337,9 @@ export default function Analytics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5 text-primary" />
-            Asset Class Distribution
+            {t.analytics.assetDistribution}
           </CardTitle>
-          <CardDescription>Breakdown by market</CardDescription>
+          <CardDescription>{t.analytics.breakdownByMarket}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EquityDataPoint {
   date: string;
@@ -46,6 +47,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function EquityChart({ data, className }: EquityChartProps) {
+  const { t } = useLanguage();
   const isPositiveTrend = data.length > 1 && data[data.length - 1].equity >= data[0].equity;
 
   return (
@@ -53,7 +55,7 @@ export function EquityChart({ data, className }: EquityChartProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className={cn('h-5 w-5', isPositiveTrend ? 'text-success' : 'text-destructive')} />
-        <h3 className="text-sm font-medium">Curva de Equidad</h3>
+        <h3 className="text-sm font-medium">{t.dashboard.equityCurve}</h3>
       </div>
 
       {/* Chart */}

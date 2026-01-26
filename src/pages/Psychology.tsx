@@ -32,25 +32,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Emotion = 'confident' | 'fearful' | 'greedy' | 'calm' | 'anxious' | 'frustrated' | 'excited' | 'neutral';
 
 interface EmotionOption {
   value: Emotion;
-  label: string;
   color: string;
   Icon: LucideIcon;
 }
 
 const emotions: EmotionOption[] = [
-  { value: 'confident', label: 'Confident', color: 'bg-success/20 text-success border-success/30', Icon: Shield },
-  { value: 'calm', label: 'Calm', color: 'bg-primary/20 text-primary border-primary/30', Icon: Leaf },
-  { value: 'neutral', label: 'Neutral', color: 'bg-muted text-muted-foreground border-border', Icon: Minus },
-  { value: 'excited', label: 'Excited', color: 'bg-warning/20 text-warning border-warning/30', Icon: Zap },
-  { value: 'anxious', label: 'Anxious', color: 'bg-warning/20 text-warning border-warning/30', Icon: AlertCircle },
-  { value: 'fearful', label: 'Fearful', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: ShieldAlert },
-  { value: 'greedy', label: 'Greedy', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: TrendingUp },
-  { value: 'frustrated', label: 'Frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: Flame },
+  { value: 'confident', color: 'bg-success/20 text-success border-success/30', Icon: Shield },
+  { value: 'calm', color: 'bg-primary/20 text-primary border-primary/30', Icon: Leaf },
+  { value: 'neutral', color: 'bg-muted text-muted-foreground border-border', Icon: Minus },
+  { value: 'excited', color: 'bg-warning/20 text-warning border-warning/30', Icon: Zap },
+  { value: 'anxious', color: 'bg-warning/20 text-warning border-warning/30', Icon: AlertCircle },
+  { value: 'fearful', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: ShieldAlert },
+  { value: 'greedy', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: TrendingUp },
+  { value: 'frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: Flame },
 ];
 
 interface DailyEntry {
@@ -101,38 +101,8 @@ const mockEntries: DailyEntry[] = [
   },
 ];
 
-function EmotionBadge({ emotion }: { emotion: Emotion }) {
-  const emotionData = emotions.find((e) => e.value === emotion);
-  if (!emotionData) return null;
-
-  const IconComponent = emotionData.Icon;
-  return (
-    <span className={cn('px-2 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1', emotionData.color)}>
-      <IconComponent className="h-3 w-3" />
-      {emotionData.label}
-    </span>
-  );
-}
-
-function MetricBar({ value, max, label, color }: { value: number; max: number; label: string; color: string }) {
-  const percentage = (value / max) * 100;
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{value}/{max}</span>
-      </div>
-      <div className="h-2 rounded-full bg-muted">
-        <div
-          className={cn('h-full rounded-full transition-all', color)}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export default function Psychology() {
+  const { t } = useLanguage();
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [disciplineScore, setDisciplineScore] = useState([7]);
   const [sleepQuality, setSleepQuality] = useState([4]);
@@ -143,17 +113,52 @@ export default function Psychology() {
   const avgSleep = mockEntries.reduce((sum, e) => sum + e.sleepQuality, 0) / mockEntries.length;
   const rulesFollowed = mockEntries.filter((e) => e.followedRules).length;
 
+  const getEmotionLabel = (emotion: Emotion) => {
+    return t.psychology.emotions[emotion];
+  };
+
+  function EmotionBadge({ emotion }: { emotion: Emotion }) {
+    const emotionData = emotions.find((e) => e.value === emotion);
+    if (!emotionData) return null;
+
+    const IconComponent = emotionData.Icon;
+    return (
+      <span className={cn('px-2 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1', emotionData.color)}>
+        <IconComponent className="h-3 w-3" />
+        {getEmotionLabel(emotion)}
+      </span>
+    );
+  }
+
+  function MetricBar({ value, max, label, color }: { value: number; max: number; label: string; color: string }) {
+    const percentage = (value / max) * 100;
+    return (
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">{label}</span>
+          <span className="font-medium">{value}/{max}</span>
+        </div>
+        <div className="h-2 rounded-full bg-muted">
+          <div
+            className={cn('h-full rounded-full transition-all', color)}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Psychology Tracker</h1>
-          <p className="text-muted-foreground">Monitor your trading mindset and emotions</p>
+          <h1 className="text-2xl font-bold">{t.psychology.title}</h1>
+          <p className="text-muted-foreground">{t.psychology.subtitle}</p>
         </div>
         <Button variant="glow" className="gap-2">
           <Plus className="h-4 w-4" />
-          New Entry
+          {t.psychology.newEntry}
         </Button>
       </div>
 
@@ -166,7 +171,7 @@ export default function Psychology() {
                 <Target className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Discipline</p>
+                <p className="text-sm text-muted-foreground">{t.psychology.avgDiscipline}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{avgDiscipline.toFixed(1)}/10</p>
               </div>
             </div>
@@ -180,7 +185,7 @@ export default function Psychology() {
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Rules Followed</p>
+                <p className="text-sm text-muted-foreground">{t.psychology.rulesFollowed}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{rulesFollowed}/{mockEntries.length}</p>
               </div>
             </div>
@@ -194,7 +199,7 @@ export default function Psychology() {
                 <Moon className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Sleep</p>
+                <p className="text-sm text-muted-foreground">{t.psychology.avgSleep}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{avgSleep.toFixed(1)}/5</p>
               </div>
             </div>
@@ -208,7 +213,7 @@ export default function Psychology() {
                 <TrendingUp className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Entries This Week</p>
+                <p className="text-sm text-muted-foreground">{t.psychology.entriesThisWeek}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{mockEntries.length}</p>
               </div>
             </div>
@@ -222,14 +227,14 @@ export default function Psychology() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
-              Today's Check-in
+              {t.psychology.todaysCheckin}
             </CardTitle>
-            <CardDescription>How are you feeling today?</CardDescription>
+            <CardDescription>{t.psychology.howAreYou}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Emotion Selection */}
             <div className="space-y-3">
-              <Label>Current Emotion</Label>
+              <Label>{t.psychology.currentEmotion}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {emotions.slice(0, 4).map((emotion) => (
                   <button
@@ -243,7 +248,7 @@ export default function Psychology() {
                     )}
                   >
                     <emotion.Icon className="h-5 w-5" />
-                    <p className="text-sm font-medium mt-1">{emotion.label}</p>
+                    <p className="text-sm font-medium mt-1">{getEmotionLabel(emotion.value)}</p>
                   </button>
                 ))}
               </div>
@@ -252,7 +257,7 @@ export default function Psychology() {
             {/* Discipline Score */}
             <div className="space-y-3">
               <div className="flex justify-between">
-                <Label>Discipline Score</Label>
+                <Label>{t.psychology.disciplineScore}</Label>
                 <span className="text-sm font-medium font-mono-numbers">{disciplineScore[0]}/10</span>
               </div>
               <Slider
@@ -268,7 +273,7 @@ export default function Psychology() {
             {/* Sleep Quality */}
             <div className="space-y-3">
               <div className="flex justify-between">
-                <Label>Sleep Quality</Label>
+                <Label>{t.psychology.sleepQuality}</Label>
                 <span className="text-sm font-medium font-mono-numbers">{sleepQuality[0]}/5</span>
               </div>
               <Slider
@@ -284,7 +289,7 @@ export default function Psychology() {
             {/* Stress Level */}
             <div className="space-y-3">
               <div className="flex justify-between">
-                <Label>Stress Level</Label>
+                <Label>{t.psychology.stressLevel}</Label>
                 <span className="text-sm font-medium font-mono-numbers">{stressLevel[0]}/5</span>
               </div>
               <Slider
@@ -299,15 +304,15 @@ export default function Psychology() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label>Lessons Learned</Label>
+              <Label>{t.psychology.lessonsLearned}</Label>
               <Textarea
-                placeholder="What did you learn today?"
+                placeholder={t.psychology.whatDidYouLearn}
                 className="bg-muted/50 min-h-[80px]"
               />
             </div>
 
             <Button variant="glow" className="w-full">
-              Save Entry
+              {t.psychology.saveEntry}
             </Button>
           </CardContent>
         </Card>
@@ -317,9 +322,9 @@ export default function Psychology() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              Recent Entries
+              {t.psychology.recentEntries}
             </CardTitle>
-            <CardDescription>Your psychology journal history</CardDescription>
+            <CardDescription>{t.psychology.journalHistory}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -350,19 +355,19 @@ export default function Psychology() {
                     <MetricBar
                       value={entry.disciplineScore}
                       max={10}
-                      label="Discipline"
+                      label={t.psychology.disciplineScore}
                       color={entry.disciplineScore >= 7 ? 'bg-success' : entry.disciplineScore >= 5 ? 'bg-warning' : 'bg-destructive'}
                     />
                     <MetricBar
                       value={entry.sleepQuality}
                       max={5}
-                      label="Sleep"
+                      label={t.psychology.sleepQuality}
                       color={entry.sleepQuality >= 4 ? 'bg-success' : entry.sleepQuality >= 3 ? 'bg-warning' : 'bg-destructive'}
                     />
                     <MetricBar
                       value={entry.stressLevel}
                       max={5}
-                      label="Stress"
+                      label={t.psychology.stressLevel}
                       color={entry.stressLevel <= 2 ? 'bg-success' : entry.stressLevel <= 3 ? 'bg-warning' : 'bg-destructive'}
                     />
                   </div>
