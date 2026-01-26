@@ -41,7 +41,7 @@ export function NeuronParticles() {
     }));
 
     const connectionDistance = 150;
-    const primaryColor = { r: 230, g: 98, b: 31 }; // #E6621F
+    const primaryColor = { r: 137, g: 137, b: 137 }; // #898989 - gray
 
     const animate = () => {
       if (!ctx || !canvas) return;
@@ -96,7 +96,7 @@ export function NeuronParticles() {
           particle.x, particle.y, particle.size * 3
         );
         gradient.addColorStop(0, `rgba(${primaryColor.r}, ${primaryColor.g}, ${primaryColor.b}, ${particle.opacity * 0.3})`);
-        gradient.addColorStop(1, 'rgba(230, 98, 31, 0)');
+        gradient.addColorStop(1, 'rgba(137, 137, 137, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
       });

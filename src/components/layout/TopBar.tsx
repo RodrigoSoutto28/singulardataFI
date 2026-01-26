@@ -16,6 +16,14 @@ export function TopBar({
   } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isDark, setIsDark] = useState(true);
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('app-language') || 'ES';
+  });
+
+  const changeLanguage = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem('app-language', lang);
+  };
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -67,13 +75,34 @@ export function TopBar({
 
           {/* Language Selector */}
           <div className="hidden sm:flex items-center bg-muted/50 backdrop-blur-sm rounded-full p-0.5 border border-border/30">
-            <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full bg-primary text-primary-foreground text-xs">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => changeLanguage('ES')}
+              className={`h-7 px-3 rounded-full text-xs transition-colors ${
+                language === 'ES' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
               ES
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full text-muted-foreground text-xs">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => changeLanguage('EN')}
+              className={`h-7 px-3 rounded-full text-xs transition-colors ${
+                language === 'EN' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
               EN
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 px-3 rounded-full text-muted-foreground text-xs">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => changeLanguage('PT')}
+              className={`h-7 px-3 rounded-full text-xs transition-colors ${
+                language === 'PT' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
               PT
             </Button>
           </div>
