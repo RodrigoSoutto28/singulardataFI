@@ -45,6 +45,7 @@ export default {
         },
         profit: "hsl(var(--profit))",
         loss: "hsl(var(--loss))",
+        teal: "hsl(var(--teal))",
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -84,6 +85,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      screens: {
+        'xs': '375px',
+        '3xl': '1920px',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -106,8 +111,8 @@ export default {
           to: { opacity: "1", transform: "scale(1)" },
         },
         "pulse-glow": {
-          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px -5px hsl(var(--primary) / 0.5)" },
-          "50%": { opacity: "0.8", boxShadow: "0 0 30px -5px hsl(var(--primary) / 0.8)" },
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px -5px hsl(var(--accent) / 0.5)" },
+          "50%": { opacity: "0.8", boxShadow: "0 0 30px -5px hsl(var(--accent) / 0.8)" },
         },
       },
       animation: {

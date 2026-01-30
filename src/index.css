@@ -2,38 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Analítica Trading Journal - Dark Fintech Design System */
+/* Analítica Trading Journal - Cave Zaid Color Palette */
+/* #5FE2F5 - Light Sky Blue (accent/teal) */
+/* #429EBD - Medium Blue (primary) */
+/* #053F5C - Dark Blue (background/dark) */
+/* #F7A019 - Intense Orange (warning/highlight) */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
-    /* Dark theme - Exact palette from brand colors */
-    /* #E6621F - Primary Orange */
-    /* #EDEDED - Light Gray */
-    /* #898989 - Medium Gray */
-    /* #333333 - Dark Gray */
-    /* #FFFFFF - White */
+    /* Cave Zaid Dark Theme */
+    --background: 202 93% 10%;
+    --foreground: 188 86% 83%;
 
-    --background: 0 0% 8%;
-    --foreground: 0 0% 93%;
+    --card: 202 70% 15%;
+    --card-foreground: 188 86% 90%;
 
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 93%;
+    --popover: 202 70% 18%;
+    --popover-foreground: 188 86% 90%;
 
-    --popover: 0 0% 18%;
-    --popover-foreground: 0 0% 93%;
-
-    --primary: 20 83% 51%;
+    --primary: 197 50% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 93%;
+    --secondary: 202 80% 20%;
+    --secondary-foreground: 188 86% 90%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 54%;
+    --muted: 202 60% 22%;
+    --muted-foreground: 197 30% 55%;
 
-    --accent: 20 83% 51%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 186 88% 66%;
+    --accent-foreground: 202 93% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -41,84 +40,88 @@
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 20%;
+    --warning: 38 95% 53%;
+    --warning-foreground: 202 93% 10%;
 
     --profit: 142 71% 45%;
     --loss: 0 84% 60%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 20 83% 51%;
+    --border: 202 50% 25%;
+    --input: 202 50% 25%;
+    --ring: 197 50% 50%;
 
     --radius: 0.75rem;
 
-    /* Chart colors */
-    --chart-1: 20 83% 51%;
+    /* Chart colors using Cave Zaid palette */
+    --chart-1: 197 50% 50%;
     --chart-2: 142 71% 45%;
-    --chart-3: 0 84% 60%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 0 0% 54%;
+    --chart-3: 186 88% 66%;
+    --chart-4: 38 95% 53%;
+    --chart-5: 0 84% 60%;
 
-    /* Brand colors as CSS vars */
-    --brand-orange: 20 83% 51%;
-    --brand-light-gray: 0 0% 93%;
-    --brand-medium-gray: 0 0% 54%;
-    --brand-dark: 0 0% 20%;
-    --brand-white: 0 0% 100%;
+    /* Brand colors - Cave Zaid */
+    --brand-sky: 186 88% 66%;
+    --brand-blue: 197 50% 50%;
+    --brand-dark: 202 93% 19%;
+    --brand-orange: 38 95% 53%;
+    --brand-deep: 202 93% 10%;
+
+    /* Teal color for accents */
+    --teal: 186 88% 66%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(20 83% 51%) 0%, hsl(20 83% 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(197 50% 50%) 0%, hsl(186 88% 66%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(142 71% 40%) 0%, hsl(142 71% 50%) 100%);
     --gradient-danger: linear-gradient(135deg, hsl(0 84% 55%) 0%, hsl(0 84% 65%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 18%) 0%, hsl(0 0% 15%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(202 70% 18%) 0%, hsl(202 70% 15%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(95, 226, 245, 0.03) 0%, rgba(66, 158, 189, 0.01) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(202 93% 19%) 0%, hsl(197 50% 50%) 100%);
 
-    /* Shadows */
-    --shadow-glow: 0 0 40px -10px hsl(20 83% 51% / 0.4);
-    --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
-    --shadow-elevated: 0 8px 32px -8px rgba(0, 0, 0, 0.6);
+    /* Shadows with Cave Zaid colors */
+    --shadow-glow: 0 0 40px -10px hsl(186 88% 66% / 0.4);
+    --shadow-card: 0 4px 24px -4px rgba(5, 63, 92, 0.5);
+    --shadow-elevated: 0 8px 32px -8px rgba(5, 63, 92, 0.6);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 13%;
-    --sidebar-foreground: 0 0% 54%;
-    --sidebar-primary: 20 83% 51%;
+    --sidebar-background: 202 85% 12%;
+    --sidebar-foreground: 197 30% 55%;
+    --sidebar-primary: 197 50% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 93%;
-    --sidebar-border: 0 0% 22%;
-    --sidebar-ring: 20 83% 51%;
+    --sidebar-accent: 202 80% 20%;
+    --sidebar-accent-foreground: 188 86% 90%;
+    --sidebar-border: 202 50% 20%;
+    --sidebar-ring: 186 88% 66%;
   }
 
   /* Light mode variant */
   .light {
-    --background: 0 0% 93%;
-    --foreground: 0 0% 20%;
+    --background: 188 40% 96%;
+    --foreground: 202 93% 19%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 202 93% 19%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 202 93% 19%;
 
-    --primary: 20 83% 51%;
+    --primary: 197 50% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 93%;
-    --secondary-foreground: 0 0% 20%;
+    --secondary: 188 40% 92%;
+    --secondary-foreground: 202 93% 19%;
 
-    --muted: 0 0% 93%;
-    --muted-foreground: 0 0% 54%;
+    --muted: 188 30% 90%;
+    --muted-foreground: 202 50% 40%;
 
-    --accent: 20 83% 51%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 186 88% 66%;
+    --accent-foreground: 202 93% 10%;
 
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
+    --border: 197 30% 80%;
+    --input: 197 30% 80%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 54%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-foreground: 202 50% 40%;
+    --sidebar-border: 197 30% 88%;
   }
 }
 
@@ -143,9 +146,9 @@
     content: '';
     position: fixed;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 0%, hsl(20 83% 51% / 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 0% 100%, hsl(20 83% 51% / 0.05) 0%, transparent 40%),
-                radial-gradient(ellipse at 100% 100%, hsl(0 0% 20% / 0.1) 0%, transparent 40%);
+    background: radial-gradient(ellipse at 50% 0%, hsl(186 88% 66% / 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 0% 100%, hsl(197 50% 50% / 0.05) 0%, transparent 40%),
+                radial-gradient(ellipse at 100% 100%, hsl(202 93% 19% / 0.1) 0%, transparent 40%);
     pointer-events: none;
     z-index: -1;
   }
@@ -190,7 +193,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--border) / 0.4);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 hsl(var(--foreground) / 0.05);
+    box-shadow: 0 8px 32px rgba(5, 63, 92, 0.3), inset 0 1px 0 hsl(var(--accent) / 0.05);
   }
 
   .glass-panel {
@@ -210,7 +213,7 @@
 
   .glass-button:hover {
     background: hsl(var(--secondary) / 0.7);
-    border-color: hsl(var(--primary) / 0.3);
+    border-color: hsl(var(--accent) / 0.3);
   }
 
   .glass-input {
@@ -263,6 +266,10 @@
 
   .glow-danger {
     box-shadow: 0 0 40px -10px hsl(var(--destructive) / 0.4);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 40px -10px hsl(var(--accent) / 0.5);
   }
 
   /* Animated pulse for live indicators */
@@ -364,6 +371,10 @@
     background: var(--gradient-card);
   }
 
+  .bg-gradient-ocean {
+    background: var(--gradient-ocean);
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
@@ -374,5 +385,26 @@
 
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
+  }
+
+  /* Responsive utilities */
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  .responsive-flex {
+    @apply flex flex-col sm:flex-row gap-4;
+  }
+
+  .responsive-text-center {
+    @apply text-center sm:text-left;
+  }
+
+  .responsive-padding {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+
+  .responsive-gap {
+    @apply gap-3 sm:gap-4 md:gap-6;
   }
 }
