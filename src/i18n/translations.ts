@@ -120,6 +120,9 @@ export interface Translations {
     addScreenshot: string;
     entry: string;
     exit: string;
+    export: string;
+    exportSuccess: string;
+    exportError: string;
   };
 
   // Analytics
@@ -391,6 +394,9 @@ export const translations: Record<Language, Translations> = {
       addScreenshot: 'Agregar Captura',
       entry: 'Entrada',
       exit: 'Salida',
+      export: 'Exportar',
+      exportSuccess: 'Exportado a {format} correctamente',
+      exportError: 'Error al exportar',
     },
     analytics: {
       title: 'Analítica',
@@ -652,6 +658,9 @@ export const translations: Record<Language, Translations> = {
       addScreenshot: 'Add Screenshot',
       entry: 'Entry',
       exit: 'Exit',
+      export: 'Export',
+      exportSuccess: 'Successfully exported to {format}',
+      exportError: 'Export failed',
     },
     analytics: {
       title: 'Analytics',
@@ -913,6 +922,9 @@ export const translations: Record<Language, Translations> = {
       addScreenshot: 'Adicionar Captura',
       entry: 'Entrada',
       exit: 'Saída',
+      export: 'Exportar',
+      exportSuccess: 'Exportado para {format} com sucesso',
+      exportError: 'Falha ao exportar',
     },
     analytics: {
       title: 'Análises',
