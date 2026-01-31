@@ -32,15 +32,27 @@ interface Insight {
   confidence?: number;
 }
 
-const mockInsights: Insight[] = [
+// Insight data keys for translation lookup
+type InsightKey = 'overtradingAlert' | 'fridayPattern' | 'eurUsdEdge' | 'riskManagement' | 'cryptoPotential';
+type ActionKey = 'viewTradingFrequency' | 'analyzeFridayTrades' | 'viewStrategyDetails' | 'reviewRiskSettings' | 'portfolioAnalysis';
+
+interface InsightData {
+  id: string;
+  type: 'warning' | 'opportunity' | 'pattern' | 'edge' | 'overtrading';
+  severity: 'low' | 'medium' | 'high';
+  titleKey: InsightKey;
+  actionKey: ActionKey;
+  isNew: boolean;
+  confidence?: number;
+}
+
+const mockInsightsData: InsightData[] = [
   {
     id: '1',
     type: 'overtrading',
     severity: 'high',
-    title: 'Overtrading Alert',
-    description: 'You made 15 trades this week, 67% above your 6-month average of 9 trades.',
-    details: 'Historical data shows your win rate drops by 18% when trading more than 12 times per week. Consider slowing down to maintain quality over quantity.',
-    actionLabel: 'View Trading Frequency',
+    titleKey: 'overtradingAlert',
+    actionKey: 'viewTradingFrequency',
     isNew: true,
     confidence: 94,
   },
@@ -48,10 +60,8 @@ const mockInsights: Insight[] = [
     id: '2',
     type: 'pattern',
     severity: 'medium',
-    title: 'Recurring Loss Pattern: Friday Afternoon',
-    description: 'Your trades on Friday after 14:00 show a 23% lower win rate.',
-    details: 'Analysis of 47 Friday afternoon trades shows a 41% win rate vs 64% overall. Consider avoiding new positions during this window.',
-    actionLabel: 'Analyze Friday Trades',
+    titleKey: 'fridayPattern',
+    actionKey: 'analyzeFridayTrades',
     isNew: true,
     confidence: 87,
   },
@@ -59,10 +69,8 @@ const mockInsights: Insight[] = [
     id: '3',
     type: 'edge',
     severity: 'low',
-    title: 'Statistical Edge: EUR/USD London Session',
-    description: 'Long positions during London session (08:00-10:00 GMT) show a 73% win rate.',
-    details: 'Based on 34 trades over 6 months. Average R:R of 1.8:1. This represents a significant edge worth exploiting.',
-    actionLabel: 'View Strategy Details',
+    titleKey: 'eurUsdEdge',
+    actionKey: 'viewStrategyDetails',
     isNew: false,
     confidence: 91,
   },
@@ -70,10 +78,8 @@ const mockInsights: Insight[] = [
     id: '4',
     type: 'warning',
     severity: 'medium',
-    title: 'Risk Management Issue',
-    description: 'Average loss size increased by 34% this month compared to last month.',
-    details: 'Your average loss went from $87 to $117. Review your stop-loss placement and position sizing.',
-    actionLabel: 'Review Risk Settings',
+    titleKey: 'riskManagement',
+    actionKey: 'reviewRiskSettings',
     isNew: false,
     confidence: 96,
   },
@@ -81,10 +87,8 @@ const mockInsights: Insight[] = [
     id: '5',
     type: 'opportunity',
     severity: 'low',
-    title: 'Untapped Potential: Crypto Markets',
-    description: 'Your crypto trades show a 78% win rate but represent only 12% of your portfolio.',
-    details: 'Consider increasing allocation to crypto markets where you demonstrate consistent edge.',
-    actionLabel: 'Portfolio Analysis',
+    titleKey: 'cryptoPotential',
+    actionKey: 'portfolioAnalysis',
     isNew: false,
     confidence: 82,
   },
@@ -134,12 +138,17 @@ const severityColors = {
 
 export default function Insights() {
   const { t } = useLanguage();
-  const newInsights = mockInsights.filter((i) => i.isNew);
-  const allInsights = mockInsights;
+  const newInsights = mockInsightsData.filter((i) => i.isNew);
+  const allInsights = mockInsightsData;
 
-  function InsightCard({ insight }: { insight: Insight }) {
+  function InsightCard({ insight }: { insight: InsightData }) {
     const Icon = insightIcons[insight.type];
     const colors = insightColors[insight.type];
+    
+    const title = t.insights.insightTitles[insight.titleKey];
+    const description = t.insights.insightDescriptions[insight.titleKey];
+    const details = t.insights.insightDetails[insight.titleKey];
+    const actionLabel = t.insights.insightActions[insight.actionKey];
 
     return (
       <Card className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
@@ -150,7 +159,7 @@ export default function Insights() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold">{insight.title}</h3>
+                <h3 className="font-semibold">{title}</h3>
                 {insight.isNew && (
                   <Badge className="bg-primary/20 text-primary text-[10px] h-5">{t.common.new}</Badge>
                 )}
@@ -158,8 +167,8 @@ export default function Insights() {
                   {insight.severity.toUpperCase()}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">{insight.description}</p>
-              <p className="text-xs text-muted-foreground/80 mb-4">{insight.details}</p>
+              <p className="text-sm text-muted-foreground mb-3">{description}</p>
+              <p className="text-xs text-muted-foreground/80 mb-4">{details}</p>
               
               {insight.confidence && (
                 <div className="mb-4">
@@ -173,7 +182,7 @@ export default function Insights() {
 
               <div className="flex items-center gap-3">
                 <Button size="sm" variant="outline" className="gap-2">
-                  {insight.actionLabel}
+                  {actionLabel}
                   <ChevronRight className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="ghost" className="text-muted-foreground">
