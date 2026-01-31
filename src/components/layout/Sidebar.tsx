@@ -13,7 +13,6 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import logoAnalitica from '@/assets/logo-analitica.png';
 
 interface NavItem {
   titleKey: 'dashboard' | 'journal' | 'analytics' | 'psychology' | 'insights';
@@ -66,11 +65,9 @@ export function Sidebar() {
     <aside className="flex flex-col items-center w-[70px] border-r border-border/50 glass-sidebar h-screen sticky top-0 py-4">
       {/* Logo */}
       <div className="flex items-center justify-center mb-8">
-        <img 
-          src={logoAnalitica} 
-          alt="Analítica" 
-          className="h-12 w-auto object-contain"
-        />
+        <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-primary">
+          <TrendingUp className="h-5 w-5 text-primary-foreground" />
+        </div>
       </div>
 
       {/* Navigation */}

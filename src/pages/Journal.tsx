@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,6 @@ import {
   FileSpreadsheet,
   FileText,
   FileCode,
-  Upload,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,7 +47,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExportTrades } from '@/hooks/useExportTrades';
-import { useImportTrades } from '@/hooks/useImportTrades';
 import { toast } from 'sonner';
 
 interface Trade {
@@ -159,8 +157,6 @@ export default function Journal() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddTradeOpen, setIsAddTradeOpen] = useState(false);
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
-  const { importFromFile } = useImportTrades();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredTrades = mockTrades.filter((trade) => {
     const matchesSearch = trade.symbol
@@ -197,34 +193,6 @@ export default function Journal() {
       }
     } catch (error) {
       toast.error(t.journal.exportError ?? 'Export failed');
-    }
-  };
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const result = await importFromFile(file);
-      
-      if (result.errors.length > 0) {
-        result.errors.forEach(error => toast.error(error));
-      }
-      
-      if (result.trades.length > 0) {
-        toast.success(t.journal.tradesImported?.replace('{count}', String(result.trades.length)) ?? `${result.trades.length} trades imported`);
-        // In a real app, you would save these trades to the database
-        console.log('Imported trades:', result.trades);
-      } else if (result.errors.length === 0) {
-        toast.warning(t.journal.importError ?? 'No trades found in file');
-      }
-    } catch (error) {
-      toast.error(t.journal.importError ?? 'Import failed');
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
   };
 
@@ -395,24 +363,6 @@ export default function Journal() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Import Button */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImport}
-            accept=".csv,.xlsx,.xls"
-            className="hidden"
-          />
-          <Button 
-            variant="outline" 
-            className="gap-2 w-full xs:w-auto"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="h-4 w-4" />
-            <span className="hidden sm:inline">{t.journal.import ?? 'Import'}</span>
-            <span className="sm:hidden">Import</span>
-          </Button>
 
           <Dialog open={isAddTradeOpen} onOpenChange={setIsAddTradeOpen}>
             <DialogTrigger asChild>

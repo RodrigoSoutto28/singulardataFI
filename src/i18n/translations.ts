@@ -123,13 +123,6 @@ export interface Translations {
     export: string;
     exportSuccess: string;
     exportError: string;
-    import: string;
-    importFile: string;
-    importSuccess: string;
-    importError: string;
-    tradesImported: string;
-    selectFile: string;
-    supportedFormats: string;
   };
 
   // Analytics
@@ -221,35 +214,6 @@ export interface Translations {
     timeDesc: string;
     psychologyCorrelation: string;
     psychologyDesc: string;
-    // Dynamic insight translations
-    insightTitles: {
-      overtradingAlert: string;
-      fridayPattern: string;
-      eurUsdEdge: string;
-      riskManagement: string;
-      cryptoPotential: string;
-    };
-    insightDescriptions: {
-      overtradingAlert: string;
-      fridayPattern: string;
-      eurUsdEdge: string;
-      riskManagement: string;
-      cryptoPotential: string;
-    };
-    insightDetails: {
-      overtradingAlert: string;
-      fridayPattern: string;
-      eurUsdEdge: string;
-      riskManagement: string;
-      cryptoPotential: string;
-    };
-    insightActions: {
-      viewTradingFrequency: string;
-      analyzeFridayTrades: string;
-      viewStrategyDetails: string;
-      reviewRiskSettings: string;
-      portfolioAnalysis: string;
-    };
   };
 
   // Settings
@@ -433,13 +397,6 @@ export const translations: Record<Language, Translations> = {
       export: 'Exportar',
       exportSuccess: 'Exportado a {format} correctamente',
       exportError: 'Error al exportar',
-      import: 'Importar',
-      importFile: 'Importar Archivo',
-      importSuccess: 'Archivo importado correctamente',
-      importError: 'Error al importar archivo',
-      tradesImported: '{count} operaciones importadas',
-      selectFile: 'Seleccionar archivo',
-      supportedFormats: 'Formatos soportados: CSV, Excel (.xlsx)',
     },
     analytics: {
       title: 'Analítica',
@@ -525,34 +482,6 @@ export const translations: Record<Language, Translations> = {
       timeDesc: 'Mejores y peores horarios de trading',
       psychologyCorrelation: 'Correlación Psicológica',
       psychologyDesc: 'Vincula emociones con rendimiento',
-      insightTitles: {
-        overtradingAlert: 'Alerta de Sobreoperación',
-        fridayPattern: 'Patrón de Pérdida Recurrente: Viernes Tarde',
-        eurUsdEdge: 'Ventaja Estadística: EUR/USD Sesión Londres',
-        riskManagement: 'Problema de Gestión de Riesgo',
-        cryptoPotential: 'Potencial Sin Explotar: Mercados Crypto',
-      },
-      insightDescriptions: {
-        overtradingAlert: 'Realizaste 15 operaciones esta semana, 67% sobre tu promedio de 6 meses de 9 operaciones.',
-        fridayPattern: 'Tus operaciones los viernes después de las 14:00 muestran un 23% menos de win rate.',
-        eurUsdEdge: 'Posiciones largas durante la sesión de Londres (08:00-10:00 GMT) muestran un 73% de win rate.',
-        riskManagement: 'El tamaño promedio de pérdida aumentó 34% este mes comparado con el mes pasado.',
-        cryptoPotential: 'Tus operaciones en crypto muestran un 78% de win rate pero representan solo el 12% de tu portafolio.',
-      },
-      insightDetails: {
-        overtradingAlert: 'Los datos históricos muestran que tu win rate baja 18% cuando operas más de 12 veces por semana. Considera reducir la frecuencia.',
-        fridayPattern: 'Análisis de 47 operaciones viernes tarde muestra 41% win rate vs 64% general. Considera evitar nuevas posiciones en esta ventana.',
-        eurUsdEdge: 'Basado en 34 operaciones en 6 meses. R:R promedio de 1.8:1. Esto representa una ventaja significativa.',
-        riskManagement: 'Tu pérdida promedio pasó de $87 a $117. Revisa la colocación de stop-loss y el tamaño de posición.',
-        cryptoPotential: 'Considera aumentar la asignación a mercados crypto donde demuestras ventaja consistente.',
-      },
-      insightActions: {
-        viewTradingFrequency: 'Ver Frecuencia de Trading',
-        analyzeFridayTrades: 'Analizar Operaciones Viernes',
-        viewStrategyDetails: 'Ver Detalles de Estrategia',
-        reviewRiskSettings: 'Revisar Configuración de Riesgo',
-        portfolioAnalysis: 'Análisis de Portafolio',
-      },
     },
     settings: {
       title: 'Configuración',
@@ -732,13 +661,6 @@ export const translations: Record<Language, Translations> = {
       export: 'Export',
       exportSuccess: 'Successfully exported to {format}',
       exportError: 'Export failed',
-      import: 'Import',
-      importFile: 'Import File',
-      importSuccess: 'File imported successfully',
-      importError: 'Error importing file',
-      tradesImported: '{count} trades imported',
-      selectFile: 'Select file',
-      supportedFormats: 'Supported formats: CSV, Excel (.xlsx)',
     },
     analytics: {
       title: 'Analytics',
@@ -824,34 +746,6 @@ export const translations: Record<Language, Translations> = {
       timeDesc: 'Best and worst trading times',
       psychologyCorrelation: 'Psychology Correlation',
       psychologyDesc: 'Links emotions to performance',
-      insightTitles: {
-        overtradingAlert: 'Overtrading Alert',
-        fridayPattern: 'Recurring Loss Pattern: Friday Afternoon',
-        eurUsdEdge: 'Statistical Edge: EUR/USD London Session',
-        riskManagement: 'Risk Management Issue',
-        cryptoPotential: 'Untapped Potential: Crypto Markets',
-      },
-      insightDescriptions: {
-        overtradingAlert: 'You made 15 trades this week, 67% above your 6-month average of 9 trades.',
-        fridayPattern: 'Your trades on Friday after 14:00 show a 23% lower win rate.',
-        eurUsdEdge: 'Long positions during London session (08:00-10:00 GMT) show a 73% win rate.',
-        riskManagement: 'Average loss size increased by 34% this month compared to last month.',
-        cryptoPotential: 'Your crypto trades show a 78% win rate but represent only 12% of your portfolio.',
-      },
-      insightDetails: {
-        overtradingAlert: 'Historical data shows your win rate drops by 18% when trading more than 12 times per week. Consider slowing down.',
-        fridayPattern: 'Analysis of 47 Friday afternoon trades shows a 41% win rate vs 64% overall. Consider avoiding new positions during this window.',
-        eurUsdEdge: 'Based on 34 trades over 6 months. Average R:R of 1.8:1. This represents a significant edge worth exploiting.',
-        riskManagement: 'Your average loss went from $87 to $117. Review your stop-loss placement and position sizing.',
-        cryptoPotential: 'Consider increasing allocation to crypto markets where you demonstrate consistent edge.',
-      },
-      insightActions: {
-        viewTradingFrequency: 'View Trading Frequency',
-        analyzeFridayTrades: 'Analyze Friday Trades',
-        viewStrategyDetails: 'View Strategy Details',
-        reviewRiskSettings: 'Review Risk Settings',
-        portfolioAnalysis: 'Portfolio Analysis',
-      },
     },
     settings: {
       title: 'Settings',
@@ -1031,13 +925,6 @@ export const translations: Record<Language, Translations> = {
       export: 'Exportar',
       exportSuccess: 'Exportado para {format} com sucesso',
       exportError: 'Falha ao exportar',
-      import: 'Importar',
-      importFile: 'Importar Arquivo',
-      importSuccess: 'Arquivo importado com sucesso',
-      importError: 'Erro ao importar arquivo',
-      tradesImported: '{count} operações importadas',
-      selectFile: 'Selecionar arquivo',
-      supportedFormats: 'Formatos suportados: CSV, Excel (.xlsx)',
     },
     analytics: {
       title: 'Análises',
@@ -1123,34 +1010,6 @@ export const translations: Record<Language, Translations> = {
       timeDesc: 'Melhores e piores horários de trading',
       psychologyCorrelation: 'Correlação Psicológica',
       psychologyDesc: 'Vincula emoções ao desempenho',
-      insightTitles: {
-        overtradingAlert: 'Alerta de Overtrading',
-        fridayPattern: 'Padrão de Perda Recorrente: Sexta Tarde',
-        eurUsdEdge: 'Vantagem Estatística: EUR/USD Sessão Londres',
-        riskManagement: 'Problema de Gestão de Risco',
-        cryptoPotential: 'Potencial Inexplorado: Mercados Crypto',
-      },
-      insightDescriptions: {
-        overtradingAlert: 'Você fez 15 operações esta semana, 67% acima da sua média de 6 meses de 9 operações.',
-        fridayPattern: 'Suas operações às sextas após 14:00 mostram 23% menos taxa de acerto.',
-        eurUsdEdge: 'Posições longas durante a sessão de Londres (08:00-10:00 GMT) mostram 73% de taxa de acerto.',
-        riskManagement: 'O tamanho médio de perda aumentou 34% este mês comparado ao mês passado.',
-        cryptoPotential: 'Suas operações em crypto mostram 78% de taxa de acerto mas representam apenas 12% do seu portfólio.',
-      },
-      insightDetails: {
-        overtradingAlert: 'Dados históricos mostram que sua taxa de acerto cai 18% quando opera mais de 12 vezes por semana. Considere reduzir.',
-        fridayPattern: 'Análise de 47 operações sexta tarde mostra 41% taxa de acerto vs 64% geral. Considere evitar novas posições nesta janela.',
-        eurUsdEdge: 'Baseado em 34 operações em 6 meses. R:R médio de 1.8:1. Isso representa uma vantagem significativa.',
-        riskManagement: 'Sua perda média foi de $87 para $117. Revise a colocação de stop-loss e tamanho de posição.',
-        cryptoPotential: 'Considere aumentar a alocação para mercados crypto onde você demonstra vantagem consistente.',
-      },
-      insightActions: {
-        viewTradingFrequency: 'Ver Frequência de Trading',
-        analyzeFridayTrades: 'Analisar Operações Sexta',
-        viewStrategyDetails: 'Ver Detalhes da Estratégia',
-        reviewRiskSettings: 'Revisar Configurações de Risco',
-        portfolioAnalysis: 'Análise de Portfólio',
-      },
     },
     settings: {
       title: 'Configurações',
