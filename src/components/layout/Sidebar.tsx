@@ -8,12 +8,12 @@ import {
   CheckSquare,
   Settings,
   LogOut,
-  TrendingUp
+  TrendingUp,
+  LineChart
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import logoAnalitica from '@/assets/logo-analitica.png';
 
 interface NavItem {
   titleKey: 'dashboard' | 'journal' | 'analytics' | 'psychology' | 'insights';
@@ -64,13 +64,15 @@ export function Sidebar() {
 
   return (
     <aside className="flex flex-col items-center w-[70px] border-r border-border/50 glass-sidebar h-screen sticky top-0 py-4">
-      {/* Logo */}
-      <div className="flex items-center justify-center mb-8">
-        <img 
-          src={logoAnalitica} 
-          alt="Analítica" 
-          className="h-12 w-auto object-contain"
-        />
+      {/* Logo - SINGULAR dataFI */}
+      <div className="flex flex-col items-center justify-center mb-8 gap-1">
+        <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-primary shadow-glow">
+          <LineChart className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-[9px] font-bold text-foreground tracking-tight">SINGULAR</span>
+          <span className="text-[8px] font-medium text-primary">dataFI</span>
+        </div>
       </div>
 
       {/* Navigation */}

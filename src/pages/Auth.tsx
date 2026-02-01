@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Brain, Shield, BarChart3, Sparkles } from 'lucide-react';
+import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
@@ -29,9 +31,9 @@ export default function Auth() {
     const { error } = await signIn(email, password);
 
     if (error) {
-      toast.error('Error al iniciar sesión', { description: error.message });
+      toast.error(t.auth.errorSignIn, { description: error.message });
     } else {
-      toast.success('¡Bienvenido de nuevo!');
+      toast.success(t.auth.welcomeBack);
     }
 
     setIsLoading(false);
@@ -49,19 +51,19 @@ export default function Auth() {
     const { error } = await signUp(email, password, fullName);
 
     if (error) {
-      toast.error('Error al crear cuenta', { description: error.message });
+      toast.error(t.auth.errorSignUp, { description: error.message });
     } else {
-      toast.success('¡Cuenta creada!', { description: '¡Bienvenido a Analítica!' });
+      toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
     }
 
     setIsLoading(false);
   };
 
   const features = [
-    { icon: BarChart3, title: 'Analítica Avanzada', description: 'Insights profundos de tu rendimiento' },
-    { icon: Brain, title: 'Insights con IA', description: 'Machine learning detecta patrones' },
-    { icon: TrendingUp, title: 'Curva de Equidad', description: 'Visualiza tu crecimiento' },
-    { icon: Shield, title: 'Psicología Trading', description: 'Domina tu mentalidad' },
+    { icon: BarChart3, title: t.auth.features.analytics, description: t.auth.features.analyticsDesc },
+    { icon: Brain, title: t.auth.features.ai, description: t.auth.features.aiDesc },
+    { icon: LineChart, title: t.auth.features.equity, description: t.auth.features.equityDesc },
+    { icon: Shield, title: t.auth.features.psychology, description: t.auth.features.psychologyDesc },
   ];
 
   return (
@@ -75,10 +77,10 @@ export default function Auth() {
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
           <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary shadow-glow">
-            <TrendingUp className="h-7 w-7 text-primary-foreground" />
+            <LineChart className="h-7 w-7 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Analítica</h1>
+            <h1 className="text-2xl font-bold">SINGULAR dataFI</h1>
             <p className="text-sm text-muted-foreground">Trading Journal & AI Analytics</p>
           </div>
         </div>
@@ -87,11 +89,11 @@ export default function Auth() {
         <div className="space-y-8 relative z-10 max-w-md">
           <div>
             <h2 className="text-3xl font-bold mb-4">
-              Opera más inteligente con insights{' '}
-              <span className="gradient-text">potenciados por IA</span>
+              {t.auth.headline}{' '}
+              <span className="gradient-text">{t.auth.headlineHighlight}</span>
             </h2>
             <p className="text-muted-foreground">
-              Únete a miles de traders que usan Analítica para rastrear, analizar y mejorar su rendimiento.
+              {t.auth.subheadline}
             </p>
           </div>
 
@@ -114,15 +116,15 @@ export default function Auth() {
         <div className="flex items-center gap-12 relative z-10">
           <div>
             <p className="text-3xl font-bold font-mono">10K+</p>
-            <p className="text-sm text-muted-foreground">Traders activos</p>
+            <p className="text-sm text-muted-foreground">{t.auth.stats.activeTraders}</p>
           </div>
           <div>
             <p className="text-3xl font-bold font-mono">2M+</p>
-            <p className="text-sm text-muted-foreground">Trades analizados</p>
+            <p className="text-sm text-muted-foreground">{t.auth.stats.analyzedTrades}</p>
           </div>
           <div>
             <p className="text-3xl font-bold font-mono">94%</p>
-            <p className="text-sm text-muted-foreground">Satisfacción</p>
+            <p className="text-sm text-muted-foreground">{t.auth.stats.satisfaction}</p>
           </div>
         </div>
       </div>
@@ -133,23 +135,23 @@ export default function Auth() {
           <CardHeader className="text-center pb-2">
             <div className="flex items-center justify-center mb-4 lg:hidden">
               <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary">
-                <Sparkles className="h-7 w-7 text-primary-foreground" />
+                <LineChart className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl">Bienvenido a Analítica</CardTitle>
-            <CardDescription>Inicia sesión para acceder a tu diario de trading</CardDescription>
+            <CardTitle className="text-2xl">{t.auth.welcome}</CardTitle>
+            <CardDescription>{t.auth.subtitle}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
-                <TabsTrigger value="signup">Registrarse</TabsTrigger>
+                <TabsTrigger value="signin">{t.auth.signIn}</TabsTrigger>
+                <TabsTrigger value="signup">{t.auth.signUp}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Correo electrónico</Label>
+                    <Label htmlFor="signin-email">{t.auth.email}</Label>
                     <Input
                       id="signin-email"
                       name="email"
@@ -160,7 +162,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Contraseña</Label>
+                    <Label htmlFor="signin-password">{t.auth.password}</Label>
                     <Input
                       id="signin-password"
                       name="password"
@@ -176,7 +178,7 @@ export default function Auth() {
                     size="lg"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    {isLoading ? t.auth.signingIn : t.auth.signIn}
                   </Button>
                 </form>
               </TabsContent>
@@ -184,7 +186,7 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nombre completo</Label>
+                    <Label htmlFor="signup-name">{t.auth.fullName}</Label>
                     <Input
                       id="signup-name"
                       name="fullName"
@@ -195,7 +197,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Correo electrónico</Label>
+                    <Label htmlFor="signup-email">{t.auth.email}</Label>
                     <Input
                       id="signup-email"
                       name="email"
@@ -206,7 +208,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Contraseña</Label>
+                    <Label htmlFor="signup-password">{t.auth.password}</Label>
                     <Input
                       id="signup-password"
                       name="password"
@@ -223,10 +225,10 @@ export default function Auth() {
                     size="lg"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+                    {isLoading ? t.auth.creatingAccount : t.auth.createAccount}
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad
+                    {t.auth.termsNotice}
                   </p>
                 </form>
               </TabsContent>
