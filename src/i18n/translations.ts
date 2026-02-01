@@ -48,6 +48,44 @@ export interface Translations {
     signOut: string;
   };
 
+  // Auth
+  auth: {
+    welcome: string;
+    subtitle: string;
+    signIn: string;
+    signUp: string;
+    email: string;
+    password: string;
+    fullName: string;
+    signingIn: string;
+    creatingAccount: string;
+    createAccount: string;
+    termsNotice: string;
+    errorSignIn: string;
+    errorSignUp: string;
+    welcomeBack: string;
+    accountCreated: string;
+    welcomeToApp: string;
+    headline: string;
+    headlineHighlight: string;
+    subheadline: string;
+    features: {
+      analytics: string;
+      analyticsDesc: string;
+      ai: string;
+      aiDesc: string;
+      equity: string;
+      equityDesc: string;
+      psychology: string;
+      psychologyDesc: string;
+    };
+    stats: {
+      activeTraders: string;
+      analyzedTrades: string;
+      satisfaction: string;
+    };
+  };
+
   // Dashboard
   dashboard: {
     mentalState: string;
@@ -356,12 +394,48 @@ export const translations: Record<Language, Translations> = {
       logout: 'Cerrar Sesión',
     },
     topbar: {
-      title: 'Analítica - Trading Journal & Analytics',
+      title: 'SINGULAR dataFI - Trading Journal & Analytics',
       myAccount: 'Mi Cuenta',
       profile: 'Perfil',
       billing: 'Facturación',
       settings: 'Configuración',
       signOut: 'Cerrar sesión',
+    },
+    auth: {
+      welcome: 'Bienvenido a SINGULAR dataFI',
+      subtitle: 'Inicia sesión para acceder a tu diario de trading',
+      signIn: 'Iniciar Sesión',
+      signUp: 'Registrarse',
+      email: 'Correo electrónico',
+      password: 'Contraseña',
+      fullName: 'Nombre completo',
+      signingIn: 'Iniciando sesión...',
+      creatingAccount: 'Creando cuenta...',
+      createAccount: 'Crear Cuenta',
+      termsNotice: 'Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad',
+      errorSignIn: 'Error al iniciar sesión',
+      errorSignUp: 'Error al crear cuenta',
+      welcomeBack: '¡Bienvenido de nuevo!',
+      accountCreated: '¡Cuenta creada!',
+      welcomeToApp: '¡Bienvenido a SINGULAR dataFI!',
+      headline: 'Opera más inteligente con insights',
+      headlineHighlight: 'potenciados por IA',
+      subheadline: 'Únete a miles de traders que usan SINGULAR dataFI para rastrear, analizar y mejorar su rendimiento.',
+      features: {
+        analytics: 'Analítica Avanzada',
+        analyticsDesc: 'Insights profundos de tu rendimiento',
+        ai: 'Insights con IA',
+        aiDesc: 'Machine learning detecta patrones',
+        equity: 'Curva de Equidad',
+        equityDesc: 'Visualiza tu crecimiento',
+        psychology: 'Psicología Trading',
+        psychologyDesc: 'Domina tu mentalidad',
+      },
+      stats: {
+        activeTraders: 'Traders activos',
+        analyzedTrades: 'Trades analizados',
+        satisfaction: 'Satisfacción',
+      },
     },
     dashboard: {
       mentalState: 'Tu Estado Mental',
@@ -655,12 +729,48 @@ export const translations: Record<Language, Translations> = {
       logout: 'Logout',
     },
     topbar: {
-      title: 'Analytics - Trading Journal & Analytics',
+      title: 'SINGULAR dataFI - Trading Journal & Analytics',
       myAccount: 'My Account',
       profile: 'Profile',
       billing: 'Billing',
       settings: 'Settings',
       signOut: 'Sign out',
+    },
+    auth: {
+      welcome: 'Welcome to SINGULAR dataFI',
+      subtitle: 'Sign in to access your trading journal',
+      signIn: 'Sign In',
+      signUp: 'Sign Up',
+      email: 'Email',
+      password: 'Password',
+      fullName: 'Full name',
+      signingIn: 'Signing in...',
+      creatingAccount: 'Creating account...',
+      createAccount: 'Create Account',
+      termsNotice: 'By signing up, you agree to our Terms of Service and Privacy Policy',
+      errorSignIn: 'Error signing in',
+      errorSignUp: 'Error creating account',
+      welcomeBack: 'Welcome back!',
+      accountCreated: 'Account created!',
+      welcomeToApp: 'Welcome to SINGULAR dataFI!',
+      headline: 'Trade smarter with',
+      headlineHighlight: 'AI-powered insights',
+      subheadline: 'Join thousands of traders using SINGULAR dataFI to track, analyze and improve their performance.',
+      features: {
+        analytics: 'Advanced Analytics',
+        analyticsDesc: 'Deep insights into your performance',
+        ai: 'AI Insights',
+        aiDesc: 'Machine learning detects patterns',
+        equity: 'Equity Curve',
+        equityDesc: 'Visualize your growth',
+        psychology: 'Trading Psychology',
+        psychologyDesc: 'Master your mindset',
+      },
+      stats: {
+        activeTraders: 'Active traders',
+        analyzedTrades: 'Trades analyzed',
+        satisfaction: 'Satisfaction',
+      },
     },
     dashboard: {
       mentalState: 'Your Mental State',
@@ -954,12 +1064,48 @@ export const translations: Record<Language, Translations> = {
       logout: 'Sair',
     },
     topbar: {
-      title: 'Análises - Trading Journal & Analytics',
+      title: 'SINGULAR dataFI - Trading Journal & Analytics',
       myAccount: 'Minha Conta',
       profile: 'Perfil',
       billing: 'Faturamento',
       settings: 'Configurações',
       signOut: 'Sair',
+    },
+    auth: {
+      welcome: 'Bem-vindo ao SINGULAR dataFI',
+      subtitle: 'Entre para acessar seu diário de trading',
+      signIn: 'Entrar',
+      signUp: 'Registrar',
+      email: 'E-mail',
+      password: 'Senha',
+      fullName: 'Nome completo',
+      signingIn: 'Entrando...',
+      creatingAccount: 'Criando conta...',
+      createAccount: 'Criar Conta',
+      termsNotice: 'Ao se registrar, você concorda com nossos Termos de Serviço e Política de Privacidade',
+      errorSignIn: 'Erro ao entrar',
+      errorSignUp: 'Erro ao criar conta',
+      welcomeBack: 'Bem-vindo de volta!',
+      accountCreated: 'Conta criada!',
+      welcomeToApp: 'Bem-vindo ao SINGULAR dataFI!',
+      headline: 'Opere com mais inteligência usando insights',
+      headlineHighlight: 'alimentados por IA',
+      subheadline: 'Junte-se a milhares de traders que usam SINGULAR dataFI para rastrear, analisar e melhorar seu desempenho.',
+      features: {
+        analytics: 'Análises Avançadas',
+        analyticsDesc: 'Insights profundos do seu desempenho',
+        ai: 'Insights de IA',
+        aiDesc: 'Machine learning detecta padrões',
+        equity: 'Curva de Patrimônio',
+        equityDesc: 'Visualize seu crescimento',
+        psychology: 'Psicologia do Trading',
+        psychologyDesc: 'Domine sua mentalidade',
+      },
+      stats: {
+        activeTraders: 'Traders ativos',
+        analyzedTrades: 'Trades analisados',
+        satisfaction: 'Satisfação',
+      },
     },
     dashboard: {
       mentalState: 'Seu Estado Mental',
