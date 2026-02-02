@@ -7,7 +7,6 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import {
   Brain,
-  Heart,
   Moon,
   Target,
   AlertTriangle,
@@ -23,16 +22,12 @@ import {
   AlertCircle,
   ShieldAlert,
   Flame,
+  Loader2,
   type LucideIcon,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePsychologyEntries, PsychologyEntry } from '@/hooks/usePsychologyEntries';
+import { toast } from 'sonner';
 
 type Emotion = 'confident' | 'fearful' | 'greedy' | 'calm' | 'anxious' | 'frustrated' | 'excited' | 'neutral';
 
@@ -53,68 +48,48 @@ const emotions: EmotionOption[] = [
   { value: 'frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: Flame },
 ];
 
-interface DailyEntry {
-  date: string;
-  preTradeEmotion: Emotion;
-  postTradeEmotion: Emotion;
-  disciplineScore: number;
-  sleepQuality: number;
-  stressLevel: number;
-  followedRules: boolean;
-  lessonsLearned: string;
-  goals: string;
-}
-
-const mockEntries: DailyEntry[] = [
-  {
-    date: '2025-01-23',
-    preTradeEmotion: 'confident',
-    postTradeEmotion: 'calm',
-    disciplineScore: 8,
-    sleepQuality: 4,
-    stressLevel: 2,
-    followedRules: true,
-    lessonsLearned: 'Patience paid off waiting for the right setup.',
-    goals: 'Focus on fewer, higher quality trades.',
-  },
-  {
-    date: '2025-01-22',
-    preTradeEmotion: 'anxious',
-    postTradeEmotion: 'frustrated',
-    disciplineScore: 5,
-    sleepQuality: 3,
-    stressLevel: 4,
-    followedRules: false,
-    lessonsLearned: 'Overtraded due to FOMO. Need to stick to the plan.',
-    goals: 'Max 3 trades tomorrow.',
-  },
-  {
-    date: '2025-01-21',
-    preTradeEmotion: 'calm',
-    postTradeEmotion: 'confident',
-    disciplineScore: 9,
-    sleepQuality: 5,
-    stressLevel: 1,
-    followedRules: true,
-    lessonsLearned: 'Morning routine helped maintain focus.',
-    goals: 'Continue with the morning routine.',
-  },
-];
-
 export default function Psychology() {
   const { t } = useLanguage();
+  const { entries, isLoading, stats, createEntry } = usePsychologyEntries();
+  
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [disciplineScore, setDisciplineScore] = useState([7]);
   const [sleepQuality, setSleepQuality] = useState([4]);
   const [stressLevel, setStressLevel] = useState([3]);
-
-  // Calculate averages
-  const avgDiscipline = mockEntries.reduce((sum, e) => sum + e.disciplineScore, 0) / mockEntries.length;
-  const avgSleep = mockEntries.reduce((sum, e) => sum + e.sleepQuality, 0) / mockEntries.length;
-  const rulesFollowed = mockEntries.filter((e) => e.followedRules).length;
+  const [lessonsLearned, setLessonsLearned] = useState('');
+  const [goals, setGoals] = useState('');
 
   const getEmotionLabel = (emotion: Emotion) => {
     return t.psychology.emotions[emotion];
+  };
+
+  const handleSaveEntry = async () => {
+    if (!selectedEmotion) {
+      toast.error('Selecciona tu estado emocional');
+      return;
+    }
+
+    try {
+      await createEntry.mutateAsync({
+        pre_trade_emotion: selectedEmotion,
+        discipline_score: disciplineScore[0],
+        sleep_quality: sleepQuality[0],
+        stress_level: stressLevel[0],
+        lessons_learned: lessonsLearned || null,
+        goals_for_tomorrow: goals || null,
+        followed_rules: disciplineScore[0] >= 7,
+      });
+
+      // Reset form
+      setSelectedEmotion(null);
+      setDisciplineScore([7]);
+      setSleepQuality([4]);
+      setStressLevel([3]);
+      setLessonsLearned('');
+      setGoals('');
+    } catch (error) {
+      // Error handled by mutation
+    }
   };
 
   function EmotionBadge({ emotion }: { emotion: Emotion }) {
@@ -148,6 +123,66 @@ export default function Psychology() {
     );
   }
 
+  function EntryCard({ entry }: { entry: PsychologyEntry }) {
+    return (
+      <div className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">
+              {new Date(entry.entry_date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {entry.pre_trade_emotion && <EmotionBadge emotion={entry.pre_trade_emotion as Emotion} />}
+            {entry.post_trade_emotion && (
+              <>
+                <span className="text-muted-foreground">→</span>
+                <EmotionBadge emotion={entry.post_trade_emotion as Emotion} />
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <MetricBar
+            value={entry.discipline_score ?? 0}
+            max={10}
+            label={t.psychology.disciplineScore}
+            color={(entry.discipline_score ?? 0) >= 7 ? 'bg-success' : (entry.discipline_score ?? 0) >= 5 ? 'bg-warning' : 'bg-destructive'}
+          />
+          <MetricBar
+            value={entry.sleep_quality ?? 0}
+            max={5}
+            label={t.psychology.sleepQuality}
+            color={(entry.sleep_quality ?? 0) >= 4 ? 'bg-success' : (entry.sleep_quality ?? 0) >= 3 ? 'bg-warning' : 'bg-destructive'}
+          />
+          <MetricBar
+            value={entry.stress_level ?? 0}
+            max={5}
+            label={t.psychology.stressLevel}
+            color={(entry.stress_level ?? 0) <= 2 ? 'bg-success' : (entry.stress_level ?? 0) <= 3 ? 'bg-warning' : 'bg-destructive'}
+          />
+        </div>
+
+        {entry.lessons_learned && (
+          <div className="flex items-start gap-2">
+            {entry.followed_rules ? (
+              <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+            )}
+            <p className="text-sm text-muted-foreground">{entry.lessons_learned}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -156,10 +191,6 @@ export default function Psychology() {
           <h1 className="text-2xl font-bold">{t.psychology.title}</h1>
           <p className="text-muted-foreground">{t.psychology.subtitle}</p>
         </div>
-        <Button variant="glow" className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t.psychology.newEntry}
-        </Button>
       </div>
 
       {/* Overview Stats */}
@@ -172,7 +203,7 @@ export default function Psychology() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.psychology.avgDiscipline}</p>
-                <p className="text-2xl font-bold font-mono-numbers">{avgDiscipline.toFixed(1)}/10</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.avgDiscipline.toFixed(1)}/10</p>
               </div>
             </div>
           </CardContent>
@@ -186,7 +217,7 @@ export default function Psychology() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.psychology.rulesFollowed}</p>
-                <p className="text-2xl font-bold font-mono-numbers">{rulesFollowed}/{mockEntries.length}</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.rulesFollowed}/{stats.totalEntries}</p>
               </div>
             </div>
           </CardContent>
@@ -200,7 +231,7 @@ export default function Psychology() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.psychology.avgSleep}</p>
-                <p className="text-2xl font-bold font-mono-numbers">{avgSleep.toFixed(1)}/5</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.avgSleep.toFixed(1)}/5</p>
               </div>
             </div>
           </CardContent>
@@ -214,7 +245,7 @@ export default function Psychology() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.psychology.entriesThisWeek}</p>
-                <p className="text-2xl font-bold font-mono-numbers">{mockEntries.length}</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.totalEntries}</p>
               </div>
             </div>
           </CardContent>
@@ -308,10 +339,20 @@ export default function Psychology() {
               <Textarea
                 placeholder={t.psychology.whatDidYouLearn}
                 className="bg-muted/50 min-h-[80px]"
+                value={lessonsLearned}
+                onChange={(e) => setLessonsLearned(e.target.value)}
               />
             </div>
 
-            <Button variant="glow" className="w-full">
+            <Button 
+              variant="glow" 
+              className="w-full"
+              onClick={handleSaveEntry}
+              disabled={createEntry.isPending}
+            >
+              {createEntry.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               {t.psychology.saveEntry}
             </Button>
           </CardContent>
@@ -327,62 +368,25 @@ export default function Psychology() {
             <CardDescription>{t.psychology.journalHistory}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockEntries.map((entry, index) => (
-                <div
-                  key={entry.date}
-                  className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {new Date(entry.date).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <EmotionBadge emotion={entry.preTradeEmotion} />
-                      <span className="text-muted-foreground">→</span>
-                      <EmotionBadge emotion={entry.postTradeEmotion} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <MetricBar
-                      value={entry.disciplineScore}
-                      max={10}
-                      label={t.psychology.disciplineScore}
-                      color={entry.disciplineScore >= 7 ? 'bg-success' : entry.disciplineScore >= 5 ? 'bg-warning' : 'bg-destructive'}
-                    />
-                    <MetricBar
-                      value={entry.sleepQuality}
-                      max={5}
-                      label={t.psychology.sleepQuality}
-                      color={entry.sleepQuality >= 4 ? 'bg-success' : entry.sleepQuality >= 3 ? 'bg-warning' : 'bg-destructive'}
-                    />
-                    <MetricBar
-                      value={entry.stressLevel}
-                      max={5}
-                      label={t.psychology.stressLevel}
-                      color={entry.stressLevel <= 2 ? 'bg-success' : entry.stressLevel <= 3 ? 'bg-warning' : 'bg-destructive'}
-                    />
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    {entry.followedRules ? (
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-                    )}
-                    <p className="text-sm text-muted-foreground">{entry.lessonsLearned}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : entries.length > 0 ? (
+              <div className="space-y-4">
+                {entries.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Brain className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground">No hay entradas psicológicas aún</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">
+                  Completa tu primer check-in del día para comenzar
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
