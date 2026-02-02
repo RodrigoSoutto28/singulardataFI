@@ -7,7 +7,6 @@ import {
   Sparkles,
   AlertTriangle,
   TrendingUp,
-  TrendingDown,
   Brain,
   Target,
   Clock,
@@ -16,85 +15,13 @@ import {
   ChevronRight,
   RefreshCw,
   CheckCircle,
-  XCircle,
+  Loader2,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useInsights } from '@/hooks/useInsights';
+import { useTrades } from '@/hooks/useTrades';
 
-interface Insight {
-  id: string;
-  type: 'warning' | 'opportunity' | 'pattern' | 'edge' | 'overtrading';
-  severity: 'low' | 'medium' | 'high';
-  title: string;
-  description: string;
-  details: string;
-  actionLabel: string;
-  isNew: boolean;
-  confidence?: number;
-}
-
-// Insight data keys for translation lookup
-type InsightKey = 'overtradingAlert' | 'fridayPattern' | 'eurUsdEdge' | 'riskManagement' | 'cryptoPotential';
-type ActionKey = 'viewTradingFrequency' | 'analyzeFridayTrades' | 'viewStrategyDetails' | 'reviewRiskSettings' | 'portfolioAnalysis';
-
-interface InsightData {
-  id: string;
-  type: 'warning' | 'opportunity' | 'pattern' | 'edge' | 'overtrading';
-  severity: 'low' | 'medium' | 'high';
-  titleKey: InsightKey;
-  actionKey: ActionKey;
-  isNew: boolean;
-  confidence?: number;
-}
-
-const mockInsightsData: InsightData[] = [
-  {
-    id: '1',
-    type: 'overtrading',
-    severity: 'high',
-    titleKey: 'overtradingAlert',
-    actionKey: 'viewTradingFrequency',
-    isNew: true,
-    confidence: 94,
-  },
-  {
-    id: '2',
-    type: 'pattern',
-    severity: 'medium',
-    titleKey: 'fridayPattern',
-    actionKey: 'analyzeFridayTrades',
-    isNew: true,
-    confidence: 87,
-  },
-  {
-    id: '3',
-    type: 'edge',
-    severity: 'low',
-    titleKey: 'eurUsdEdge',
-    actionKey: 'viewStrategyDetails',
-    isNew: false,
-    confidence: 91,
-  },
-  {
-    id: '4',
-    type: 'warning',
-    severity: 'medium',
-    titleKey: 'riskManagement',
-    actionKey: 'reviewRiskSettings',
-    isNew: false,
-    confidence: 96,
-  },
-  {
-    id: '5',
-    type: 'opportunity',
-    severity: 'low',
-    titleKey: 'cryptoPotential',
-    actionKey: 'portfolioAnalysis',
-    isNew: false,
-    confidence: 82,
-  },
-];
-
-const insightIcons = {
+const insightIcons: Record<string, any> = {
   warning: AlertTriangle,
   opportunity: TrendingUp,
   pattern: Repeat,
@@ -102,7 +29,7 @@ const insightIcons = {
   overtrading: Clock,
 };
 
-const insightColors = {
+const insightColors: Record<string, { bg: string; border: string; icon: string }> = {
   warning: {
     bg: 'bg-warning/10',
     border: 'border-warning/30',
@@ -130,69 +57,24 @@ const insightColors = {
   },
 };
 
-const severityColors = {
-  low: 'bg-success/20 text-success',
-  medium: 'bg-warning/20 text-warning',
-  high: 'bg-destructive/20 text-destructive',
+const severityColors: Record<string, string> = {
+  info: 'bg-primary/20 text-primary',
+  warn: 'bg-warning/20 text-warning',
+  error: 'bg-destructive/20 text-destructive',
 };
 
 export default function Insights() {
   const { t } = useLanguage();
-  const newInsights = mockInsightsData.filter((i) => i.isNew);
-  const allInsights = mockInsightsData;
+  const { insights, newInsights, readInsights, stats, isLoading, markAsRead, refetch } = useInsights();
+  const { trades } = useTrades();
 
-  function InsightCard({ insight }: { insight: InsightData }) {
-    const Icon = insightIcons[insight.type];
-    const colors = insightColors[insight.type];
-    
-    const title = t.insights.insightTitles[insight.titleKey];
-    const description = t.insights.insightDescriptions[insight.titleKey];
-    const details = t.insights.insightDetails[insight.titleKey];
-    const actionLabel = t.insights.insightActions[insight.actionKey];
+  const hasData = trades.length >= 5;
 
+  if (isLoading) {
     return (
-      <Card className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4">
-            <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
-              <Icon className={cn('h-6 w-6', colors.icon)} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold">{title}</h3>
-                {insight.isNew && (
-                  <Badge className="bg-primary/20 text-primary text-[10px] h-5">{t.common.new}</Badge>
-                )}
-                <Badge className={cn('text-[10px] h-5', severityColors[insight.severity])}>
-                  {insight.severity.toUpperCase()}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">{description}</p>
-              <p className="text-xs text-muted-foreground/80 mb-4">{details}</p>
-              
-              {insight.confidence && (
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">{t.insights.aiConfidence}</span>
-                    <span className="font-medium font-mono-numbers">{insight.confidence}%</span>
-                  </div>
-                  <Progress value={insight.confidence} className="h-1.5" />
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <Button size="sm" variant="outline" className="gap-2">
-                  {actionLabel}
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-                <Button size="sm" variant="ghost" className="text-muted-foreground">
-                  {t.common.dismiss}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
@@ -209,7 +91,11 @@ export default function Insights() {
             {t.insights.subtitle}
           </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          onClick={() => refetch()}
+        >
           <RefreshCw className="h-4 w-4" />
           {t.insights.refreshAnalysis}
         </Button>
@@ -225,7 +111,7 @@ export default function Insights() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.insights.patternsDetected}</p>
-                <p className="text-2xl font-bold font-mono-numbers">23</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.patternsDetected}</p>
               </div>
             </div>
           </CardContent>
@@ -239,7 +125,7 @@ export default function Insights() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.insights.edgesFound}</p>
-                <p className="text-2xl font-bold font-mono-numbers">7</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.edgesFound}</p>
               </div>
             </div>
           </CardContent>
@@ -253,7 +139,7 @@ export default function Insights() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.insights.warnings}</p>
-                <p className="text-2xl font-bold font-mono-numbers">4</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.warnings}</p>
               </div>
             </div>
           </CardContent>
@@ -267,7 +153,7 @@ export default function Insights() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t.insights.actionsTaken}</p>
-                <p className="text-2xl font-bold font-mono-numbers">12</p>
+                <p className="text-2xl font-bold font-mono-numbers">{stats.actionsTaken}</p>
               </div>
             </div>
           </CardContent>
@@ -295,35 +181,124 @@ export default function Insights() {
         </Button>
       </div>
 
-      {/* New Insights */}
-      {newInsights.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            {t.insights.newInsights}
-            <Badge className="bg-destructive text-destructive-foreground text-xs">
-              {newInsights.length}
-            </Badge>
-          </h2>
-          <div className="grid gap-4">
-            {newInsights.map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
-          </div>
-        </div>
-      )}
+      {!hasData ? (
+        <Card className="bg-card border-border">
+          <CardContent className="py-16">
+            <div className="text-center">
+              <Brain className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground">Comienza a registrar operaciones para recibir insights</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                Necesitas al menos 5 operaciones para que la IA analice tus patrones
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : insights.length === 0 ? (
+        <Card className="bg-card border-border">
+          <CardContent className="py-16">
+            <div className="text-center">
+              <Sparkles className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground">No hay insights disponibles aún</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                Los insights se generarán automáticamente a medida que registres operaciones
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* New Insights */}
+          {newInsights.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                {t.insights.newInsights}
+                <Badge className="bg-destructive text-destructive-foreground text-xs">
+                  {newInsights.length}
+                </Badge>
+              </h2>
+              <div className="grid gap-4">
+                {newInsights.map((insight) => {
+                  const Icon = insightIcons[insight.insight_type] || Brain;
+                  const colors = insightColors[insight.insight_type] || insightColors.pattern;
+                  
+                  return (
+                    <Card key={insight.id} className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
+                            <Icon className={cn('h-6 w-6', colors.icon)} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{insight.title}</h3>
+                              <Badge className="bg-primary/20 text-primary text-[10px] h-5">{t.common.new}</Badge>
+                              {insight.severity && (
+                                <Badge className={cn('text-[10px] h-5', severityColors[insight.severity])}>
+                                  {insight.severity.toUpperCase()}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">{insight.content}</p>
 
-      {/* All Insights */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">{t.insights.allInsights}</h2>
-        <div className="grid gap-4">
-          {allInsights
-            .filter((i) => !i.isNew)
-            .map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
-        </div>
-      </div>
+                            <div className="flex items-center gap-3">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="gap-2"
+                                onClick={() => markAsRead.mutate(insight.id)}
+                              >
+                                Marcar como leído
+                                <ChevronRight className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Read Insights */}
+          {readInsights.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">{t.insights.allInsights}</h2>
+              <div className="grid gap-4">
+                {readInsights.map((insight) => {
+                  const Icon = insightIcons[insight.insight_type] || Brain;
+                  const colors = insightColors[insight.insight_type] || insightColors.pattern;
+                  
+                  return (
+                    <Card key={insight.id} className={cn('border transition-all hover:shadow-lg opacity-70', colors.bg, colors.border)}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
+                            <Icon className={cn('h-6 w-6', colors.icon)} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{insight.title}</h3>
+                              {insight.severity && (
+                                <Badge className={cn('text-[10px] h-5', severityColors[insight.severity])}>
+                                  {insight.severity.toUpperCase()}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{insight.content}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* AI Capabilities */}
       <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">

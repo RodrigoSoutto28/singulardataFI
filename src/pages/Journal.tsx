@@ -38,131 +38,48 @@ import {
   FileText,
   FileCode,
   Upload,
+  Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExportTrades } from '@/hooks/useExportTrades';
 import { useImportTrades } from '@/hooks/useImportTrades';
+import { useTrades, Trade } from '@/hooks/useTrades';
 import { toast } from 'sonner';
-
-interface Trade {
-  id: string;
-  symbol: string;
-  direction: 'long' | 'short';
-  status: 'open' | 'closed';
-  entryPrice: number;
-  exitPrice?: number;
-  quantity: number;
-  pnl?: number;
-  pnlPercentage?: number;
-  entryDate: string;
-  exitDate?: string;
-  strategy?: string;
-  notes?: string;
-  rating?: number;
-  tags?: string[];
-}
-
-// Mock data
-const mockTrades: Trade[] = [
-  {
-    id: '1',
-    symbol: 'EUR/USD',
-    direction: 'long',
-    status: 'closed',
-    entryPrice: 1.0850,
-    exitPrice: 1.0920,
-    quantity: 100000,
-    pnl: 700,
-    pnlPercentage: 0.65,
-    entryDate: '2025-01-22T14:30:00',
-    exitDate: '2025-01-22T18:45:00',
-    strategy: 'Breakout',
-    notes: 'Strong momentum after news release',
-    rating: 4,
-    tags: ['forex', 'breakout', 'news'],
-  },
-  {
-    id: '2',
-    symbol: 'BTC/USD',
-    direction: 'short',
-    status: 'closed',
-    entryPrice: 42500,
-    exitPrice: 41800,
-    quantity: 0.5,
-    pnl: 350,
-    pnlPercentage: 1.65,
-    entryDate: '2025-01-21T10:15:00',
-    exitDate: '2025-01-21T16:30:00',
-    strategy: 'Trend Following',
-    rating: 5,
-    tags: ['crypto', 'trend'],
-  },
-  {
-    id: '3',
-    symbol: 'AAPL',
-    direction: 'long',
-    status: 'closed',
-    entryPrice: 178.50,
-    exitPrice: 176.20,
-    quantity: 100,
-    pnl: -230,
-    pnlPercentage: -1.29,
-    entryDate: '2025-01-20T09:35:00',
-    exitDate: '2025-01-20T15:50:00',
-    strategy: 'Support Bounce',
-    notes: 'Should have waited for confirmation',
-    rating: 2,
-    tags: ['stocks', 'support'],
-  },
-  {
-    id: '4',
-    symbol: 'GBP/JPY',
-    direction: 'long',
-    status: 'open',
-    entryPrice: 188.45,
-    quantity: 50000,
-    pnl: 125,
-    pnlPercentage: 0.28,
-    entryDate: '2025-01-23T09:00:00',
-    strategy: 'Range Trade',
-    tags: ['forex', 'range'],
-  },
-  {
-    id: '5',
-    symbol: 'TSLA',
-    direction: 'short',
-    status: 'closed',
-    entryPrice: 245.00,
-    exitPrice: 252.30,
-    quantity: 50,
-    pnl: -365,
-    pnlPercentage: -2.98,
-    entryDate: '2025-01-19T11:20:00',
-    exitDate: '2025-01-19T14:45:00',
-    strategy: 'Reversal',
-    notes: 'Bad timing, trend continued up',
-    rating: 1,
-    tags: ['stocks', 'reversal'],
-  },
-];
+import { Progress } from '@/components/ui/progress';
 
 export default function Journal() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddTradeOpen, setIsAddTradeOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    symbol: '',
+    direction: '' as 'long' | 'short' | '',
+    entry_price: '',
+    quantity: '',
+    stop_loss: '',
+    take_profit: '',
+    strategy: '',
+    entry_date: '',
+    notes: '',
+  });
+  
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
+  const { trades, isLoading, createTrade, deleteTrade, importTrades } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredTrades = mockTrades.filter((trade) => {
+  const filteredTrades = trades.filter((trade) => {
     const matchesSearch = trade.symbol
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -172,26 +89,46 @@ export default function Journal() {
   });
 
   const totalPnl = filteredTrades.reduce((sum, trade) => sum + (trade.pnl ?? 0), 0);
-  const winningTrades = filteredTrades.filter((tr) => (tr.pnl ?? 0) > 0).length;
-  const winRate = filteredTrades.length > 0 
-    ? (winningTrades / filteredTrades.length * 100).toFixed(1)
+  const closedTrades = filteredTrades.filter(t => t.status === 'closed');
+  const winningTrades = closedTrades.filter((tr) => (tr.pnl ?? 0) > 0).length;
+  const winRate = closedTrades.length > 0 
+    ? (winningTrades / closedTrades.length * 100).toFixed(1)
     : '0';
 
   const handleExport = (format: 'excel' | 'pdf' | 'html') => {
     const filename = `trading-journal-${new Date().toISOString().split('T')[0]}`;
     
+    // Convert trades to export format
+    const exportData = filteredTrades.map(trade => ({
+      id: trade.id,
+      symbol: trade.symbol,
+      direction: trade.direction,
+      status: (trade.status === 'open' || trade.status === 'closed' ? trade.status : 'open') as 'open' | 'closed',
+      entryPrice: Number(trade.entry_price),
+      exitPrice: trade.exit_price ? Number(trade.exit_price) : undefined,
+      quantity: Number(trade.quantity),
+      pnl: trade.pnl ? Number(trade.pnl) : undefined,
+      pnlPercentage: trade.pnl_percentage ? Number(trade.pnl_percentage) : undefined,
+      entryDate: trade.entry_date,
+      exitDate: trade.exit_date ?? undefined,
+      strategy: trade.strategy ?? undefined,
+      notes: trade.notes ?? undefined,
+      rating: trade.rating ?? undefined,
+      tags: trade.tags ?? undefined,
+    }));
+    
     try {
       switch (format) {
         case 'excel':
-          exportToExcel(filteredTrades, filename);
+          exportToExcel(exportData, filename);
           toast.success(t.journal.exportSuccess?.replace('{format}', 'Excel') ?? 'Exported to Excel');
           break;
         case 'pdf':
-          exportToPDF(filteredTrades, filename);
+          exportToPDF(exportData, filename);
           toast.success(t.journal.exportSuccess?.replace('{format}', 'PDF') ?? 'Exported to PDF');
           break;
         case 'html':
-          exportToHTML(filteredTrades, filename);
+          exportToHTML(exportData, filename);
           toast.success(t.journal.exportSuccess?.replace('{format}', 'HTML') ?? 'Exported to HTML');
           break;
       }
@@ -204,27 +141,97 @@ export default function Journal() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setIsImporting(true);
+    setImportProgress(10);
+
     try {
       const result = await importFromFile(file);
+      setImportProgress(50);
       
       if (result.errors.length > 0) {
-        result.errors.forEach(error => toast.error(error));
+        result.errors.slice(0, 3).forEach(error => toast.error(error));
       }
       
       if (result.trades.length > 0) {
+        setImportProgress(70);
+        
+        // Convert imported trades to database format
+        const dbTrades = result.trades.map(trade => ({
+          symbol: trade.symbol,
+          direction: trade.direction as 'long' | 'short',
+          entry_price: trade.entryPrice,
+          exit_price: trade.exitPrice ?? null,
+          quantity: trade.quantity,
+          pnl: trade.pnl ?? null,
+          pnl_percentage: trade.pnlPercentage ?? null,
+          entry_date: trade.entryDate,
+          exit_date: trade.exitDate ?? null,
+          strategy: trade.strategy ?? null,
+          notes: trade.notes ?? null,
+          stop_loss: trade.stopLoss ?? null,
+          take_profit: trade.takeProfit ?? null,
+          status: trade.exitDate ? 'closed' as const : 'open' as const,
+        }));
+
+        await importTrades.mutateAsync(dbTrades);
+        setImportProgress(100);
         toast.success(t.journal.tradesImported?.replace('{count}', String(result.trades.length)) ?? `${result.trades.length} trades imported`);
-        // In a real app, you would save these trades to the database
-        console.log('Imported trades:', result.trades);
       } else if (result.errors.length === 0) {
         toast.warning(t.journal.importError ?? 'No trades found in file');
       }
     } catch (error) {
       toast.error(t.journal.importError ?? 'Import failed');
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleAddTrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.symbol || !formData.direction || !formData.entry_price || !formData.quantity) {
+      toast.error('Por favor completa los campos requeridos');
+      return;
     }
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    try {
+      await createTrade.mutateAsync({
+        symbol: formData.symbol.toUpperCase(),
+        direction: formData.direction as 'long' | 'short',
+        entry_price: parseFloat(formData.entry_price),
+        quantity: parseFloat(formData.quantity),
+        stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
+        take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
+        strategy: formData.strategy || null,
+        entry_date: formData.entry_date || new Date().toISOString(),
+        notes: formData.notes || null,
+        status: 'open',
+      });
+      
+      setIsAddTradeOpen(false);
+      setFormData({
+        symbol: '',
+        direction: '',
+        entry_price: '',
+        quantity: '',
+        stop_loss: '',
+        take_profit: '',
+        strategy: '',
+        entry_date: '',
+        notes: '',
+      });
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  const handleDeleteTrade = async (id: string) => {
+    if (confirm('¿Eliminar esta operación?')) {
+      await deleteTrade.mutateAsync(id);
     }
   };
 
@@ -234,7 +241,6 @@ export default function Journal() {
     return (
       <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group gap-3">
         <div className="flex items-center gap-3 sm:gap-4">
-          {/* Direction Icon */}
           <div
             className={cn(
               'flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0',
@@ -248,7 +254,6 @@ export default function Journal() {
             )}
           </div>
 
-          {/* Trade Info */}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-base sm:text-lg">{trade.symbol}</span>
@@ -271,24 +276,22 @@ export default function Journal() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
               <span className="font-mono-numbers">
-                {t.journal.entry}: ${trade.entryPrice.toLocaleString()}
+                {t.journal.entry}: ${Number(trade.entry_price).toLocaleString()}
               </span>
-              {trade.exitPrice && (
+              {trade.exit_price && (
                 <span className="font-mono-numbers hidden xs:inline">
-                  {t.journal.exit}: ${trade.exitPrice.toLocaleString()}
+                  {t.journal.exit}: ${Number(trade.exit_price).toLocaleString()}
                 </span>
               )}
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(trade.entryDate).toLocaleDateString()}
+                {new Date(trade.entry_date).toLocaleDateString()}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Side */}
         <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
-          {/* Rating - Hidden on mobile */}
           {trade.rating && (
             <div className="hidden md:flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
@@ -305,7 +308,6 @@ export default function Journal() {
             </div>
           )}
 
-          {/* P&L */}
           <div className="text-right min-w-[80px] sm:min-w-[100px]">
             <p
               className={cn(
@@ -313,20 +315,21 @@ export default function Journal() {
                 isProfit ? 'text-profit' : 'text-loss'
               )}
             >
-              {isProfit ? '+' : ''}${(trade.pnl ?? 0).toFixed(2)}
+              {trade.pnl !== null ? `${isProfit ? '+' : ''}$${Number(trade.pnl).toFixed(2)}` : '-'}
             </p>
-            <p
-              className={cn(
-                'text-[10px] sm:text-xs font-mono-numbers',
-                isProfit ? 'text-profit' : 'text-loss'
-              )}
-            >
-              {isProfit ? '+' : ''}
-              {(trade.pnlPercentage ?? 0).toFixed(2)}%
-            </p>
+            {trade.pnl_percentage !== null && (
+              <p
+                className={cn(
+                  'text-[10px] sm:text-xs font-mono-numbers',
+                  isProfit ? 'text-profit' : 'text-loss'
+                )}
+              >
+                {isProfit ? '+' : ''}
+                {Number(trade.pnl_percentage).toFixed(2)}%
+              </p>
+            )}
           </div>
 
-          {/* Actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -350,7 +353,10 @@ export default function Journal() {
                 <Image className="h-4 w-4 mr-2" />
                 {t.journal.addScreenshot}
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={() => handleDeleteTrade(trade.id)}
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t.common.delete}
               </DropdownMenuItem>
@@ -374,7 +380,7 @@ export default function Journal() {
           {/* Export Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 w-full xs:w-auto">
+              <Button variant="outline" className="gap-2 w-full xs:w-auto" disabled={trades.length === 0}>
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">{t.journal.export ?? 'Export'}</span>
                 <span className="sm:hidden">Export</span>
@@ -408,8 +414,13 @@ export default function Journal() {
             variant="outline" 
             className="gap-2 w-full xs:w-auto"
             onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting}
           >
-            <Upload className="h-4 w-4" />
+            {isImporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
             <span className="hidden sm:inline">{t.journal.import ?? 'Import'}</span>
             <span className="sm:hidden">Import</span>
           </Button>
@@ -428,15 +439,24 @@ export default function Journal() {
                   {t.journal.logNewTrade}
                 </DialogDescription>
               </DialogHeader>
-              <form className="space-y-4 mt-4">
+              <form onSubmit={handleAddTrade} className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t.journal.symbol}</Label>
-                    <Input placeholder="EUR/USD" className="bg-muted/50" />
+                    <Label>{t.journal.symbol} *</Label>
+                    <Input 
+                      placeholder="EUR/USD" 
+                      className="bg-muted/50"
+                      value={formData.symbol}
+                      onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.direction}</Label>
-                    <Select>
+                    <Label>{t.journal.direction} *</Label>
+                    <Select
+                      value={formData.direction}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, direction: value as 'long' | 'short' }))}
+                    >
                       <SelectTrigger className="bg-muted/50">
                         <SelectValue placeholder={t.journal.selectDirection} />
                       </SelectTrigger>
@@ -447,28 +467,68 @@ export default function Journal() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.entryPrice}</Label>
-                    <Input type="number" step="any" placeholder="0.00" className="bg-muted/50" />
+                    <Label>{t.journal.entryPrice} *</Label>
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      placeholder="0.00" 
+                      className="bg-muted/50"
+                      value={formData.entry_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, entry_price: e.target.value }))}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.quantity}</Label>
-                    <Input type="number" step="any" placeholder="0" className="bg-muted/50" />
+                    <Label>{t.journal.quantity} *</Label>
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      placeholder="0" 
+                      className="bg-muted/50"
+                      value={formData.quantity}
+                      onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>{t.journal.stopLoss}</Label>
-                    <Input type="number" step="any" placeholder="0.00" className="bg-muted/50" />
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      placeholder="0.00" 
+                      className="bg-muted/50"
+                      value={formData.stop_loss}
+                      onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>{t.journal.takeProfit}</Label>
-                    <Input type="number" step="any" placeholder="0.00" className="bg-muted/50" />
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      placeholder="0.00" 
+                      className="bg-muted/50"
+                      value={formData.take_profit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>{t.journal.strategy}</Label>
-                    <Input placeholder="e.g., Breakout" className="bg-muted/50" />
+                    <Input 
+                      placeholder="e.g., Breakout" 
+                      className="bg-muted/50"
+                      value={formData.strategy}
+                      onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>{t.journal.entryDate}</Label>
-                    <Input type="datetime-local" className="bg-muted/50" />
+                    <Input 
+                      type="datetime-local" 
+                      className="bg-muted/50"
+                      value={formData.entry_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -476,6 +536,8 @@ export default function Journal() {
                   <Textarea
                     placeholder={t.journal.addNotesPlaceholder}
                     className="bg-muted/50 min-h-[100px]"
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
                 <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
@@ -487,7 +549,15 @@ export default function Journal() {
                   >
                     {t.common.cancel}
                   </Button>
-                  <Button type="submit" variant="glow" className="w-full sm:w-auto">
+                  <Button 
+                    type="submit" 
+                    variant="glow" 
+                    className="w-full sm:w-auto"
+                    disabled={createTrade.isPending}
+                  >
+                    {createTrade.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
                     {t.journal.addTrade}
                   </Button>
                 </div>
@@ -496,6 +566,14 @@ export default function Journal() {
           </Dialog>
         </div>
       </div>
+
+      {/* Import Progress */}
+      {isImporting && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">Importando operaciones...</p>
+          <Progress value={importProgress} className="h-2" />
+        </div>
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -544,13 +622,20 @@ export default function Journal() {
 
       {/* Trades List */}
       <div className="space-y-2 sm:space-y-3">
-        {filteredTrades.map((trade) => (
-          <TradeRow key={trade.id} trade={trade} />
-        ))}
-
-        {filteredTrades.length === 0 && (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : filteredTrades.length > 0 ? (
+          filteredTrades.map((trade) => (
+            <TradeRow key={trade.id} trade={trade} />
+          ))
+        ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground">{t.journal.noTradesFound}</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">
+              Importa un archivo CSV/Excel o agrega tu primera operación
+            </p>
             <Button
               variant="link"
               className="mt-2"

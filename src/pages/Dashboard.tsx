@@ -6,25 +6,28 @@ import { EquityChart } from '@/components/dashboard/EquityChart';
 import { TasksCard } from '@/components/dashboard/TasksCard';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-// Mock data - will be replaced with real data from the database
-const mockEquityData = [
-  { date: 'Jan 1', equity: 100, pnl: 0 },
-  { date: 'Jan 8', equity: 102, pnl: 2 },
-  { date: 'Jan 15', equity: 98, pnl: -4 },
-  { date: 'Jan 22', equity: 105, pnl: 7 },
-  { date: 'Jan 29', equity: 108, pnl: 3 },
-  { date: 'Feb 5', equity: 103, pnl: -5 },
-  { date: 'Feb 12', equity: 112, pnl: 9 },
-  { date: 'Feb 19', equity: 118, pnl: 6 },
-  { date: 'Feb 26', equity: 110, pnl: -8 },
-  { date: 'Mar 4', equity: 120, pnl: 10 },
-  { date: 'Mar 11', equity: 115, pnl: -5 },
-  { date: 'Mar 18', equity: 108, pnl: -7 },
-];
+import { useTrades } from '@/hooks/useTrades';
+import { useTradingAccount } from '@/hooks/useTradingAccount';
+import { usePsychologyEntries } from '@/hooks/usePsychologyEntries';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 export default function Dashboard() {
   const { t } = useLanguage();
+  const { trades, isLoading: tradesLoading } = useTrades();
+  const { account } = useTradingAccount();
+  const { latestEntry } = usePsychologyEntries();
+  const { stats, equityCurve } = useAnalytics(trades);
+
+  // Calculate real values
+  const balance = account?.current_balance ?? 0;
+  const initialBalance = account?.initial_balance ?? 0;
+  const totalPnl = stats.totalPnl;
+  const pnlPercentage = initialBalance > 0 ? ((totalPnl / initialBalance) * 100) : 0;
+  const balanceChange = initialBalance > 0 ? (((balance - initialBalance) / initialBalance) * 100) : 0;
+  
+  const closedTrades = trades.filter(t => t.status === 'closed').length;
+  const winRate = stats.winRate;
+  const disciplineScore = latestEntry?.discipline_score ?? 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -35,7 +38,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Mental State */}
         <div className="lg:col-span-1">
-          <MentalStateCard disciplineScore={45} />
+          <MentalStateCard disciplineScore={disciplineScore} />
         </div>
 
         {/* Right Column - Capital & Performance */}
@@ -47,8 +50,18 @@ export default function Dashboard() {
 
           {/* Capital Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CapitalCard title={t.dashboard.accountBalance} value={83} change={12.5} variant="balance" />
-            <CapitalCard title="P&L" value={-17} change={-2.1} variant="pnl" />
+            <CapitalCard 
+              title={t.dashboard.accountBalance} 
+              value={balance} 
+              change={balanceChange} 
+              variant="balance" 
+            />
+            <CapitalCard 
+              title="P&L" 
+              value={totalPnl} 
+              change={pnlPercentage} 
+              variant="pnl" 
+            />
           </div>
 
           {/* Performance Section */}
@@ -58,10 +71,15 @@ export default function Dashboard() {
 
           {/* Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <MetricCard title="Win Rate" value="49.2%" icon={TrendingUp} iconColor="teal" />
+            <MetricCard 
+              title="Win Rate" 
+              value={`${winRate.toFixed(1)}%`} 
+              icon={TrendingUp} 
+              iconColor="teal" 
+            />
             <MetricCard 
               title={t.dashboard.totalTrades} 
-              value="59" 
+              value={String(closedTrades)} 
               subtitle={t.dashboard.closed} 
               icon={BarChart3} 
               iconColor="primary" 
@@ -72,7 +90,7 @@ export default function Dashboard() {
 
       {/* Bottom Row - Charts & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <EquityChart data={mockEquityData} className="lg:col-span-2" />
+        <EquityChart data={equityCurve} className="lg:col-span-2" />
         <TasksCard />
       </div>
     </div>
