@@ -96,9 +96,11 @@ export function useTradingAccount() {
     account: accountQuery.data ?? null,
     isLoading: accountQuery.isLoading,
     error: accountQuery.error,
-    createAccount,
-    updateAccount,
-    updateBalance,
+    createAccount: createAccount.mutateAsync,
+    updateAccount: updateAccount.mutateAsync,
+    updateBalance: updateBalance.mutateAsync,
+    isCreating: createAccount.isPending,
+    isUpdating: updateAccount.isPending,
     refetch: accountQuery.refetch,
   };
 }
