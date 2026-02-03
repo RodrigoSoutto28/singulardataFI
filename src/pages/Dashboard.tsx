@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { AchievementBadges } from '@/components/dashboard/AchievementBadges';
 import { CapitalCard } from '@/components/dashboard/CapitalCard';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { MentalStateCard } from '@/components/dashboard/MentalStateCard';
 import { EquityChart } from '@/components/dashboard/EquityChart';
 import { TasksCard } from '@/components/dashboard/TasksCard';
+import { AccountSetupModal } from '@/components/dashboard/AccountSetupModal';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTrades } from '@/hooks/useTrades';
@@ -17,6 +19,8 @@ export default function Dashboard() {
   const { account } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
   const { stats, equityCurve } = useAnalytics(trades);
+  
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   // Calculate real values
   const balance = account?.current_balance ?? 0;
@@ -54,7 +58,9 @@ export default function Dashboard() {
               title={t.dashboard.accountBalance} 
               value={balance} 
               change={balanceChange} 
-              variant="balance" 
+              variant="balance"
+              showEdit={true}
+              onEdit={() => setShowAccountModal(true)}
             />
             <CapitalCard 
               title="P&L" 
@@ -93,6 +99,12 @@ export default function Dashboard() {
         <EquityChart data={equityCurve} className="lg:col-span-2" />
         <TasksCard />
       </div>
+
+      {/* Account Setup Modal */}
+      <AccountSetupModal 
+        open={showAccountModal} 
+        onOpenChange={setShowAccountModal} 
+      />
     </div>
   );
 }

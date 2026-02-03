@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
-import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, Pencil } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface CapitalCardProps {
   title: string;
@@ -7,6 +8,8 @@ interface CapitalCardProps {
   change?: number;
   variant?: 'balance' | 'pnl';
   className?: string;
+  onEdit?: () => void;
+  showEdit?: boolean;
 }
 
 export function CapitalCard({
@@ -15,6 +18,8 @@ export function CapitalCard({
   change,
   variant = 'balance',
   className,
+  onEdit,
+  showEdit = false,
 }: CapitalCardProps) {
   const isPositive = change !== undefined && change >= 0;
   const displayValue = typeof value === 'number' 
@@ -22,7 +27,17 @@ export function CapitalCard({
     : value;
 
   return (
-    <div className={cn('p-5 rounded-xl glass-card', className)}>
+    <div className={cn('p-5 rounded-xl glass-card relative group', className)}>
+      {showEdit && onEdit && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={onEdit}
+        >
+          <Pencil className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      )}
       <div className="flex items-start justify-between mb-4">
         <div className={cn(
           'p-3 rounded-xl',

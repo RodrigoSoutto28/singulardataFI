@@ -111,6 +111,17 @@ export interface Translations {
     newTask: string;
     emptyList: string;
     aiFree: string;
+    // Account setup
+    editBalance: string;
+    accountSetup: string;
+    initialBalance: string;
+    currentBalance: string;
+    accountName: string;
+    broker: string;
+    saveAccount: string;
+    createAccount: string;
+    noAccountYet: string;
+    clickToSetup: string;
   };
 
   // Achievements
@@ -461,6 +472,17 @@ export const translations: Record<Language, Translations> = {
       newTask: 'Nueva tarea...',
       emptyList: 'Lista vacía',
       aiFree: 'AI-Free',
+      // Account setup
+      editBalance: 'Editar Saldo',
+      accountSetup: 'Configurar Cuenta',
+      initialBalance: 'Saldo Inicial',
+      currentBalance: 'Saldo Actual',
+      accountName: 'Nombre de Cuenta',
+      broker: 'Broker',
+      saveAccount: 'Guardar Cuenta',
+      createAccount: 'Crear Cuenta',
+      noAccountYet: 'Sin cuenta configurada',
+      clickToSetup: 'Clic para configurar',
     },
     achievements: {
       streak3Days: 'Racha de 3 Días',
@@ -796,6 +818,17 @@ export const translations: Record<Language, Translations> = {
       newTask: 'New task...',
       emptyList: 'Empty list',
       aiFree: 'AI-Free',
+      // Account setup
+      editBalance: 'Edit Balance',
+      accountSetup: 'Account Setup',
+      initialBalance: 'Initial Balance',
+      currentBalance: 'Current Balance',
+      accountName: 'Account Name',
+      broker: 'Broker',
+      saveAccount: 'Save Account',
+      createAccount: 'Create Account',
+      noAccountYet: 'No account configured',
+      clickToSetup: 'Click to set up',
     },
     achievements: {
       streak3Days: '3-Day Streak',
@@ -1131,6 +1164,17 @@ export const translations: Record<Language, Translations> = {
       newTask: 'Nova tarefa...',
       emptyList: 'Lista vazia',
       aiFree: 'Sem IA',
+      // Account setup
+      editBalance: 'Editar Saldo',
+      accountSetup: 'Configurar Conta',
+      initialBalance: 'Saldo Inicial',
+      currentBalance: 'Saldo Atual',
+      accountName: 'Nome da Conta',
+      broker: 'Corretora',
+      saveAccount: 'Salvar Conta',
+      createAccount: 'Criar Conta',
+      noAccountYet: 'Sem conta configurada',
+      clickToSetup: 'Clique para configurar',
     },
     achievements: {
       streak3Days: 'Sequência de 3 Dias',
