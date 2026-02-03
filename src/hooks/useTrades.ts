@@ -8,6 +8,39 @@ export type Trade = Tables<'trades'>;
 export type TradeInsert = TablesInsert<'trades'>;
 export type TradeUpdate = TablesUpdate<'trades'>;
 
+// Helper function to sync account balance based on closed trades P&L
+async function syncAccountBalance(userId: string) {
+  // Get the active trading account
+  const { data: account, error: accountError } = await supabase
+    .from('trading_accounts')
+    .select('id, initial_balance')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (accountError || !account) return;
+
+  // Calculate total P&L from closed trades
+  const { data: trades, error: tradesError } = await supabase
+    .from('trades')
+    .select('pnl')
+    .eq('user_id', userId)
+    .eq('status', 'closed');
+
+  if (tradesError) return;
+
+  const totalPnl = trades?.reduce((sum, t) => sum + (t.pnl ?? 0), 0) ?? 0;
+  const newBalance = (account.initial_balance ?? 0) + totalPnl;
+
+  // Update the account balance
+  await supabase
+    .from('trading_accounts')
+    .update({ current_balance: newBalance })
+    .eq('id', account.id);
+}
+
 export function useTrades() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -29,6 +62,14 @@ export function useTrades() {
     enabled: !!user?.id,
   });
 
+  const invalidateAndSyncBalance = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    if (user?.id) {
+      await syncAccountBalance(user.id);
+      await queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
+    }
+  };
+
   const createTrade = useMutation({
     mutationFn: async (trade: Omit<TradeInsert, 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
@@ -42,8 +83,8 @@ export function useTrades() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    onSuccess: async () => {
+      await invalidateAndSyncBalance();
       toast.success('Operación creada correctamente');
     },
     onError: (error) => {
@@ -63,8 +104,8 @@ export function useTrades() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    onSuccess: async () => {
+      await invalidateAndSyncBalance();
       toast.success('Operación actualizada');
     },
     onError: (error) => {
@@ -81,8 +122,8 @@ export function useTrades() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    onSuccess: async () => {
+      await invalidateAndSyncBalance();
       toast.success('Operación eliminada');
     },
     onError: (error) => {
@@ -107,8 +148,8 @@ export function useTrades() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    onSuccess: async (data) => {
+      await invalidateAndSyncBalance();
       toast.success(`${data.length} operaciones importadas`);
     },
     onError: (error) => {
@@ -125,5 +166,6 @@ export function useTrades() {
     deleteTrade,
     importTrades,
     refetch: tradesQuery.refetch,
+    syncBalance: () => user?.id ? syncAccountBalance(user.id) : Promise.resolve(),
   };
 }
