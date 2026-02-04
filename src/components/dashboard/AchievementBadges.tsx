@@ -1,41 +1,41 @@
 import { cn } from '@/lib/utils';
-import { Flame, Trophy, Brain, Calendar, CheckCircle2 } from 'lucide-react';
+import { Target, TrendingUp, Brain, Calendar, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-interface Achievement {
+interface DisciplineMetric {
   id: string;
-  titleKey: 'streak3Days' | 'weekOfFire' | 'reflective' | 'consistentOperator';
+  titleKey: 'streak3Days' | 'weeklyTarget' | 'analyticalMindset' | 'operationalConsistency';
   subtitleKey?: string;
   icon: React.ComponentType<{ className?: string }>;
   status: 'locked' | 'in-progress' | 'completed';
   progress?: string;
 }
 
-const achievements: Achievement[] = [
+const metrics: DisciplineMetric[] = [
   {
     id: '1',
     titleKey: 'streak3Days',
     subtitleKey: 'streak3DaysDesc',
-    icon: Flame,
+    icon: Target,
     status: 'completed',
   },
   {
     id: '2',
-    titleKey: 'weekOfFire',
-    icon: Trophy,
+    titleKey: 'weeklyTarget',
+    icon: TrendingUp,
     status: 'in-progress',
     progress: '1/7',
   },
   {
     id: '3',
-    titleKey: 'reflective',
+    titleKey: 'analyticalMindset',
     icon: Brain,
     status: 'completed',
   },
   {
     id: '4',
-    titleKey: 'consistentOperator',
-    subtitleKey: 'consistentOperatorDesc',
+    titleKey: 'operationalConsistency',
+    subtitleKey: 'operationalConsistencyDesc',
     icon: Calendar,
     status: 'locked',
   },
@@ -44,7 +44,7 @@ const achievements: Achievement[] = [
 export function AchievementBadges() {
   const { t } = useLanguage();
 
-  const getStatusStyles = (status: Achievement['status']) => {
+  const getStatusStyles = (status: DisciplineMetric['status']) => {
     switch (status) {
       case 'completed':
         return {
@@ -67,28 +67,28 @@ export function AchievementBadges() {
     }
   };
 
-  const getSubtitle = (achievement: Achievement) => {
-    if (achievement.status === 'in-progress' && achievement.progress) {
-      return `${t.common.inProgress}: ${achievement.progress}`;
+  const getSubtitle = (metric: DisciplineMetric) => {
+    if (metric.status === 'in-progress' && metric.progress) {
+      return `${t.common.inProgress}: ${metric.progress}`;
     }
-    if (achievement.status === 'completed') {
+    if (metric.status === 'completed') {
       return t.common.completed;
     }
-    if (achievement.subtitleKey) {
-      return t.achievements[achievement.subtitleKey as keyof typeof t.achievements];
+    if (metric.subtitleKey) {
+      return t.disciplineMetrics[metric.subtitleKey as keyof typeof t.disciplineMetrics];
     }
     return '';
   };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {achievements.map((achievement) => {
-        const styles = getStatusStyles(achievement.status);
-        const Icon = achievement.icon;
+      {metrics.map((metric) => {
+        const styles = getStatusStyles(metric.status);
+        const Icon = metric.icon;
 
         return (
           <div
-            key={achievement.id}
+            key={metric.id}
             className={cn(
               'flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 hover:scale-[1.02]',
               styles.container
@@ -99,19 +99,19 @@ export function AchievementBadges() {
             </div>
             <div className="flex-1 min-w-0">
               <p className={cn('text-sm font-medium truncate', styles.text)}>
-                {t.achievements[achievement.titleKey]}
+                {t.disciplineMetrics[metric.titleKey]}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {achievement.status === 'in-progress' ? (
-                  <span className="text-primary">{getSubtitle(achievement)}</span>
-                ) : achievement.status === 'completed' ? (
+                {metric.status === 'in-progress' ? (
+                  <span className="text-primary">{getSubtitle(metric)}</span>
+                ) : metric.status === 'completed' ? (
                   <span className="text-success">{t.common.completed}</span>
                 ) : (
-                  getSubtitle(achievement)
+                  getSubtitle(metric)
                 )}
               </p>
             </div>
-            {achievement.status === 'completed' && (
+            {metric.status === 'completed' && (
               <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
             )}
           </div>
