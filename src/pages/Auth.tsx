@@ -69,14 +69,14 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-gradient-to-br from-primary/5 via-background to-background p-12 flex-col justify-between relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-background p-12 flex-col justify-between relative overflow-hidden">
+        {/* Subtle background accents */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/3 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/2 rounded-full blur-3xl" />
 
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
-          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary shadow-glow">
+          <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
             <LineChart className="h-7 w-7 text-primary-foreground" />
           </div>
           <div>
@@ -89,8 +89,7 @@ export default function Auth() {
         <div className="space-y-8 relative z-10 max-w-md">
           <div>
             <h2 className="text-3xl font-bold mb-4">
-              {t.auth.headline}{' '}
-              <span className="gradient-text">{t.auth.headlineHighlight}</span>
+              {t.auth.headline} <span className="text-primary">{t.auth.headlineHighlight}</span>
             </h2>
             <p className="text-muted-foreground">
               {t.auth.subheadline}
@@ -101,8 +100,7 @@ export default function Auth() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm animate-fade-in"
-                style={{ animationDelay: `${i * 100}ms` }}
+                className="p-4 rounded-lg bg-card border border-border"
               >
                 <feature.icon className="h-8 w-8 text-primary mb-3" />
                 <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
@@ -131,10 +129,10 @@ export default function Auth() {
 
       {/* Right Side - Auth Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <Card className="w-full max-w-md border-border bg-card shadow-elevated">
+        <Card className="w-full max-w-md border-border bg-card">
           <CardHeader className="text-center pb-2">
             <div className="flex items-center justify-center mb-4 lg:hidden">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-primary">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
                 <LineChart className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>

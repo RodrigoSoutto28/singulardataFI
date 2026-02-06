@@ -223,10 +223,10 @@ export default function Insights() {
                   const colors = insightColors[insight.insight_type] || insightColors.pattern;
                   
                   return (
-                    <Card key={insight.id} className={cn('border transition-all hover:shadow-lg', colors.bg, colors.border)}>
+                    <Card key={insight.id} className={cn('border transition-colors', colors.bg, colors.border)}>
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-4">
-                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
+                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-lg shrink-0', colors.bg)}>
                             <Icon className={cn('h-6 w-6', colors.icon)} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -272,10 +272,10 @@ export default function Insights() {
                   const colors = insightColors[insight.insight_type] || insightColors.pattern;
                   
                   return (
-                    <Card key={insight.id} className={cn('border transition-all hover:shadow-lg opacity-70', colors.bg, colors.border)}>
+                    <Card key={insight.id} className={cn('border transition-colors opacity-70', colors.bg, colors.border)}>
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-4">
-                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-xl shrink-0', colors.bg)}>
+                          <div className={cn('flex items-center justify-center h-12 w-12 rounded-lg shrink-0', colors.bg)}>
                             <Icon className={cn('h-6 w-6', colors.icon)} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -301,7 +301,7 @@ export default function Insights() {
       )}
 
       {/* AI Capabilities */}
-      <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+      <Card className="bg-card border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
