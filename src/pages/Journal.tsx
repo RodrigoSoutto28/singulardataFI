@@ -239,11 +239,11 @@ export default function Journal() {
     const isProfit = (trade.pnl ?? 0) >= 0;
 
     return (
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors group gap-3">
         <div className="flex items-center gap-3 sm:gap-4">
           <div
             className={cn(
-              'flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0',
+              'flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-lg shrink-0',
               trade.direction === 'long' ? 'bg-success/10' : 'bg-destructive/10'
             )}
           >
@@ -427,7 +427,7 @@ export default function Journal() {
 
           <Dialog open={isAddTradeOpen} onOpenChange={setIsAddTradeOpen}>
             <DialogTrigger asChild>
-              <Button variant="glow" className="gap-2 w-full xs:w-auto">
+              <Button className="gap-2 w-full xs:w-auto">
                 <Plus className="h-4 w-4" />
                 {t.journal.addTrade}
               </Button>

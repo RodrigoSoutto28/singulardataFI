@@ -339,7 +339,7 @@ export default function Analytics() {
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {assetDistribution.map((asset) => (
-                    <div key={asset.name} className="p-4 rounded-xl bg-muted/30 text-center">
+                    <div key={asset.name} className="p-4 rounded-lg bg-muted/50 text-center">
                       <div
                         className="h-3 w-full rounded-full mb-3"
                         style={{ backgroundColor: `${asset.color}30` }}

@@ -125,7 +125,7 @@ export default function Psychology() {
 
   function EntryCard({ entry }: { entry: PsychologyEntry }) {
     return (
-      <div className="p-4 rounded-xl bg-muted/30 border border-border hover:border-primary/30 transition-all">
+      <div className="p-4 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -345,7 +345,6 @@ export default function Psychology() {
             </div>
 
             <Button 
-              variant="glow" 
               className="w-full"
               onClick={handleSaveEntry}
               disabled={createEntry.isPending}

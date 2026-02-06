@@ -145,7 +145,7 @@ export default function Settings() {
               </Select>
             </div>
           </div>
-          <Button variant="glow">{t.settings.saveChanges}</Button>
+          <Button>{t.settings.saveChanges}</Button>
         </CardContent>
       </Card>
 
@@ -212,10 +212,10 @@ export default function Settings() {
                 <div
                   key={plan.id}
                   className={cn(
-                    'relative p-6 rounded-xl border transition-all',
+                    'relative p-6 rounded-lg border transition-colors',
                     plan.popular
                       ? 'border-primary bg-primary/5'
-                      : 'border-border bg-muted/30',
+                      : 'border-border bg-muted/50',
                     isCurrentPlan && 'ring-2 ring-primary'
                   )}
                 >
@@ -247,7 +247,7 @@ export default function Settings() {
                   </ul>
 
                   <Button
-                    variant={isCurrentPlan ? 'outline' : plan.popular ? 'glow' : 'default'}
+                    variant={isCurrentPlan ? 'outline' : 'default'}
                     className="w-full"
                     disabled={isCurrentPlan}
                   >
