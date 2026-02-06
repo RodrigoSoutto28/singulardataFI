@@ -32,7 +32,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const languages: Language[] = ['ES', 'EN', 'PT'];
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-border/50 bg-background/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 h-14 border-b border-border bg-background">
       <div className="flex items-center justify-between h-full px-4 md:px-6">
         {/* Left - Date & Time */}
         <div className="flex items-center gap-4">
@@ -51,19 +51,19 @@ export function TopBar({ onMenuClick }: TopBarProps) {
         {/* Right - Actions */}
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-full">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-lg">
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
           {/* Language Selector */}
-          <div className="hidden sm:flex items-center bg-muted/50 backdrop-blur-sm rounded-full p-0.5 border border-border/30">
+          <div className="hidden sm:flex items-center bg-muted rounded-lg p-0.5 border border-border">
             {languages.map((lang) => (
               <Button
                 key={lang}
                 variant="ghost"
                 size="sm"
                 onClick={() => setLanguage(lang)}
-                className={`h-7 px-3 rounded-full text-xs transition-colors ${
+                className={`h-7 px-3 rounded-md text-xs font-medium transition-colors ${
                   language === lang
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
@@ -89,7 +89,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-popover/80 backdrop-blur-xl border-border/50">
+            <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
               <DropdownMenuLabel>{t.topbar.myAccount}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>{t.topbar.profile}</DropdownMenuItem>

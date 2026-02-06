@@ -45,10 +45,10 @@ export function Sidebar() {
               variant="ghost"
               size="icon"
               className={cn(
-                'h-11 w-11 rounded-xl transition-all duration-200',
+                'h-10 w-10 rounded-lg transition-colors',
                 isActive 
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -63,10 +63,10 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="flex flex-col items-center w-[70px] border-r border-border/50 glass-sidebar h-screen sticky top-0 py-4">
+    <aside className="flex flex-col items-center w-[70px] border-r border-border bg-sidebar h-screen sticky top-0 py-4">
       {/* Logo - SINGULAR dataFI */}
       <div className="flex flex-col items-center justify-center mb-8 gap-1">
-        <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-primary shadow-glow">
+        <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary">
           <LineChart className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="flex flex-col items-center">
@@ -90,7 +90,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                className="h-10 w-10 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 <Settings className="h-5 w-5" />
               </Button>
@@ -106,7 +106,7 @@ export function Sidebar() {
               variant="ghost"
               size="icon"
               onClick={signOut}
-              className="h-11 w-11 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="h-10 w-10 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="h-5 w-5" />
             </Button>

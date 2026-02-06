@@ -27,7 +27,7 @@ export function CapitalCard({
     : value;
 
   return (
-    <div className={cn('p-5 rounded-xl glass-card relative group', className)}>
+    <div className={cn('p-5 rounded-lg bg-card border border-border relative group', className)}>
       {showEdit && onEdit && (
         <Button
           variant="ghost"
@@ -40,7 +40,7 @@ export function CapitalCard({
       )}
       <div className="flex items-start justify-between mb-4">
         <div className={cn(
-          'p-3 rounded-xl',
+          'p-2.5 rounded-lg',
           variant === 'balance' ? 'bg-primary/10' : 'bg-muted'
         )}>
           {variant === 'balance' ? (
@@ -53,7 +53,7 @@ export function CapitalCard({
         </div>
         {change !== undefined && (
           <span className={cn(
-            'text-xs font-medium px-2 py-1 rounded-full',
+            'text-xs font-medium px-2 py-1 rounded-md',
             isPositive 
               ? 'bg-success/10 text-success' 
               : 'bg-destructive/10 text-destructive'
