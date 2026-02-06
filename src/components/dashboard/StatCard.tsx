@@ -23,23 +23,23 @@ export function StatCard({
   const isPositive = change !== undefined && change >= 0;
 
   const variantStyles = {
-    default: 'bg-card',
-    profit: 'bg-gradient-to-br from-success/10 to-success/5 border-success/20',
-    loss: 'bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20',
-    primary: 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20',
+    default: 'bg-card border-border',
+    profit: 'bg-card border-success/30',
+    loss: 'bg-card border-destructive/30',
+    primary: 'bg-card border-primary/30',
   };
 
   const iconStyles = {
     default: 'bg-muted text-muted-foreground',
-    profit: 'bg-success/20 text-success',
-    loss: 'bg-destructive/20 text-destructive',
-    primary: 'bg-primary/20 text-primary',
+    profit: 'bg-success/10 text-success',
+    loss: 'bg-destructive/10 text-destructive',
+    primary: 'bg-primary/10 text-primary',
   };
 
   return (
     <div
       className={cn(
-        'stat-card rounded-xl border p-5 shadow-card',
+        'stat-card rounded-lg border p-5',
         variantStyles[variant],
         className
       )}
@@ -71,7 +71,7 @@ export function StatCard({
         </div>
         <div
           className={cn(
-            'flex items-center justify-center h-12 w-12 rounded-xl',
+            'flex items-center justify-center h-10 w-10 rounded-lg',
             iconStyles[variant]
           )}
         >
