@@ -226,11 +226,12 @@
 
   /* Stat card */
   .stat-card {
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .stat-card:hover {
     border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.08);
   }
 
   /* Table styles */
@@ -254,6 +255,94 @@
     font-weight: 500;
     padding: 0.25rem 0.5rem;
     border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Professional micro-interactions */
+  .hover-lift {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.1);
+  }
+
+  .hover-scale {
+    transition: transform 0.15s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+  }
+
+  /* Button micro-animations */
+  .btn-press {
+    transition: transform 0.1s ease;
+  }
+
+  .btn-press:active {
+    transform: scale(0.98);
+  }
+
+  /* Card row interactions */
+  .trade-row {
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .trade-row:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    background-color: hsl(var(--primary) / 0.03);
+  }
+
+  /* Stagger animation for lists */
+  .stagger-item {
+    opacity: 0;
+    animation: fade-in 0.25s ease-out forwards;
+  }
+
+  .stagger-item:nth-child(1) { animation-delay: 0ms; }
+  .stagger-item:nth-child(2) { animation-delay: 30ms; }
+  .stagger-item:nth-child(3) { animation-delay: 60ms; }
+  .stagger-item:nth-child(4) { animation-delay: 90ms; }
+  .stagger-item:nth-child(5) { animation-delay: 120ms; }
+  .stagger-item:nth-child(6) { animation-delay: 150ms; }
+  .stagger-item:nth-child(7) { animation-delay: 180ms; }
+  .stagger-item:nth-child(8) { animation-delay: 210ms; }
+  .stagger-item:nth-child(9) { animation-delay: 240ms; }
+  .stagger-item:nth-child(10) { animation-delay: 270ms; }
+
+  /* Icon transitions */
+  .icon-hover {
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .icon-hover:hover {
+    color: hsl(var(--primary));
+    transform: scale(1.1);
+  }
+
+  /* Focus states */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.5);
+  }
+
+  /* Loading pulse */
+  .loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 }
 
