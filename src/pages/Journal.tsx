@@ -39,12 +39,16 @@ import {
   FileCode,
   Upload,
   Loader2,
+  TrendingUp,
+  BarChart3,
+  DollarSign,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExportTrades } from '@/hooks/useExportTrades';
@@ -91,14 +95,14 @@ export default function Journal() {
   const totalPnl = filteredTrades.reduce((sum, trade) => sum + (trade.pnl ?? 0), 0);
   const closedTrades = filteredTrades.filter(t => t.status === 'closed');
   const winningTrades = closedTrades.filter((tr) => (tr.pnl ?? 0) > 0).length;
+  const losingTrades = closedTrades.filter((tr) => (tr.pnl ?? 0) < 0).length;
   const winRate = closedTrades.length > 0 
     ? (winningTrades / closedTrades.length * 100).toFixed(1)
-    : '0';
+    : '0.0';
 
   const handleExport = (format: 'excel' | 'pdf' | 'html') => {
     const filename = `trading-journal-${new Date().toISOString().split('T')[0]}`;
     
-    // Convert trades to export format
     const exportData = filteredTrades.map(trade => ({
       id: trade.id,
       symbol: trade.symbol,
@@ -155,7 +159,6 @@ export default function Journal() {
       if (result.trades.length > 0) {
         setImportProgress(70);
         
-        // Convert imported trades to database format
         const dbTrades = result.trades.map(trade => ({
           symbol: trade.symbol,
           direction: trade.direction as 'long' | 'short',
@@ -235,38 +238,44 @@ export default function Journal() {
     }
   };
 
-  function TradeRow({ trade }: { trade: Trade }) {
+  function TradeRow({ trade, index }: { trade: Trade; index: number }) {
     const isProfit = (trade.pnl ?? 0) >= 0;
 
     return (
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors group gap-3">
-        <div className="flex items-center gap-3 sm:gap-4">
+      <div 
+        className={cn(
+          "flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-card border border-border",
+          "trade-row stagger-item group"
+        )}
+        style={{ animationDelay: `${index * 30}ms` }}
+      >
+        <div className="flex items-center gap-4">
           <div
             className={cn(
-              'flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-lg shrink-0',
+              'flex items-center justify-center h-11 w-11 rounded-lg shrink-0 transition-transform hover:scale-105',
               trade.direction === 'long' ? 'bg-success/10' : 'bg-destructive/10'
             )}
           >
             {trade.direction === 'long' ? (
-              <ArrowUpRight className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
+              <ArrowUpRight className="h-5 w-5 text-success" />
             ) : (
-              <ArrowDownRight className="h-5 w-5 sm:h-6 sm:w-6 text-destructive" />
+              <ArrowDownRight className="h-5 w-5 text-destructive" />
             )}
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-base sm:text-lg">{trade.symbol}</span>
+              <span className="font-semibold text-foreground">{trade.symbol}</span>
               <Badge
                 variant="outline"
                 className={cn(
-                  'text-[10px] h-5',
+                  'text-[10px] h-5 uppercase font-medium',
                   trade.status === 'open'
-                    ? 'border-primary text-primary'
-                    : 'border-muted-foreground/50 text-muted-foreground'
+                    ? 'border-primary/50 text-primary bg-primary/5'
+                    : 'border-muted-foreground/30 text-muted-foreground bg-muted/50'
                 )}
               >
-                {trade.status === 'open' ? t.journal.open.toUpperCase() : 'CLOSED'}
+                {trade.status === 'open' ? 'Open' : 'Closed'}
               </Badge>
               {trade.strategy && (
                 <Badge variant="secondary" className="text-[10px] h-5 hidden sm:inline-flex">
@@ -274,13 +283,13 @@ export default function Journal() {
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1 flex-wrap">
               <span className="font-mono-numbers">
-                {t.journal.entry}: ${Number(trade.entry_price).toLocaleString()}
+                Entry: ${Number(trade.entry_price).toLocaleString()}
               </span>
               {trade.exit_price && (
-                <span className="font-mono-numbers hidden xs:inline">
-                  {t.journal.exit}: ${Number(trade.exit_price).toLocaleString()}
+                <span className="font-mono-numbers hidden sm:inline">
+                  Exit: ${Number(trade.exit_price).toLocaleString()}
                 </span>
               )}
               <span className="flex items-center gap-1">
@@ -291,27 +300,27 @@ export default function Journal() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
+        <div className="flex items-center justify-between sm:justify-end gap-6 mt-3 sm:mt-0 pl-15 sm:pl-0">
           {trade.rating && (
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
                   className={cn(
-                    'h-3 w-3 sm:h-4 sm:w-4',
+                    'h-3.5 w-3.5',
                     i < trade.rating!
                       ? 'fill-warning text-warning'
-                      : 'text-muted-foreground/30'
+                      : 'text-muted-foreground/20'
                   )}
                 />
               ))}
             </div>
           )}
 
-          <div className="text-right min-w-[80px] sm:min-w-[100px]">
+          <div className="text-right min-w-[90px]">
             <p
               className={cn(
-                'text-base sm:text-lg font-bold font-mono-numbers',
+                'text-lg font-bold font-mono-numbers',
                 isProfit ? 'text-profit' : 'text-loss'
               )}
             >
@@ -320,7 +329,7 @@ export default function Journal() {
             {trade.pnl_percentage !== null && (
               <p
                 className={cn(
-                  'text-[10px] sm:text-xs font-mono-numbers',
+                  'text-xs font-mono-numbers',
                   isProfit ? 'text-profit' : 'text-loss'
                 )}
               >
@@ -340,24 +349,25 @@ export default function Journal() {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Eye className="h-4 w-4 mr-2" />
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem className="gap-2">
+                <Eye className="h-4 w-4" />
                 {t.journal.viewDetails}
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Pencil className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="gap-2">
+                <Pencil className="h-4 w-4" />
                 {t.journal.editTrade}
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Image className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="gap-2">
+                <Image className="h-4 w-4" />
                 {t.journal.addScreenshot}
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="text-destructive"
+                className="text-destructive gap-2"
                 onClick={() => handleDeleteTrade(trade.id)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4" />
                 {t.common.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -368,40 +378,15 @@ export default function Journal() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
+    <div className="space-y-6 animate-fade-in">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">{t.journal.title}</h1>
-          <p className="text-sm text-muted-foreground">{t.journal.subtitle}</p>
+          <h1 className="text-2xl font-bold text-foreground">{t.journal.title}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t.journal.subtitle}</p>
         </div>
 
-        <div className="flex flex-col xs:flex-row gap-2">
-          {/* Export Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 w-full xs:w-auto" disabled={trades.length === 0}>
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.journal.export ?? 'Export'}</span>
-                <span className="sm:hidden">Export</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleExport('excel')}>
-                <FileSpreadsheet className="h-4 w-4 mr-2 text-success" />
-                Excel (.xlsx)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                <FileText className="h-4 w-4 mr-2 text-destructive" />
-                PDF (.pdf)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('html')}>
-                <FileCode className="h-4 w-4 mr-2 text-primary" />
-                HTML (.html)
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+        <div className="flex flex-wrap gap-2">
           {/* Import Button */}
           <input
             type="file"
@@ -412,7 +397,8 @@ export default function Journal() {
           />
           <Button 
             variant="outline" 
-            className="gap-2 w-full xs:w-auto"
+            size="sm"
+            className="gap-2 btn-press"
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}
           >
@@ -421,18 +407,42 @@ export default function Journal() {
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">{t.journal.import ?? 'Import'}</span>
-            <span className="sm:hidden">Import</span>
+            {t.journal.import ?? 'Import'}
           </Button>
 
+          {/* Export Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 btn-press" disabled={trades.length === 0}>
+                <Download className="h-4 w-4" />
+                {t.journal.export ?? 'Export'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => handleExport('excel')} className="gap-2">
+                <FileSpreadsheet className="h-4 w-4 text-success" />
+                Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2">
+                <FileText className="h-4 w-4 text-destructive" />
+                PDF (.pdf)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('html')} className="gap-2">
+                <FileCode className="h-4 w-4 text-primary" />
+                HTML (.html)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Add Trade Dialog */}
           <Dialog open={isAddTradeOpen} onOpenChange={setIsAddTradeOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 w-full xs:w-auto">
+              <Button size="sm" className="gap-2 btn-press">
                 <Plus className="h-4 w-4" />
                 {t.journal.addTrade}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t.journal.addNewTrade}</DialogTitle>
                 <DialogDescription>
@@ -442,22 +452,22 @@ export default function Journal() {
               <form onSubmit={handleAddTrade} className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t.journal.symbol} *</Label>
+                    <Label className="text-sm font-medium">{t.journal.symbol} *</Label>
                     <Input 
                       placeholder="EUR/USD" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.symbol}
                       onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.direction} *</Label>
+                    <Label className="text-sm font-medium">{t.journal.direction} *</Label>
                     <Select
                       value={formData.direction}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, direction: value as 'long' | 'short' }))}
                     >
-                      <SelectTrigger className="bg-muted/50">
+                      <SelectTrigger className="bg-muted/30">
                         <SelectValue placeholder={t.journal.selectDirection} />
                       </SelectTrigger>
                       <SelectContent>
@@ -467,97 +477,93 @@ export default function Journal() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.entryPrice} *</Label>
+                    <Label className="text-sm font-medium">{t.journal.entryPrice} *</Label>
                     <Input 
                       type="number" 
                       step="any" 
                       placeholder="0.00" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.entry_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_price: e.target.value }))}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.quantity} *</Label>
+                    <Label className="text-sm font-medium">{t.journal.quantity} *</Label>
                     <Input 
                       type="number" 
                       step="any" 
                       placeholder="0" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.quantity}
                       onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.stopLoss}</Label>
+                    <Label className="text-sm font-medium">{t.journal.stopLoss}</Label>
                     <Input 
                       type="number" 
                       step="any" 
                       placeholder="0.00" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.stop_loss}
                       onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.takeProfit}</Label>
+                    <Label className="text-sm font-medium">{t.journal.takeProfit}</Label>
                     <Input 
                       type="number" 
                       step="any" 
                       placeholder="0.00" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.take_profit}
                       onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.strategy}</Label>
+                    <Label className="text-sm font-medium">{t.journal.strategy}</Label>
                     <Input 
                       placeholder="e.g., Breakout" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.strategy}
                       onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t.journal.entryDate}</Label>
+                    <Label className="text-sm font-medium">{t.journal.entryDate}</Label>
                     <Input 
                       type="datetime-local" 
-                      className="bg-muted/50"
+                      className="bg-muted/30"
                       value={formData.entry_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t.journal.notes}</Label>
+                  <Label className="text-sm font-medium">{t.journal.notes}</Label>
                   <Textarea
                     placeholder={t.journal.addNotesPlaceholder}
-                    className="bg-muted/50 min-h-[100px]"
+                    className="bg-muted/30 min-h-[80px] resize-none"
                     value={formData.notes}
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
-                <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+                <div className="flex justify-end gap-3 pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsAddTradeOpen(false)}
-                    className="w-full sm:w-auto"
                   >
                     {t.common.cancel}
                   </Button>
                   <Button 
-                    type="submit" 
-                    variant="glow" 
-                    className="w-full sm:w-auto"
+                    type="submit"
                     disabled={createTrade.isPending}
+                    className="btn-press"
                   >
-                    {createTrade.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : null}
+                    {createTrade.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                     {t.journal.addTrade}
                   </Button>
                 </div>
@@ -569,46 +575,89 @@ export default function Journal() {
 
       {/* Import Progress */}
       {isImporting && (
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Importando operaciones...</p>
-          <Progress value={importProgress} className="h-2" />
+        <div className="p-4 rounded-lg bg-card border border-border space-y-2 animate-fade-in">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Importing trades...</span>
+            <span className="font-mono-numbers text-primary">{importProgress}%</span>
+          </div>
+          <Progress value={importProgress} className="h-1.5" />
         </div>
       )}
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
-        <div className="p-3 sm:p-4 rounded-xl bg-card border border-border">
-          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t.journal.totalTrades}</p>
-          <p className="text-lg sm:text-2xl font-bold font-mono-numbers">{filteredTrades.length}</p>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-md bg-primary/10">
+              <BarChart3 className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              {t.journal.totalTrades}
+            </span>
+          </div>
+          <p className="text-2xl font-bold font-mono-numbers">{filteredTrades.length}</p>
         </div>
-        <div className="p-3 sm:p-4 rounded-xl bg-card border border-border">
-          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t.journal.winRate}</p>
-          <p className="text-lg sm:text-2xl font-bold font-mono-numbers text-primary">{winRate}%</p>
+
+        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-md bg-success/10">
+              <TrendingUp className="h-4 w-4 text-success" />
+            </div>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              {t.journal.winRate}
+            </span>
+          </div>
+          <p className="text-2xl font-bold font-mono-numbers text-success">{winRate}%</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {winningTrades}W / {losingTrades}L
+          </p>
         </div>
-        <div className="p-3 sm:p-4 rounded-xl bg-card border border-border">
-          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t.journal.totalPnl}</p>
+
+        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+          <div className="flex items-center gap-2 mb-2">
+            <div className={cn("p-1.5 rounded-md", totalPnl >= 0 ? "bg-profit/10" : "bg-loss/10")}>
+              <DollarSign className={cn("h-4 w-4", totalPnl >= 0 ? "text-profit" : "text-loss")} />
+            </div>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              {t.journal.totalPnl}
+            </span>
+          </div>
           <p className={cn(
-            'text-lg sm:text-2xl font-bold font-mono-numbers',
+            'text-2xl font-bold font-mono-numbers',
             totalPnl >= 0 ? 'text-profit' : 'text-loss'
           )}>
             {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
           </p>
         </div>
+
+        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-md bg-primary/10">
+              <Calendar className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              Open Positions
+            </span>
+          </div>
+          <p className="text-2xl font-bold font-mono-numbers">
+            {filteredTrades.filter(t => t.status === 'open').length}
+          </p>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      {/* Search & Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t.journal.searchSymbol}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-muted/50"
+            className="pl-10 bg-muted/30"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-muted/50">
+          <SelectTrigger className="w-full sm:w-[160px] bg-muted/30">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder={t.journal.filterStatus} />
           </SelectTrigger>
@@ -621,28 +670,44 @@ export default function Journal() {
       </div>
 
       {/* Trades List */}
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-2">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading trades...</p>
           </div>
         ) : filteredTrades.length > 0 ? (
-          filteredTrades.map((trade) => (
-            <TradeRow key={trade.id} trade={trade} />
+          filteredTrades.map((trade, index) => (
+            <TradeRow key={trade.id} trade={trade} index={index} />
           ))
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">{t.journal.noTradesFound}</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Importa un archivo CSV/Excel o agrega tu primera operación
+          <div className="text-center py-16 px-4">
+            <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-1">{t.journal.noTradesFound}</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              Import a CSV/Excel file or add your first trade to get started tracking your performance.
             </p>
-            <Button
-              variant="link"
-              className="mt-2"
-              onClick={() => setIsAddTradeOpen(true)}
-            >
-              {t.journal.addFirstTrade}
-            </Button>
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Import File
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setIsAddTradeOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {t.journal.addFirstTrade}
+              </Button>
+            </div>
           </div>
         )}
       </div>
