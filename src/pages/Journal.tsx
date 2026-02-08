@@ -55,7 +55,25 @@ import { useExportTrades } from '@/hooks/useExportTrades';
 import { useImportTrades } from '@/hooks/useImportTrades';
 import { useTrades, Trade } from '@/hooks/useTrades';
 import { toast } from 'sonner';
-import { Progress } from '@/components/ui/progress';
+import { ImportPreviewModal } from '@/components/journal/ImportPreviewModal';
+
+// Types for import preview
+interface ImportedTrade {
+  symbol: string;
+  direction: 'long' | 'short';
+  entryPrice: number;
+  exitPrice?: number;
+  quantity: number;
+  pnl?: number;
+  pnlPercentage?: number;
+  entryDate: string;
+  exitDate?: string;
+  strategy?: string;
+  notes?: string;
+  stopLoss?: number;
+  takeProfit?: number;
+  assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+}
 
 export default function Journal() {
   const { t } = useLanguage();
@@ -63,7 +81,12 @@ export default function Journal() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddTradeOpen, setIsAddTradeOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState(0);
+  
+  // Import preview state
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
+  const [previewErrors, setPreviewErrors] = useState<string[]>([]);
+  const [previewFileName, setPreviewFileName] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -141,55 +164,64 @@ export default function Journal() {
     }
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection - opens preview modal
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsImporting(true);
-    setImportProgress(10);
-
     try {
       const result = await importFromFile(file);
-      setImportProgress(50);
       
-      if (result.errors.length > 0) {
-        result.errors.slice(0, 3).forEach(error => toast.error(error));
-      }
-      
-      if (result.trades.length > 0) {
-        setImportProgress(70);
-        
-        const dbTrades = result.trades.map(trade => ({
-          symbol: trade.symbol,
-          direction: trade.direction as 'long' | 'short',
-          entry_price: trade.entryPrice,
-          exit_price: trade.exitPrice ?? null,
-          quantity: trade.quantity,
-          pnl: trade.pnl ?? null,
-          pnl_percentage: trade.pnlPercentage ?? null,
-          entry_date: trade.entryDate,
-          exit_date: trade.exitDate ?? null,
-          strategy: trade.strategy ?? null,
-          notes: trade.notes ?? null,
-          stop_loss: trade.stopLoss ?? null,
-          take_profit: trade.takeProfit ?? null,
-          status: trade.exitDate ? 'closed' as const : 'open' as const,
-        }));
-
-        await importTrades.mutateAsync(dbTrades);
-        setImportProgress(100);
-        toast.success(t.journal.tradesImported?.replace('{count}', String(result.trades.length)) ?? `${result.trades.length} trades imported`);
-      } else if (result.errors.length === 0) {
+      if (result.trades.length > 0 || result.errors.length > 0) {
+        setPreviewTrades(result.trades);
+        setPreviewErrors(result.errors);
+        setPreviewFileName(file.name);
+        setPreviewOpen(true);
+      } else {
         toast.warning(t.journal.importError ?? 'No trades found in file');
       }
     } catch (error) {
       toast.error(t.journal.importError ?? 'Import failed');
     } finally {
-      setIsImporting(false);
-      setImportProgress(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  // Confirm import from preview modal
+  const handleConfirmImport = async (selectedTrades: ImportedTrade[]) => {
+    if (selectedTrades.length === 0) return;
+
+    setIsImporting(true);
+
+    try {
+      const dbTrades = selectedTrades.map(trade => ({
+        symbol: trade.symbol,
+        direction: trade.direction as 'long' | 'short',
+        entry_price: trade.entryPrice,
+        exit_price: trade.exitPrice ?? null,
+        quantity: trade.quantity,
+        pnl: trade.pnl ?? null,
+        pnl_percentage: trade.pnlPercentage ?? null,
+        entry_date: trade.entryDate,
+        exit_date: trade.exitDate ?? null,
+        strategy: trade.strategy ?? null,
+        notes: trade.notes ?? null,
+        stop_loss: trade.stopLoss ?? null,
+        take_profit: trade.takeProfit ?? null,
+        status: trade.exitDate ? 'closed' as const : 'open' as const,
+      }));
+
+      await importTrades.mutateAsync(dbTrades);
+      toast.success(t.journal.tradesImported?.replace('{count}', String(selectedTrades.length)) ?? `${selectedTrades.length} trades imported`);
+      setPreviewOpen(false);
+      setPreviewTrades([]);
+      setPreviewErrors([]);
+    } catch (error) {
+      toast.error(t.journal.importError ?? 'Import failed');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -391,7 +423,7 @@ export default function Journal() {
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleImport}
+            onChange={handleFileSelect}
             accept=".csv,.xlsx,.xls"
             className="hidden"
           />
@@ -573,16 +605,20 @@ export default function Journal() {
         </div>
       </div>
 
-      {/* Import Progress */}
-      {isImporting && (
-        <div className="p-4 rounded-lg bg-card border border-border space-y-2 animate-fade-in">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Importing trades...</span>
-            <span className="font-mono-numbers text-primary">{importProgress}%</span>
-          </div>
-          <Progress value={importProgress} className="h-1.5" />
-        </div>
-      )}
+      {/* Import Preview Modal */}
+      <ImportPreviewModal
+        isOpen={previewOpen}
+        onClose={() => {
+          setPreviewOpen(false);
+          setPreviewTrades([]);
+          setPreviewErrors([]);
+        }}
+        trades={previewTrades}
+        errors={previewErrors}
+        fileName={previewFileName}
+        onConfirm={handleConfirmImport}
+        isImporting={isImporting}
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
