@@ -1,213 +1,138 @@
 
-# Plan: Verificación de Importación, Estado Cero Inicial y Botón Editar Saldo
+# Plan: iOS 26 Glass Effect Redesign + Journal Bug Fixes + Full Verification
 
-## Resumen
-Este plan verifica el sistema de importación de archivos, asegura que todos los datos comiencen en cero para nuevos usuarios, agrega un botón para editar el saldo inicial de la cuenta, y completa las funcionalidades necesarias para que la aplicación esté lista para uso en producción.
-
----
-
-## 1. Verificación del Sistema de Importación
-
-### Estado Actual
-El hook `useImportTrades.ts` ya está implementado con las siguientes capacidades:
-- Soporte para archivos **CSV** (con detección automática de delimitadores: coma, punto y coma, tab)
-- Soporte para archivos **Excel** (.xlsx, .xls) usando la biblioteca `xlsx`
-- Mapeo de columnas extensivo (30+ variaciones de nombres en inglés y español)
-- Detección automática de asset class (forex, crypto, stocks, futures, options, commodities)
-- Parsing de fechas en múltiples formatos (ISO, DD/MM/YYYY, Excel serial date)
-- Parsing de números con símbolos de moneda
-
-### Mejoras Necesarias
-
-#### Archivo: `src/hooks/useImportTrades.ts`
-- Agregar soporte para el campo `asset_class` en la tabla trades
-- Mejorar la inferencia de dirección cuando no está especificada
-- Agregar más formatos de brokers populares (MetaTrader, TradingView)
+## Summary
+Comprehensive overhaul of the application with three objectives:
+1. Fix trade creation/editing bugs in the Journal
+2. Implement iOS 26-inspired glassmorphism across all components
+3. Verify full application functionality
 
 ---
 
-## 2. Agregar Botón para Editar Saldo Inicial
+## Part 1: Fix Journal Trade Operations
 
-### Archivo: `src/pages/Dashboard.tsx`
-- Agregar un modal/dialog para configurar la cuenta de trading
-- Permitir editar saldo inicial (`initial_balance`)
-- Permitir editar saldo actual (`current_balance`)
-- Si no existe cuenta, crear una nueva automáticamente
+### Problem: Add Trade Form
+- The "Add Trade" form works but lacks edit functionality -- the "Edit" dropdown menu item does nothing
+- The form needs proper validation feedback
 
-### Archivo: `src/components/dashboard/CapitalCard.tsx`
-- Agregar un botón de edición (icono de lápiz) en la card de Balance
-- Al hacer clic, abrir el modal de configuración de cuenta
+### Problem: Edit Trade Missing
+- The "Edit" (Pencil) dropdown menu item in each trade row has no `onClick` handler -- it's completely non-functional
+- Need to implement full edit modal that pre-fills with trade data and calls `updateTrade`
 
-### Archivo: `src/hooks/useTradingAccount.ts`
-- Ya tiene la mutación `updateAccount` que sirve para actualizar el balance
-- Agregar función `updateInitialBalance` específica
-
-### Flujo de Usuario
-```text
-Dashboard
-    │
-    ▼
-Tarjeta "Account Balance"
-    │
-    ├─► Click en icono de edición
-    │
-    ▼
-Modal "Configurar Cuenta"
-    │
-    ├─ Input: Nombre de la cuenta
-    ├─ Input: Broker (opcional)
-    ├─ Input: Saldo inicial *
-    ├─ Input: Saldo actual *
-    │
-    └─► Guardar → Actualizar BD → Refrescar Dashboard
-```
+### Changes:
+- Add `editingTrade` state to track which trade is being edited
+- Reuse the Add Trade dialog for editing by pre-filling `formData` when editing
+- Connect the "Edit" dropdown item to open the dialog with existing trade data
+- Add `exit_price`, `exit_date`, `pnl`, `pnl_percentage`, and `status` fields to the edit form so users can close trades
+- Update `handleAddTrade` to detect edit mode and call `updateTrade.mutateAsync` instead of `createTrade.mutateAsync`
 
 ---
 
-## 3. Estado Inicial en Cero - Verificación
+## Part 2: iOS 26 Glass Effect Redesign
 
-### Estado Actual
-Todos los componentes ya están conectados a datos reales:
-- **Dashboard**: Usa `useTrades`, `useTradingAccount`, `usePsychologyEntries`, `useAnalytics`
-- **Journal**: Usa `useTrades` para CRUD completo
-- **Psychology**: Usa `usePsychologyEntries` para CRUD completo
-- **Analytics**: Usa `useAnalytics` que calcula desde trades reales
+Apply Apple's iOS 26 "Liquid Glass" aesthetic across the entire application. This involves translucent backgrounds with blur, subtle borders, and refined shadows.
 
-### Verificación de Estado Cero
-- Balance: `account?.current_balance ?? 0` ✓
-- Initial Balance: `account?.initial_balance ?? 0` ✓
-- Win Rate: Calculado dinámicamente, 0 si no hay trades ✓
-- Total Trades: Calculado dinámicamente, 0 si no hay trades ✓
-- Equity Curve: Array vacío si no hay trades ✓
-- Psychology Stats: Todo en 0 si no hay entradas ✓
+### Global CSS Changes (`src/index.css`)
+- Add a `.glass` utility class: `backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg`
+- Add `.glass-card` variant with slightly more opacity
+- Add `.glass-sidebar` for navigation
+- Add `.glass-topbar` for header
+- Update light mode to use `bg-white/60` with similar blur effects
+- Add subtle inner shadow for depth on glass elements
 
----
+### Component Updates
 
-## 4. Funcionalidades Completas por Pestaña
+**Layout Components:**
+- `Sidebar.tsx`: Apply `backdrop-blur-2xl bg-sidebar/70 border-r border-white/10` for glass sidebar
+- `TopBar.tsx`: Apply `backdrop-blur-xl bg-background/60 border-b border-white/10` for glass header
+- `AppLayout.tsx`: Keep the corporate grid background (provides texture behind glass)
+- `CorporateGrid.tsx`: Enhance with more visible gradient orbs to make glass effect pop
 
-### Dashboard
-| Función | Estado | Mejora |
-|---------|--------|--------|
-| Balance cuenta | ✓ | Agregar botón editar |
-| P&L | ✓ | - |
-| Win Rate | ✓ | - |
-| Curva equidad | ✓ | - |
-| Estado mental | ✓ | - |
-| Tareas | ✓ | - |
+**Card Component (`card.tsx`):**
+- Update base Card to: `backdrop-blur-xl bg-card/60 border border-white/8 shadow-lg`
+- Subtle hover: increase border opacity on hover
 
-### Journal
-| Función | Estado | Mejora |
-|---------|--------|--------|
-| Listar trades | ✓ | - |
-| Agregar trade | ✓ | - |
-| Eliminar trade | ✓ | - |
-| Importar | ✓ | Mejorar asset_class |
-| Exportar | ✓ | - |
-| Editar trade | Parcial | Agregar modal de edición |
+**All Dashboard Components:**
+- `StatCard.tsx`: Glass card with blur
+- `CapitalCard.tsx`: Glass treatment with translucent background
+- `MentalStateCard.tsx`: Glass containers for inner sections
+- `EquityChart.tsx`: Glass wrapper
+- `TasksCard.tsx`: Glass card
+- `AIInsightCard.tsx`: Glass with colored accent borders
+- `AchievementBadges.tsx`: Glass badges
+- `MetricCard.tsx`: Glass card
+- `AccountSetupModal.tsx`: Glass dialog content
 
-### Psychology
-| Función | Estado | Notas |
-|---------|--------|-------|
-| Listar entradas | ✓ | - |
-| Nueva entrada | ✓ | - |
-| Stats promedio | ✓ | - |
+**Page Components:**
+- `Journal.tsx`: Glass stat cards, glass trade rows, glass form dialog
+- `Analytics.tsx`: Glass metric cards and chart containers
+- `Psychology.tsx`: Glass form and entry cards
+- `Insights.tsx`: Glass insight cards
+- `Settings.tsx`: Glass settings cards and plan cards
+- `Auth.tsx`: Glass login card with enhanced background blur
 
-### Analytics
-| Función | Estado | Notas |
-|---------|--------|-------|
-| Todas las métricas | ✓ | Calculadas dinámicamente |
+**UI Primitives:**
+- `dialog.tsx`: Glass content overlay with enhanced blur
+- `badge.tsx`: Subtle glass effect on badges
+- `button.tsx`: Keep solid for primary actions, glass effect for ghost/outline variants
+- Inputs: Translucent glass backgrounds
 
----
-
-## 5. Nuevas Traducciones Necesarias
-
-### Archivo: `src/i18n/translations.ts`
-Agregar claves para:
-- `dashboard.editBalance` / "Edit Balance" / "Editar Saldo" / "Editar Saldo"
-- `dashboard.accountSetup` / "Account Setup" / "Configurar Cuenta" / "Configurar Conta"
-- `dashboard.initialBalance` / "Initial Balance" / "Saldo Inicial" / "Saldo Inicial"
-- `dashboard.currentBalance` / "Current Balance" / "Saldo Actual" / "Saldo Atual"
-- `dashboard.accountName` / "Account Name" / "Nombre de Cuenta" / "Nome da Conta"
-- `dashboard.broker` / "Broker" / "Broker" / "Corretora"
-- `dashboard.saveAccount` / "Save Account" / "Guardar Cuenta" / "Salvar Conta"
-- `dashboard.createAccount` / "Create Account" / "Crear Cuenta" / "Criar Conta"
-- `dashboard.noAccountYet` / "No account configured" / "Sin cuenta configurada" / "Sem conta configurada"
-- `dashboard.clickToSetup` / "Click to set up" / "Clic para configurar" / "Clique para configurar"
+### Color/Opacity Strategy
+- Dark mode: `bg-white/5` to `bg-white/10` with `backdrop-blur-xl`
+- Light mode: `bg-white/60` to `bg-white/80` with `backdrop-blur-xl`
+- Borders: `border-white/10` (dark) / `border-black/5` (light)
+- Shadows: soft, diffused `shadow-lg` with low opacity
 
 ---
 
-## Sección Técnica
+## Part 3: Verification
 
-### Archivos a Modificar
-1. `src/pages/Dashboard.tsx` - Agregar modal de configuración de cuenta
-2. `src/components/dashboard/CapitalCard.tsx` - Agregar botón de edición
-3. `src/hooks/useTradingAccount.ts` - Agregar función updateInitialBalance
-4. `src/hooks/useImportTrades.ts` - Incluir asset_class en import
-5. `src/i18n/translations.ts` - Nuevas traducciones
+After implementing changes, browser-based verification of:
+- Trade creation flow (add, save, verify in list)
+- Trade editing flow (click edit, modify, save)
+- Trade deletion
+- Import file workflow with preview modal
+- Navigation across all pages
+- Glass effect consistency across Dashboard, Journal, Analytics, Psychology, Insights, Settings
+- Light/dark mode glass rendering
+- Mobile responsiveness
 
-### Nuevo Componente a Crear
-`src/components/dashboard/AccountSetupModal.tsx`
-- Dialog modal para crear/editar cuenta de trading
-- Campos: nombre, broker, saldo inicial, saldo actual
-- Validación de campos numéricos
-- Llamadas a `createAccount` o `updateAccount` según corresponda
+---
 
-### Lógica del Modal
-```text
-Usuario abre modal
-    │
-    ├─► SI no hay cuenta:
-    │       - Mostrar formulario de creación
-    │       - Botón "Crear Cuenta"
-    │       - Llamar a createAccount()
-    │
-    └─► SI hay cuenta:
-            - Mostrar formulario de edición
-            - Precargar valores actuales
-            - Botón "Guardar Cambios"
-            - Llamar a updateAccount()
-```
+## Technical Details
 
-### Estructura del Modal
-```text
-+------------------------------------------+
-|  Configurar Cuenta de Trading            |
-+------------------------------------------+
-|                                          |
-|  Nombre de Cuenta *                      |
-|  [______________________]                |
-|                                          |
-|  Broker (opcional)                       |
-|  [______________________]                |
-|                                          |
-|  Saldo Inicial *                         |
-|  [______________________] USD            |
-|                                          |
-|  Saldo Actual *                          |
-|  [______________________] USD            |
-|                                          |
-|  [Cancelar]          [Guardar Cuenta]    |
-+------------------------------------------+
-```
+### Files to Create: None
 
-### Dependencias
-No se requieren nuevas dependencias. Se usan:
-- Componentes UI existentes (Dialog, Input, Label, Button)
-- Hook `useTradingAccount` existente
+### Files to Modify:
+1. `src/index.css` -- Glass utility classes and theme variables
+2. `src/components/ui/card.tsx` -- Glass card base
+3. `src/components/ui/dialog.tsx` -- Glass dialog
+4. `src/components/ui/badge.tsx` -- Glass badge refinement
+5. `src/components/layout/Sidebar.tsx` -- Glass sidebar
+6. `src/components/layout/TopBar.tsx` -- Glass topbar
+7. `src/components/effects/CorporateGrid.tsx` -- Enhanced background for glass
+8. `src/pages/Journal.tsx` -- Fix edit functionality + glass styling
+9. `src/pages/Dashboard.tsx` -- Glass styling
+10. `src/pages/Analytics.tsx` -- Glass styling
+11. `src/pages/Psychology.tsx` -- Glass styling
+12. `src/pages/Insights.tsx` -- Glass styling
+13. `src/pages/Settings.tsx` -- Glass styling
+14. `src/pages/Auth.tsx` -- Glass login card
+15. `src/components/dashboard/StatCard.tsx` -- Glass
+16. `src/components/dashboard/CapitalCard.tsx` -- Glass
+17. `src/components/dashboard/MentalStateCard.tsx` -- Glass
+18. `src/components/dashboard/EquityChart.tsx` -- Glass
+19. `src/components/dashboard/TasksCard.tsx` -- Glass
+20. `src/components/dashboard/AIInsightCard.tsx` -- Glass
+21. `src/components/dashboard/AchievementBadges.tsx` -- Glass
+22. `src/components/dashboard/MetricCard.tsx` -- Glass
+23. `src/components/dashboard/AccountSetupModal.tsx` -- Glass dialog
+24. `src/hooks/useTrades.ts` -- No changes needed (updateTrade already exists)
 
-### Flujo Completo para Usuario Nuevo
-1. Usuario se registra → Perfil creado automáticamente
-2. Usuario va al Dashboard → Ve $0.00 en balance
-3. Usuario hace clic en "Editar" → Modal de cuenta aparece
-4. Usuario ingresa saldo inicial y actual → Crea cuenta
-5. Dashboard se actualiza con nuevo balance
-6. Usuario puede importar trades o agregar manualmente
-7. Métricas se calculan automáticamente
-
-### Resultado Esperado
-- Importación de archivos CSV/Excel funcionando correctamente
-- Estado inicial en cero para todos los datos
-- Botón de edición de saldo en el Dashboard
-- Modal para configurar cuenta de trading (crear/editar)
-- Todas las pestañas con funcionalidad completa
-- Aplicación lista para uso en producción
+### Execution Order:
+1. CSS glass utilities and theme variables
+2. Core UI primitives (card, dialog, badge)
+3. Layout components (sidebar, topbar, background)
+4. Journal bug fixes (edit trade)
+5. Dashboard + remaining page glass styling
+6. Browser verification
