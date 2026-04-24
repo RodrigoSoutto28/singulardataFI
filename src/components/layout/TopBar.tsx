@@ -32,7 +32,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const languages: Language[] = ['ES', 'EN', 'PT'];
 
   return (
-    <header className="sticky top-0 z-50 h-14 border-b border-border bg-background">
+    <header className="sticky top-0 z-40 h-14 glass-topbar">
       <div className="flex items-center justify-between h-full px-4 md:px-6">
         {/* Left - Date & Time */}
         <div className="flex items-center gap-4">
