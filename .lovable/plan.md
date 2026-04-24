@@ -1,138 +1,79 @@
+# Plan: Journal Fixes + iOS 26 Liquid Glass Redesign + Verification
 
-# Plan: iOS 26 Glass Effect Redesign + Journal Bug Fixes + Full Verification
+## Part 1 — Fix Trade CRUD in Journal (`src/pages/Journal.tsx`)
 
-## Summary
-Comprehensive overhaul of the application with three objectives:
-1. Fix trade creation/editing bugs in the Journal
-2. Implement iOS 26-inspired glassmorphism across all components
-3. Verify full application functionality
+**Problems detected:**
+- The "Edit" item in each trade row's dropdown has no `onClick` handler — it does nothing.
+- The Add Trade form cannot close trades (missing `exit_price`, `exit_date`, `pnl`, `status`).
+- Creating/saving operations sometimes fails because the form does not branch between create vs. update.
 
----
+**Changes:**
+- Add `editingTrade: Trade | null` state.
+- Import `updateTrade` from `useTrades()`.
+- Expand `formData` with `exit_price`, `exit_date`, `pnl`, `pnl_percentage`, `status`.
+- Wire the row dropdown "Edit" item to set `editingTrade`, prefill `formData`, and open the dialog.
+- Refactor `handleAddTrade` to call `updateTrade.mutateAsync({ id: editingTrade.id, ...payload })` when editing, otherwise `createTrade.mutateAsync(payload)`.
+- Reset `editingTrade` and `formData` on dialog close.
+- Adapt dialog title/CTA labels based on edit vs. create mode.
 
-## Part 1: Fix Journal Trade Operations
+## Part 2 — iOS 26 "Liquid Glass" Aesthetic
 
-### Problem: Add Trade Form
-- The "Add Trade" form works but lacks edit functionality -- the "Edit" dropdown menu item does nothing
-- The form needs proper validation feedback
+**Global CSS (`src/index.css`):**
+- Add utilities:
+  - `.glass` → `backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg` (dark) / `bg-white/60` (light)
+  - `.glass-card`, `.glass-sidebar`, `.glass-topbar`, `.glass-dialog` variants with adjusted opacity/blur.
+- Subtle inner highlight via `box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)`.
 
-### Problem: Edit Trade Missing
-- The "Edit" (Pencil) dropdown menu item in each trade row has no `onClick` handler -- it's completely non-functional
-- Need to implement full edit modal that pre-fills with trade data and calls `updateTrade`
+**UI primitives:**
+- `src/components/ui/card.tsx` → glass base with hover border lift.
+- `src/components/ui/dialog.tsx` → glass content + stronger overlay blur.
+- `src/components/ui/badge.tsx` → translucent variant.
 
-### Changes:
-- Add `editingTrade` state to track which trade is being edited
-- Reuse the Add Trade dialog for editing by pre-filling `formData` when editing
-- Connect the "Edit" dropdown item to open the dialog with existing trade data
-- Add `exit_price`, `exit_date`, `pnl`, `pnl_percentage`, and `status` fields to the edit form so users can close trades
-- Update `handleAddTrade` to detect edit mode and call `updateTrade.mutateAsync` instead of `createTrade.mutateAsync`
+**Layout:**
+- `src/components/layout/Sidebar.tsx` → glass sidebar.
+- `src/components/layout/TopBar.tsx` → glass topbar.
+- `src/components/effects/CorporateGrid.tsx` → keep grid + add soft gradient orbs so glass has something to refract.
 
----
+**Dashboard widgets:** apply glass to `StatCard`, `CapitalCard`, `MentalStateCard`, `EquityChart`, `TasksCard`, `AIInsightCard`, `AchievementBadges`, `MetricCard`, `AccountSetupModal`.
 
-## Part 2: iOS 26 Glass Effect Redesign
+**Pages:** apply glass containers to `Dashboard`, `Journal`, `Analytics`, `Psychology`, `Insights`, `Settings`, `Auth`.
 
-Apply Apple's iOS 26 "Liquid Glass" aesthetic across the entire application. This involves translucent backgrounds with blur, subtle borders, and refined shadows.
+**Color strategy:**
+- Dark: `bg-white/5–10` + `border-white/10`
+- Light: `bg-white/60–80` + `border-black/5`
+- Always paired with `backdrop-blur-xl`.
 
-### Global CSS Changes (`src/index.css`)
-- Add a `.glass` utility class: `backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg`
-- Add `.glass-card` variant with slightly more opacity
-- Add `.glass-sidebar` for navigation
-- Add `.glass-topbar` for header
-- Update light mode to use `bg-white/60` with similar blur effects
-- Add subtle inner shadow for depth on glass elements
+## Part 3 — Verification
 
-### Component Updates
+After implementation:
+1. Log in and create a new trade → confirm it persists and balance syncs.
+2. Click Edit on an existing trade → confirm prefill + save works.
+3. Delete a trade → confirm removal.
+4. Import a CSV and an Excel file → confirm `ImportPreviewModal` shows counts, errors, and selection works; confirm import.
+5. Navigate Dashboard / Journal / Analytics / Psychology / Insights / Settings → confirm glass effect is consistent and legible in light + dark mode.
+6. Test mobile viewport (375px) for sidebar sheet + responsive grids.
 
-**Layout Components:**
-- `Sidebar.tsx`: Apply `backdrop-blur-2xl bg-sidebar/70 border-r border-white/10` for glass sidebar
-- `TopBar.tsx`: Apply `backdrop-blur-xl bg-background/60 border-b border-white/10` for glass header
-- `AppLayout.tsx`: Keep the corporate grid background (provides texture behind glass)
-- `CorporateGrid.tsx`: Enhance with more visible gradient orbs to make glass effect pop
+## Files to modify
+1. `src/index.css`
+2. `src/components/ui/card.tsx`
+3. `src/components/ui/dialog.tsx`
+4. `src/components/ui/badge.tsx`
+5. `src/components/layout/Sidebar.tsx`
+6. `src/components/layout/TopBar.tsx`
+7. `src/components/effects/CorporateGrid.tsx`
+8. `src/pages/Journal.tsx` (CRUD fixes + glass)
+9. `src/pages/Dashboard.tsx`
+10. `src/pages/Analytics.tsx`
+11. `src/pages/Psychology.tsx`
+12. `src/pages/Insights.tsx`
+13. `src/pages/Settings.tsx`
+14. `src/pages/Auth.tsx`
+15. `src/components/dashboard/*.tsx` (StatCard, CapitalCard, MentalStateCard, EquityChart, TasksCard, AIInsightCard, AchievementBadges, MetricCard, AccountSetupModal)
 
-**Card Component (`card.tsx`):**
-- Update base Card to: `backdrop-blur-xl bg-card/60 border border-white/8 shadow-lg`
-- Subtle hover: increase border opacity on hover
-
-**All Dashboard Components:**
-- `StatCard.tsx`: Glass card with blur
-- `CapitalCard.tsx`: Glass treatment with translucent background
-- `MentalStateCard.tsx`: Glass containers for inner sections
-- `EquityChart.tsx`: Glass wrapper
-- `TasksCard.tsx`: Glass card
-- `AIInsightCard.tsx`: Glass with colored accent borders
-- `AchievementBadges.tsx`: Glass badges
-- `MetricCard.tsx`: Glass card
-- `AccountSetupModal.tsx`: Glass dialog content
-
-**Page Components:**
-- `Journal.tsx`: Glass stat cards, glass trade rows, glass form dialog
-- `Analytics.tsx`: Glass metric cards and chart containers
-- `Psychology.tsx`: Glass form and entry cards
-- `Insights.tsx`: Glass insight cards
-- `Settings.tsx`: Glass settings cards and plan cards
-- `Auth.tsx`: Glass login card with enhanced background blur
-
-**UI Primitives:**
-- `dialog.tsx`: Glass content overlay with enhanced blur
-- `badge.tsx`: Subtle glass effect on badges
-- `button.tsx`: Keep solid for primary actions, glass effect for ghost/outline variants
-- Inputs: Translucent glass backgrounds
-
-### Color/Opacity Strategy
-- Dark mode: `bg-white/5` to `bg-white/10` with `backdrop-blur-xl`
-- Light mode: `bg-white/60` to `bg-white/80` with `backdrop-blur-xl`
-- Borders: `border-white/10` (dark) / `border-black/5` (light)
-- Shadows: soft, diffused `shadow-lg` with low opacity
-
----
-
-## Part 3: Verification
-
-After implementing changes, browser-based verification of:
-- Trade creation flow (add, save, verify in list)
-- Trade editing flow (click edit, modify, save)
-- Trade deletion
-- Import file workflow with preview modal
-- Navigation across all pages
-- Glass effect consistency across Dashboard, Journal, Analytics, Psychology, Insights, Settings
-- Light/dark mode glass rendering
-- Mobile responsiveness
-
----
-
-## Technical Details
-
-### Files to Create: None
-
-### Files to Modify:
-1. `src/index.css` -- Glass utility classes and theme variables
-2. `src/components/ui/card.tsx` -- Glass card base
-3. `src/components/ui/dialog.tsx` -- Glass dialog
-4. `src/components/ui/badge.tsx` -- Glass badge refinement
-5. `src/components/layout/Sidebar.tsx` -- Glass sidebar
-6. `src/components/layout/TopBar.tsx` -- Glass topbar
-7. `src/components/effects/CorporateGrid.tsx` -- Enhanced background for glass
-8. `src/pages/Journal.tsx` -- Fix edit functionality + glass styling
-9. `src/pages/Dashboard.tsx` -- Glass styling
-10. `src/pages/Analytics.tsx` -- Glass styling
-11. `src/pages/Psychology.tsx` -- Glass styling
-12. `src/pages/Insights.tsx` -- Glass styling
-13. `src/pages/Settings.tsx` -- Glass styling
-14. `src/pages/Auth.tsx` -- Glass login card
-15. `src/components/dashboard/StatCard.tsx` -- Glass
-16. `src/components/dashboard/CapitalCard.tsx` -- Glass
-17. `src/components/dashboard/MentalStateCard.tsx` -- Glass
-18. `src/components/dashboard/EquityChart.tsx` -- Glass
-19. `src/components/dashboard/TasksCard.tsx` -- Glass
-20. `src/components/dashboard/AIInsightCard.tsx` -- Glass
-21. `src/components/dashboard/AchievementBadges.tsx` -- Glass
-22. `src/components/dashboard/MetricCard.tsx` -- Glass
-23. `src/components/dashboard/AccountSetupModal.tsx` -- Glass dialog
-24. `src/hooks/useTrades.ts` -- No changes needed (updateTrade already exists)
-
-### Execution Order:
-1. CSS glass utilities and theme variables
-2. Core UI primitives (card, dialog, badge)
-3. Layout components (sidebar, topbar, background)
-4. Journal bug fixes (edit trade)
-5. Dashboard + remaining page glass styling
-6. Browser verification
+## Execution order
+1. CSS glass utilities
+2. UI primitives (card, dialog, badge)
+3. Layout (sidebar, topbar, background)
+4. Journal CRUD fixes
+5. Dashboard widgets + remaining pages
+6. Browser verification (CRUD + import + visual audit)
