@@ -617,6 +617,7 @@ export default function Journal() {
                       value={formData.entry_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
                     />
+                  </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Exit Price</Label>
                     <Input
