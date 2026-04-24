@@ -617,6 +617,51 @@ export default function Journal() {
                       value={formData.entry_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
                     />
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Exit Price</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="0.00"
+                      className="bg-muted/30"
+                      value={formData.exit_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Exit Date</Label>
+                    <Input
+                      type="datetime-local"
+                      className="bg-muted/30"
+                      value={formData.exit_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_date: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">P&L ($)</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="0.00"
+                      className="bg-muted/30"
+                      value={formData.pnl}
+                      onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'open' | 'closed' }))}
+                    >
+                      <SelectTrigger className="bg-muted/30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="space-y-2">
