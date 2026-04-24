@@ -426,7 +426,7 @@ export default function Journal() {
                 <Eye className="h-4 w-4" />
                 {t.journal.viewDetails}
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2">
+              <DropdownMenuItem className="gap-2" onClick={() => openEditTrade(trade)}>
                 <Pencil className="h-4 w-4" />
                 {t.journal.editTrade}
               </DropdownMenuItem>
@@ -507,16 +507,22 @@ export default function Journal() {
           </DropdownMenu>
 
           {/* Add Trade Dialog */}
-          <Dialog open={isAddTradeOpen} onOpenChange={setIsAddTradeOpen}>
+          <Dialog
+            open={isAddTradeOpen}
+            onOpenChange={(open) => {
+              setIsAddTradeOpen(open);
+              if (!open) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-2 btn-press">
+              <Button size="sm" className="gap-2 btn-press" onClick={() => resetForm()}>
                 <Plus className="h-4 w-4" />
                 {t.journal.addTrade}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{t.journal.addNewTrade}</DialogTitle>
+                <DialogTitle>{editingTrade ? (t.journal.editTrade ?? 'Edit Trade') : t.journal.addNewTrade}</DialogTitle>
                 <DialogDescription>
                   {t.journal.logNewTrade}
                 </DialogDescription>
@@ -630,13 +636,15 @@ export default function Journal() {
                   >
                     {t.common.cancel}
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
-                    disabled={createTrade.isPending}
+                    disabled={createTrade.isPending || updateTrade.isPending}
                     className="btn-press"
                   >
-                    {createTrade.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    {t.journal.addTrade}
+                    {(createTrade.isPending || updateTrade.isPending) && (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    )}
+                    {editingTrade ? (t.common.save ?? 'Save') : t.journal.addTrade}
                   </Button>
                 </div>
               </form>
