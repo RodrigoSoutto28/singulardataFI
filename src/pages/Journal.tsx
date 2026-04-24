@@ -81,15 +81,16 @@ export default function Journal() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddTradeOpen, setIsAddTradeOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  
+  const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+
   // Import preview state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
   const [previewErrors, setPreviewErrors] = useState<string[]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
-  
+
   // Form state
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     symbol: '',
     direction: '' as 'long' | 'short' | '',
     entry_price: '',
@@ -98,13 +99,47 @@ export default function Journal() {
     take_profit: '',
     strategy: '',
     entry_date: '',
+    exit_price: '',
+    exit_date: '',
+    pnl: '',
+    pnl_percentage: '',
+    status: 'open' as 'open' | 'closed',
     notes: '',
-  });
-  
+  };
+  const [formData, setFormData] = useState(emptyForm);
+
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
-  const { trades, isLoading, createTrade, deleteTrade, importTrades } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resetForm = () => {
+    setFormData(emptyForm);
+    setEditingTrade(null);
+  };
+
+  const openEditTrade = (trade: Trade) => {
+    setEditingTrade(trade);
+    const toLocal = (iso?: string | null) =>
+      iso ? new Date(iso).toISOString().slice(0, 16) : '';
+    setFormData({
+      symbol: trade.symbol ?? '',
+      direction: (trade.direction as 'long' | 'short') ?? '',
+      entry_price: trade.entry_price?.toString() ?? '',
+      quantity: trade.quantity?.toString() ?? '',
+      stop_loss: trade.stop_loss?.toString() ?? '',
+      take_profit: trade.take_profit?.toString() ?? '',
+      strategy: trade.strategy ?? '',
+      entry_date: toLocal(trade.entry_date),
+      exit_price: trade.exit_price?.toString() ?? '',
+      exit_date: toLocal(trade.exit_date),
+      pnl: trade.pnl?.toString() ?? '',
+      pnl_percentage: trade.pnl_percentage?.toString() ?? '',
+      status: (trade.status as 'open' | 'closed') ?? 'open',
+      notes: trade.notes ?? '',
+    });
+    setIsAddTradeOpen(true);
+  };
 
   const filteredTrades = trades.filter((trade) => {
     const matchesSearch = trade.symbol
@@ -227,40 +262,45 @@ export default function Journal() {
 
   const handleAddTrade = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.symbol || !formData.direction || !formData.entry_price || !formData.quantity) {
       toast.error('Por favor completa los campos requeridos');
       return;
     }
 
+    const num = (v: string) => (v.trim() === '' ? null : parseFloat(v));
+    const exitDateIso = formData.exit_date ? new Date(formData.exit_date).toISOString() : null;
+    const status: 'open' | 'closed' = formData.status || (exitDateIso ? 'closed' : 'open');
+
+    const payload = {
+      symbol: formData.symbol.toUpperCase(),
+      direction: formData.direction as 'long' | 'short',
+      entry_price: parseFloat(formData.entry_price),
+      quantity: parseFloat(formData.quantity),
+      stop_loss: num(formData.stop_loss),
+      take_profit: num(formData.take_profit),
+      strategy: formData.strategy || null,
+      entry_date: formData.entry_date
+        ? new Date(formData.entry_date).toISOString()
+        : new Date().toISOString(),
+      exit_price: num(formData.exit_price),
+      exit_date: exitDateIso,
+      pnl: num(formData.pnl),
+      pnl_percentage: num(formData.pnl_percentage),
+      notes: formData.notes || null,
+      status,
+    };
+
     try {
-      await createTrade.mutateAsync({
-        symbol: formData.symbol.toUpperCase(),
-        direction: formData.direction as 'long' | 'short',
-        entry_price: parseFloat(formData.entry_price),
-        quantity: parseFloat(formData.quantity),
-        stop_loss: formData.stop_loss ? parseFloat(formData.stop_loss) : null,
-        take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
-        strategy: formData.strategy || null,
-        entry_date: formData.entry_date || new Date().toISOString(),
-        notes: formData.notes || null,
-        status: 'open',
-      });
-      
+      if (editingTrade) {
+        await updateTrade.mutateAsync({ id: editingTrade.id, ...payload });
+      } else {
+        await createTrade.mutateAsync(payload);
+      }
       setIsAddTradeOpen(false);
-      setFormData({
-        symbol: '',
-        direction: '',
-        entry_price: '',
-        quantity: '',
-        stop_loss: '',
-        take_profit: '',
-        strategy: '',
-        entry_date: '',
-        notes: '',
-      });
+      resetForm();
     } catch (error) {
-      // Error handled by mutation
+      // handled by mutation
     }
   };
 
