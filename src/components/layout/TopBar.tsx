@@ -33,45 +33,45 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const languages: Language[] = ['ES', 'EN', 'PT'];
 
   return (
-    <header className="sticky top-0 z-40 h-14 glass-topbar">
+    <header className="sticky top-0 z-40 h-16 glass-topbar">
       <div className="flex items-center justify-between h-full px-4 md:px-6">
-        {/* Left - Date & Time */}
-        <div className="flex items-center gap-4">
+        {/* Left */}
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
             <Menu className="h-5 w-5" />
           </Button>
-        </div>
-
-        {/* Center - Title */}
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <h1 className="text-sm font-medium text-muted-foreground">
+          <h1 className="text-sm font-medium text-muted-foreground tracking-wide">
             {t.topbar.title}
           </h1>
         </div>
 
-        {/* Right - Actions */}
-        <div className="flex items-center gap-3">
+        {/* Right */}
+        <div className="flex items-center gap-2">
           {/* Theme Toggle */}
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-lg">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-9 w-9 rounded-md hover:bg-muted/60 transition-all"
+            aria-label="Toggle theme"
+          >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
           {/* Language Selector */}
-          <div className="hidden sm:flex items-center bg-muted rounded-lg p-0.5 border border-border">
+          <div className="hidden sm:flex items-center bg-muted/60 rounded-md p-0.5 border border-border/60">
             {languages.map((lang) => (
-              <Button
+              <button
                 key={lang}
-                variant="ghost"
-                size="sm"
                 onClick={() => setLanguage(lang)}
-                className={`h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                className={`h-7 px-2.5 rounded text-[11px] font-semibold tracking-wider transition-all duration-200 ${
                   language === lang
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-card text-primary shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {lang}
-              </Button>
+              </button>
             ))}
           </div>
 
