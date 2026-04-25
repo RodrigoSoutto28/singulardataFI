@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   BookOpen,
@@ -8,7 +7,7 @@ import {
   Brain,
   Settings,
   LogOut,
-  LineChart,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,71 +33,87 @@ export function Sidebar() {
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
     return (
-      <Link to={item.href} className="w-full">
-        <Button
-          variant="ghost"
+      <Link to={item.href} className="block group">
+        <div
           className={cn(
-            'w-full justify-start gap-3 h-10 px-3 rounded-md text-sm font-medium transition-colors',
+            'relative flex items-center gap-3 h-10 px-3 rounded-md text-sm font-medium transition-all duration-200',
             isActive
-              ? 'bg-primary/10 text-primary hover:bg-primary/15'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              ? 'text-primary bg-primary/8'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
           )}
         >
-          <item.icon className="h-4 w-4" />
-          <span>{t.nav[item.titleKey]}</span>
-        </Button>
+          {/* Active indicator bar */}
+          <span
+            className={cn(
+              'absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary transition-all duration-300',
+              isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
+            )}
+          />
+          <item.icon
+            className={cn(
+              'h-[18px] w-[18px] transition-transform duration-200',
+              'group-hover:scale-110',
+              isActive && 'text-primary'
+            )}
+          />
+          <span className="tracking-tight">{t.nav[item.titleKey]}</span>
+        </div>
       </Link>
     );
   };
 
   return (
     <aside className="flex flex-col w-[230px] h-screen sticky top-0 glass-sidebar">
-      {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex items-center justify-center h-9 w-9 rounded-md bg-primary">
-          <LineChart className="h-5 w-5 text-primary-foreground" />
+      {/* Brand — clean monogram */}
+      <div className="flex items-center gap-2.5 px-5 h-16">
+        <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30">
+          <TrendingUp className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
         </div>
-        <div className="flex flex-col leading-tight">
-          <span className="text-[11px] font-bold tracking-wider text-foreground">SINGULAR</span>
-          <span className="text-[10px] font-medium text-primary tracking-wide">dataFI</span>
-        </div>
+        <span className="text-[13px] font-semibold tracking-[0.18em] text-foreground uppercase">
+          Singular
+        </span>
       </div>
 
-      <div className="px-3">
+      <div className="px-5">
         <div className="h-px bg-border" />
       </div>
 
+      {/* Section label */}
+      <div className="px-5 pt-5 pb-2">
+        <span className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70 uppercase">
+          Workspace
+        </span>
+      </div>
+
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+      <nav className="flex-1 px-3 flex flex-col gap-0.5">
         {navItems.map((item) => (
           <NavRow key={item.href} item={item} />
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-border flex flex-col gap-1">
-        <Link to="/settings">
-          <Button
-            variant="ghost"
+      <div className="px-3 py-3 border-t border-border flex flex-col gap-0.5">
+        <Link to="/settings" className="block group">
+          <div
             className={cn(
-              'w-full justify-start gap-3 h-10 px-3 rounded-md text-sm font-medium',
+              'flex items-center gap-3 h-10 px-3 rounded-md text-sm font-medium transition-all duration-200',
               location.pathname === '/settings'
-                ? 'bg-primary/10 text-primary'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'text-primary bg-primary/8'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
             )}
           >
-            <Settings className="h-4 w-4" />
-            <span>{t.nav.settings}</span>
-          </Button>
+            <Settings className="h-[18px] w-[18px] transition-transform duration-200 group-hover:rotate-45" />
+            <span className="tracking-tight">{t.nav.settings}</span>
+          </div>
         </Link>
-        <Button
-          variant="ghost"
+        <button
           onClick={signOut}
-          className="w-full justify-start gap-3 h-10 px-3 rounded-md text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          className="group flex items-center gap-3 h-10 px-3 rounded-md text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-all duration-200 w-full"
         >
-          <LogOut className="h-4 w-4" />
-          <span>{t.nav.logout}</span>
-        </Button>
+          <LogOut className="h-[18px] w-[18px] transition-transform duration-200 group-hover:translate-x-0.5" />
+          <span className="tracking-tight">{t.nav.logout}</span>
+        </button>
       </div>
     </aside>
   );
