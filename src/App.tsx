@@ -12,9 +12,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Journal from "./pages/Journal";
 import Psychology from "./pages/Psychology";
-import Insights from "./pages/Insights";
-import Analytics from "./pages/Analytics";
-import Reports from "./pages/Reports";
+import AnalyticsHub from "./pages/AnalyticsHub";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -41,13 +39,10 @@ function AppRoutes() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="journal" element={<Journal />} />
         <Route path="psychology" element={<Psychology />} />
-        <Route path="insights" element={<Insights />} />
-        <Route path="analytics" element={<Analytics />} />
-        <Route path="reports" element={<Reports />} />
+        <Route path="analytics" element={<AnalyticsHub />} />
+        <Route path="insights" element={<Navigate to="/analytics" replace />} />
+        <Route path="reports" element={<Navigate to="/analytics" replace />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="accounts" element={<Dashboard />} />
-        <Route path="strategies" element={<Dashboard />} />
-        <Route path="backtesting" element={<Dashboard />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
