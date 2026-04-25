@@ -90,30 +90,24 @@ export default function Reports() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Reports</h1>
-          <p className="text-muted-foreground">Generate and export performance reports</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select defaultValue="monthly">
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Report type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="quarterly">Quarterly</SelectItem>
-              <SelectItem value="yearly">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="glow" className="gap-2" disabled={!hasData}>
-            <FileText className="h-4 w-4" />
-            Generate Report
-          </Button>
-        </div>
+    <div className="space-y-6">
+      {/* Header actions */}
+      <div className="flex items-center justify-end gap-2">
+        <Select defaultValue="monthly">
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Report type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="weekly">Weekly</SelectItem>
+            <SelectItem value="monthly">Monthly</SelectItem>
+            <SelectItem value="quarterly">Quarterly</SelectItem>
+            <SelectItem value="yearly">Yearly</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="default" className="gap-2" disabled={!hasData}>
+          <FileText className="h-4 w-4" />
+          Generate Report
+        </Button>
       </div>
 
       {!hasData ? (

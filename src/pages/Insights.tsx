@@ -79,20 +79,11 @@ export default function Insights() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold">{t.insights.title}</h1>
-            <Badge className="bg-primary/20 text-primary">{t.insights.poweredByAI}</Badge>
-          </div>
-          <p className="text-muted-foreground">
-            {t.insights.subtitle}
-          </p>
-        </div>
-        <Button 
-          variant="outline" 
+    <div className="space-y-6">
+      {/* Header actions only */}
+      <div className="flex items-center justify-end">
+        <Button
+          variant="outline"
           className="gap-2"
           onClick={() => refetch()}
         >
