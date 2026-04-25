@@ -68,19 +68,13 @@ export default function Analytics() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{t.analytics.title}</h1>
-          <p className="text-muted-foreground">{t.analytics.subtitle}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">{t.analytics.last30Days}</Button>
-          <Button variant="outline" size="sm">{t.analytics.last90Days}</Button>
-          <Button variant="default" size="sm">{t.analytics.sixMonths}</Button>
-          <Button variant="outline" size="sm">{t.analytics.allTime}</Button>
-        </div>
+    <div className="space-y-6">
+      {/* Date range filter */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button variant="outline" size="sm">{t.analytics.last30Days}</Button>
+        <Button variant="outline" size="sm">{t.analytics.last90Days}</Button>
+        <Button variant="default" size="sm">{t.analytics.sixMonths}</Button>
+        <Button variant="outline" size="sm">{t.analytics.allTime}</Button>
       </div>
 
       {/* Key Metrics */}
@@ -179,19 +173,19 @@ export default function Analytics() {
                   {monthlyPnl.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyPnl}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" vertical={false} />
-                        <XAxis dataKey="month" stroke="hsl(215, 20%, 55%)" fontSize={12} tickLine={false} />
-                        <YAxis stroke="hsl(215, 20%, 55%)" fontSize={12} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                        <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} tickFormatter={(v) => `$${v}`} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar
                           dataKey="pnl"
                           radius={[4, 4, 0, 0]}
-                          fill="hsl(187, 85%, 53%)"
+                          fill="hsl(var(--primary))"
                         >
                           {monthlyPnl.map((entry, index) => (
                             <Cell
                               key={`cell-${index}`}
-                              fill={entry.pnl >= 0 ? 'hsl(142, 76%, 45%)' : 'hsl(0, 72%, 55%)'}
+                              fill={entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
                             />
                           ))}
                         </Bar>
