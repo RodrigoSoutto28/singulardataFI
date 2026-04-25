@@ -15,7 +15,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const { profile, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -23,8 +23,9 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('light');
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle('dark', next);
   };
 
   const initials = profile?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'T';
