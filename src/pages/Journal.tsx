@@ -269,24 +269,42 @@ export default function Journal() {
     }
 
     const num = (v: string) => (v.trim() === '' ? null : parseFloat(v));
+    const entry = parseFloat(formData.entry_price);
+    const exit = num(formData.exit_price);
+    const qty = parseFloat(formData.quantity);
     const exitDateIso = formData.exit_date ? new Date(formData.exit_date).toISOString() : null;
-    const status: 'open' | 'closed' = formData.status || (exitDateIso ? 'closed' : 'open');
+    const isClosed = exit !== null;
+    const status: 'open' | 'closed' = isClosed ? 'closed' : 'open';
+
+    // Auto-calc P&L when both prices are present
+    let pnl: number | null = num(formData.pnl);
+    let pnlPct: number | null = num(formData.pnl_percentage);
+    if (isClosed && exit !== null && pnl === null) {
+      const diff = formData.direction === 'long' ? exit - entry : entry - exit;
+      pnl = +(diff * qty).toFixed(2);
+    }
+    if (isClosed && exit !== null && pnlPct === null && entry !== 0) {
+      const pct = formData.direction === 'long'
+        ? ((exit - entry) / entry) * 100
+        : ((entry - exit) / entry) * 100;
+      pnlPct = +pct.toFixed(2);
+    }
 
     const payload = {
       symbol: formData.symbol.toUpperCase(),
       direction: formData.direction as 'long' | 'short',
-      entry_price: parseFloat(formData.entry_price),
-      quantity: parseFloat(formData.quantity),
+      entry_price: entry,
+      quantity: qty,
       stop_loss: num(formData.stop_loss),
       take_profit: num(formData.take_profit),
       strategy: formData.strategy || null,
       entry_date: formData.entry_date
         ? new Date(formData.entry_date).toISOString()
         : new Date().toISOString(),
-      exit_price: num(formData.exit_price),
-      exit_date: exitDateIso,
-      pnl: num(formData.pnl),
-      pnl_percentage: num(formData.pnl_percentage),
+      exit_price: exit,
+      exit_date: isClosed ? (exitDateIso ?? new Date().toISOString()) : null,
+      pnl,
+      pnl_percentage: pnlPct,
       notes: formData.notes || null,
       status,
     };
@@ -464,7 +482,7 @@ export default function Journal() {
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
-            accept=".csv,.xlsx,.xls"
+            accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.ods,.json,.html,.htm,.xml,.pdf"
             className="hidden"
           />
           <Button 
@@ -520,7 +538,7 @@ export default function Journal() {
                 {t.journal.addTrade}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingTrade ? (t.journal.editTrade ?? 'Edit Trade') : t.journal.addNewTrade}</DialogTitle>
                 <DialogDescription>
@@ -528,162 +546,134 @@ export default function Journal() {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.symbol} *</Label>
-                    <Input 
-                      placeholder="EUR/USD" 
-                      className="bg-muted/30"
+                {/* Essentials */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.symbol} *</Label>
+                    <Input
+                      placeholder="EUR/USD, AAPL, BTC..."
+                      className="bg-muted/30 font-mono uppercase"
                       value={formData.symbol}
                       onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
                       required
+                      autoFocus
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.direction} *</Label>
-                    <Select
-                      value={formData.direction}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, direction: value as 'long' | 'short' }))}
-                    >
-                      <SelectTrigger className="bg-muted/30">
-                        <SelectValue placeholder={t.journal.selectDirection} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="long">{t.journal.long}</SelectItem>
-                        <SelectItem value="short">{t.journal.short}</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.direction} *</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, direction: 'long' }))}
+                        className={cn(
+                          'flex items-center justify-center gap-2 h-10 rounded-md border text-sm font-medium transition-all',
+                          formData.direction === 'long'
+                            ? 'bg-success/10 border-success text-success'
+                            : 'bg-muted/30 border-border text-muted-foreground hover:border-success/40'
+                        )}
+                      >
+                        <ArrowUpRight className="h-4 w-4" /> {t.journal.long}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, direction: 'short' }))}
+                        className={cn(
+                          'flex items-center justify-center gap-2 h-10 rounded-md border text-sm font-medium transition-all',
+                          formData.direction === 'short'
+                            ? 'bg-destructive/10 border-destructive text-destructive'
+                            : 'bg-muted/30 border-border text-muted-foreground hover:border-destructive/40'
+                        )}
+                      >
+                        <ArrowDownRight className="h-4 w-4" /> {t.journal.short}
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.entryPrice} *</Label>
-                    <Input 
-                      type="number" 
-                      step="any" 
-                      placeholder="0.00" 
-                      className="bg-muted/30"
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.entryPrice} *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="0.00"
+                      className="bg-muted/30 font-mono"
                       value={formData.entry_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_price: e.target.value }))}
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.quantity} *</Label>
-                    <Input 
-                      type="number" 
-                      step="any" 
-                      placeholder="0" 
-                      className="bg-muted/30"
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Exit Price</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="optional"
+                      className="bg-muted/30 font-mono"
+                      value={formData.exit_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.quantity} *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="0"
+                      className="bg-muted/30 font-mono"
                       value={formData.quantity}
                       onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.stopLoss}</Label>
-                    <Input 
-                      type="number" 
-                      step="any" 
-                      placeholder="0.00" 
-                      className="bg-muted/30"
-                      value={formData.stop_loss}
-                      onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.takeProfit}</Label>
-                    <Input 
-                      type="number" 
-                      step="any" 
-                      placeholder="0.00" 
-                      className="bg-muted/30"
-                      value={formData.take_profit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.strategy}</Label>
-                    <Input 
-                      placeholder="e.g., Breakout" 
-                      className="bg-muted/30"
-                      value={formData.strategy}
-                      onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">{t.journal.entryDate}</Label>
-                    <Input 
-                      type="datetime-local" 
-                      className="bg-muted/30"
-                      value={formData.entry_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Exit Price</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder="0.00"
-                      className="bg-muted/30"
-                      value={formData.exit_price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Exit Date</Label>
-                    <Input
-                      type="datetime-local"
-                      className="bg-muted/30"
-                      value={formData.exit_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, exit_date: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">P&L ($)</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder="0.00"
-                      className="bg-muted/30"
-                      value={formData.pnl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Status</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'open' | 'closed' }))}
-                    >
-                      <SelectTrigger className="bg-muted/30">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="open">Open</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{t.journal.notes}</Label>
+
+                {/* Auto P&L preview */}
+                {formData.entry_price && formData.exit_price && formData.quantity && formData.direction && (() => {
+                  const entry = parseFloat(formData.entry_price);
+                  const exit = parseFloat(formData.exit_price);
+                  const qty = parseFloat(formData.quantity);
+                  if (isNaN(entry) || isNaN(exit) || isNaN(qty)) return null;
+                  const diff = formData.direction === 'long' ? exit - entry : entry - exit;
+                  const pnl = diff * qty;
+                  const pct = entry !== 0 ? (diff / entry) * 100 : 0;
+                  return (
+                    <div className={cn(
+                      'flex items-center justify-between rounded-md px-3 py-2.5 border',
+                      pnl >= 0 ? 'bg-profit/5 border-profit/20' : 'bg-loss/5 border-loss/20'
+                    )}>
+                      <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">P&L Estimado</span>
+                      <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
+                        {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
+                      </span>
+                    </div>
+                  );
+                })()}
+
+                {/* Optional notes */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.notes}</Label>
                   <Textarea
                     placeholder={t.journal.addNotesPlaceholder}
-                    className="bg-muted/30 min-h-[80px] resize-none"
+                    className="bg-muted/30 min-h-[60px] resize-none text-sm"
                     value={formData.notes}
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
-                <div className="flex justify-end gap-3 pt-2">
+
+                <div className="flex justify-end gap-2 pt-2">
                   <Button
                     type="button"
                     variant="outline"
+                    size="sm"
                     onClick={() => setIsAddTradeOpen(false)}
                   >
                     {t.common.cancel}
                   </Button>
                   <Button
                     type="submit"
+                    size="sm"
                     disabled={createTrade.isPending || updateTrade.isPending}
                     className="btn-press"
                   >
