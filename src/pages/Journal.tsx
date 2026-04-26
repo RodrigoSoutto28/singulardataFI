@@ -482,7 +482,7 @@ export default function Journal() {
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
-            accept=".csv,.xlsx,.xls"
+            accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.ods,.json,.html,.htm,.xml,.pdf"
             className="hidden"
           />
           <Button 
