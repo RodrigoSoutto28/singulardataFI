@@ -136,17 +136,24 @@
 }
 
 @layer components {
-  /* Solid surface card — clean, flat, professional */
+  /* Solid surface card — clean, flat, professional with hover lift + zoom */
   .surface-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow: 0 1px 2px hsl(205 35% 15% / 0.04);
-    transition: border-color .2s ease, box-shadow .25s ease, transform .2s ease;
+    transition:
+      border-color .25s ease,
+      box-shadow .3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
   }
   .surface-card:hover {
-    border-color: hsl(var(--primary) / 0.35);
-    box-shadow: 0 4px 16px hsl(var(--primary) / 0.08), 0 1px 2px hsl(205 35% 15% / 0.04);
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow:
+      0 12px 28px -12px hsl(var(--primary) / 0.18),
+      0 4px 10px -4px hsl(205 35% 15% / 0.08);
+    transform: translateY(-2px) scale(1.005);
   }
 
   /* Subtle glass — only for chrome (sidebar/topbar) */
@@ -172,12 +179,48 @@
 
   /* Modern micro-interactions */
   .interactive {
-    transition: transform .15s cubic-bezier(0.4,0,0.2,1), box-shadow .2s ease, background-color .15s ease;
+    transition:
+      transform .2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow .2s ease,
+      background-color .15s ease;
   }
+  .interactive:hover { transform: scale(1.02); }
   .interactive:active { transform: scale(0.97); }
 
-  /* Apply gentle press to all buttons */
-  button:not(:disabled):active { transform: translateY(0.5px); }
+  /* Global zoom-on-hover for buttons (excluding ghost/icon-only chrome) */
+  button:not(:disabled) {
+    transition:
+      transform .2s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color .15s ease,
+      border-color .15s ease,
+      box-shadow .2s ease,
+      color .15s ease;
+  }
+  button:not(:disabled):hover { transform: translateY(-1px); }
+  button:not(:disabled):active { transform: translateY(0) scale(0.98); }
+
+  /* Icon zoom inside buttons + links on hover */
+  a:hover svg, button:not(:disabled):hover svg {
+    transform: scale(1.08);
+  }
+  a svg, button svg {
+    transition: transform .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Table rows: subtle highlight + slide on hover */
+  tbody tr {
+    transition: background-color .15s ease, transform .2s ease;
+  }
+  tbody tr:hover {
+    background-color: hsl(var(--muted) / 0.5);
+  }
+
+  /* Badge zoom on hover */
+  [class*="badge"]:hover,
+  .badge:hover {
+    transform: scale(1.05);
+    transition: transform .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
   /* Smooth focus ring system-wide */
   :focus-visible {
@@ -242,4 +285,13 @@
   .responsive-padding { @apply p-3 sm:p-4 md:p-6; }
   .responsive-gap { @apply gap-3 sm:gap-4 md:gap-6; }
   .font-mono-numbers { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+}
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
 }
