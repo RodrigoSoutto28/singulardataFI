@@ -286,3 +286,12 @@
   .responsive-gap { @apply gap-3 sm:gap-4 md:gap-6; }
   .font-mono-numbers { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 }
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
