@@ -13,6 +13,7 @@ export interface Profile {
   subscription_expires_at: string | null;
   timezone: string;
   currency: string;
+  role?: string;
   created_at: string;
   updated_at: string;
 }
@@ -145,4 +146,32 @@ export interface FeatureFlag {
   pro_plan: boolean;
   power_plan: boolean;
   created_at: string;
+}
+
+export type StudyContentType = 'summary' | 'paper_pdf';
+
+export interface StudyContent {
+  id: string;
+  title: string;
+  description: string | null;
+  type: StudyContentType;
+  categories: string[] | null;
+  read_time_minutes: number | null;
+  content_md: string | null;
+  pdf_url: string | null;
+  week_number: number | null;
+  published_at: string | null;
+  is_pro: boolean;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudyProgress {
+  user_id: string;
+  content_id: string;
+  progress_percent: number;
+  completed: boolean;
+  started_at: string | null;
+  completed_at: string | null;
 }

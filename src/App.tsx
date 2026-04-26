@@ -15,6 +15,8 @@ import Psychology from "./pages/Psychology";
 import AnalyticsHub from "./pages/AnalyticsHub";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import StudyAdmin from "./pages/admin/StudyAdmin";
+import { AdminRoute } from "./components/auth/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,14 @@ function AppRoutes() {
         <Route path="insights" element={<Navigate to="/analytics" replace />} />
         <Route path="reports" element={<Navigate to="/analytics" replace />} />
         <Route path="settings" element={<Settings />} />
+        <Route 
+          path="admin/study" 
+          element={
+            <AdminRoute>
+              <StudyAdmin />
+            </AdminRoute>
+          } 
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

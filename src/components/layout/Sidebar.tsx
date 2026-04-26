@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   TrendingUp,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -27,7 +28,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
   const { t } = useLanguage();
 
   const NavRow = ({ item }: { item: NavItem }) => {
@@ -94,6 +95,21 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-border flex flex-col gap-0.5">
+        {profile?.role === 'admin' && (
+          <Link to="/admin/study" className="block group">
+            <div
+              className={cn(
+                'flex items-center gap-3 h-10 px-3 rounded-md text-sm font-medium transition-all duration-200',
+                location.pathname === '/admin/study'
+                  ? 'text-primary bg-primary/8'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+              )}
+            >
+              <Shield className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
+              <span className="tracking-tight">Admin</span>
+            </div>
+          </Link>
+        )}
         <Link to="/settings" className="block group">
           <div
             className={cn(
