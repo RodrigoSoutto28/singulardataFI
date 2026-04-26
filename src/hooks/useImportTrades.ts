@@ -113,18 +113,18 @@ function splitCSVLine(line: string, delim: string): string[] {
 
 const FIELD_ALIASES = {
   symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product'],
-  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando'],
-  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'fill price', 'exec price', 'avg price', 'average price', 'price of open'],
-  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close'],
-  quantity: ['quantity', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size'],
-  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'gross pnl'],
+  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando', 'trade side'],
+  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'fill price', 'exec price', 'avg price', 'average price', 'price of open', 'opening price', 'entry @', 'open @'],
+  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close', 'exit @', 'close @'],
+  quantity: ['quantity', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'volume (lots)', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size', 'lot size'],
+  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'gross pnl', 'net usd', 'net p/l', 'net', 'gross profit', 'profit (usd)', 'profit usd'],
   pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %'],
-  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'trade date', 'execution date', 'opened', 'start date', 'time of open'],
-  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close'],
+  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'trade date', 'execution date', 'opened', 'start date', 'time of open', 'opening time', 'open time', 'entry time'],
+  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close', 'closing time', 'close time', 'exit time'],
   strategy: ['strategy', 'estrategia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern'],
-  notes: ['notes', 'notas', 'comment', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo'],
-  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l'],
-  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p'],
+  notes: ['notes', 'notas', 'comment', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo', 'label', 'etiqueta'],
+  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l', 's/l'],
+  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p', 't/p'],
 };
 
 function buildRowGetter(headers: string[], values: unknown[]) {
@@ -201,31 +201,71 @@ function parseCSV(content: string): ParseResult {
   return { trades, errors };
 }
 
+// Score how "header-like" a row is by counting matches against known field aliases
+function scoreHeaderRow(row: unknown[]): number {
+  if (!Array.isArray(row)) return 0;
+  const cells = row.map(v => String(v ?? '').toLowerCase().trim()).filter(Boolean);
+  if (cells.length < 3) return 0;
+  let score = 0;
+  const allAliases = Object.values(FIELD_ALIASES).flat();
+  for (const cell of cells) {
+    if (allAliases.some(a => cell === a || cell.includes(a) || (a.length > 3 && a.includes(cell)))) {
+      score++;
+    }
+  }
+  return score;
+}
+
 function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   try {
     const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    if (!wb.SheetNames.length) {
+      return { trades: [], errors: ['El archivo Excel no contiene hojas'] };
+    }
+
     for (const sheetName of wb.SheetNames) {
       const sheet = wb.Sheets[sheetName];
       const data: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
       if (data.length < 2) continue;
 
-      // Find header row (row with most non-empty cells, typically row 0)
-      const headerRow = (data[0] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
-      for (let i = 1; i < data.length; i++) {
+      // Auto-detect header row by scoring the first 15 rows
+      let headerIdx = 0;
+      let bestScore = scoreHeaderRow(data[0]);
+      const scanLimit = Math.min(15, data.length);
+      for (let i = 1; i < scanLimit; i++) {
+        const s = scoreHeaderRow(data[i]);
+        if (s > bestScore) { bestScore = s; headerIdx = i; }
+      }
+
+      if (bestScore < 2) {
+        errors.push(`Hoja "${sheetName}": no se encontró una fila de cabecera reconocible`);
+        continue;
+      }
+
+      const headerRow = (data[headerIdx] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
+      let mappedAny = false;
+      for (let i = headerIdx + 1; i < data.length; i++) {
         const row = data[i];
         if (!Array.isArray(row) || row.every(v => v === '' || v === null || v === undefined)) continue;
         try {
           const trade = mapRowToTrade(headerRow, row);
-          if (trade) trades.push(trade);
+          if (trade) { trades.push(trade); mappedAny = true; }
         } catch (e) {
-          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${e}`);
+          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${(e as Error)?.message ?? e}`);
         }
       }
+      if (!mappedAny && trades.length === 0) {
+        errors.push(`Hoja "${sheetName}": cabeceras detectadas pero ninguna fila pudo ser interpretada como operación`);
+      }
+    }
+
+    if (trades.length === 0 && errors.length === 0) {
+      errors.push('No se encontraron operaciones en el archivo Excel');
     }
   } catch (e) {
-    errors.push(`Error al leer Excel: ${e}`);
+    errors.push(`Error al leer Excel: ${(e as Error)?.message ?? e}`);
   }
   return { trades, errors };
 }

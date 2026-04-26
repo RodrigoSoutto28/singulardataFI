@@ -206,17 +206,21 @@ export default function Journal() {
 
     try {
       const result = await importFromFile(file);
-      
-      if (result.trades.length > 0 || result.errors.length > 0) {
-        setPreviewTrades(result.trades);
-        setPreviewErrors(result.errors);
-        setPreviewFileName(file.name);
-        setPreviewOpen(true);
-      } else {
-        toast.warning(t.journal.importError ?? 'No trades found in file');
-      }
+
+      // Always open the preview so the user can see errors when no trades parsed
+      setPreviewTrades(result.trades);
+      setPreviewErrors(
+        result.errors.length > 0
+          ? result.errors
+          : result.trades.length === 0
+            ? ['No se reconocieron operaciones en el archivo. Verifica que las columnas incluyan al menos: símbolo, dirección, precio de entrada y cantidad.']
+            : []
+      );
+      setPreviewFileName(file.name);
+      setPreviewOpen(true);
     } catch (error) {
-      toast.error(t.journal.importError ?? 'Import failed');
+      console.error('[ImportTrades] Unexpected error:', error);
+      toast.error(`${t.journal.importError ?? 'Import failed'}: ${(error as Error)?.message ?? error}`);
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
