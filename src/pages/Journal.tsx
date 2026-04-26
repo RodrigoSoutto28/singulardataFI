@@ -269,24 +269,42 @@ export default function Journal() {
     }
 
     const num = (v: string) => (v.trim() === '' ? null : parseFloat(v));
+    const entry = parseFloat(formData.entry_price);
+    const exit = num(formData.exit_price);
+    const qty = parseFloat(formData.quantity);
     const exitDateIso = formData.exit_date ? new Date(formData.exit_date).toISOString() : null;
-    const status: 'open' | 'closed' = formData.status || (exitDateIso ? 'closed' : 'open');
+    const isClosed = exit !== null;
+    const status: 'open' | 'closed' = isClosed ? 'closed' : 'open';
+
+    // Auto-calc P&L when both prices are present
+    let pnl: number | null = num(formData.pnl);
+    let pnlPct: number | null = num(formData.pnl_percentage);
+    if (isClosed && exit !== null && pnl === null) {
+      const diff = formData.direction === 'long' ? exit - entry : entry - exit;
+      pnl = +(diff * qty).toFixed(2);
+    }
+    if (isClosed && exit !== null && pnlPct === null && entry !== 0) {
+      const pct = formData.direction === 'long'
+        ? ((exit - entry) / entry) * 100
+        : ((entry - exit) / entry) * 100;
+      pnlPct = +pct.toFixed(2);
+    }
 
     const payload = {
       symbol: formData.symbol.toUpperCase(),
       direction: formData.direction as 'long' | 'short',
-      entry_price: parseFloat(formData.entry_price),
-      quantity: parseFloat(formData.quantity),
+      entry_price: entry,
+      quantity: qty,
       stop_loss: num(formData.stop_loss),
       take_profit: num(formData.take_profit),
       strategy: formData.strategy || null,
       entry_date: formData.entry_date
         ? new Date(formData.entry_date).toISOString()
         : new Date().toISOString(),
-      exit_price: num(formData.exit_price),
-      exit_date: exitDateIso,
-      pnl: num(formData.pnl),
-      pnl_percentage: num(formData.pnl_percentage),
+      exit_price: exit,
+      exit_date: isClosed ? (exitDateIso ?? new Date().toISOString()) : null,
+      pnl,
+      pnl_percentage: pnlPct,
       notes: formData.notes || null,
       status,
     };
