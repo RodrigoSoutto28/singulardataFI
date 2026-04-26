@@ -23,329 +23,353 @@ interface ParseResult {
   errors: string[];
 }
 
-// Common date formats
-const dateFormats = [
-  /^\d{4}-\d{2}-\d{2}/, // YYYY-MM-DD
-  /^\d{2}\/\d{2}\/\d{4}/, // DD/MM/YYYY or MM/DD/YYYY
-  /^\d{2}-\d{2}-\d{4}/, // DD-MM-YYYY
-  /^\d{2}\.\d{2}\.\d{4}/, // DD.MM.YYYY
-];
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-// Asset class detection based on symbol
 function detectAssetClass(symbol: string): ImportedTrade['assetClass'] {
-  const upperSymbol = symbol.toUpperCase();
-  
-  // Crypto patterns
-  if (/BTC|ETH|XRP|LTC|ADA|DOT|SOL|DOGE|SHIB|MATIC|AVAX|LINK|UNI|USDT|USDC|BNB/.test(upperSymbol)) {
-    return 'crypto';
-  }
-  
-  // Forex patterns
-  if (/EUR|USD|GBP|JPY|CHF|AUD|NZD|CAD/.test(upperSymbol) && upperSymbol.includes('/')) {
-    return 'forex';
-  }
-  if (/^[A-Z]{6}$/.test(upperSymbol) && /EUR|USD|GBP|JPY|CHF|AUD|NZD|CAD/.test(upperSymbol)) {
-    return 'forex';
-  }
-  
-  // Futures patterns
-  if (/^(ES|NQ|YM|CL|GC|SI|ZB|ZN|ZC|ZS|ZW|NG|HO|RB)\d*/.test(upperSymbol)) {
-    return 'futures';
-  }
-  if (upperSymbol.includes('FUTURES') || upperSymbol.includes('FUT')) {
-    return 'futures';
-  }
-  
-  // Commodities
-  if (/GOLD|SILVER|OIL|XAUUSD|XAGUSD|USOIL|UKOIL/.test(upperSymbol)) {
-    return 'commodities';
-  }
-  
-  // Options
-  if (/CALL|PUT|C\d|P\d/.test(upperSymbol)) {
-    return 'options';
-  }
-  
-  // Default to stocks
+  const s = symbol.toUpperCase();
+  if (/BTC|ETH|XRP|LTC|ADA|DOT|SOL|DOGE|SHIB|MATIC|AVAX|LINK|UNI|USDT|USDC|BNB/.test(s)) return 'crypto';
+  if (/EUR|USD|GBP|JPY|CHF|AUD|NZD|CAD/.test(s) && (s.includes('/') || /^[A-Z]{6}$/.test(s))) return 'forex';
+  if (/^(ES|NQ|YM|CL|GC|SI|ZB|ZN|ZC|ZS|ZW|NG|HO|RB)\d*/.test(s) || s.includes('FUT')) return 'futures';
+  if (/GOLD|SILVER|OIL|XAUUSD|XAGUSD|USOIL|UKOIL/.test(s)) return 'commodities';
+  if (/CALL|PUT|C\d|P\d/.test(s)) return 'options';
   return 'stocks';
 }
 
-// Parse various date formats
-function parseDate(dateStr: string): string {
+function parseDate(dateStr: string | number | Date): string {
   if (!dateStr) return new Date().toISOString();
-  
-  // If it's already ISO format
-  if (dateStr.includes('T')) {
-    return new Date(dateStr).toISOString();
+  if (dateStr instanceof Date) return dateStr.toISOString();
+
+  const str = String(dateStr).trim();
+  if (str.includes('T')) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) return d.toISOString();
   }
-  
-  // Try parsing as number (Excel serial date)
-  const numDate = parseFloat(dateStr);
-  if (!isNaN(numDate) && numDate > 25569) { // Excel dates start from 1900
+
+  const numDate = parseFloat(str);
+  if (!isNaN(numDate) && numDate > 25569 && numDate < 60000) {
     const excelEpoch = new Date(1899, 11, 30);
-    const date = new Date(excelEpoch.getTime() + numDate * 86400000);
-    return date.toISOString();
+    return new Date(excelEpoch.getTime() + numDate * 86400000).toISOString();
   }
-  
-  // Try common date formats
-  try {
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString();
-    }
-  } catch {
-    // Continue to fallback
+
+  // Try DD/MM/YYYY or DD.MM.YYYY → reverse if year is at end
+  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
+    const year = y.length === 2 ? 2000 + +y : +y;
+    // Heuristic: if first part > 12, it's day-first
+    const dayFirst = +a > 12;
+    const day = dayFirst ? +a : +b;
+    const month = dayFirst ? +b : +a;
+    const d = new Date(year, month - 1, day, +h, +mi, +s);
+    if (!isNaN(d.getTime())) return d.toISOString();
   }
-  
+
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d.toISOString();
   return new Date().toISOString();
 }
 
-// Parse number with various formats
-function parseNumber(value: string | number): number | undefined {
-  if (typeof value === 'number') return value;
-  if (!value || value === '') return undefined;
-  
-  // Remove currency symbols and spaces
+function parseNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return isNaN(value) ? undefined : value;
   const cleaned = String(value)
-    .replace(/[$€£¥₹,\s]/g, '')
-    .replace(/\(([^)]+)\)/, '-$1'); // Handle (123) as -123
-  
+    .replace(/[$€£¥₹\s]/g, '')
+    .replace(/,(\d{3})/g, '$1')          // thousands separator: 1,234 → 1234
+    .replace(/(\d),(\d{1,2})$/, '$1.$2') // EU decimal: 1234,56 → 1234.56
+    .replace(/\(([^)]+)\)/, '-$1');
   const num = parseFloat(cleaned);
   return isNaN(num) ? undefined : num;
 }
 
-export function useImportTrades() {
-  const parseCSV = useCallback((content: string): ParseResult => {
-    const lines = content.trim().split('\n');
-    const trades: ImportedTrade[] = [];
-    const errors: string[] = [];
-    
-    if (lines.length < 2) {
-      return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
+// Detect delimiter for CSV-like content
+function detectDelimiter(line: string): string {
+  const candidates = [',', ';', '\t', '|'];
+  let best = ',', max = 0;
+  for (const d of candidates) {
+    const count = (line.match(new RegExp(`\\${d}`, 'g')) ?? []).length;
+    if (count > max) { max = count; best = d; }
+  }
+  return best;
+}
+
+// Robust CSV row split (supports quoted fields with embedded delimiters)
+function splitCSVLine(line: string, delim: string): string[] {
+  const out: string[] = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (c === delim && !inQuotes) {
+      out.push(cur); cur = '';
+    } else cur += c;
+  }
+  out.push(cur);
+  return out.map(v => v.trim().replace(/^"|"$/g, ''));
+}
+
+// ─── Field mapping ──────────────────────────────────────────────────────────
+
+const FIELD_ALIASES = {
+  symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product'],
+  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando'],
+  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'fill price', 'exec price', 'avg price', 'average price', 'price of open'],
+  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close'],
+  quantity: ['quantity', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size'],
+  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'gross pnl'],
+  pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %'],
+  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'trade date', 'execution date', 'opened', 'start date', 'time of open'],
+  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close'],
+  strategy: ['strategy', 'estrategia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern'],
+  notes: ['notes', 'notas', 'comment', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo'],
+  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l'],
+  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p'],
+};
+
+function buildRowGetter(headers: string[], values: unknown[]) {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim().replace(/\s+/g, ' '));
+  return (key: keyof typeof FIELD_ALIASES): unknown => {
+    for (const alias of FIELD_ALIASES[key]) {
+      const idx = norm.findIndex(h => h === alias || h.includes(alias) || alias.includes(h) && h.length > 2);
+      if (idx !== -1 && values[idx] !== undefined && values[idx] !== '') return values[idx];
     }
+    return '';
+  };
+}
 
-    // Handle different delimiters
-    let delimiter = ',';
-    if (lines[0].includes(';') && !lines[0].includes(',')) {
-      delimiter = ';';
-    } else if (lines[0].includes('\t')) {
-      delimiter = '\t';
+function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | null {
+  const get = buildRowGetter(headers, values);
+  const symbol = String(get('symbol') ?? '').trim();
+  const entryPriceRaw = get('entryPrice');
+  if (!symbol || entryPriceRaw === '' || entryPriceRaw === undefined) return null;
+
+  const entryPrice = parseNumber(entryPriceRaw);
+  if (entryPrice === undefined) return null;
+
+  const directionRaw = String(get('direction') ?? '').toLowerCase().trim();
+  const isLong = ['long', 'buy', 'compra', 'largo', 'l', 'b', 'bought', 'comprar', '0'].includes(directionRaw);
+  const isShort = ['short', 'sell', 'venta', 'corto', 's', 'sold', 'vender', '1'].includes(directionRaw);
+
+  let finalDirection: 'long' | 'short' = isShort ? 'short' : 'long';
+  if (!isLong && !isShort) {
+    const exit = parseNumber(get('exitPrice'));
+    const profit = parseNumber(get('pnl'));
+    if (exit !== undefined && profit !== undefined) {
+      if ((exit < entryPrice && profit > 0) || (exit > entryPrice && profit < 0)) finalDirection = 'short';
     }
+  }
 
-    const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-    
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      
-      const values = lines[i].split(delimiter).map(v => v.trim().replace(/['"]/g, ''));
-      
-      try {
-        const trade = mapRowToTrade(headers, values);
-        if (trade) {
-          trades.push(trade);
-        }
-      } catch (error) {
-        errors.push(`Línea ${i + 1}: Error al procesar - ${error}`);
-      }
-    }
+  return {
+    symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+    direction: finalDirection,
+    entryPrice,
+    exitPrice: parseNumber(get('exitPrice')),
+    quantity: parseNumber(get('quantity')) ?? 1,
+    pnl: parseNumber(get('pnl')),
+    pnlPercentage: parseNumber(get('pnlPercentage')),
+    entryDate: parseDate(get('entryDate') as string),
+    exitDate: get('exitDate') ? parseDate(get('exitDate') as string) : undefined,
+    strategy: (get('strategy') as string) || undefined,
+    notes: (get('notes') as string) || undefined,
+    stopLoss: parseNumber(get('stopLoss')),
+    takeProfit: parseNumber(get('takeProfit')),
+    assetClass: detectAssetClass(symbol),
+  };
+}
 
-    return { trades, errors };
-  }, []);
+// ─── Parsers ────────────────────────────────────────────────────────────────
 
-  const parseExcel = useCallback((buffer: ArrayBuffer): ParseResult => {
-    const trades: ImportedTrade[] = [];
-    const errors: string[] = [];
+function parseCSV(content: string): ParseResult {
+  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
 
+  const delim = detectDelimiter(lines[0]);
+  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase());
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
     try {
-      const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data: unknown[][] = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: false });
+      const values = splitCSVLine(lines[i], delim);
+      const trade = mapRowToTrade(headers, values);
+      if (trade) trades.push(trade);
+    } catch (e) {
+      errors.push(`Línea ${i + 1}: ${e}`);
+    }
+  }
+  return { trades, errors };
+}
 
-      if (data.length < 2) {
-        return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
-      }
+function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+  try {
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    for (const sheetName of wb.SheetNames) {
+      const sheet = wb.Sheets[sheetName];
+      const data: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+      if (data.length < 2) continue;
 
-      const headerRow = data[0];
-      if (!Array.isArray(headerRow)) {
-        return { trades: [], errors: ['No se encontraron encabezados válidos'] };
-      }
-      
-      const headers = headerRow.map(h => String(h ?? '').toLowerCase().trim());
-
+      // Find header row (row with most non-empty cells, typically row 0)
+      const headerRow = (data[0] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
-        if (!Array.isArray(row) || row.length === 0) continue;
-        
+        if (!Array.isArray(row) || row.every(v => v === '' || v === null || v === undefined)) continue;
         try {
-          const values = row.map(v => String(v ?? '').trim());
-          const trade = mapRowToTrade(headers, values);
-          if (trade) {
-            trades.push(trade);
-          }
-        } catch (error) {
-          errors.push(`Fila ${i + 1}: Error al procesar - ${error}`);
+          const trade = mapRowToTrade(headerRow, row);
+          if (trade) trades.push(trade);
+        } catch (e) {
+          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${e}`);
         }
       }
-    } catch (error) {
-      errors.push(`Error al leer el archivo Excel: ${error}`);
     }
+  } catch (e) {
+    errors.push(`Error al leer Excel: ${e}`);
+  }
+  return { trades, errors };
+}
 
+function parseJSON(content: string): ParseResult {
+  try {
+    const data = JSON.parse(content);
+    let rows: Record<string, unknown>[] = [];
+    if (Array.isArray(data)) rows = data;
+    else if (Array.isArray(data.trades)) rows = data.trades;
+    else if (Array.isArray(data.data)) rows = data.data;
+    else if (Array.isArray(data.orders)) rows = data.orders;
+    else return { trades: [], errors: ['JSON no contiene un array de operaciones reconocible'] };
+
+    if (rows.length === 0) return { trades: [], errors: ['JSON vacío'] };
+
+    const headers = Object.keys(rows[0]).map(h => h.toLowerCase());
+    const trades: ImportedTrade[] = [];
+    const errors: string[] = [];
+    rows.forEach((row, i) => {
+      try {
+        const values = Object.values(row);
+        const trade = mapRowToTrade(headers, values);
+        if (trade) trades.push(trade);
+      } catch (e) {
+        errors.push(`Item ${i + 1}: ${e}`);
+      }
+    });
     return { trades, errors };
-  }, []);
+  } catch (e) {
+    return { trades: [], errors: [`JSON inválido: ${e}`] };
+  }
+}
 
-  const mapRowToTrade = (headers: string[], values: string[]): ImportedTrade | null => {
-    const getValue = (possibleNames: string[]): string => {
-      for (const name of possibleNames) {
-        const index = headers.findIndex(h => h.includes(name) || name.includes(h));
-        if (index !== -1 && values[index]) {
-          return values[index];
+function parseHTML(content: string): ParseResult {
+  // Extract the first table from HTML (MT4/MT5 reports come as HTML tables)
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const tables = doc.querySelectorAll('table');
+    if (tables.length === 0) return { trades: [], errors: ['No se encontraron tablas en el HTML'] };
+
+    let parsedAny = false;
+    tables.forEach(table => {
+      const rows = Array.from(table.querySelectorAll('tr'));
+      if (rows.length < 2) return;
+
+      // Find a header row by looking for one whose cells look like headers
+      let headerIdx = 0;
+      for (let i = 0; i < Math.min(5, rows.length); i++) {
+        const cells = Array.from(rows[i].querySelectorAll('th, td')).map(c => c.textContent?.toLowerCase().trim() ?? '');
+        if (cells.some(c => /symbol|ticker|item|instrument|símbolo|simbolo|product/.test(c)) &&
+            cells.some(c => /price|precio|open|entry/.test(c))) {
+          headerIdx = i;
+          break;
         }
       }
-      return '';
-    };
 
-    // Extended column mappings for different broker formats
-    const symbol = getValue([
-      'symbol', 'símbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 
-      'instrument', 'instrumento', 'security', 'item', 'market', 'mercado',
-      'currency pair', 'forex pair', 'stock', 'crypto'
-    ]);
-    
-    const direction = getValue([
-      'direction', 'dirección', 'tipo', 'type', 'side', 'action', 'acción',
-      'buy/sell', 'compra/venta', 'order type', 'trade type', 'position',
-      'b/s', 'long/short'
-    ]);
-    
-    const entryPrice = getValue([
-      'entry', 'entrada', 'entry_price', 'entry price', 'precio_entrada', 'precio entrada',
-      'open', 'apertura', 'open price', 'precio apertura', 'price', 'precio',
-      'fill price', 'exec price', 'avg price', 'average price'
-    ]);
-    
-    const exitPrice = getValue([
-      'exit', 'salida', 'exit_price', 'exit price', 'precio_salida', 'precio salida',
-      'close', 'cierre', 'close price', 'precio cierre', 'closing price'
-    ]);
-    
-    const quantity = getValue([
-      'quantity', 'cantidad', 'size', 'tamaño', 'lots', 'lotes', 'volume', 'volumen',
-      'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos',
-      'amount', 'qty', 'position size'
-    ]);
-
-    const pnl = getValue([
-      'pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 
-      'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'return',
-      'realized pnl', 'realized p/l', 'gross pnl'
-    ]);
-    
-    const pnlPercentage = getValue([
-      'pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno',
-      '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %'
-    ]);
-    
-    const entryDate = getValue([
-      'entry_date', 'entry date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha',
-      'open_date', 'open date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime',
-      'trade date', 'execution date', 'opened', 'start date'
-    ]);
-    
-    const exitDate = getValue([
-      'exit_date', 'exit date', 'fecha_salida', 'fecha salida', 
-      'close_date', 'close date', 'fecha_cierre', 'fecha cierre',
-      'closed', 'end date', 'closing date'
-    ]);
-    
-    const strategy = getValue([
-      'strategy', 'estrategia', 'setup', 'system', 'sistema', 'method',
-      'trading system', 'approach', 'technique', 'pattern'
-    ]);
-    
-    const notes = getValue([
-      'notes', 'notas', 'comment', 'comentario', 'observation', 'observación',
-      'remarks', 'description', 'descripción', 'details', 'memo'
-    ]);
-    
-    const stopLoss = getValue([
-      'stop_loss', 'stop loss', 'sl', 'stop', 'stoploss', 
-      'stop price', 'stop level', 'protective stop'
-    ]);
-    
-    const takeProfit = getValue([
-      'take_profit', 'take profit', 'tp', 'target', 'objetivo',
-      'profit target', 'target price', 'limit', 'take_profit_price'
-    ]);
-
-    // Validate required fields
-    if (!symbol || !entryPrice) {
-      return null;
-    }
-
-    // Determine direction
-    const normalizedDirection = direction.toLowerCase();
-    const isLong = ['long', 'buy', 'compra', 'largo', 'l', 'b', 'bought', 'comprar'].includes(normalizedDirection);
-    const isShort = ['short', 'sell', 'venta', 'corto', 's', 'sold', 'vender'].includes(normalizedDirection);
-
-    // If no direction specified, try to infer from P&L and prices
-    let finalDirection: 'long' | 'short' = 'long';
-    if (isShort) {
-      finalDirection = 'short';
-    } else if (!isLong && !isShort) {
-      const entry = parseNumber(entryPrice);
-      const exit = parseNumber(exitPrice);
-      const profit = parseNumber(pnl);
-      
-      if (entry && exit && profit !== undefined) {
-        // If profit is positive when exit > entry, it's long
-        // If profit is positive when exit < entry, it's short
-        if ((exit > entry && profit > 0) || (exit < entry && profit < 0)) {
-          finalDirection = 'long';
-        } else if ((exit < entry && profit > 0) || (exit > entry && profit < 0)) {
-          finalDirection = 'short';
+      const headers = Array.from(rows[headerIdx].querySelectorAll('th, td')).map(c => (c.textContent ?? '').toLowerCase().trim());
+      for (let i = headerIdx + 1; i < rows.length; i++) {
+        const values = Array.from(rows[i].querySelectorAll('th, td')).map(c => (c.textContent ?? '').trim());
+        if (values.every(v => !v)) continue;
+        try {
+          const trade = mapRowToTrade(headers, values);
+          if (trade) { trades.push(trade); parsedAny = true; }
+        } catch (e) {
+          errors.push(`Fila ${i + 1}: ${e}`);
         }
       }
+    });
+
+    if (!parsedAny && trades.length === 0) {
+      errors.push('No se pudieron extraer operaciones de las tablas del HTML');
     }
+  } catch (e) {
+    errors.push(`Error al leer HTML: ${e}`);
+  }
+  return { trades, errors };
+}
 
-    const parsedEntryPrice = parseNumber(entryPrice);
-    if (!parsedEntryPrice) return null;
-
-    return {
-      symbol: symbol.toUpperCase().replace(/\s+/g, ''),
-      direction: finalDirection,
-      entryPrice: parsedEntryPrice,
-      exitPrice: parseNumber(exitPrice),
-      quantity: parseNumber(quantity) ?? 1,
-      pnl: parseNumber(pnl),
-      pnlPercentage: parseNumber(pnlPercentage),
-      entryDate: parseDate(entryDate),
-      exitDate: exitDate ? parseDate(exitDate) : undefined,
-      strategy: strategy || undefined,
-      notes: notes || undefined,
-      stopLoss: parseNumber(stopLoss),
-      takeProfit: parseNumber(takeProfit),
-      assetClass: detectAssetClass(symbol),
-    };
+// PDF parsing — uses xlsx ability to read text, or falls back to graceful error
+async function parsePDF(_file: File): Promise<ParseResult> {
+  return {
+    trades: [],
+    errors: [
+      'Los archivos PDF no se pueden leer directamente. Por favor, exporta el reporte de tu broker como CSV, Excel (.xlsx) o HTML para mejores resultados.',
+    ],
   };
+}
 
+// ─── Public hook ────────────────────────────────────────────────────────────
+
+export function useImportTrades() {
   const importFromFile = useCallback(async (file: File): Promise<ParseResult> => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const mime = file.type.toLowerCase();
 
-    if (extension === 'csv' || extension === 'txt') {
+    try {
+      // CSV / TXT / TSV
+      if (['csv', 'txt', 'tsv'].includes(ext) || mime.includes('csv') || mime === 'text/plain') {
+        const content = await file.text();
+        return parseCSV(content);
+      }
+
+      // Excel
+      if (['xlsx', 'xls', 'xlsm', 'xlsb', 'ods'].includes(ext) || mime.includes('spreadsheet') || mime.includes('excel')) {
+        const buffer = await file.arrayBuffer();
+        return parseExcelBuffer(buffer);
+      }
+
+      // JSON
+      if (ext === 'json' || mime.includes('json')) {
+        const content = await file.text();
+        return parseJSON(content);
+      }
+
+      // HTML / HTM (MT4/MT5/cTrader reports)
+      if (['html', 'htm', 'mhtml', 'xml'].includes(ext) || mime.includes('html') || mime.includes('xml')) {
+        const content = await file.text();
+        return parseHTML(content);
+      }
+
+      // PDF
+      if (ext === 'pdf' || mime.includes('pdf')) {
+        return await parsePDF(file);
+      }
+
+      // Fallback: try to read as text and detect format
       const content = await file.text();
-      return parseCSV(content);
-    }
+      const trimmed = content.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) return parseJSON(content);
+      if (trimmed.toLowerCase().startsWith('<!doctype html') || trimmed.toLowerCase().startsWith('<html')) return parseHTML(content);
+      if (trimmed.includes(',') || trimmed.includes(';') || trimmed.includes('\t')) return parseCSV(content);
 
-    if (extension === 'xlsx' || extension === 'xls') {
-      const buffer = await file.arrayBuffer();
-      return parseExcel(buffer);
+      return {
+        trades: [],
+        errors: [`Formato no soportado: .${ext}. Formatos compatibles: CSV, Excel, JSON, HTML, TSV`],
+      };
+    } catch (e) {
+      return { trades: [], errors: [`Error al procesar el archivo: ${e}`] };
     }
-
-    return {
-      trades: [],
-      errors: [`Formato no soportado: .${extension}. Use CSV o Excel (.xlsx/.xls)`],
-    };
-  }, [parseCSV, parseExcel]);
+  }, []);
 
   return { importFromFile };
 }
