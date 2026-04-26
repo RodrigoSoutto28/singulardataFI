@@ -201,31 +201,71 @@ function parseCSV(content: string): ParseResult {
   return { trades, errors };
 }
 
+// Score how "header-like" a row is by counting matches against known field aliases
+function scoreHeaderRow(row: unknown[]): number {
+  if (!Array.isArray(row)) return 0;
+  const cells = row.map(v => String(v ?? '').toLowerCase().trim()).filter(Boolean);
+  if (cells.length < 3) return 0;
+  let score = 0;
+  const allAliases = Object.values(FIELD_ALIASES).flat();
+  for (const cell of cells) {
+    if (allAliases.some(a => cell === a || cell.includes(a) || (a.length > 3 && a.includes(cell)))) {
+      score++;
+    }
+  }
+  return score;
+}
+
 function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   try {
     const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    if (!wb.SheetNames.length) {
+      return { trades: [], errors: ['El archivo Excel no contiene hojas'] };
+    }
+
     for (const sheetName of wb.SheetNames) {
       const sheet = wb.Sheets[sheetName];
       const data: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
       if (data.length < 2) continue;
 
-      // Find header row (row with most non-empty cells, typically row 0)
-      const headerRow = (data[0] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
-      for (let i = 1; i < data.length; i++) {
+      // Auto-detect header row by scoring the first 15 rows
+      let headerIdx = 0;
+      let bestScore = scoreHeaderRow(data[0]);
+      const scanLimit = Math.min(15, data.length);
+      for (let i = 1; i < scanLimit; i++) {
+        const s = scoreHeaderRow(data[i]);
+        if (s > bestScore) { bestScore = s; headerIdx = i; }
+      }
+
+      if (bestScore < 2) {
+        errors.push(`Hoja "${sheetName}": no se encontró una fila de cabecera reconocible`);
+        continue;
+      }
+
+      const headerRow = (data[headerIdx] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
+      let mappedAny = false;
+      for (let i = headerIdx + 1; i < data.length; i++) {
         const row = data[i];
         if (!Array.isArray(row) || row.every(v => v === '' || v === null || v === undefined)) continue;
         try {
           const trade = mapRowToTrade(headerRow, row);
-          if (trade) trades.push(trade);
+          if (trade) { trades.push(trade); mappedAny = true; }
         } catch (e) {
-          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${e}`);
+          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${(e as Error)?.message ?? e}`);
         }
       }
+      if (!mappedAny && trades.length === 0) {
+        errors.push(`Hoja "${sheetName}": cabeceras detectadas pero ninguna fila pudo ser interpretada como operación`);
+      }
+    }
+
+    if (trades.length === 0 && errors.length === 0) {
+      errors.push('No se encontraron operaciones en el archivo Excel');
     }
   } catch (e) {
-    errors.push(`Error al leer Excel: ${e}`);
+    errors.push(`Error al leer Excel: ${(e as Error)?.message ?? e}`);
   }
   return { trades, errors };
 }
