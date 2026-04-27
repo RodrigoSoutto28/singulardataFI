@@ -21,7 +21,13 @@ import { AdminRoute } from "./components/auth/AdminRoute";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  // Auth temporarily disabled - free access to all routes
+  const { user, loading } = useAuth();
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Cargando...</div>;
+  }
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
   return <>{children}</>;
 }
 
