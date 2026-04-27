@@ -95,18 +95,19 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-border flex flex-col gap-0.5">
-        {profile?.role === 'admin' && (
+        {/* Admin link: visible mientras la auth esté deshabilitada o si el usuario es admin */}
+        {(!profile || profile?.role === 'admin') && (
           <Link to="/admin/study" className="block group">
             <div
               className={cn(
                 'flex items-center gap-3 h-10 px-3 rounded-md text-sm font-medium transition-all duration-200',
-                location.pathname === '/admin/study'
+                location.pathname.startsWith('/admin')
                   ? 'text-primary bg-primary/8'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
               )}
             >
               <Shield className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
-              <span className="tracking-tight">Admin</span>
+              <span className="tracking-tight">Admin · Estudio</span>
             </div>
           </Link>
         )}
