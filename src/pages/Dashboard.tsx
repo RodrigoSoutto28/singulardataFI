@@ -16,7 +16,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 export default function Dashboard() {
   const { t } = useLanguage();
   const { trades, isLoading: tradesLoading } = useTrades();
-  const { account } = useTradingAccount();
+  const { account, updateAccount } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
   const { stats, equityCurve } = useAnalytics(trades);
   
@@ -39,14 +39,14 @@ export default function Dashboard() {
       <AchievementBadges />
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Left Column - Mental State */}
-        <div className="lg:col-span-1">
+        <div className="md:col-span-2 lg:col-span-1">
           <MentalStateCard disciplineScore={disciplineScore} />
         </div>
 
         {/* Right Column - Capital & Performance */}
-        <div className="lg:col-span-2 space-y-6 px-0 mx-[25px] my-0 border-0">
+        <div className="md:col-span-2 lg:col-span-2 space-y-6">
           {/* Section Header */}
           <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             {t.dashboard.capitalRisk}
@@ -60,7 +60,15 @@ export default function Dashboard() {
               change={balanceChange} 
               variant="balance"
               showEdit={true}
-              onEdit={() => setShowAccountModal(true)}
+              onSave={async (newBalance) => {
+                if (account?.id) {
+                  await updateAccount({ 
+                    id: account.id, 
+                    initial_balance: newBalance,
+                    current_balance: newBalance + totalPnl
+                  });
+                }
+              }}
             />
             <CapitalCard 
               title="P&L" 
@@ -95,9 +103,9 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Row - Charts & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <EquityChart data={equityCurve} className="lg:col-span-2" />
-        <TasksCard />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <EquityChart data={equityCurve} className="md:col-span-2" />
+        <TasksCard className="md:col-span-2 lg:col-span-1" />
       </div>
 
       {/* Account Setup Modal */}

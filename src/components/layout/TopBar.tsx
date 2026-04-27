@@ -40,8 +40,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-sm font-medium text-muted-foreground tracking-wide">
-            {t.topbar.title}
+          <h1 className="text-sm md:text-base font-light text-slate-700 dark:text-slate-300 tracking-wider">
+            Trading Intelligence Platform
           </h1>
         </div>
 
