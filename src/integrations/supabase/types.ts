@@ -186,6 +186,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          role: string | null
           subscription_expires_at: string | null
           subscription_plan:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -200,6 +201,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          role?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -214,6 +216,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          role?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -298,6 +301,86 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_content: {
+        Row: {
+          categories: string[] | null
+          content_md: string | null
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          is_pro: boolean | null
+          pdf_url: string | null
+          published_at: string | null
+          read_time_minutes: number | null
+          title: string
+          type: Database["public"]["Enums"]["study_content_type"]
+          week_number: number | null
+        }
+        Insert: {
+          categories?: string[] | null
+          content_md?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          pdf_url?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          title: string
+          type?: Database["public"]["Enums"]["study_content_type"]
+          week_number?: number | null
+        }
+        Update: {
+          categories?: string[] | null
+          content_md?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          pdf_url?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["study_content_type"]
+          week_number?: number | null
+        }
+        Relationships: []
+      }
+      study_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          content_id: string
+          progress_percent: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          content_id: string
+          progress_percent?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          content_id?: string
+          progress_percent?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "study_content"
             referencedColumns: ["id"]
           },
         ]
@@ -561,6 +644,7 @@ export type Database = {
         | "frustrated"
         | "excited"
         | "neutral"
+      study_content_type: "summary" | "paper_pdf"
       subscription_plan: "free" | "pro" | "power"
       trade_direction: "long" | "short"
       trade_status: "open" | "closed" | "cancelled"
@@ -709,6 +793,7 @@ export const Constants = {
         "excited",
         "neutral",
       ],
+      study_content_type: ["summary", "paper_pdf"],
       subscription_plan: ["free", "pro", "power"],
       trade_direction: ["long", "short"],
       trade_status: ["open", "closed", "cancelled"],
