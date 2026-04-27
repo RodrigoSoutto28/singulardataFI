@@ -49,7 +49,7 @@ const assetColors: Record<string, string> = {
   commodities: 'hsl(22, 90%, 52%)',
 };
 
-export function useAnalytics(trades: Trade[], initialBalance: number = 0) {
+export function useAnalytics(trades: Trade[]) {
   const stats = useMemo<AnalyticsStats>(() => {
     if (!trades.length) {
       return {
@@ -82,15 +82,14 @@ export function useAnalytics(trades: Trade[], initialBalance: number = 0) {
     const largestWin = pnlValues.length ? Math.max(...pnlValues, 0) : 0;
     const largestLoss = pnlValues.length ? Math.min(...pnlValues, 0) : 0;
 
-    // Calculate max drawdown based on peak equity (starting from initialBalance)
-    let peak = initialBalance;
-    let currentEquity = initialBalance;
+    // Calculate max drawdown
+    let peak = 0;
     let maxDrawdown = 0;
-    
+    let cumulative = 0;
     closedTrades.forEach(t => {
-      currentEquity += t.pnl ?? 0;
-      if (currentEquity > peak) peak = currentEquity;
-      const drawdown = peak - currentEquity;
+      cumulative += t.pnl ?? 0;
+      if (cumulative > peak) peak = cumulative;
+      const drawdown = peak - cumulative;
       if (drawdown > maxDrawdown) maxDrawdown = drawdown;
     });
 
@@ -107,7 +106,7 @@ export function useAnalytics(trades: Trade[], initialBalance: number = 0) {
       largestLoss,
       maxDrawdown,
     };
-  }, [trades, initialBalance]);
+  }, [trades]);
 
   const equityCurve = useMemo<EquityPoint[]>(() => {
     if (!trades.length) return [];
@@ -116,31 +115,17 @@ export function useAnalytics(trades: Trade[], initialBalance: number = 0) {
       .filter(t => t.status === 'closed' && t.exit_date)
       .sort((a, b) => new Date(a.exit_date!).getTime() - new Date(b.exit_date!).getTime());
 
-    let cumulative = initialBalance;
-    
-    // Add starting point
-    const firstTradeDate = closedTrades.length > 0 
-      ? new Date(new Date(closedTrades[0].exit_date!).getTime() - 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      : 'Start';
-
-    const curve: EquityPoint[] = [{
-      date: firstTradeDate,
-      equity: initialBalance,
-      pnl: 0
-    }];
-
-    closedTrades.forEach(t => {
+    let cumulative = 0;
+    return closedTrades.map(t => {
       const pnl = t.pnl ?? 0;
       cumulative += pnl;
-      curve.push({
+      return {
         date: new Date(t.exit_date!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         equity: cumulative,
         pnl,
-      });
+      };
     });
-
-    return curve;
-  }, [trades, initialBalance]);
+  }, [trades]);
 
   const monthlyPnl = useMemo(() => {
     if (!trades.length) return [];

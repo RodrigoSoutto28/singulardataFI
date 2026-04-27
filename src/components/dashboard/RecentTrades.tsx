@@ -32,7 +32,7 @@ export function RecentTrades({ trades, className }: RecentTradesProps) {
         {trades.map((trade) => (
           <div
             key={trade.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors gap-3"
+            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
           >
             <div className="flex items-center gap-3">
               <div
@@ -68,7 +68,7 @@ export function RecentTrades({ trades, className }: RecentTradesProps) {
               </div>
             </div>
 
-            <div className="text-left sm:text-right">
+            <div className="text-right">
               <p
                 className={cn(
                   'font-semibold font-mono-numbers',

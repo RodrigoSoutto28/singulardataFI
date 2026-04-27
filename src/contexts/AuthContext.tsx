@@ -17,56 +17,42 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // MOCK USER: Bypass temporal del login
-  const [user, setUser] = useState<User | null>({
-    id: 'mock-user-id',
-    email: 'mock@example.com',
-    app_metadata: {},
-    user_metadata: {},
-    aud: 'authenticated',
-    created_at: new Date().toISOString()
-  } as User);
-  
-  const [session, setSession] = useState<Session | null>({
-    access_token: 'mock-token',
-    refresh_token: 'mock-refresh',
-    expires_in: 3600,
-    token_type: 'bearer',
-    user: {
-      id: 'mock-user-id',
-      email: 'mock@example.com',
-      app_metadata: {},
-      user_metadata: {},
-      aud: 'authenticated',
-      created_at: new Date().toISOString()
-    } as User
-  } as Session);
-  
-  const [profile, setProfile] = useState<Profile | null>({
-    id: 'mock-user-id',
-    full_name: 'Desarrollador (Bypass Auth)',
-    is_admin: true,
-  } as Profile);
-  
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    // Desactivado temporalmente
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setProfile(data as Profile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    }
   };
 
   const refreshProfile = async () => {
-    // Desactivado temporalmente
+    if (user) {
+      await fetchProfile(user.id);
+    }
   };
 
   useEffect(() => {
-    // LOGIN BYPASS: La lógica de Supabase Auth fue comentada temporalmente para poder entrar a la app sin loguearse.
-    /*
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Use setTimeout to avoid Supabase deadlock
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
@@ -76,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -88,7 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-    */
   }, []);
 
   const signIn = async (email: string, password: string) => {
