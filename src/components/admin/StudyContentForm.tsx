@@ -115,11 +115,8 @@ export function StudyContentForm({
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('study-pdfs')
-        .getPublicUrl(fileName);
-
-      form.setValue("pdf_url", publicUrl);
+      // Bucket es privado: guardamos el path. La URL firmada se genera al leer.
+      form.setValue("pdf_url", fileName);
       toast.success("PDF subido correctamente");
     } catch (error: any) {
       toast.error(`Error al subir PDF: ${error.message}`);
