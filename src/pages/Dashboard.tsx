@@ -18,13 +18,13 @@ export default function Dashboard() {
   const { trades, isLoading: tradesLoading } = useTrades();
   const { account, updateAccount } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
-  const { stats, equityCurve } = useAnalytics(trades);
+  const initialBalance = account?.initial_balance ?? 0;
+  const { stats, equityCurve } = useAnalytics(trades, initialBalance);
   
   const [showAccountModal, setShowAccountModal] = useState(false);
 
   // Calculate real values
   const balance = account?.current_balance ?? 0;
-  const initialBalance = account?.initial_balance ?? 0;
   const totalPnl = stats.totalPnl;
   const pnlPercentage = initialBalance > 0 ? ((totalPnl / initialBalance) * 100) : 0;
   const balanceChange = initialBalance > 0 ? (((balance - initialBalance) / initialBalance) * 100) : 0;
