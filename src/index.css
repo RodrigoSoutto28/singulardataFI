@@ -136,24 +136,24 @@
 }
 
 @layer components {
-  /* Solid surface card — clean, flat, professional with hover lift + zoom */
+  /* Solid surface card — clean, flat, professional with institutional hover lift */
   .surface-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow: 0 1px 2px hsl(205 35% 15% / 0.04);
-    transition:
-      border-color .25s ease,
-      box-shadow .3s cubic-bezier(0.4, 0, 0.2, 1),
-      transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-out;
     will-change: transform;
   }
   .surface-card:hover {
     border-color: hsl(var(--primary) / 0.4);
-    box-shadow:
-      0 12px 28px -12px hsl(var(--primary) / 0.18),
-      0 4px 10px -4px hsl(205 35% 15% / 0.08);
-    transform: translateY(-2px) scale(1.005);
+    box-shadow: 0 12px 28px -12px hsl(var(--primary) / 0.18);
+    transform: translateY(-2px) scale(1.01);
+    filter: brightness(1.02); /* Sutil incremento de luminosidad */
+  }
+  .surface-card:active {
+    transform: translateY(0) scale(0.99);
+    background-color: hsl(var(--muted) / 0.3);
   }
 
   /* Subtle glass — only for chrome (sidebar/topbar) */
@@ -177,49 +177,71 @@
   .bg-profit { background-color: hsl(var(--profit)); }
   .bg-loss { background-color: hsl(var(--loss)); }
 
-  /* Modern micro-interactions */
+  /* Institutional Micro-interactions */
   .interactive {
-    transition:
-      transform .2s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow .2s ease,
-      background-color .15s ease;
+    transition: all 0.3s ease-out;
   }
-  .interactive:hover { transform: scale(1.02); }
-  .interactive:active { transform: scale(0.97); }
+  .interactive:hover { 
+    transform: translateY(-2px); 
+    filter: brightness(1.05);
+  }
+  .interactive:active { 
+    transform: translateY(0); 
+    filter: brightness(0.95);
+  }
 
-  /* Global zoom-on-hover for buttons (excluding ghost/icon-only chrome) */
+  /* Global buttons */
   button:not(:disabled) {
-    transition:
-      transform .2s cubic-bezier(0.4, 0, 0.2, 1),
-      background-color .15s ease,
-      border-color .15s ease,
-      box-shadow .2s ease,
-      color .15s ease;
+    transition: all 0.3s ease-out;
   }
-  button:not(:disabled):hover { transform: translateY(-1px); }
-  button:not(:disabled):active { transform: translateY(0) scale(0.98); }
-
-  /* Icon zoom inside buttons + links on hover */
-  a:hover svg, button:not(:disabled):hover svg {
-    transform: scale(1.08);
+  button:not(:disabled):hover { 
+    transform: translateY(-2px);
+    filter: contrast(1.1);
   }
-  a svg, button svg {
-    transition: transform .2s cubic-bezier(0.4, 0, 0.2, 1);
+  button:not(:disabled):active { 
+    transform: translateY(0) scale(0.98);
+    filter: brightness(0.9);
   }
 
-  /* Table rows: subtle highlight + slide on hover */
+  /* Navigation links */
+  nav a, .nav-link {
+    transition: all 0.3s ease-out;
+    position: relative;
+  }
+  nav a:hover, .nav-link:hover {
+    transform: translateX(4px);
+    color: hsl(var(--primary));
+  }
+  nav a.active, .nav-link.active {
+    color: hsl(var(--primary));
+  }
+  nav a.active::before, .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    background-color: hsl(var(--primary));
+    border-radius: 2px;
+  }
+
+  /* Table rows */
   tbody tr {
-    transition: background-color .15s ease, transform .2s ease;
+    transition: all 0.3s ease-out;
   }
   tbody tr:hover {
-    background-color: hsl(var(--muted) / 0.5);
+    background-color: hsl(var(--muted) / 0.4);
+    transform: scale(1.002);
+    box-shadow: inset 2px 0 0 hsl(var(--primary));
   }
 
   /* Badge zoom on hover */
   [class*="badge"]:hover,
   .badge:hover {
     transform: scale(1.05);
-    transition: transform .2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-out;
   }
 
   /* Smooth focus ring system-wide */
@@ -234,6 +256,7 @@
   [role="combobox"]:focus-visible {
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
     border-color: hsl(var(--primary) / 0.5);
+    transition: all 0.3s ease-out;
   }
 
   /* Link underline grow */
@@ -248,7 +271,7 @@
     background: hsl(var(--primary));
     transform: scaleX(0);
     transform-origin: right;
-    transition: transform .3s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .link-underline:hover::after {
     transform: scaleX(1);
@@ -272,8 +295,11 @@
   .stagger-item:nth-child(7) { animation-delay: 180ms; }
   .stagger-item:nth-child(8) { animation-delay: 210ms; }
 
-  .hover-lift { transition: transform .15s ease, box-shadow .15s ease; }
-  .hover-lift:hover { transform: translateY(-1px); box-shadow: 0 4px 12px hsl(var(--primary) / 0.1); }
+  .hover-lift { transition: all 0.3s ease-out; }
+  .hover-lift:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.1); 
+  }
 
   .focus-ring:focus-visible {
     outline: none;
