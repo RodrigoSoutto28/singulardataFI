@@ -136,23 +136,23 @@
 }
 
 @layer components {
-  /* Solid surface card — clean, flat, professional with institutional hover lift */
+  /* Solid surface card — clean, flat, professional with premium zoom lift */
   .surface-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow: 0 1px 2px hsl(205 35% 15% / 0.04);
-    transition: all 0.3s ease-out;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     will-change: transform;
   }
   .surface-card:hover {
     border-color: hsl(var(--primary) / 0.4);
-    box-shadow: 0 12px 28px -12px hsl(var(--primary) / 0.18);
-    transform: translateY(-2px) scale(1.01);
-    filter: brightness(1.02); /* Sutil incremento de luminosidad */
+    box-shadow: 0 20px 40px -12px hsl(var(--primary) / 0.15);
+    transform: translateY(-4px) scale(1.02);
+    filter: brightness(1.03);
   }
   .surface-card:active {
-    transform: translateY(0) scale(0.99);
+    transform: translateY(0) scale(0.98);
     background-color: hsl(var(--muted) / 0.3);
   }
 
@@ -177,39 +177,40 @@
   .bg-profit { background-color: hsl(var(--profit)); }
   .bg-loss { background-color: hsl(var(--loss)); }
 
-  /* Institutional Micro-interactions */
+  /* Institutional Micro-interactions with Zoom */
   .interactive {
-    transition: all 0.3s ease-out;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .interactive:hover { 
-    transform: translateY(-2px); 
+    transform: translateY(-2px) scale(1.04); 
     filter: brightness(1.05);
   }
   .interactive:active { 
-    transform: translateY(0); 
+    transform: scale(0.96); 
     filter: brightness(0.95);
   }
 
-  /* Global buttons */
+  /* Global buttons with Zoom */
   button:not(:disabled) {
-    transition: all 0.3s ease-out;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   button:not(:disabled):hover { 
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.06);
     filter: contrast(1.1);
+    box-shadow: 0 8px 20px -8px hsl(var(--primary) / 0.4);
   }
   button:not(:disabled):active { 
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(0.94);
     filter: brightness(0.9);
   }
 
-  /* Navigation links */
+  /* Navigation links with Zoom */
   nav a, .nav-link {
-    transition: all 0.3s ease-out;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
   }
   nav a:hover, .nav-link:hover {
-    transform: translateX(4px);
+    transform: scale(1.08) translateX(4px);
     color: hsl(var(--primary));
   }
   nav a.active, .nav-link.active {
@@ -227,21 +228,23 @@
     border-radius: 2px;
   }
 
-  /* Table rows */
+  /* Table rows with Zoom */
   tbody tr {
     transition: all 0.3s ease-out;
   }
   tbody tr:hover {
     background-color: hsl(var(--muted) / 0.4);
-    transform: scale(1.002);
-    box-shadow: inset 2px 0 0 hsl(var(--primary));
+    transform: scale(1.01);
+    box-shadow: inset 2px 0 0 hsl(var(--primary)), 0 4px 12px -4px rgba(0,0,0,0.1);
+    z-index: 10;
+    position: relative;
   }
 
   /* Badge zoom on hover */
   [class*="badge"]:hover,
   .badge:hover {
-    transform: scale(1.05);
-    transition: all 0.3s ease-out;
+    transform: scale(1.15);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Smooth focus ring system-wide */
@@ -256,6 +259,7 @@
   [role="combobox"]:focus-visible {
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
     border-color: hsl(var(--primary) / 0.5);
+    transform: scale(1.01);
     transition: all 0.3s ease-out;
   }
 
@@ -295,10 +299,10 @@
   .stagger-item:nth-child(7) { animation-delay: 180ms; }
   .stagger-item:nth-child(8) { animation-delay: 210ms; }
 
-  .hover-lift { transition: all 0.3s ease-out; }
+  .hover-lift { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .hover-lift:hover { 
-    transform: translateY(-2px); 
-    box-shadow: 0 4px 12px hsl(var(--primary) / 0.1); 
+    transform: translateY(-4px) scale(1.02); 
+    box-shadow: 0 10px 25px -10px hsl(var(--primary) / 0.2); 
   }
 
   .focus-ring:focus-visible {
