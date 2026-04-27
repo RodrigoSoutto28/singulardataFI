@@ -4,33 +4,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SINGULAR dataFI — Minimal Light Professional */
-/* Palette: #42718C  #318194  #0779A2  #B0C7E1  #40A9D3  #2E6CC0  #0EC4CC  #8AD1CC */
+/* SINGULAR dataFI — Modern Amethyst & Rose */
+/* Palette: Vibrant Purple and Rose accents for a sleek, premium look */
 
 @layer base {
   :root {
     /* Light surface */
-    --background: 210 30% 98%;
-    --foreground: 205 35% 15%;
+    --background: 270 30% 99%;
+    --foreground: 270 40% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 205 35% 15%;
+    --card-foreground: 270 40% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 205 35% 15%;
+    --popover-foreground: 270 40% 15%;
 
-    /* Primary: #0779A2 */
-    --primary: 197 92% 33%;
+    /* Primary: Amethyst */
+    --primary: 270 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 96%;
-    --secondary-foreground: 205 35% 20%;
+    --secondary: 270 20% 96%;
+    --secondary-foreground: 270 40% 20%;
 
-    --muted: 210 25% 95%;
-    --muted-foreground: 205 15% 45%;
+    --muted: 270 20% 95%;
+    --muted-foreground: 270 15% 45%;
 
-    /* Accent: #40A9D3 */
-    --accent: 199 62% 54%;
+    /* Accent: Vibrant Rose */
+    --accent: 330 70% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 65% 50%;
@@ -45,61 +45,61 @@
     --profit: 165 55% 38%;
     --loss: 0 65% 52%;
 
-    --border: 210 25% 90%;
-    --input: 210 25% 92%;
-    --ring: 197 92% 33%;
+    --border: 270 20% 90%;
+    --input: 270 20% 92%;
+    --ring: 270 70% 50%;
 
     --radius: 0.625rem;
 
-    /* Charts: from supplied palette */
-    --chart-1: 197 92% 33%;   /* #0779A2 */
-    --chart-2: 199 62% 54%;   /* #40A9D3 */
-    --chart-3: 217 62% 47%;   /* #2E6CC0 */
-    --chart-4: 183 92% 42%;   /* #0EC4CC */
-    --chart-5: 167 41% 68%;   /* #8AD1CC */
+    /* Charts: Purple & Pink shades */
+    --chart-1: 270 70% 50%;
+    --chart-2: 330 70% 55%;
+    --chart-3: 250 70% 60%;
+    --chart-4: 310 60% 60%;
+    --chart-5: 290 50% 70%;
 
     --teal: 183 92% 42%;
 
     /* Sidebar — translucent light */
-    --sidebar-background: 210 30% 98%;
-    --sidebar-foreground: 205 20% 40%;
-    --sidebar-primary: 197 92% 33%;
+    --sidebar-background: 270 30% 99%;
+    --sidebar-foreground: 270 20% 40%;
+    --sidebar-primary: 270 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 94%;
-    --sidebar-accent-foreground: 205 35% 15%;
-    --sidebar-border: 210 25% 90%;
-    --sidebar-ring: 197 92% 33%;
+    --sidebar-accent: 270 20% 94%;
+    --sidebar-accent-foreground: 270 40% 15%;
+    --sidebar-border: 270 20% 90%;
+    --sidebar-ring: 270 70% 50%;
   }
 
-  /* Dark mode (kept available for toggle) */
+  /* Dark mode */
   .dark {
-    --background: 210 30% 8%;
-    --foreground: 210 20% 92%;
+    --background: 270 30% 8%;
+    --foreground: 270 20% 92%;
 
-    --card: 210 28% 11%;
-    --card-foreground: 210 20% 95%;
+    --card: 270 28% 11%;
+    --card-foreground: 270 20% 95%;
 
-    --popover: 210 28% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 270 28% 12%;
+    --popover-foreground: 270 20% 95%;
 
-    --primary: 199 62% 54%;
-    --primary-foreground: 210 30% 8%;
+    --primary: 270 70% 65%;
+    --primary-foreground: 270 30% 8%;
 
-    --secondary: 210 25% 16%;
-    --secondary-foreground: 210 20% 90%;
+    --secondary: 270 25% 16%;
+    --secondary-foreground: 270 20% 90%;
 
-    --muted: 210 22% 18%;
-    --muted-foreground: 210 15% 60%;
+    --muted: 270 22% 18%;
+    --muted-foreground: 270 15% 60%;
 
-    --accent: 197 92% 40%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 330 70% 65%;
+    --accent-foreground: 270 30% 8%;
 
-    --border: 210 20% 22%;
-    --input: 210 22% 18%;
+    --border: 270 20% 22%;
+    --input: 270 22% 18%;
 
-    --sidebar-background: 210 30% 9%;
-    --sidebar-foreground: 210 15% 60%;
-    --sidebar-border: 210 20% 18%;
+    --sidebar-background: 270 30% 9%;
+    --sidebar-foreground: 270 15% 60%;
+    --sidebar-border: 270 20% 18%;
   }
 }
 
