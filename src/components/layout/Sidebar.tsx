@@ -95,8 +95,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-border flex flex-col gap-0.5">
-        {/* Admin link: visible mientras la auth esté deshabilitada o si el usuario es admin */}
-        {(!profile || profile?.role === 'admin') && (
+        {profile?.role === 'admin' && (
           <Link to="/admin/study" className="block group">
             <div
               className={cn(
