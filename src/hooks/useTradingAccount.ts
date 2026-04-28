@@ -92,6 +92,31 @@ export function useTradingAccount() {
     },
   });
 
+  // Inline initial-balance update used by the Portfolio Balance card
+  const updateInitialBalance = useMutation({
+    mutationFn: async ({ accountId, initialBalance }: { accountId: string; initialBalance: number }) => {
+      const { data, error } = await supabase
+        .from('trading_accounts')
+        .update({ initial_balance: initialBalance })
+        .eq('id', accountId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidate account + trades so analytics (drawdown, win-rate, equity) recompute
+      queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['trades'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics_snapshots'] });
+      toast.success('Balance inicial actualizado');
+    },
+    onError: (error: any) => {
+      toast.error(`No se pudo actualizar el balance inicial: ${error?.message ?? 'error'}`);
+    },
+  });
+
   return {
     account: accountQuery.data ?? null,
     isLoading: accountQuery.isLoading,
@@ -99,6 +124,8 @@ export function useTradingAccount() {
     createAccount: createAccount.mutateAsync,
     updateAccount: updateAccount.mutateAsync,
     updateBalance: updateBalance.mutateAsync,
+    updateInitialBalance: updateInitialBalance.mutateAsync,
+    isUpdatingInitialBalance: updateInitialBalance.isPending,
     isCreating: createAccount.isPending,
     isUpdating: updateAccount.isPending,
     refetch: accountQuery.refetch,
