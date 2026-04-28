@@ -40,7 +40,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-sm font-medium text-muted-foreground tracking-wide">
+          {/* Brand line — sober technical sans-serif, light weight */}
+          <h1 className="text-sm font-light text-muted-foreground tracking-[0.08em]">
             {t.topbar.title}
           </h1>
         </div>
