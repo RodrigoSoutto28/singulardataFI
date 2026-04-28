@@ -28,7 +28,7 @@ export function AppLayout() {
       {/* Main Content - above background */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         <TopBar onMenuClick={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto">
           <Outlet />
         </main>
       </div>
