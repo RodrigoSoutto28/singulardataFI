@@ -15,8 +15,8 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 
 export default function Dashboard() {
   const { t } = useLanguage();
-  const { trades, isLoading: tradesLoading } = useTrades();
-  const { account } = useTradingAccount();
+  const { trades } = useTrades();
+  const { account, updateInitialBalance, isUpdatingInitialBalance } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
   const { stats, equityCurve } = useAnalytics(trades);
   
@@ -33,20 +33,29 @@ export default function Dashboard() {
   const winRate = stats.winRate;
   const disciplineScore = latestEntry?.discipline_score ?? 0;
 
+  const handleSaveInitialBalance = async (newValue: number) => {
+    if (!account?.id) {
+      // No account yet → open the full setup modal so the user can create one
+      setShowAccountModal(true);
+      return;
+    }
+    await updateInitialBalance({ accountId: account.id, initialBalance: newValue });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Achievement Badges */}
       <AchievementBadges />
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Column - Mental State */}
         <div className="lg:col-span-1">
           <MentalStateCard disciplineScore={disciplineScore} />
         </div>
 
         {/* Right Column - Capital & Performance */}
-        <div className="lg:col-span-2 space-y-6 px-0 mx-[25px] my-0 border-0">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           {/* Section Header */}
           <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             {t.dashboard.capitalRisk}
@@ -54,19 +63,22 @@ export default function Dashboard() {
 
           {/* Capital Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CapitalCard 
-              title={t.dashboard.accountBalance} 
-              value={balance} 
-              change={balanceChange} 
+            <CapitalCard
+              title={t.dashboard.accountBalance}
+              value={initialBalance}
+              change={balanceChange}
               variant="balance"
               showEdit={true}
               onEdit={() => setShowAccountModal(true)}
+              editable={true}
+              onSaveValue={handleSaveInitialBalance}
+              isSaving={isUpdatingInitialBalance}
             />
-            <CapitalCard 
-              title="P&L" 
-              value={totalPnl} 
-              change={pnlPercentage} 
-              variant="pnl" 
+            <CapitalCard
+              title="P&L"
+              value={totalPnl}
+              change={pnlPercentage}
+              variant="pnl"
             />
           </div>
 
@@ -95,7 +107,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Row - Charts & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <EquityChart data={equityCurve} className="lg:col-span-2" />
         <TasksCard />
       </div>

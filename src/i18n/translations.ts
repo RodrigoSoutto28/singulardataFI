@@ -408,7 +408,7 @@ export const translations: Record<Language, Translations> = {
       reports: 'Reportes',
     },
     topbar: {
-      title: 'SINGULAR dataFI - Trading Intelligence Platform',
+      title: 'Trading Intelligence Platform',
       myAccount: 'Mi Cuenta',
       profile: 'Perfil',
       billing: 'Facturación',
@@ -755,7 +755,7 @@ export const translations: Record<Language, Translations> = {
       reports: 'Reports',
     },
     topbar: {
-      title: 'SINGULAR dataFI - Trading Intelligence Platform',
+      title: 'Trading Intelligence Platform',
       myAccount: 'My Account',
       profile: 'Profile',
       billing: 'Billing',
@@ -1102,7 +1102,7 @@ export const translations: Record<Language, Translations> = {
       reports: 'Relatórios',
     },
     topbar: {
-      title: 'SINGULAR dataFI - Plataforma de Inteligência de Trading',
+      title: 'Trading Intelligence Platform',
       myAccount: 'Minha Conta',
       profile: 'Perfil',
       billing: 'Faturamento',
