@@ -1,79 +1,74 @@
-# Plan: Journal Fixes + iOS 26 Liquid Glass Redesign + Verification
+# Plan de ajustes — Singular dataFI
 
-## Part 1 — Fix Trade CRUD in Journal (`src/pages/Journal.tsx`)
+Tres tareas: (1) edición inline del Balance Inicial con recálculo de métricas, (2) diseño responsive mobile-first en layout/tablas/gráficos, (3) limpieza de la marca en el header.
 
-**Problems detected:**
-- The "Edit" item in each trade row's dropdown has no `onClick` handler — it does nothing.
-- The Add Trade form cannot close trades (missing `exit_price`, `exit_date`, `pnl`, `status`).
-- Creating/saving operations sometimes fails because the form does not branch between create vs. update.
+---
 
-**Changes:**
-- Add `editingTrade: Trade | null` state.
-- Import `updateTrade` from `useTrades()`.
-- Expand `formData` with `exit_price`, `exit_date`, `pnl`, `pnl_percentage`, `status`.
-- Wire the row dropdown "Edit" item to set `editingTrade`, prefill `formData`, and open the dialog.
-- Refactor `handleAddTrade` to call `updateTrade.mutateAsync({ id: editingTrade.id, ...payload })` when editing, otherwise `createTrade.mutateAsync(payload)`.
-- Reset `editingTrade` and `formData` on dialog close.
-- Adapt dialog title/CTA labels based on edit vs. create mode.
+## Tarea 1 — Edición inline del Balance Inicial
 
-## Part 2 — iOS 26 "Liquid Glass" Aesthetic
+**Componentes**: `src/components/dashboard/CapitalCard.tsx`, `src/pages/Dashboard.tsx`, `src/hooks/useTradingAccount.ts`, `src/hooks/useAnalytics.ts`.
 
-**Global CSS (`src/index.css`):**
-- Add utilities:
-  - `.glass` → `backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg` (dark) / `bg-white/60` (light)
-  - `.glass-card`, `.glass-sidebar`, `.glass-topbar`, `.glass-dialog` variants with adjusted opacity/blur.
-- Subtle inner highlight via `box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)`.
+- Agregar a `CapitalCard` un modo edición opcional (`editableValue`, `onSaveValue`):
+  - Click en el icono lápiz → `isEditing = true` y muestra un `Input` numérico inline (regex `^\d*\.?\d*$`, sin negativos).
+  - En modo edición, el lápiz se reemplaza por dos botones minimalistas: `Check` (confirmar) y `X` (cancelar) de `lucide-react`.
+  - `Enter` confirma, `Esc` cancela. Botón confirmar deshabilitado si el valor es vacío o inválido.
+- En `Dashboard.tsx`, usar este modo edición en la card "Balance" para `initial_balance`:
+  - `onSaveValue` llama a un nuevo `updateInitialBalance({ accountId, initialBalance })` en `useTradingAccount` (mutación que actualiza solo `initial_balance`).
+  - Tras guardar, `react-query` invalida `trading_account` y `trades`, lo que dispara recálculo automático de equity curve, drawdown, P&L % y win-rate histórico en `useAnalytics` (ya derivan del `initial_balance`).
+- Mantener el modal completo (`AccountSetupModal`) accesible desde un menú "Editar cuenta" para edición avanzada (broker, nombre, etc.); la edición inline cubre solo el balance inicial.
+- Toast `sonner` de éxito/error; estética alineada al sistema (`surface-card`, botones ghost, iconos h-4 w-4).
 
-**UI primitives:**
-- `src/components/ui/card.tsx` → glass base with hover border lift.
-- `src/components/ui/dialog.tsx` → glass content + stronger overlay blur.
-- `src/components/ui/badge.tsx` → translucent variant.
+## Tarea 2 — Responsive Mobile-First global
 
-**Layout:**
-- `src/components/layout/Sidebar.tsx` → glass sidebar.
-- `src/components/layout/TopBar.tsx` → glass topbar.
-- `src/components/effects/CorporateGrid.tsx` → keep grid + add soft gradient orbs so glass has something to refract.
+Breakpoints Tailwind ya disponibles: `sm 640`, `md 768`, `lg 1024`, `xl 1280`. Estrategia:
 
-**Dashboard widgets:** apply glass to `StatCard`, `CapitalCard`, `MentalStateCard`, `EquityChart`, `TasksCard`, `AIInsightCard`, `AchievementBadges`, `MetricCard`, `AccountSetupModal`.
+- **Mobile < 768px**: stack vertical, sidebar oculta tras hamburguesa (ya existe en `AppLayout` vía `Sheet`), cards a 1 columna, padding reducido.
+- **Tablet 768–1024px**: grid de 2 columnas en dashboard, sidebar colapsable.
+- **Desktop > 1024px**: layout actual completo.
 
-**Pages:** apply glass containers to `Dashboard`, `Journal`, `Analytics`, `Psychology`, `Insights`, `Settings`, `Auth`.
+Cambios:
+- **Layout/Sidebar**: el `Sheet` ya cubre el menú hamburguesa móvil. Verificar que el botón Menu del `TopBar` sea visible siempre `< md`. Reducir padding del `<main>` a `p-3 sm:p-4 md:p-6` (ya parcialmente aplicado).
+- **Dashboard** (`src/pages/Dashboard.tsx`): cambiar grids `grid-cols-1 lg:grid-cols-3` a `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` y eliminar el `mx-[25px]` fijo que rompe en mobile (usar `md:mx-6`).
+- **Tablas de operaciones** (`src/pages/Journal.tsx`, `RecentTrades.tsx`): envolver las `<Table>` en un `<div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">` para scroll horizontal suave; en `< md` renderizar variante "card" con un map de filas mostrando Activo, R:R, P&L y fecha como tarjetas apiladas (toggle por breakpoint con `hidden md:table` / `md:hidden space-y-2`).
+- **Gráficos** (`EquityChart.tsx` y otros que usen `recharts`): envolver con `<ResponsiveContainer width="100%" height={...}>` (ya lo hace recharts). Añadir un `ResizeObserver` ligero solo donde haga falta forzar re-render (ej. al rotar dispositivo) — en la práctica `ResponsiveContainer` lo gestiona; añadir `key={breakpoint}` si se detectan glitches.
+- **Cards de métricas** (`MetricCard`, `CapitalCard`): tipografía responsive `text-2xl md:text-3xl`, padding `p-4 md:p-5`.
+- **Topbar**: ocultar el selector de idioma en `< sm` (ya hecho), colapsar el nombre del perfil con `hidden md:block` (ya hecho).
 
-**Color strategy:**
-- Dark: `bg-white/5–10` + `border-white/10`
-- Light: `bg-white/60–80` + `border-black/5`
-- Always paired with `backdrop-blur-xl`.
+## Tarea 3 — Limpieza de marca en el header
 
-## Part 3 — Verification
+**Archivo**: `src/i18n/translations.ts` (claves `topbar.title` en ES/EN/PT).
 
-After implementation:
-1. Log in and create a new trade → confirm it persists and balance syncs.
-2. Click Edit on an existing trade → confirm prefill + save works.
-3. Delete a trade → confirm removal.
-4. Import a CSV and an Excel file → confirm `ImportPreviewModal` shows counts, errors, and selection works; confirm import.
-5. Navigate Dashboard / Journal / Analytics / Psychology / Insights / Settings → confirm glass effect is consistent and legible in light + dark mode.
-6. Test mobile viewport (375px) for sidebar sheet + responsive grids.
+- Reemplazar `"SINGULAR dataFI - Trading Intelligence Platform"` por solo **`"Trading Intelligence Platform"`** (igual en las 3 lenguas para mantener identidad técnica; PT puede mantenerse en inglés como término de marca).
+- En `TopBar.tsx`, mantener `text-sm font-medium text-muted-foreground tracking-wide` (sans-serif Geist, peso medio = 500). Si se quiere peso "ligero" estricto, cambiar a `font-light` (300) o `font-normal` (400) según preferencia. Color ya integrado (`text-muted-foreground`).
+- Alineación: dejar a la izquierda (grid actual del header).
 
-## Files to modify
-1. `src/index.css`
-2. `src/components/ui/card.tsx`
-3. `src/components/ui/dialog.tsx`
-4. `src/components/ui/badge.tsx`
-5. `src/components/layout/Sidebar.tsx`
-6. `src/components/layout/TopBar.tsx`
-7. `src/components/effects/CorporateGrid.tsx`
-8. `src/pages/Journal.tsx` (CRUD fixes + glass)
-9. `src/pages/Dashboard.tsx`
-10. `src/pages/Analytics.tsx`
-11. `src/pages/Psychology.tsx`
-12. `src/pages/Insights.tsx`
-13. `src/pages/Settings.tsx`
-14. `src/pages/Auth.tsx`
-15. `src/components/dashboard/*.tsx` (StatCard, CapitalCard, MentalStateCard, EquityChart, TasksCard, AIInsightCard, AchievementBadges, MetricCard, AccountSetupModal)
+## Detalles técnicos
 
-## Execution order
-1. CSS glass utilities
-2. UI primitives (card, dialog, badge)
-3. Layout (sidebar, topbar, background)
-4. Journal CRUD fixes
-5. Dashboard widgets + remaining pages
-6. Browser verification (CRUD + import + visual audit)
+- Validación numérica del input inline: `onChange` filtra con regex `/^\d*\.?\d{0,2}$/` y bloquea negativos.
+- Mutación nueva en `useTradingAccount`:
+  ```ts
+  updateInitialBalance: useMutation(async ({ accountId, initialBalance }) => {
+    await supabase.from('trading_accounts')
+      .update({ initial_balance: initialBalance })
+      .eq('id', accountId);
+  })
+  ```
+  invalida `['trading_account']` y `['trades']`.
+- `useAnalytics` ya recibe `trades` y deriva equity, drawdown y win-rate; al cambiar `initial_balance` desde `Dashboard`, se recalculan automáticamente porque la prop entra como nuevo valor a `CapitalCard` y a la equity curve (revisar que `useAnalytics` use `account.initial_balance` como base; si no, agregarlo como argumento).
+- Tablas mobile: helper `<TradeRowCard>` reusable en Journal y RecentTrades.
+- Sin cambios en colores institucionales — solo se tocan tipografías y layouts.
+
+## Archivos que se modificarán
+
+- `src/components/dashboard/CapitalCard.tsx` — modo edición inline
+- `src/hooks/useTradingAccount.ts` — mutación `updateInitialBalance`
+- `src/hooks/useAnalytics.ts` — asegurar uso del `initial_balance` para drawdown
+- `src/pages/Dashboard.tsx` — wiring + grids responsive
+- `src/pages/Journal.tsx` + `src/components/dashboard/RecentTrades.tsx` — tabla con scroll horizontal y variante card móvil
+- `src/components/dashboard/EquityChart.tsx` — verificación de `ResponsiveContainer`
+- `src/components/layout/TopBar.tsx` — peso tipográfico
+- `src/i18n/translations.ts` — texto del header en ES/EN/PT
+
+## Resumen post-implementación
+
+Al terminar entregaré: lista exacta de archivos tocados y una guía breve de cómo se ven Dashboard, Journal y header en mobile (< 768px), tablet y desktop.
