@@ -90,6 +90,11 @@ export default function Journal() {
   const [previewFileName, setPreviewFileName] = useState('');
 
   // Form state
+  const nowLocalIso = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
   const emptyForm = {
     symbol: '',
     direction: '' as 'long' | 'short' | '',
@@ -97,13 +102,14 @@ export default function Journal() {
     quantity: '',
     stop_loss: '',
     take_profit: '',
+    commission: '',
     strategy: '',
-    entry_date: '',
+    entry_date: nowLocalIso(),
     exit_price: '',
     exit_date: '',
     pnl: '',
     pnl_percentage: '',
-    status: 'open' as 'open' | 'closed',
+    status: 'closed' as 'open' | 'closed',
     notes: '',
   };
   const [formData, setFormData] = useState(emptyForm);
