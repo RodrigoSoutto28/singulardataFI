@@ -336,25 +336,47 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
 
 // ─── Parsers ────────────────────────────────────────────────────────────────
 
+function processRows(
+  headers: string[],
+  rows: unknown[][],
+  ctx: { source: string },
+): ParseResult {
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+  const broker = detectBroker(headers);
+  const brokerMap = broker !== 'generic' ? BROKER_MAPS[broker] : null;
+
+  rows.forEach((values, idx) => {
+    if (!Array.isArray(values) || values.every(v => v === '' || v === null || v === undefined)) return;
+    const rowNum = idx + 2; // +1 for header, +1 for 1-indexed
+    try {
+      if (brokerMap) {
+        const result = mapRowWithBroker(headers, values, brokerMap, rowNum);
+        if (result.trade) trades.push(result.trade);
+        else if (result.error) errors.push(result.error);
+      } else {
+        const trade = mapRowToTrade(headers, values);
+        if (trade) trades.push(trade);
+      }
+    } catch (e) {
+      errors.push(`${ctx.source} fila ${rowNum}: ${(e as Error)?.message ?? e}`);
+    }
+  });
+
+  if (broker !== 'generic' && trades.length > 0) {
+    errors.unshift(`Formato detectado: ${broker.toUpperCase()} — ${trades.length} operación(es) interpretada(s)`);
+  }
+  return { trades, errors };
+}
+
 function parseCSV(content: string): ParseResult {
   const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').filter(l => l.trim());
   if (lines.length < 2) return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
 
   const delim = detectDelimiter(lines[0]);
-  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase());
-  const trades: ImportedTrade[] = [];
-  const errors: string[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    try {
-      const values = splitCSVLine(lines[i], delim);
-      const trade = mapRowToTrade(headers, values);
-      if (trade) trades.push(trade);
-    } catch (e) {
-      errors.push(`Línea ${i + 1}: ${e}`);
-    }
-  }
-  return { trades, errors };
+  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase().trim());
+  const rows = lines.slice(1).map(l => splitCSVLine(l, delim));
+  return processRows(headers, rows, { source: 'CSV' });
 }
 
 // Score how "header-like" a row is by counting matches against known field aliases
