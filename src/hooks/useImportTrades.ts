@@ -423,18 +423,11 @@ function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
       }
 
       const headerRow = (data[headerIdx] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
-      let mappedAny = false;
-      for (let i = headerIdx + 1; i < data.length; i++) {
-        const row = data[i];
-        if (!Array.isArray(row) || row.every(v => v === '' || v === null || v === undefined)) continue;
-        try {
-          const trade = mapRowToTrade(headerRow, row);
-          if (trade) { trades.push(trade); mappedAny = true; }
-        } catch (e) {
-          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${(e as Error)?.message ?? e}`);
-        }
-      }
-      if (!mappedAny && trades.length === 0) {
+      const dataRows = data.slice(headerIdx + 1);
+      const sheetResult = processRows(headerRow, dataRows, { source: `Hoja "${sheetName}"` });
+      trades.push(...sheetResult.trades);
+      errors.push(...sheetResult.errors);
+      if (sheetResult.trades.length === 0) {
         errors.push(`Hoja "${sheetName}": cabeceras detectadas pero ninguna fila pudo ser interpretada como operación`);
       }
     }
