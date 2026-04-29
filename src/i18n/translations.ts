@@ -181,6 +181,18 @@ export interface Translations {
     tradesImported: string;
     selectFile: string;
     supportedFormats: string;
+    optional: string;
+    closedStatus: string;
+    openStatus: string;
+    tradeStatus: string;
+    openDateTime: string;
+    closeDateTime: string;
+    commission: string;
+    pnlEstimated: string;
+    openPositions: string;
+    importEmptyHint: string;
+    loadingTrades: string;
+    closed: string;
   };
 
   // Analytics
