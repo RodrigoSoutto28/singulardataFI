@@ -979,7 +979,7 @@ export default function Journal() {
                 className="gap-2"
               >
                 <Upload className="h-4 w-4" />
-                Import File
+                {t.journal.importFile}
               </Button>
               <Button
                 size="sm"
