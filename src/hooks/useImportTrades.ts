@@ -35,38 +35,44 @@ function detectAssetClass(symbol: string): ImportedTrade['assetClass'] {
   return 'stocks';
 }
 
-function parseDate(dateStr: string | number | Date): string {
-  if (!dateStr) return new Date().toISOString();
-  if (dateStr instanceof Date) return dateStr.toISOString();
+function parseDate(dateStr: string | number | Date | null | undefined, dayFirstHint = true): string | null {
+  if (dateStr === null || dateStr === undefined || dateStr === '') return null;
+  if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr.toISOString();
 
   const str = String(dateStr).trim();
+  if (!str) return null;
+
   if (str.includes('T')) {
     const d = new Date(str);
     if (!isNaN(d.getTime())) return d.toISOString();
   }
 
   const numDate = parseFloat(str);
-  if (!isNaN(numDate) && numDate > 25569 && numDate < 60000) {
+  if (!isNaN(numDate) && numDate > 25569 && numDate < 60000 && /^\d+(\.\d+)?$/.test(str)) {
     const excelEpoch = new Date(1899, 11, 30);
     return new Date(excelEpoch.getTime() + numDate * 86400000).toISOString();
   }
 
-  // Try DD/MM/YYYY or DD.MM.YYYY → reverse if year is at end
-  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  // DD/MM/YYYY HH:MM[:SS] or MM/DD/YYYY HH:MM[:SS]
+  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
     const year = y.length === 2 ? 2000 + +y : +y;
-    // Heuristic: if first part > 12, it's day-first
-    const dayFirst = +a > 12;
-    const day = dayFirst ? +a : +b;
-    const month = dayFirst ? +b : +a;
-    const d = new Date(year, month - 1, day, +h, +mi, +s);
-    if (!isNaN(d.getTime())) return d.toISOString();
+    // If first part > 12 it MUST be day. Otherwise rely on hint.
+    let day: number, month: number;
+    if (+a > 12) { day = +a; month = +b; }
+    else if (+b > 12) { day = +b; month = +a; }
+    else { day = dayFirstHint ? +a : +b; month = dayFirstHint ? +b : +a; }
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const d = new Date(Date.UTC(year, month - 1, day, +h, +mi, +s));
+    if (!isNaN(d.getTime()) && d.getUTCDate() === day && d.getUTCMonth() === month - 1) {
+      return d.toISOString();
+    }
   }
 
   const d = new Date(str);
   if (!isNaN(d.getTime())) return d.toISOString();
-  return new Date().toISOString();
+  return null;
 }
 
 function parseNumber(value: unknown): number | undefined {
@@ -138,6 +144,153 @@ function buildRowGetter(headers: string[], values: unknown[]) {
   };
 }
 
+// ─── Broker-specific exact mappings ─────────────────────────────────────────
+
+type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'generic';
+
+interface BrokerMap {
+  format: BrokerFormat;
+  // exact header → field mapping (case-insensitive, exact match)
+  fields: Partial<Record<keyof typeof FIELD_ALIASES, string[]>>;
+}
+
+const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
+  ctrader: {
+    format: 'ctrader',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['direction', 'side', 'type'],
+      entryPrice: ['open price', 'entry price'],
+      exitPrice: ['close price', 'exit price'],
+      quantity: ['volume', 'quantity', 'lots', 'volume (lots)'],
+      pnl: ['net profit', 'profit', 'net p/l', 'net usd'],
+      entryDate: ['open time', 'opened'],
+      exitDate: ['close time', 'closed'],
+      stopLoss: ['stop loss', 'sl'],
+      takeProfit: ['take profit', 'tp'],
+      strategy: ['comment', 'label'],
+    },
+  },
+  mt5: {
+    format: 'mt5',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['type'],
+      entryPrice: ['price', 'open price'],
+      exitPrice: ['price.1', 'close price'],
+      quantity: ['volume'],
+      pnl: ['profit'],
+      entryDate: ['time', 'open time'],
+      exitDate: ['time.1', 'close time'],
+      stopLoss: ['s / l', 's/l'],
+      takeProfit: ['t / p', 't/p'],
+    },
+  },
+  mt4: {
+    format: 'mt4',
+    fields: {
+      symbol: ['symbol', 'item'],
+      direction: ['type'],
+      entryPrice: ['price'],
+      exitPrice: ['close price'],
+      quantity: ['size', 'volume'],
+      pnl: ['profit'],
+      entryDate: ['open time'],
+      exitDate: ['close time'],
+      stopLoss: ['s / l'],
+      takeProfit: ['t / p'],
+    },
+  },
+  tradingview: {
+    format: 'tradingview',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['type'],
+      entryPrice: ['entry price', 'price'],
+      exitPrice: ['exit price'],
+      quantity: ['quantity', 'contracts'],
+      pnl: ['p&l', 'profit', 'net p&l'],
+      entryDate: ['date/time', 'entry time'],
+      exitDate: ['exit time'],
+    },
+  },
+};
+
+function detectBroker(headers: string[]): BrokerFormat {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
+  const has = (s: string) => norm.includes(s);
+  if (has('position id') && (has('open price') || has('open time'))) return 'ctrader';
+  if (has('ticket') && (has('open time') || has('s / l') || has('symbol'))) {
+    return norm.includes('time.1') || norm.includes('price.1') ? 'mt5' : 'mt4';
+  }
+  if ((has('trade #') || has('trade')) && has('entry price')) return 'tradingview';
+  return 'generic';
+}
+
+function buildExactGetter(headers: string[], values: unknown[], map: BrokerMap['fields']) {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
+  return (key: keyof typeof FIELD_ALIASES): unknown => {
+    const candidates = map[key];
+    if (!candidates) return '';
+    for (const candidate of candidates) {
+      const idx = norm.findIndex(h => h === candidate);
+      if (idx !== -1 && values[idx] !== undefined && values[idx] !== '') return values[idx];
+    }
+    return '';
+  };
+}
+
+function mapRowWithBroker(
+  headers: string[],
+  values: unknown[],
+  broker: BrokerMap,
+  rowNumber: number,
+): { trade: ImportedTrade | null; error?: string } {
+  const get = buildExactGetter(headers, values, broker.fields);
+  const symbol = String(get('symbol') ?? '').trim();
+  if (!symbol) return { trade: null };
+
+  const entryRaw = get('entryPrice');
+  if (entryRaw === '' || entryRaw === null || entryRaw === undefined) {
+    return { trade: null, error: `Fila ${rowNumber}: falta precio de entrada para ${symbol}` };
+  }
+  const entryPrice = parseNumber(entryRaw);
+  if (entryPrice === undefined || isNaN(entryPrice)) {
+    return { trade: null, error: `Fila ${rowNumber}: precio de entrada inválido (${entryRaw}) para ${symbol}` };
+  }
+
+  const dirRaw = String(get('direction') ?? '').toLowerCase().trim();
+  const isLong = ['long', 'buy', 'compra', 'largo', 'l', 'b', 'bought', '0'].includes(dirRaw);
+  const isShort = ['short', 'sell', 'venta', 'corto', 's', 'sold', '1'].includes(dirRaw);
+  const direction: 'long' | 'short' = isShort ? 'short' : isLong ? 'long' : 'long';
+
+  const exitPrice = parseNumber(get('exitPrice'));
+  const entryDate = parseDate(get('entryDate') as string, true);
+  if (!entryDate) {
+    return { trade: null, error: `Fila ${rowNumber}: fecha de apertura inválida para ${symbol}` };
+  }
+  const exitDate = parseDate(get('exitDate') as string, true) ?? undefined;
+
+  return {
+    trade: {
+      symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+      direction,
+      entryPrice,
+      exitPrice,
+      quantity: parseNumber(get('quantity')) ?? 1,
+      pnl: parseNumber(get('pnl')),
+      pnlPercentage: parseNumber(get('pnlPercentage')),
+      entryDate,
+      exitDate,
+      strategy: (get('strategy') as string) || undefined,
+      notes: (get('notes') as string) || undefined,
+      stopLoss: parseNumber(get('stopLoss')),
+      takeProfit: parseNumber(get('takeProfit')),
+      assetClass: detectAssetClass(symbol),
+    },
+  };
+}
+
 function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | null {
   const get = buildRowGetter(headers, values);
   const symbol = String(get('symbol') ?? '').trim();
@@ -160,6 +313,9 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     }
   }
 
+  const entryDate = parseDate(get('entryDate') as string) ?? new Date().toISOString();
+  const exitDate = parseDate(get('exitDate') as string) ?? undefined;
+
   return {
     symbol: symbol.toUpperCase().replace(/\s+/g, ''),
     direction: finalDirection,
@@ -168,8 +324,8 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     quantity: parseNumber(get('quantity')) ?? 1,
     pnl: parseNumber(get('pnl')),
     pnlPercentage: parseNumber(get('pnlPercentage')),
-    entryDate: parseDate(get('entryDate') as string),
-    exitDate: get('exitDate') ? parseDate(get('exitDate') as string) : undefined,
+    entryDate,
+    exitDate,
     strategy: (get('strategy') as string) || undefined,
     notes: (get('notes') as string) || undefined,
     stopLoss: parseNumber(get('stopLoss')),
@@ -180,25 +336,47 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
 
 // ─── Parsers ────────────────────────────────────────────────────────────────
 
+function processRows(
+  headers: string[],
+  rows: unknown[][],
+  ctx: { source: string },
+): ParseResult {
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+  const broker = detectBroker(headers);
+  const brokerMap = broker !== 'generic' ? BROKER_MAPS[broker] : null;
+
+  rows.forEach((values, idx) => {
+    if (!Array.isArray(values) || values.every(v => v === '' || v === null || v === undefined)) return;
+    const rowNum = idx + 2; // +1 for header, +1 for 1-indexed
+    try {
+      if (brokerMap) {
+        const result = mapRowWithBroker(headers, values, brokerMap, rowNum);
+        if (result.trade) trades.push(result.trade);
+        else if (result.error) errors.push(result.error);
+      } else {
+        const trade = mapRowToTrade(headers, values);
+        if (trade) trades.push(trade);
+      }
+    } catch (e) {
+      errors.push(`${ctx.source} fila ${rowNum}: ${(e as Error)?.message ?? e}`);
+    }
+  });
+
+  if (broker !== 'generic' && trades.length > 0) {
+    errors.unshift(`Formato detectado: ${broker.toUpperCase()} — ${trades.length} operación(es) interpretada(s)`);
+  }
+  return { trades, errors };
+}
+
 function parseCSV(content: string): ParseResult {
   const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').filter(l => l.trim());
   if (lines.length < 2) return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
 
   const delim = detectDelimiter(lines[0]);
-  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase());
-  const trades: ImportedTrade[] = [];
-  const errors: string[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    try {
-      const values = splitCSVLine(lines[i], delim);
-      const trade = mapRowToTrade(headers, values);
-      if (trade) trades.push(trade);
-    } catch (e) {
-      errors.push(`Línea ${i + 1}: ${e}`);
-    }
-  }
-  return { trades, errors };
+  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase().trim());
+  const rows = lines.slice(1).map(l => splitCSVLine(l, delim));
+  return processRows(headers, rows, { source: 'CSV' });
 }
 
 // Score how "header-like" a row is by counting matches against known field aliases
@@ -245,18 +423,11 @@ function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
       }
 
       const headerRow = (data[headerIdx] as unknown[]).map(v => String(v ?? '').toLowerCase().trim());
-      let mappedAny = false;
-      for (let i = headerIdx + 1; i < data.length; i++) {
-        const row = data[i];
-        if (!Array.isArray(row) || row.every(v => v === '' || v === null || v === undefined)) continue;
-        try {
-          const trade = mapRowToTrade(headerRow, row);
-          if (trade) { trades.push(trade); mappedAny = true; }
-        } catch (e) {
-          errors.push(`Hoja "${sheetName}" fila ${i + 1}: ${(e as Error)?.message ?? e}`);
-        }
-      }
-      if (!mappedAny && trades.length === 0) {
+      const dataRows = data.slice(headerIdx + 1);
+      const sheetResult = processRows(headerRow, dataRows, { source: `Hoja "${sheetName}"` });
+      trades.push(...sheetResult.trades);
+      errors.push(...sheetResult.errors);
+      if (sheetResult.trades.length === 0) {
         errors.push(`Hoja "${sheetName}": cabeceras detectadas pero ninguna fila pudo ser interpretada como operación`);
       }
     }

@@ -95,18 +95,18 @@ export default function Reports() {
       <div className="flex items-center justify-end gap-2">
         <Select defaultValue="monthly">
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Report type" />
+            <SelectValue placeholder="Tipo de reporte" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="quarterly">Quarterly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
+            <SelectItem value="weekly">Semanal</SelectItem>
+            <SelectItem value="monthly">Mensual</SelectItem>
+            <SelectItem value="quarterly">Trimestral</SelectItem>
+            <SelectItem value="yearly">Anual</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="default" className="gap-2" disabled={!hasData}>
           <FileText className="h-4 w-4" />
-          Generate Report
+          Generar Reporte
         </Button>
       </div>
 
@@ -252,25 +252,25 @@ export default function Reports() {
       {/* Export Options */}
       <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <CardHeader>
-          <CardTitle>Export Options</CardTitle>
-          <CardDescription>Choose your preferred export format</CardDescription>
+          <CardTitle>Opciones de Exportación</CardTitle>
+          <CardDescription>Elegí el formato de exportación que preferís</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" disabled={!hasData}>
               <FileText className="h-8 w-8 text-primary" />
-              <span className="font-medium">PDF Report</span>
-              <span className="text-xs text-muted-foreground">Full formatted report</span>
+              <span className="font-medium">Reporte PDF</span>
+              <span className="text-xs text-muted-foreground">Reporte completo con formato</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" disabled={!hasData}>
               <BarChart3 className="h-8 w-8 text-success" />
-              <span className="font-medium">CSV Data</span>
-              <span className="text-xs text-muted-foreground">Raw trade data export</span>
+              <span className="font-medium">Datos CSV</span>
+              <span className="text-xs text-muted-foreground">Exportación de datos sin procesar</span>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" disabled={!hasData}>
               <Share2 className="h-8 w-8 text-accent" />
-              <span className="font-medium">Share Link</span>
-              <span className="text-xs text-muted-foreground">Generate shareable report</span>
+              <span className="font-medium">Link para compartir</span>
+              <span className="text-xs text-muted-foreground">Generar reporte compartible</span>
             </Button>
           </div>
         </CardContent>

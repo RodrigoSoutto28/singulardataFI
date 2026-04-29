@@ -181,6 +181,18 @@ export interface Translations {
     tradesImported: string;
     selectFile: string;
     supportedFormats: string;
+    optional: string;
+    closedStatus: string;
+    openStatus: string;
+    tradeStatus: string;
+    openDateTime: string;
+    closeDateTime: string;
+    commission: string;
+    pnlEstimated: string;
+    openPositions: string;
+    importEmptyHint: string;
+    loadingTrades: string;
+    closed: string;
   };
 
   // Analytics
@@ -539,6 +551,18 @@ export const translations: Record<Language, Translations> = {
       tradesImported: '{count} operaciones importadas',
       selectFile: 'Seleccionar archivo',
       supportedFormats: 'Formatos soportados: CSV, Excel (.xlsx)',
+      optional: 'opcional',
+      closedStatus: 'Cerrada',
+      openStatus: 'Abierta',
+      tradeStatus: 'Estado',
+      openDateTime: 'Fecha/Hora de Apertura',
+      closeDateTime: 'Fecha/Hora de Cierre',
+      commission: 'Comisión',
+      pnlEstimated: 'P&L Estimado',
+      openPositions: 'Posiciones Abiertas',
+      importEmptyHint: 'Importá un archivo CSV/Excel o agregá tu primera operación para comenzar a registrar tu rendimiento.',
+      loadingTrades: 'Cargando operaciones...',
+      closed: 'Cerrada',
     },
     analytics: {
       title: 'Analítica',
@@ -886,6 +910,18 @@ export const translations: Record<Language, Translations> = {
       tradesImported: '{count} trades imported',
       selectFile: 'Select file',
       supportedFormats: 'Supported formats: CSV, Excel (.xlsx)',
+      optional: 'optional',
+      closedStatus: 'Closed',
+      openStatus: 'Open',
+      tradeStatus: 'Status',
+      openDateTime: 'Open Date/Time',
+      closeDateTime: 'Close Date/Time',
+      commission: 'Commission',
+      pnlEstimated: 'Estimated P&L',
+      openPositions: 'Open Positions',
+      importEmptyHint: 'Import a CSV/Excel file or add your first trade to get started tracking your performance.',
+      loadingTrades: 'Loading trades...',
+      closed: 'Closed',
     },
     analytics: {
       title: 'Analytics',
@@ -1233,6 +1269,18 @@ export const translations: Record<Language, Translations> = {
       tradesImported: '{count} operações importadas',
       selectFile: 'Selecionar arquivo',
       supportedFormats: 'Formatos suportados: CSV, Excel (.xlsx)',
+      optional: 'opcional',
+      closedStatus: 'Fechada',
+      openStatus: 'Aberta',
+      tradeStatus: 'Estado',
+      openDateTime: 'Data/Hora de Abertura',
+      closeDateTime: 'Data/Hora de Fechamento',
+      commission: 'Comissão',
+      pnlEstimated: 'P&L Estimado',
+      openPositions: 'Posições Abertas',
+      importEmptyHint: 'Importe um arquivo CSV/Excel ou adicione sua primeira operação para começar.',
+      loadingTrades: 'Carregando operações...',
+      closed: 'Fechada',
     },
     analytics: {
       title: 'Análises',
