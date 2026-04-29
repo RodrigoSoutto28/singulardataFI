@@ -135,6 +135,7 @@ export default function Journal() {
       quantity: trade.quantity?.toString() ?? '',
       stop_loss: trade.stop_loss?.toString() ?? '',
       take_profit: trade.take_profit?.toString() ?? '',
+      commission: trade.commission?.toString() ?? '',
       strategy: trade.strategy ?? '',
       entry_date: toLocal(trade.entry_date),
       exit_price: trade.exit_price?.toString() ?? '',
