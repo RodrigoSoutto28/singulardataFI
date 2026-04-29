@@ -166,6 +166,9 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     }
   }
 
+  const entryDate = parseDate(get('entryDate') as string) ?? new Date().toISOString();
+  const exitDate = parseDate(get('exitDate') as string) ?? undefined;
+
   return {
     symbol: symbol.toUpperCase().replace(/\s+/g, ''),
     direction: finalDirection,
@@ -174,8 +177,8 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     quantity: parseNumber(get('quantity')) ?? 1,
     pnl: parseNumber(get('pnl')),
     pnlPercentage: parseNumber(get('pnlPercentage')),
-    entryDate: parseDate(get('entryDate') as string),
-    exitDate: get('exitDate') ? parseDate(get('exitDate') as string) : undefined,
+    entryDate,
+    exitDate,
     strategy: (get('strategy') as string) || undefined,
     notes: (get('notes') as string) || undefined,
     stopLoss: parseNumber(get('stopLoss')),
