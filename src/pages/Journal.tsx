@@ -645,14 +645,15 @@ export default function Journal() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Exit Price</Label>
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.exitPrice}</Label>
                     <Input
                       type="number"
                       step="any"
-                      placeholder="optional"
+                      placeholder={t.journal.optional ?? 'opcional'}
                       className="bg-muted/30 font-mono"
                       value={formData.exit_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
+                      disabled={formData.status === 'open'}
                     />
                   </div>
 
@@ -668,26 +669,146 @@ export default function Journal() {
                       required
                     />
                   </div>
+
+                  {/* Status */}
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.tradeStatus ?? 'Estado'} *</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, status: 'closed' }))}
+                        className={cn(
+                          'h-10 rounded-md border text-sm font-medium transition-all',
+                          formData.status === 'closed'
+                            ? 'bg-primary/10 border-primary text-primary'
+                            : 'bg-muted/30 border-border text-muted-foreground'
+                        )}
+                      >{t.journal.closedStatus ?? 'Cerrada'}</button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, status: 'open', exit_price: '', exit_date: '' }))}
+                        className={cn(
+                          'h-10 rounded-md border text-sm font-medium transition-all',
+                          formData.status === 'open'
+                            ? 'bg-warning/10 border-warning text-warning'
+                            : 'bg-muted/30 border-border text-muted-foreground'
+                        )}
+                      >{t.journal.openStatus ?? 'Abierta'}</button>
+                    </div>
+                  </div>
+
+                  {/* Dates */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.openDateTime ?? 'Apertura'} *</Label>
+                    <Input
+                      type="datetime-local"
+                      className="bg-muted/30 font-mono"
+                      value={formData.entry_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.closeDateTime ?? 'Cierre'}</Label>
+                    <Input
+                      type="datetime-local"
+                      className="bg-muted/30 font-mono"
+                      value={formData.exit_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_date: e.target.value }))}
+                      disabled={formData.status === 'open'}
+                    />
+                  </div>
+
+                  {/* SL / TP */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.stopLoss}</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder={t.journal.optional ?? 'opcional'}
+                      className="bg-muted/30 font-mono"
+                      value={formData.stop_loss}
+                      onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder={t.journal.optional ?? 'opcional'}
+                      className="bg-muted/30 font-mono"
+                      value={formData.take_profit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Commission */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.commission ?? 'Comisión'}</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="0"
+                      className="bg-muted/30 font-mono"
+                      value={formData.commission}
+                      onChange={(e) => setFormData(prev => ({ ...prev, commission: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Strategy */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.strategy}</Label>
+                    <Input
+                      type="text"
+                      placeholder={t.journal.optional ?? 'opcional'}
+                      className="bg-muted/30"
+                      value={formData.strategy}
+                      onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
-                {/* Auto P&L preview */}
-                {formData.entry_price && formData.exit_price && formData.quantity && formData.direction && (() => {
+                {/* Auto P&L + R:R preview */}
+                {(() => {
                   const entry = parseFloat(formData.entry_price);
                   const exit = parseFloat(formData.exit_price);
                   const qty = parseFloat(formData.quantity);
-                  if (isNaN(entry) || isNaN(exit) || isNaN(qty)) return null;
-                  const diff = formData.direction === 'long' ? exit - entry : entry - exit;
-                  const pnl = diff * qty;
-                  const pct = entry !== 0 ? (diff / entry) * 100 : 0;
+                  const sl = parseFloat(formData.stop_loss);
+                  const tp = parseFloat(formData.take_profit);
+                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && formData.direction;
+                  const hasRR = !isNaN(entry) && !isNaN(sl) && !isNaN(tp) && formData.direction;
+                  if (!hasPnl && !hasRR) return null;
+                  let pnl = 0, pct = 0, rr = 0;
+                  if (hasPnl) {
+                    const diff = formData.direction === 'long' ? exit - entry : entry - exit;
+                    pnl = diff * qty;
+                    pct = entry !== 0 ? (diff / entry) * 100 : 0;
+                  }
+                  if (hasRR) {
+                    const reward = formData.direction === 'long' ? tp - entry : entry - tp;
+                    const risk = formData.direction === 'long' ? entry - sl : sl - entry;
+                    rr = risk > 0 ? reward / risk : 0;
+                  }
                   return (
-                    <div className={cn(
-                      'flex items-center justify-between rounded-md px-3 py-2.5 border',
-                      pnl >= 0 ? 'bg-profit/5 border-profit/20' : 'bg-loss/5 border-loss/20'
-                    )}>
-                      <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">P&L Estimado</span>
-                      <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
-                        {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
-                      </span>
+                    <div className="space-y-2">
+                      {hasPnl && (
+                        <div className={cn(
+                          'flex items-center justify-between rounded-md px-3 py-2.5 border',
+                          pnl >= 0 ? 'bg-profit/5 border-profit/20' : 'bg-loss/5 border-loss/20'
+                        )}>
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.pnlEstimated ?? 'P&L Estimado'}</span>
+                          <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
+                            {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
+                          </span>
+                        </div>
+                      )}
+                      {hasRR && rr > 0 && (
+                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">R:R</span>
+                          <span className="font-mono font-bold text-foreground">1 : {rr.toFixed(2)}</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
