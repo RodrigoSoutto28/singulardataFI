@@ -308,10 +308,12 @@ export default function Journal() {
 
     const num = (v: string) => (v.trim() === '' ? null : parseFloat(v));
     const entry = parseFloat(formData.entry_price);
-    const exit = num(formData.exit_price);
+    const exit = formData.status === 'open' ? null : num(formData.exit_price);
     const qty = parseFloat(formData.quantity);
-    const exitDateIso = formData.exit_date ? new Date(formData.exit_date).toISOString() : null;
-    const isClosed = exit !== null;
+    const exitDateIso = formData.status === 'open'
+      ? null
+      : formData.exit_date ? new Date(formData.exit_date).toISOString() : null;
+    const isClosed = formData.status === 'closed';
     const status: 'open' | 'closed' = isClosed ? 'closed' : 'open';
 
     // Auto-calc P&L when both prices are present
