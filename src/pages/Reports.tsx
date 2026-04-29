@@ -95,18 +95,18 @@ export default function Reports() {
       <div className="flex items-center justify-end gap-2">
         <Select defaultValue="monthly">
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Report type" />
+            <SelectValue placeholder="Tipo de reporte" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="quarterly">Quarterly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
+            <SelectItem value="weekly">Semanal</SelectItem>
+            <SelectItem value="monthly">Mensual</SelectItem>
+            <SelectItem value="quarterly">Trimestral</SelectItem>
+            <SelectItem value="yearly">Anual</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="default" className="gap-2" disabled={!hasData}>
           <FileText className="h-4 w-4" />
-          Generate Report
+          Generar Reporte
         </Button>
       </div>
 
