@@ -234,10 +234,24 @@ export default function Journal() {
 
     setIsImporting(true);
 
-    try {
-      const dbTrades = selectedTrades.map(trade => ({
+    // Pre-validate every trade and split valid/invalid
+    const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never>> = [];
+    const validationErrors: string[] = [];
+
+    selectedTrades.forEach((trade, i) => {
+      const row = i + 1;
+      if (!trade.symbol) { validationErrors.push(`Operación #${row}: falta símbolo`); return; }
+      if (typeof trade.entryPrice !== 'number' || isNaN(trade.entryPrice)) {
+        validationErrors.push(`Operación #${row} (${trade.symbol}): precio de entrada inválido`);
+        return;
+      }
+      if (typeof trade.quantity !== 'number' || isNaN(trade.quantity) || trade.quantity <= 0) {
+        validationErrors.push(`Operación #${row} (${trade.symbol}): cantidad inválida`);
+        return;
+      }
+      dbTrades.push({
         symbol: trade.symbol,
-        direction: trade.direction as 'long' | 'short',
+        direction: trade.direction,
         entry_price: trade.entryPrice,
         exit_price: trade.exitPrice ?? null,
         quantity: trade.quantity,
@@ -250,15 +264,28 @@ export default function Journal() {
         stop_loss: trade.stopLoss ?? null,
         take_profit: trade.takeProfit ?? null,
         status: trade.exitDate ? 'closed' as const : 'open' as const,
-      }));
+      });
+    });
 
+    if (dbTrades.length === 0) {
+      toast.error(`Ninguna operación válida para importar. ${validationErrors[0] ?? ''}`);
+      setIsImporting(false);
+      return;
+    }
+
+    try {
       await importTrades.mutateAsync(dbTrades);
-      toast.success(t.journal.tradesImported?.replace('{count}', String(selectedTrades.length)) ?? `${selectedTrades.length} trades imported`);
+      const failed = selectedTrades.length - dbTrades.length;
+      if (failed > 0) {
+        toast.warning(`${dbTrades.length} operación(es) importada(s). ${failed} fallaron en validación.`);
+      }
       setPreviewOpen(false);
       setPreviewTrades([]);
       setPreviewErrors([]);
     } catch (error) {
-      toast.error(t.journal.importError ?? 'Import failed');
+      const msg = (error as Error)?.message ?? String(error);
+      console.error('[ImportTrades] Insert failed:', error);
+      toast.error(`Error al insertar en la base de datos: ${msg}`);
     } finally {
       setIsImporting(false);
     }
