@@ -956,7 +956,7 @@ export default function Journal() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading trades...</p>
+            <p className="text-sm text-muted-foreground">{t.journal.loadingTrades}</p>
           </div>
         ) : filteredTrades.length > 0 ? (
           filteredTrades.map((trade, index) => (
