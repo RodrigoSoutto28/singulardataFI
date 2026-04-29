@@ -144,6 +144,153 @@ function buildRowGetter(headers: string[], values: unknown[]) {
   };
 }
 
+// ─── Broker-specific exact mappings ─────────────────────────────────────────
+
+type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'generic';
+
+interface BrokerMap {
+  format: BrokerFormat;
+  // exact header → field mapping (case-insensitive, exact match)
+  fields: Partial<Record<keyof typeof FIELD_ALIASES, string[]>>;
+}
+
+const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
+  ctrader: {
+    format: 'ctrader',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['direction', 'side', 'type'],
+      entryPrice: ['open price', 'entry price'],
+      exitPrice: ['close price', 'exit price'],
+      quantity: ['volume', 'quantity', 'lots', 'volume (lots)'],
+      pnl: ['net profit', 'profit', 'net p/l', 'net usd'],
+      entryDate: ['open time', 'opened'],
+      exitDate: ['close time', 'closed'],
+      stopLoss: ['stop loss', 'sl'],
+      takeProfit: ['take profit', 'tp'],
+      strategy: ['comment', 'label'],
+    },
+  },
+  mt5: {
+    format: 'mt5',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['type'],
+      entryPrice: ['price', 'open price'],
+      exitPrice: ['price.1', 'close price'],
+      quantity: ['volume'],
+      pnl: ['profit'],
+      entryDate: ['time', 'open time'],
+      exitDate: ['time.1', 'close time'],
+      stopLoss: ['s / l', 's/l'],
+      takeProfit: ['t / p', 't/p'],
+    },
+  },
+  mt4: {
+    format: 'mt4',
+    fields: {
+      symbol: ['symbol', 'item'],
+      direction: ['type'],
+      entryPrice: ['price'],
+      exitPrice: ['close price'],
+      quantity: ['size', 'volume'],
+      pnl: ['profit'],
+      entryDate: ['open time'],
+      exitDate: ['close time'],
+      stopLoss: ['s / l'],
+      takeProfit: ['t / p'],
+    },
+  },
+  tradingview: {
+    format: 'tradingview',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['type'],
+      entryPrice: ['entry price', 'price'],
+      exitPrice: ['exit price'],
+      quantity: ['quantity', 'contracts'],
+      pnl: ['p&l', 'profit', 'net p&l'],
+      entryDate: ['date/time', 'entry time'],
+      exitDate: ['exit time'],
+    },
+  },
+};
+
+function detectBroker(headers: string[]): BrokerFormat {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
+  const has = (s: string) => norm.includes(s);
+  if (has('position id') && (has('open price') || has('open time'))) return 'ctrader';
+  if (has('ticket') && (has('open time') || has('s / l') || has('symbol'))) {
+    return norm.includes('time.1') || norm.includes('price.1') ? 'mt5' : 'mt4';
+  }
+  if ((has('trade #') || has('trade')) && has('entry price')) return 'tradingview';
+  return 'generic';
+}
+
+function buildExactGetter(headers: string[], values: unknown[], map: BrokerMap['fields']) {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
+  return (key: keyof typeof FIELD_ALIASES): unknown => {
+    const candidates = map[key];
+    if (!candidates) return '';
+    for (const candidate of candidates) {
+      const idx = norm.findIndex(h => h === candidate);
+      if (idx !== -1 && values[idx] !== undefined && values[idx] !== '') return values[idx];
+    }
+    return '';
+  };
+}
+
+function mapRowWithBroker(
+  headers: string[],
+  values: unknown[],
+  broker: BrokerMap,
+  rowNumber: number,
+): { trade: ImportedTrade | null; error?: string } {
+  const get = buildExactGetter(headers, values, broker.fields);
+  const symbol = String(get('symbol') ?? '').trim();
+  if (!symbol) return { trade: null };
+
+  const entryRaw = get('entryPrice');
+  if (entryRaw === '' || entryRaw === null || entryRaw === undefined) {
+    return { trade: null, error: `Fila ${rowNumber}: falta precio de entrada para ${symbol}` };
+  }
+  const entryPrice = parseNumber(entryRaw);
+  if (entryPrice === undefined || isNaN(entryPrice)) {
+    return { trade: null, error: `Fila ${rowNumber}: precio de entrada inválido (${entryRaw}) para ${symbol}` };
+  }
+
+  const dirRaw = String(get('direction') ?? '').toLowerCase().trim();
+  const isLong = ['long', 'buy', 'compra', 'largo', 'l', 'b', 'bought', '0'].includes(dirRaw);
+  const isShort = ['short', 'sell', 'venta', 'corto', 's', 'sold', '1'].includes(dirRaw);
+  const direction: 'long' | 'short' = isShort ? 'short' : isLong ? 'long' : 'long';
+
+  const exitPrice = parseNumber(get('exitPrice'));
+  const entryDate = parseDate(get('entryDate') as string, true);
+  if (!entryDate) {
+    return { trade: null, error: `Fila ${rowNumber}: fecha de apertura inválida para ${symbol}` };
+  }
+  const exitDate = parseDate(get('exitDate') as string, true) ?? undefined;
+
+  return {
+    trade: {
+      symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+      direction,
+      entryPrice,
+      exitPrice,
+      quantity: parseNumber(get('quantity')) ?? 1,
+      pnl: parseNumber(get('pnl')),
+      pnlPercentage: parseNumber(get('pnlPercentage')),
+      entryDate,
+      exitDate,
+      strategy: (get('strategy') as string) || undefined,
+      notes: (get('notes') as string) || undefined,
+      stopLoss: parseNumber(get('stopLoss')),
+      takeProfit: parseNumber(get('takeProfit')),
+      assetClass: detectAssetClass(symbol),
+    },
+  };
+}
+
 function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | null {
   const get = buildRowGetter(headers, values);
   const symbol = String(get('symbol') ?? '').trim();
