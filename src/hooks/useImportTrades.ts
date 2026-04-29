@@ -35,38 +35,44 @@ function detectAssetClass(symbol: string): ImportedTrade['assetClass'] {
   return 'stocks';
 }
 
-function parseDate(dateStr: string | number | Date): string {
-  if (!dateStr) return new Date().toISOString();
-  if (dateStr instanceof Date) return dateStr.toISOString();
+function parseDate(dateStr: string | number | Date | null | undefined, dayFirstHint = true): string | null {
+  if (dateStr === null || dateStr === undefined || dateStr === '') return null;
+  if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr.toISOString();
 
   const str = String(dateStr).trim();
+  if (!str) return null;
+
   if (str.includes('T')) {
     const d = new Date(str);
     if (!isNaN(d.getTime())) return d.toISOString();
   }
 
   const numDate = parseFloat(str);
-  if (!isNaN(numDate) && numDate > 25569 && numDate < 60000) {
+  if (!isNaN(numDate) && numDate > 25569 && numDate < 60000 && /^\d+(\.\d+)?$/.test(str)) {
     const excelEpoch = new Date(1899, 11, 30);
     return new Date(excelEpoch.getTime() + numDate * 86400000).toISOString();
   }
 
-  // Try DD/MM/YYYY or DD.MM.YYYY → reverse if year is at end
-  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  // DD/MM/YYYY HH:MM[:SS] or MM/DD/YYYY HH:MM[:SS]
+  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
     const year = y.length === 2 ? 2000 + +y : +y;
-    // Heuristic: if first part > 12, it's day-first
-    const dayFirst = +a > 12;
-    const day = dayFirst ? +a : +b;
-    const month = dayFirst ? +b : +a;
-    const d = new Date(year, month - 1, day, +h, +mi, +s);
-    if (!isNaN(d.getTime())) return d.toISOString();
+    // If first part > 12 it MUST be day. Otherwise rely on hint.
+    let day: number, month: number;
+    if (+a > 12) { day = +a; month = +b; }
+    else if (+b > 12) { day = +b; month = +a; }
+    else { day = dayFirstHint ? +a : +b; month = dayFirstHint ? +b : +a; }
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const d = new Date(Date.UTC(year, month - 1, day, +h, +mi, +s));
+    if (!isNaN(d.getTime()) && d.getUTCDate() === day && d.getUTCMonth() === month - 1) {
+      return d.toISOString();
+    }
   }
 
   const d = new Date(str);
   if (!isNaN(d.getTime())) return d.toISOString();
-  return new Date().toISOString();
+  return null;
 }
 
 function parseNumber(value: unknown): number | undefined {
