@@ -946,7 +946,7 @@ export default function Journal() {
           <SelectContent>
             <SelectItem value="all">{t.journal.allTrades}</SelectItem>
             <SelectItem value="open">{t.journal.open}</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="closed">{t.journal.closed}</SelectItem>
           </SelectContent>
         </Select>
       </div>
