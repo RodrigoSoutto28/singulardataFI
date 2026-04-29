@@ -337,7 +337,8 @@ export default function Journal() {
       quantity: qty,
       stop_loss: num(formData.stop_loss),
       take_profit: num(formData.take_profit),
-      strategy: formData.strategy || null,
+      commission: num(formData.commission) ?? 0,
+      strategy: formData.strategy.trim() || null,
       entry_date: formData.entry_date
         ? new Date(formData.entry_date).toISOString()
         : new Date().toISOString(),
