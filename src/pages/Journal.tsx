@@ -918,11 +918,11 @@ export default function Journal() {
               <Calendar className="h-4 w-4 text-primary" />
             </div>
             <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              Open Positions
+              {t.journal.openPositions}
             </span>
           </div>
           <p className="text-2xl font-bold font-mono-numbers">
-            {filteredTrades.filter(t => t.status === 'open').length}
+            {filteredTrades.filter(tr => tr.status === 'open').length}
           </p>
         </div>
       </div>
