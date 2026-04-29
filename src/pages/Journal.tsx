@@ -969,7 +969,7 @@ export default function Journal() {
             </div>
             <h3 className="font-semibold text-foreground mb-1">{t.journal.noTradesFound}</h3>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              Import a CSV/Excel file or add your first trade to get started tracking your performance.
+              {t.journal.importEmptyHint}
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               <Button
