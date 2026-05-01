@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,14 +13,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Language } from '@/i18n/translations';
+import { supabase } from '@/integrations/supabase/client';
 import {
   User,
   Bell,
   Shield,
   CreditCard,
-  Globe,
   Palette,
   Zap,
   Check,
@@ -28,15 +42,76 @@ import {
   Database,
   Loader2,
   Sparkles,
+  Globe,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLoadSampleData } from '@/components/onboarding/WelcomeModal';
 import { resetOnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { toast } from 'sonner';
 
 export default function Settings() {
-  const { profile } = useAuth();
-  const { t } = useLanguage();
+  const { profile, user, signOut } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const { load: loadSample, loading: loadingSample } = useLoadSampleData();
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+
+  const handleExport = async () => {
+    if (!user) return;
+    setExporting(true);
+    try {
+      const [trades, psych, account] = await Promise.all([
+        supabase.from('trades').select('*').eq('user_id', user.id),
+        supabase.from('psychology_entries').select('*').eq('user_id', user.id),
+        supabase.from('trading_accounts').select('*').eq('user_id', user.id),
+      ]);
+      const payload = {
+        exported_at: new Date().toISOString(),
+        user: { id: user.id, email: user.email },
+        profile,
+        trades: trades.data ?? [],
+        psychology_entries: psych.data ?? [],
+        trading_accounts: account.data ?? [],
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `singular-datafi-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Datos exportados correctamente');
+    } catch (e) {
+      toast.error('No pudimos exportar tus datos. Intentá nuevamente.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      // Borrar datos del usuario (RLS limita al propio usuario)
+      await Promise.all([
+        supabase.from('trades').delete().eq('user_id', user.id),
+        supabase.from('psychology_entries').delete().eq('user_id', user.id),
+        supabase.from('trading_accounts').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('id', user.id),
+      ]);
+      toast.success('Tu cuenta y datos fueron eliminados.');
+      await signOut();
+    } catch {
+      toast.error('No pudimos eliminar la cuenta. Contactanos a privacy@singulardatafi.com');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   const plans = [
     {
