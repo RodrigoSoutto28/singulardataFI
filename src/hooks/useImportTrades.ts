@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { parseXLSXBuffer } from '@/lib/xlsx-adapter';
 
 interface ImportedTrade {
   symbol: string;
