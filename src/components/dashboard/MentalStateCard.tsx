@@ -49,9 +49,25 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
           </div>
           <Badge variant="secondary" className="text-[10px]">{t.dashboard.aiFree}</Badge>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {t.dashboard.tiltDescription}
-        </p>
+        <div>
+          <p
+            className={cn(
+              'text-sm text-muted-foreground',
+              isLong && !insightExpanded && 'line-clamp-3'
+            )}
+          >
+            {insightText}
+          </p>
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setInsightExpanded((v) => !v)}
+              className="mt-1 text-xs font-medium text-primary hover:underline"
+            >
+              {insightExpanded ? 'Ver menos' : 'Ver más'}
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-2 text-xs text-warning">
           <Lightbulb className="h-4 w-4" />
           <span>{t.dashboard.tiltAdvice}</span>
