@@ -56,6 +56,8 @@ import { useImportTrades } from '@/hooks/useImportTrades';
 import { useTrades, Trade } from '@/hooks/useTrades';
 import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/components/journal/ImportPreviewModal';
+import { useDebounce } from '@/hooks/useDebounce';
+import { tradeFormSchema } from '@/lib/validation';
 
 // Types for import preview
 interface ImportedTrade {
@@ -78,10 +80,12 @@ interface ImportedTrade {
 export default function Journal() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddTradeOpen, setIsAddTradeOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Import preview state
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -151,7 +155,7 @@ export default function Journal() {
   const filteredTrades = trades.filter((trade) => {
     const matchesSearch = trade.symbol
       .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+      .includes(debouncedSearch.toLowerCase());
     const matchesStatus =
       statusFilter === 'all' || trade.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -300,9 +304,17 @@ export default function Journal() {
 
   const handleAddTrade = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
 
-    if (!formData.symbol || !formData.direction || !formData.entry_price || !formData.quantity) {
-      toast.error('Por favor completa los campos requeridos');
+    const parsed = tradeFormSchema.safeParse(formData);
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as string;
+        if (!errs[k]) errs[k] = i.message;
+      });
+      setFormErrors(errs);
+      toast.error('Revisa los campos marcados');
       return;
     }
 
