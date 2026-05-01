@@ -294,7 +294,7 @@ export function ImportPreviewModal({
           </Table>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">
+        <DialogFooter className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted/30 shrink-0">
           <div className="flex items-center justify-between w-full gap-4">
             <p className="text-sm text-muted-foreground">
               {selectedIndices.size} de {trades.length} trades seleccionados
