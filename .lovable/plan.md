@@ -1,21 +1,26 @@
-## Proteger archivos de capturas de pantalla de operaciones
+## Eliminar políticas duplicadas en bucket `study-pdfs`
+
+### Hallazgo
+Existen 3 pares de políticas duplicadas en `storage.objects` para el bucket `study-pdfs`:
+
+| Operación | Mantener (`has_role`) | Eliminar (`is_admin`) |
+|---|---|---|
+| INSERT | `Admins can upload study PDFs` | `Admins can upload study pdfs` |
+| UPDATE | `Admins can update study PDFs` | `Admins can update study pdfs` |
+| DELETE | `Admins can delete study PDFs` | `Admins can delete study pdfs` |
+
+Ambas funciones (`has_role` e `is_admin`) consultan la misma tabla `user_roles`, así que el control de acceso es equivalente. Mantengo `has_role` por consistencia con el resto del proyecto (profiles, user_roles).
 
 ### Migración SQL
-
-1. Crear bucket privado `trade-screenshots` (`public = false`).
-2. Crear 4 políticas RLS sobre `storage.objects` que restringen acceso al dueño según convención de path `{user_id}/...`:
-   - **SELECT**: solo el dueño puede leer.
-   - **INSERT**: solo el dueño puede subir a su carpeta.
-   - **UPDATE**: solo el dueño puede modificar.
-   - **DELETE**: solo el dueño puede borrar.
-
-Todas usan: `auth.uid()::text = (storage.foldername(name))[1]`.
+```sql
+DROP POLICY IF EXISTS "Admins can delete study pdfs" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update study pdfs" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can upload study pdfs" ON storage.objects;
+```
 
 ### Post-migración
-
-- Marcar el finding `trade_screenshots_no_select_policy_for_screenshots_bucket` como resuelto en el panel de seguridad.
+Marcar el finding `study_pdfs_duplicate_policies` como resuelto.
 
 ### Notas
-
-- No se modifica código frontend: aún no hay flujo de subida implementado. El bucket queda listo y seguro para cuando se implemente.
-- Cuando se implemente la subida, el path debe ser `{auth.uid()}/...` y la visualización debe usar URLs firmadas (`createSignedUrl`).
+- No cambia quién puede acceder a los PDFs.
+- No requiere cambios en código frontend.
