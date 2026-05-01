@@ -868,7 +868,9 @@ export default function Journal() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                </div>
+                {/* Sticky footer */}
+                <div className="shrink-0 flex justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
                   <Button
                     type="button"
                     variant="outline"
