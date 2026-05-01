@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Brain, Lightbulb, CheckCircle2, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
