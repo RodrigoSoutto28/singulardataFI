@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => ({
           ],
           charts: ["recharts"],
           supabase: ["@supabase/supabase-js"],
-          xlsx: ["xlsx"],
+          exceljs: ["exceljs"],
         },
       },
     },
