@@ -220,6 +220,8 @@ export default function Settings() {
                 <SelectContent>
                   <SelectItem value="USD">USD ($)</SelectItem>
                   <SelectItem value="EUR">EUR (€)</SelectItem>
+                  <SelectItem value="ARS">ARS ($)</SelectItem>
+                  <SelectItem value="BRL">BRL (R$)</SelectItem>
                   <SelectItem value="GBP">GBP (£)</SelectItem>
                   <SelectItem value="JPY">JPY (¥)</SelectItem>
                 </SelectContent>
