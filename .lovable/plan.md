@@ -1,26 +1,23 @@
-## Eliminar políticas duplicadas en bucket `study-pdfs`
+## Hardening de SELECT en `user_roles`
 
-### Hallazgo
-Existen 3 pares de políticas duplicadas en `storage.objects` para el bucket `study-pdfs`:
-
-| Operación | Mantener (`has_role`) | Eliminar (`is_admin`) |
-|---|---|---|
-| INSERT | `Admins can upload study PDFs` | `Admins can upload study pdfs` |
-| UPDATE | `Admins can update study PDFs` | `Admins can update study pdfs` |
-| DELETE | `Admins can delete study PDFs` | `Admins can delete study pdfs` |
-
-Ambas funciones (`has_role` e `is_admin`) consultan la misma tabla `user_roles`, así que el control de acceso es equivalente. Mantengo `has_role` por consistencia con el resto del proyecto (profiles, user_roles).
+Agregar una política RESTRICTIVE SELECT que limite la lectura a (self OR admin), como defensa en profundidad ante posibles desconfiguraciones futuras de las políticas PERMISSIVE existentes.
 
 ### Migración SQL
 ```sql
-DROP POLICY IF EXISTS "Admins can delete study pdfs" ON storage.objects;
-DROP POLICY IF EXISTS "Admins can update study pdfs" ON storage.objects;
-DROP POLICY IF EXISTS "Admins can upload study pdfs" ON storage.objects;
+CREATE POLICY "Restrict role visibility to self or admin"
+ON public.user_roles
+AS RESTRICTIVE
+FOR SELECT
+TO authenticated
+USING (
+  auth.uid() = user_id
+  OR has_role(auth.uid(), 'admin'::app_role)
+);
 ```
 
 ### Post-migración
-Marcar el finding `study_pdfs_duplicate_policies` como resuelto.
+Marcar el finding `user_roles_self_select_escalation` como resuelto.
 
 ### Notas
-- No cambia quién puede acceder a los PDFs.
-- No requiere cambios en código frontend.
+- No cambia comportamiento actual.
+- Sin cambios en código frontend.
