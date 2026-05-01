@@ -1027,43 +1027,41 @@ export default function Journal() {
       {/* Trades List */}
       <div className="space-y-2">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">{t.journal.loadingTrades}</p>
+          <div className="space-y-2" aria-busy="true" aria-live="polite">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-lg" />
+            ))}
           </div>
         ) : filteredTrades.length > 0 ? (
-          filteredTrades.map((trade, index) => (
-            <TradeRow key={trade.id} trade={trade} index={index} />
-          ))
+          <>
+            {filteredTrades.slice(0, visibleCount).map((trade, index) => (
+              <TradeRow key={trade.id} trade={trade} index={index} />
+            ))}
+            {visibleCount < filteredTrades.length && (
+              <div className="flex flex-col items-center gap-2 pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Mostrando {visibleCount} de {filteredTrades.length}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setVisibleCount((c) => c + 50)}
+                  className="gap-2"
+                >
+                  Cargar más
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="text-center py-16 px-4">
-            <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <BarChart3 className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1">{t.journal.noTradesFound}</h3>
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              {t.journal.importEmptyHint}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                {t.journal.importFile}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setIsAddTradeOpen(true)}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                {t.journal.addFirstTrade}
-              </Button>
-            </div>
-          </div>
+          <EmptyState
+            icon={BarChart3}
+            title={t.journal.noTradesFound}
+            description={t.journal.importEmptyHint}
+            actionLabel={t.journal.addFirstTrade}
+            actionIcon={Plus}
+            onAction={() => setIsAddTradeOpen(true)}
+          />
         )}
       </div>
     </div>
