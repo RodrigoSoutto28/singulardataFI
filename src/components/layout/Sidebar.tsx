@@ -103,6 +103,8 @@ export function Sidebar({
   return (
     <TooltipProvider delayDuration={200}>
       <aside
+        data-tour="sidebar"
+        aria-label="Navegación principal"
         className={cn(
           'flex flex-col h-screen sticky top-0 glass-sidebar transition-[width] duration-200',
           collapsed ? 'w-[64px]' : 'w-[230px]'
