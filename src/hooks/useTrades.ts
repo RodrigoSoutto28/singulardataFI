@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { getUserErrorMessage } from '@/lib/errors';
 
 export type Trade = Tables<'trades'>;
 export type TradeInsert = TablesInsert<'trades'>;
@@ -88,7 +89,7 @@ export function useTrades() {
       toast.success('Operación creada correctamente');
     },
     onError: (error) => {
-      toast.error(`Error al crear operación: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudo crear la operación. Inténtalo de nuevo.'));
     },
   });
 
@@ -109,7 +110,7 @@ export function useTrades() {
       toast.success('Operación actualizada');
     },
     onError: (error) => {
-      toast.error(`Error al actualizar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
     },
   });
 
@@ -127,7 +128,7 @@ export function useTrades() {
       toast.success('Operación eliminada');
     },
     onError: (error) => {
-      toast.error(`Error al eliminar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo eliminar."));
     },
   });
 
@@ -153,7 +154,7 @@ export function useTrades() {
       toast.success(`${data.length} operaciones importadas`);
     },
     onError: (error) => {
-      toast.error(`Error al importar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudieron importar las operaciones.'));
     },
   });
 

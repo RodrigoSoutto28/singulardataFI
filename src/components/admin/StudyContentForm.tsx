@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, File, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getUserErrorMessage } from "@/lib/errors";
 
 const PREDEFINED_CATEGORIES = [
   "Psicología", "Risk management", "Disciplina", "Comportamiento", 
@@ -118,8 +119,8 @@ export function StudyContentForm({
       // Bucket es privado: guardamos el path. La URL firmada se genera al leer.
       form.setValue("pdf_url", fileName);
       toast.success("PDF subido correctamente");
-    } catch (error: any) {
-      toast.error(`Error al subir PDF: ${error.message}`);
+    } catch (error) {
+      toast.error(getUserErrorMessage(error, 'No se pudo subir el PDF.'));
     } finally {
       setUploadingPdf(false);
     }
@@ -163,7 +164,7 @@ export function StudyContentForm({
       onSuccess();
     },
     onError: (error) => {
-      toast.error(`Error al guardar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudo guardar el contenido.'));
     }
   });
 

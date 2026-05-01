@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Edit, Star, FileText, File, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { getUserErrorMessage } from "@/lib/errors";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,7 +66,7 @@ export function StudyContentList({ onEdit }: { onEdit: (content: StudyContent) =
       setDeleteId(null);
     },
     onError: (error) => {
-      toast.error(`Error al eliminar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudo eliminar el contenido.'));
       setDeleteId(null);
     }
   });

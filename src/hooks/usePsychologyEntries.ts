@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { getUserErrorMessage } from '@/lib/errors';
 
 export type PsychologyEntry = Tables<'psychology_entries'>;
 export type PsychologyEntryInsert = TablesInsert<'psychology_entries'>;
@@ -47,7 +48,7 @@ export function usePsychologyEntries() {
       toast.success('Entrada guardada correctamente');
     },
     onError: (error) => {
-      toast.error(`Error al guardar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo guardar."));
     },
   });
 
@@ -68,7 +69,7 @@ export function usePsychologyEntries() {
       toast.success('Entrada actualizada');
     },
     onError: (error) => {
-      toast.error(`Error al actualizar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
     },
   });
 
@@ -86,7 +87,7 @@ export function usePsychologyEntries() {
       toast.success('Entrada eliminada');
     },
     onError: (error) => {
-      toast.error(`Error al eliminar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudo eliminar la entrada.'));
     },
   });
 

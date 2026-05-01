@@ -239,7 +239,7 @@ export default function Journal() {
       setPreviewOpen(true);
     } catch (error) {
       console.error('[ImportTrades] Unexpected error:', error);
-      toast.error(`${t.journal.importError ?? 'Import failed'}: ${(error as Error)?.message ?? error}`);
+      toast.error(t.journal.importError ?? 'No se pudo importar el archivo. Verifica el formato e inténtalo de nuevo.');
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -302,9 +302,8 @@ export default function Journal() {
       setPreviewTrades([]);
       setPreviewErrors([]);
     } catch (error) {
-      const msg = (error as Error)?.message ?? String(error);
       console.error('[ImportTrades] Insert failed:', error);
-      toast.error(`Error al insertar en la base de datos: ${msg}`);
+      toast.error('No se pudieron guardar las operaciones. Inténtalo de nuevo.');
     } finally {
       setIsImporting(false);
     }
