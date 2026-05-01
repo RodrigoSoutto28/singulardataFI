@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,14 +13,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Language } from '@/i18n/translations';
+import { supabase } from '@/integrations/supabase/client';
 import {
   User,
   Bell,
   Shield,
   CreditCard,
-  Globe,
   Palette,
   Zap,
   Check,
@@ -28,15 +42,76 @@ import {
   Database,
   Loader2,
   Sparkles,
+  Globe,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLoadSampleData } from '@/components/onboarding/WelcomeModal';
 import { resetOnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { toast } from 'sonner';
 
 export default function Settings() {
-  const { profile } = useAuth();
-  const { t } = useLanguage();
+  const { profile, user, signOut } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const { load: loadSample, loading: loadingSample } = useLoadSampleData();
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+
+  const handleExport = async () => {
+    if (!user) return;
+    setExporting(true);
+    try {
+      const [trades, psych, account] = await Promise.all([
+        supabase.from('trades').select('*').eq('user_id', user.id),
+        supabase.from('psychology_entries').select('*').eq('user_id', user.id),
+        supabase.from('trading_accounts').select('*').eq('user_id', user.id),
+      ]);
+      const payload = {
+        exported_at: new Date().toISOString(),
+        user: { id: user.id, email: user.email },
+        profile,
+        trades: trades.data ?? [],
+        psychology_entries: psych.data ?? [],
+        trading_accounts: account.data ?? [],
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `singular-datafi-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Datos exportados correctamente');
+    } catch (e) {
+      toast.error('No pudimos exportar tus datos. Intentá nuevamente.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      // Borrar datos del usuario (RLS limita al propio usuario)
+      await Promise.all([
+        supabase.from('trades').delete().eq('user_id', user.id),
+        supabase.from('psychology_entries').delete().eq('user_id', user.id),
+        supabase.from('trading_accounts').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('id', user.id),
+      ]);
+      toast.success('Tu cuenta y datos fueron eliminados.');
+      await signOut();
+    } catch {
+      toast.error('No pudimos eliminar la cuenta. Contactanos a privacy@singulardatafi.com');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   const plans = [
     {
@@ -145,6 +220,8 @@ export default function Settings() {
                 <SelectContent>
                   <SelectItem value="USD">USD ($)</SelectItem>
                   <SelectItem value="EUR">EUR (€)</SelectItem>
+                  <SelectItem value="ARS">ARS ($)</SelectItem>
+                  <SelectItem value="BRL">BRL (R$)</SelectItem>
                   <SelectItem value="GBP">GBP (£)</SelectItem>
                   <SelectItem value="JPY">JPY (¥)</SelectItem>
                 </SelectContent>
@@ -360,27 +437,126 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Danger Zone */}
+      {/* Apariencia */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Apariencia
+          </CardTitle>
+          <CardDescription>Personalizá el aspecto de la plataforma.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-medium text-sm">Tema</p>
+              <p className="text-xs text-muted-foreground">Claro, oscuro o seguir el sistema.</p>
+            </div>
+            <Select
+              value={theme}
+              onValueChange={(v) => setTheme(v as 'light' | 'dark')}
+            >
+              <SelectTrigger className="w-[180px] bg-muted/50" aria-label="Seleccionar tema">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Claro</SelectItem>
+                <SelectItem value="dark">Oscuro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Idioma */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            Idioma
+          </CardTitle>
+          <CardDescription>Se aplica a toda la interfaz.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm text-muted-foreground">Idioma de la aplicación</p>
+            <Select value={language} onValueChange={(v) => setLanguage(v as Language)}>
+              <SelectTrigger className="w-[180px] bg-muted/50" aria-label="Seleccionar idioma">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ES">Español</SelectItem>
+                <SelectItem value="EN">English</SelectItem>
+                <SelectItem value="PT">Português</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Privacidad / Danger Zone */}
       <Card className="bg-destructive/5 border-destructive/30">
         <CardHeader>
           <CardTitle className="text-destructive">{t.settings.dangerZone}</CardTitle>
           <CardDescription>{t.settings.irreversibleActions}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
               <p className="font-medium">{t.settings.exportAllData}</p>
               <p className="text-sm text-muted-foreground">{t.settings.exportDataDesc}</p>
             </div>
-            <Button variant="outline" size="sm">{t.common.export}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={exporting}
+              className="gap-2"
+              aria-label="Exportar todos mis datos"
+            >
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {t.common.export}
+            </Button>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
               <p className="font-medium text-destructive">{t.settings.deleteAccount}</p>
               <p className="text-sm text-muted-foreground">{t.settings.deleteAccountDesc}</p>
             </div>
-            <Button variant="destructive" size="sm">{t.common.delete}</Button>
+            <AlertDialog onOpenChange={() => setConfirmText('')}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-2" aria-label="Eliminar cuenta">
+                  <Trash2 className="h-4 w-4" />
+                  {t.common.delete}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar cuenta de forma permanente?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminarán tus operaciones, notas y configuración.
+                    Para confirmar, escribí <strong>ELIMINAR</strong> a continuación.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Input
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="ELIMINAR"
+                  aria-label="Confirmación de eliminación"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={confirmText !== 'ELIMINAR' || deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? 'Eliminando…' : 'Eliminar definitivamente'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

@@ -1,14 +1,15 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
+Disallow: /dashboard
+Disallow: /journal
+Disallow: /analytics
+Disallow: /psychology
+Disallow: /insights
+Disallow: /reports
+Disallow: /settings
+Disallow: /admin
 Allow: /
+Allow: /auth
+Allow: /terminos
+Allow: /privacidad
+
+Sitemap: https://singulardata.lovable.app/sitemap.xml
