@@ -81,42 +81,85 @@ export function AchievementBadges() {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {metrics.map((metric) => {
-        const styles = getStatusStyles(metric.status);
-        const Icon = metric.icon;
+    <>
+      {/* Mobile: horizontal snap-scroll carousel */}
+      <div
+        className="sm:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {metrics.map((metric) => {
+          const styles = getStatusStyles(metric.status);
+          const Icon = metric.icon;
+          return (
+            <div
+              key={metric.id}
+              className={cn(
+                'snap-start shrink-0 w-[78%] max-w-[260px] flex items-center gap-3 p-4 rounded-lg border transition-colors',
+                styles.container
+              )}
+            >
+              <div className={cn('p-2.5 rounded-lg shrink-0', styles.icon)}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={cn('text-sm font-medium truncate', styles.text)}>
+                  {t.disciplineMetrics[metric.titleKey]}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {metric.status === 'in-progress' ? (
+                    <span className="text-primary">{getSubtitle(metric)}</span>
+                  ) : metric.status === 'completed' ? (
+                    <span className="text-success">{t.common.completed}</span>
+                  ) : (
+                    getSubtitle(metric)
+                  )}
+                </p>
+              </div>
+              {metric.status === 'completed' && (
+                <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-        return (
-          <div
-            key={metric.id}
-            className={cn(
-              'flex items-center gap-3 p-4 rounded-lg border transition-colors',
-              styles.container
-            )}
-          >
-            <div className={cn('p-2.5 rounded-lg', styles.icon)}>
-              <Icon className="h-5 w-5" />
+      {/* Tablet/Desktop: grid */}
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {metrics.map((metric) => {
+          const styles = getStatusStyles(metric.status);
+          const Icon = metric.icon;
+          return (
+            <div
+              key={metric.id}
+              className={cn(
+                'flex items-center gap-3 p-4 rounded-lg border transition-colors',
+                styles.container
+              )}
+            >
+              <div className={cn('p-2.5 rounded-lg', styles.icon)}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={cn('text-sm font-medium truncate', styles.text)}>
+                  {t.disciplineMetrics[metric.titleKey]}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {metric.status === 'in-progress' ? (
+                    <span className="text-primary">{getSubtitle(metric)}</span>
+                  ) : metric.status === 'completed' ? (
+                    <span className="text-success">{t.common.completed}</span>
+                  ) : (
+                    getSubtitle(metric)
+                  )}
+                </p>
+              </div>
+              {metric.status === 'completed' && (
+                <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className={cn('text-sm font-medium truncate', styles.text)}>
-                {t.disciplineMetrics[metric.titleKey]}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {metric.status === 'in-progress' ? (
-                  <span className="text-primary">{getSubtitle(metric)}</span>
-                ) : metric.status === 'completed' ? (
-                  <span className="text-success">{t.common.completed}</span>
-                ) : (
-                  getSubtitle(metric)
-                )}
-              </p>
-            </div>
-            {metric.status === 'completed' && (
-              <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-            )}
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
