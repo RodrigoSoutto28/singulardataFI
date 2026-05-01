@@ -257,7 +257,7 @@ export default function Psychology() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Entry Form */}
-        <Card className="lg:col-span-1 bg-card border-border">
+        <Card className="lg:col-span-1 bg-card border-border flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
@@ -265,26 +265,30 @@ export default function Psychology() {
             </CardTitle>
             <CardDescription>{t.psychology.howAreYou}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Emotion Selection */}
+          <CardContent className="space-y-6 flex-1">
+            {/* Emotion Selection — 8 options, negatives styled distinctly */}
             <div className="space-y-3">
               <Label>{t.psychology.currentEmotion}</Label>
               <div className="grid grid-cols-2 gap-2">
-                {emotions.slice(0, 4).map((emotion) => (
-                  <button
-                    key={emotion.value}
-                    onClick={() => setSelectedEmotion(emotion.value)}
-                    className={cn(
-                      'p-3 rounded-lg border text-left transition-all',
-                      selectedEmotion === emotion.value
-                        ? emotion.color
-                        : 'bg-muted/30 border-border hover:border-primary/30'
-                    )}
-                  >
-                    <emotion.Icon className="h-5 w-5" />
-                    <p className="text-sm font-medium mt-1">{getEmotionLabel(emotion.value)}</p>
-                  </button>
-                ))}
+                {emotions.map((emotion) => {
+                  const isSelected = selectedEmotion === emotion.value;
+                  const baseUnselected = emotion.negative
+                    ? 'bg-warning/5 border-warning/20 hover:border-warning/40 text-foreground'
+                    : 'bg-muted/30 border-border hover:border-primary/30';
+                  return (
+                    <button
+                      key={emotion.value}
+                      onClick={() => setSelectedEmotion(emotion.value)}
+                      className={cn(
+                        'p-3 rounded-lg border text-left transition-all',
+                        isSelected ? emotion.color : baseUnselected
+                      )}
+                    >
+                      <emotion.Icon className="h-5 w-5" />
+                      <p className="text-sm font-medium mt-1">{getEmotionLabel(emotion.value)}</p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -346,8 +350,11 @@ export default function Psychology() {
                 onChange={(e) => setLessonsLearned(e.target.value)}
               />
             </div>
+          </CardContent>
 
-            <Button 
+          {/* Sticky footer — save button always visible */}
+          <div className="sticky bottom-0 z-10 p-4 border-t border-border bg-card/95 backdrop-blur-sm rounded-b-lg">
+            <Button
               className="w-full"
               onClick={handleSaveEntry}
               disabled={createEntry.isPending}
@@ -357,9 +364,8 @@ export default function Psychology() {
               ) : null}
               {t.psychology.saveEntry}
             </Button>
-          </CardContent>
+          </div>
         </Card>
-
         {/* Recent Entries */}
         <Card className="lg:col-span-2 bg-card border-border">
           <CardHeader>
