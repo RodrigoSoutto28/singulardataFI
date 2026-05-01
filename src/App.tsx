@@ -56,7 +56,11 @@ function AppRoutes() {
           path="/"
           element={
             <ProtectedRoute>
-              <AppLayout />
+              <>
+                <AppLayout />
+                <WelcomeModal />
+                <OnboardingTour />
+              </>
             </ProtectedRoute>
           }
         >
