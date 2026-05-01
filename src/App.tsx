@@ -17,6 +17,9 @@ import { AdminRoute } from "./components/auth/AdminRoute";
 
 // Lazy-loaded pages — code splitting per route
 const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Journal = lazy(() => import("./pages/Journal"));
 const Psychology = lazy(() => import("./pages/Psychology"));
@@ -52,6 +55,9 @@ function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/terminos" element={<Terms />} />
+        <Route path="/privacidad" element={<Privacy />} />
         <Route
           path="/"
           element={
