@@ -110,8 +110,8 @@ export function ImportPreviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
+      <DialogContent className="max-w-[100vw] sm:max-w-4xl w-screen sm:w-auto h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col p-0 rounded-none sm:rounded-lg">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10">
               <FileSpreadsheet className="h-5 w-5 text-primary" />
@@ -128,8 +128,8 @@ export function ImportPreviewModal({
         </DialogHeader>
 
         {/* Summary Stats */}
-        <div className="px-6 py-4 border-b border-border bg-muted/30">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-foreground">
                 {selectedIndices.size}
@@ -294,7 +294,7 @@ export function ImportPreviewModal({
           </Table>
         </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">
+        <DialogFooter className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted/30 shrink-0">
           <div className="flex items-center justify-between w-full gap-4">
             <p className="text-sm text-muted-foreground">
               {selectedIndices.size} de {trades.length} trades seleccionados

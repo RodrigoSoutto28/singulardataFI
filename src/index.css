@@ -282,9 +282,13 @@
 }
 
 @layer utilities {
-  .responsive-padding { @apply p-3 sm:p-4 md:p-6; }
+  .responsive-padding { @apply p-4 md:p-6 lg:p-7; }
   .responsive-gap { @apply gap-3 sm:gap-4 md:gap-6; }
   .font-mono-numbers { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  /* Hide scrollbars while preserving scroll behavior (used in carousels and pill rows) */
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
 /* Accessibility: respect reduced motion */

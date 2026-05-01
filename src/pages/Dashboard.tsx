@@ -106,7 +106,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom Row - Charts & Tasks */}
+      {/* Bottom Row - Charts & Tasks (chart full-width on mobile) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <EquityChart data={equityCurve} className="lg:col-span-2" />
         <TasksCard />
