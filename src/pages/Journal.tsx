@@ -622,14 +622,15 @@ export default function Journal() {
                 {t.journal.addTrade}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+            <DialogContent className="p-0 gap-0 max-w-[100vw] sm:max-w-md w-screen sm:w-auto h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col rounded-none sm:rounded-lg">
+              <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b border-border shrink-0">
                 <DialogTitle>{editingTrade ? (t.journal.editTrade ?? 'Edit Trade') : t.journal.addNewTrade}</DialogTitle>
                 <DialogDescription>
                   {t.journal.logNewTrade}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAddTrade} className="space-y-4 mt-4">
+              <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
                 {/* Essentials */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 col-span-2">
