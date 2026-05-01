@@ -88,6 +88,12 @@ export default function Journal() {
   const [isImporting, setIsImporting] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [visibleCount, setVisibleCount] = useState(50);
+
+  // Reset paginación al cambiar filtros
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [debouncedSearch, statusFilter]);
 
   // Import preview state
   const [previewOpen, setPreviewOpen] = useState(false);
