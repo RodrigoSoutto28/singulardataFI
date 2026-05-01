@@ -15,6 +15,7 @@ import { FileText, File, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserErrorMessage } from "@/lib/errors";
+import ReactMarkdown from "react-markdown";
 
 const PREDEFINED_CATEGORIES = [
   "Psicología", "Risk management", "Disciplina", "Comportamiento", 
