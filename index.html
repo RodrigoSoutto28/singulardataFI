@@ -1,28 +1,87 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SINGULAR dataFI - Trading Journal &amp; Analytics</title>
-    <meta name="description" content="Professional trading journal with AI-powered analytics. Track, analyze and improve your trading performance.">
+    <meta name="theme-color" content="#0779A2" />
+    <title>SINGULAR dataFI — Diario de Trading con IA</title>
+    <meta name="description" content="El diario de trading más completo en español. Registrá, analizá y mejorá tu rendimiento con IA. Compatible con cTrader, MT4, MT5 y TradingView." />
+    <meta name="keywords" content="diario de trading, trading journal español, análisis de trading, psicología del trading, IC Markets, cTrader, MT4, MT5, TradingView" />
     <meta name="author" content="SINGULAR dataFI" />
+    <link rel="canonical" href="https://singulardata.lovable.app" />
 
-    
-    
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4af95387-98d7-49f7-b677-e209e17be157">
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content="SINGULAR dataFI — Diario de Trading con IA" />
+    <meta property="og:description" content="Registrá, analizá y mejorá tu rendimiento con IA. Compatible con cTrader, MT4, MT5 y TradingView." />
+    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4af95387-98d7-49f7-b677-e209e17be157" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@singulardatafi" />
-    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4af95387-98d7-49f7-b677-e209e17be157">
-    <meta property="og:title" content="SINGULAR dataFI - Trading Journal &amp; Analytics">
-  <meta name="twitter:title" content="SINGULAR dataFI - Trading Journal &amp; Analytics">
-  <meta property="og:description" content="Professional trading journal with AI-powered analytics. Track, analyze and improve your trading performance.">
-  <meta name="twitter:description" content="Professional trading journal with AI-powered analytics. Track, analyze and improve your trading performance.">
-</head>
+    <meta name="twitter:title" content="SINGULAR dataFI — Diario de Trading con IA" />
+    <meta name="twitter:description" content="Registrá, analizá y mejorá tu rendimiento con IA." />
+    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4af95387-98d7-49f7-b677-e209e17be157" />
 
+    <style>
+      /* Splash screen — pure CSS, no JS deps */
+      #sdf-splash {
+        position: fixed;
+        inset: 0;
+        background: #0b1220;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+        color: #e6eef5;
+        transition: opacity 0.3s ease;
+      }
+      #sdf-splash.sdf-hide { opacity: 0; pointer-events: none; }
+      .sdf-logo {
+        width: 56px; height: 56px; border-radius: 12px;
+        background: #0779A2;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 8px 24px rgba(7,121,162,0.35);
+      }
+      .sdf-logo svg { width: 32px; height: 32px; color: #fff; }
+      .sdf-name { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
+      .sdf-tag { font-size: 12px; opacity: 0.7; }
+      .sdf-spinner {
+        width: 22px; height: 22px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.15);
+        border-top-color: #40A9D3;
+        animation: sdf-spin 0.8s linear infinite;
+        margin-top: 6px;
+      }
+      @keyframes sdf-spin { to { transform: rotate(360deg); } }
+      @media (prefers-color-scheme: light) {
+        #sdf-splash { background: #f6f9fb; color: #0b1220; }
+      }
+    </style>
+  </head>
   <body>
+    <div id="sdf-splash" aria-hidden="true">
+      <div class="sdf-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      </div>
+      <div class="sdf-name">SINGULAR dataFI</div>
+      <div class="sdf-tag">Trading Intelligence Platform</div>
+      <div class="sdf-spinner" aria-label="Cargando"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var el = document.getElementById('sdf-splash');
+          if (el) {
+            el.classList.add('sdf-hide');
+            setTimeout(function () { el && el.remove(); }, 350);
+          }
+        }, 200);
+      });
+    </script>
   </body>
 </html>
