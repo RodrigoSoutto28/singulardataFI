@@ -110,7 +110,7 @@ export function useTrades() {
       toast.success('Operación actualizada');
     },
     onError: (error) => {
-      toast.error(`Error al actualizar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
     },
   });
 
@@ -128,7 +128,7 @@ export function useTrades() {
       toast.success('Operación eliminada');
     },
     onError: (error) => {
-      toast.error(`Error al eliminar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo eliminar."));
     },
   });
 

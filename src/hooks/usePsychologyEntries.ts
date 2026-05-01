@@ -48,7 +48,7 @@ export function usePsychologyEntries() {
       toast.success('Entrada guardada correctamente');
     },
     onError: (error) => {
-      toast.error(`Error al guardar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo guardar."));
     },
   });
 
@@ -69,7 +69,7 @@ export function usePsychologyEntries() {
       toast.success('Entrada actualizada');
     },
     onError: (error) => {
-      toast.error(`Error al actualizar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
     },
   });
 

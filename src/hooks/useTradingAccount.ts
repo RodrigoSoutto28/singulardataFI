@@ -72,7 +72,7 @@ export function useTradingAccount() {
       toast.success('Cuenta actualizada');
     },
     onError: (error) => {
-      toast.error(`Error al actualizar: ${error.message}`);
+      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
     },
   });
 
