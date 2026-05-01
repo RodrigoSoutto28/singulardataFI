@@ -59,7 +59,7 @@ export function EquityChart({ data, className }: EquityChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="h-[280px]">
+      <div className="h-[220px] sm:h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
