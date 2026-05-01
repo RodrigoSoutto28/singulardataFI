@@ -15,6 +15,7 @@ import { FileText, File, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserErrorMessage } from "@/lib/errors";
+import ReactMarkdown from "react-markdown";
 
 const PREDEFINED_CATEGORIES = [
   "Psicología", "Risk management", "Disciplina", "Comportamiento", 
@@ -363,8 +364,18 @@ export function StudyContentForm({
                       {...field}
                     />
                     <div className="h-full border-l bg-muted/10 p-4 overflow-y-auto prose prose-sm dark:prose-invert max-w-none">
-                      {/* Very simple markdown preview, since we don't have a full MD parser available right away */}
-                      <div dangerouslySetInnerHTML={{ __html: simpleMarkdownParse(field.value || '') }} />
+                      {/* Safe markdown rendering — react-markdown escapes HTML and disables raw HTML by default. javascript: URIs are stripped. */}
+                      <ReactMarkdown
+                        urlTransform={(url) => {
+                          const safe = url.trim().toLowerCase();
+                          if (safe.startsWith('javascript:') || safe.startsWith('data:') || safe.startsWith('vbscript:')) {
+                            return '';
+                          }
+                          return url;
+                        }}
+                      >
+                        {field.value || ''}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </FormControl>
@@ -444,19 +455,4 @@ function getWeekNumber(d: Date) {
   var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
   var weekNo = Math.ceil(( ( (d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
   return weekNo;
-}
-
-function simpleMarkdownParse(text: string) {
-  let html = text
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-    .replace(/\*(.*)\*/gim, '<em>$1</em>')
-    .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
-    .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-    .replace(/\n$/gim, '<br />');
-
-  return html;
 }
