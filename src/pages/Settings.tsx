@@ -437,27 +437,126 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Danger Zone */}
+      {/* Apariencia */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Apariencia
+          </CardTitle>
+          <CardDescription>Personalizá el aspecto de la plataforma.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-medium text-sm">Tema</p>
+              <p className="text-xs text-muted-foreground">Claro, oscuro o seguir el sistema.</p>
+            </div>
+            <Select
+              value={theme}
+              onValueChange={(v) => setTheme(v as 'light' | 'dark')}
+            >
+              <SelectTrigger className="w-[180px] bg-muted/50" aria-label="Seleccionar tema">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Claro</SelectItem>
+                <SelectItem value="dark">Oscuro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Idioma */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            Idioma
+          </CardTitle>
+          <CardDescription>Se aplica a toda la interfaz.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm text-muted-foreground">Idioma de la aplicación</p>
+            <Select value={language} onValueChange={(v) => setLanguage(v as Language)}>
+              <SelectTrigger className="w-[180px] bg-muted/50" aria-label="Seleccionar idioma">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ES">Español</SelectItem>
+                <SelectItem value="EN">English</SelectItem>
+                <SelectItem value="PT">Português</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Privacidad / Danger Zone */}
       <Card className="bg-destructive/5 border-destructive/30">
         <CardHeader>
           <CardTitle className="text-destructive">{t.settings.dangerZone}</CardTitle>
           <CardDescription>{t.settings.irreversibleActions}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
               <p className="font-medium">{t.settings.exportAllData}</p>
               <p className="text-sm text-muted-foreground">{t.settings.exportDataDesc}</p>
             </div>
-            <Button variant="outline" size="sm">{t.common.export}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={exporting}
+              className="gap-2"
+              aria-label="Exportar todos mis datos"
+            >
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {t.common.export}
+            </Button>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
               <p className="font-medium text-destructive">{t.settings.deleteAccount}</p>
               <p className="text-sm text-muted-foreground">{t.settings.deleteAccountDesc}</p>
             </div>
-            <Button variant="destructive" size="sm">{t.common.delete}</Button>
+            <AlertDialog onOpenChange={() => setConfirmText('')}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-2" aria-label="Eliminar cuenta">
+                  <Trash2 className="h-4 w-4" />
+                  {t.common.delete}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar cuenta de forma permanente?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminarán tus operaciones, notas y configuración.
+                    Para confirmar, escribí <strong>ELIMINAR</strong> a continuación.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Input
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="ELIMINAR"
+                  aria-label="Confirmación de eliminación"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={confirmText !== 'ELIMINAR' || deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? 'Eliminando…' : 'Eliminar definitivamente'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>
