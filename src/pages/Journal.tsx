@@ -652,9 +652,11 @@ export default function Journal() {
                       className="bg-muted/30 font-mono uppercase"
                       value={formData.symbol}
                       onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
+                      aria-invalid={!!formErrors.symbol}
                       required
                       autoFocus
                     />
+                    {formErrors.symbol && <p className="text-xs text-destructive">{formErrors.symbol}</p>}
                   </div>
 
                   <div className="space-y-1.5 col-span-2">
@@ -685,6 +687,7 @@ export default function Journal() {
                         <ArrowDownRight className="h-4 w-4" /> {t.journal.short}
                       </button>
                     </div>
+                    {formErrors.direction && <p className="text-xs text-destructive">{formErrors.direction}</p>}
                   </div>
 
                   <div className="space-y-1.5">
@@ -696,8 +699,10 @@ export default function Journal() {
                       className="bg-muted/30 font-mono"
                       value={formData.entry_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_price: e.target.value }))}
+                      aria-invalid={!!formErrors.entry_price}
                       required
                     />
+                    {formErrors.entry_price && <p className="text-xs text-destructive">{formErrors.entry_price}</p>}
                   </div>
 
                   <div className="space-y-1.5">
@@ -722,8 +727,10 @@ export default function Journal() {
                       className="bg-muted/30 font-mono"
                       value={formData.quantity}
                       onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
+                      aria-invalid={!!formErrors.quantity}
                       required
                     />
+                    {formErrors.quantity && <p className="text-xs text-destructive">{formErrors.quantity}</p>}
                   </div>
 
                   {/* Status */}
