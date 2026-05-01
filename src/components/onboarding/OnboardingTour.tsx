@@ -13,6 +13,8 @@ interface Step {
   body: string;
   /** Posición preferida del tooltip respecto al target. */
   placement?: 'right' | 'bottom' | 'top' | 'left';
+  /** Ruta requerida; el tour navega ahí antes de medir. */
+  route?: string;
 }
 
 const STEPS: Step[] = [
