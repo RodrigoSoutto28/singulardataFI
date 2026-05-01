@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
