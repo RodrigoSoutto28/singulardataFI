@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
+import { signInSchema, signUpSchema, translateAuthError } from '@/lib/validation';
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Redirect if already authenticated
   if (!loading && user) {
@@ -22,40 +24,67 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (isLoading) return; // prevent double submit
+    setFieldErrors({});
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const payload = {
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
+    };
 
-    const { error } = await signIn(email, password);
+    const parsed = signInSchema.safeParse(payload);
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as string;
+        if (!errs[k]) errs[k] = i.message;
+      });
+      setFieldErrors(errs);
+      return;
+    }
 
+    setIsLoading(true);
+    const { error } = await signIn(parsed.data.email, parsed.data.password);
     if (error) {
-      toast.error(t.auth.errorSignIn, { description: error.message });
+      // Do NOT disclose whether email or password was wrong
+      toast.error(translateAuthError(error.message));
     } else {
       toast.success(t.auth.welcomeBack);
     }
-
     setIsLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (isLoading) return; // prevent double submit
+    setFieldErrors({});
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const fullName = formData.get('fullName') as string;
+    const payload = {
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
+      fullName: String(formData.get('fullName') ?? ''),
+    };
 
-    const { error } = await signUp(email, password, fullName);
+    const parsed = signUpSchema.safeParse(payload);
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as string;
+        if (!errs[k]) errs[k] = i.message;
+      });
+      setFieldErrors(errs);
+      return;
+    }
 
+    setIsLoading(true);
+    const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.fullName);
     if (error) {
-      toast.error(t.auth.errorSignUp, { description: error.message });
+      toast.error(translateAuthError(error.message));
     } else {
       toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
     }
-
     setIsLoading(false);
   };
 
@@ -156,8 +185,12 @@ export default function Auth() {
                       type="email"
                       placeholder="trader@example.com"
                       required
+                      aria-invalid={!!fieldErrors.email}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">{t.auth.password}</Label>
@@ -167,8 +200,12 @@ export default function Auth() {
                       type="password"
                       placeholder="••••••••"
                       required
+                      aria-invalid={!!fieldErrors.password}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.password && (
+                      <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
@@ -191,8 +228,12 @@ export default function Auth() {
                       type="text"
                       placeholder="John Trader"
                       required
+                      aria-invalid={!!fieldErrors.fullName}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.fullName && (
+                      <p className="text-xs text-destructive">{fieldErrors.fullName}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">{t.auth.email}</Label>
@@ -202,8 +243,12 @@ export default function Auth() {
                       type="email"
                       placeholder="trader@example.com"
                       required
+                      aria-invalid={!!fieldErrors.email}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">{t.auth.password}</Label>
@@ -214,8 +259,12 @@ export default function Auth() {
                       placeholder="••••••••"
                       minLength={6}
                       required
+                      aria-invalid={!!fieldErrors.password}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.password && (
+                      <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
