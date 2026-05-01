@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,24 +7,35 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-
-// Pages
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Journal from "./pages/Journal";
-import Psychology from "./pages/Psychology";
-import AnalyticsHub from "./pages/AnalyticsHub";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import StudyAdmin from "./pages/admin/StudyAdmin";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageLoader } from "@/components/ui/page-loader";
 import { AdminRoute } from "./components/auth/AdminRoute";
 
-const queryClient = new QueryClient();
+// Lazy-loaded pages — code splitting per route
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Journal = lazy(() => import("./pages/Journal"));
+const Psychology = lazy(() => import("./pages/Psychology"));
+const AnalyticsHub = lazy(() => import("./pages/AnalyticsHub"));
+const Settings = lazy(() => import("./pages/Settings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const StudyAdmin = lazy(() => import("./pages/admin/StudyAdmin"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutos
+      gcTime: 1000 * 60 * 10,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Cargando...</div>;
+    return <PageLoader />;
   }
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -33,52 +45,56 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/auth" element={<Auth />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="journal" element={<Journal />} />
-        <Route path="psychology" element={<Psychology />} />
-        <Route path="analytics" element={<AnalyticsHub />} />
-        <Route path="insights" element={<Navigate to="/analytics" replace />} />
-        <Route path="reports" element={<Navigate to="/analytics" replace />} />
-        <Route path="settings" element={<Settings />} />
-        <Route 
-          path="admin/study" 
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/"
           element={
-            <AdminRoute>
-              <StudyAdmin />
-            </AdminRoute>
-          } 
-        />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="journal" element={<Journal />} />
+          <Route path="psychology" element={<Psychology />} />
+          <Route path="analytics" element={<AnalyticsHub />} />
+          <Route path="insights" element={<Navigate to="/analytics" replace />} />
+          <Route path="reports" element={<Navigate to="/analytics" replace />} />
+          <Route path="settings" element={<Settings />} />
+          <Route
+            path="admin/study"
+            element={
+              <AdminRoute>
+                <StudyAdmin />
+              </AdminRoute>
+            }
+          />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
