@@ -1,23 +1,26 @@
-## Hardening de SELECT en `user_roles`
+## Override de admin para INSERT/UPDATE en `study_progress`
 
-Agregar una política RESTRICTIVE SELECT que limite la lectura a (self OR admin), como defensa en profundidad ante posibles desconfiguraciones futuras de las políticas PERMISSIVE existentes.
+Agregar dos políticas PERMISSIVE que permitan a los admins insertar y actualizar el progreso de cualquier usuario, manteniendo intactas las políticas existentes para usuarios normales (que siguen restringidas a su propio `user_id`).
 
 ### Migración SQL
 ```sql
-CREATE POLICY "Restrict role visibility to self or admin"
-ON public.user_roles
-AS RESTRICTIVE
-FOR SELECT
+CREATE POLICY "Admins can insert any progress"
+ON public.study_progress
+FOR INSERT
 TO authenticated
-USING (
-  auth.uid() = user_id
-  OR has_role(auth.uid(), 'admin'::app_role)
-);
+WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+
+CREATE POLICY "Admins can update any progress"
+ON public.study_progress
+FOR UPDATE
+TO authenticated
+USING (has_role(auth.uid(), 'admin'::app_role))
+WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
 ```
 
 ### Post-migración
-Marcar el finding `user_roles_self_select_escalation` como resuelto.
+Marcar el finding `study_progress_no_admin_insert_update` como resuelto.
 
 ### Notas
-- No cambia comportamiento actual.
 - Sin cambios en código frontend.
+- Consistente con el patrón ya usado en `study_progress` SELECT y en `profiles`.
