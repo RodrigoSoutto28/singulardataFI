@@ -513,11 +513,61 @@ export default function Journal() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t.journal.title}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{t.journal.subtitle}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t.journal.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{t.journal.subtitle}</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* Mobile: actions menu */}
+        <div className="sm:hidden flex items-center justify-end gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.ods,.json,.html,.htm,.xml,.pdf"
+            className="hidden"
+          />
+          <Button
+            size="sm"
+            className="gap-1.5 btn-press flex-1"
+            onClick={() => { resetForm(); setIsAddTradeOpen(true); }}
+          >
+            <Plus className="h-4 w-4" />
+            {t.journal.addTrade}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" aria-label="Más acciones">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+                className="gap-2"
+              >
+                {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {t.journal.import ?? 'Import'}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleExport('excel')} className="gap-2" disabled={trades.length === 0}>
+                <FileSpreadsheet className="h-4 w-4 text-success" />
+                Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2" disabled={trades.length === 0}>
+                <FileText className="h-4 w-4 text-destructive" />
+                PDF (.pdf)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('html')} className="gap-2" disabled={trades.length === 0}>
+                <FileCode className="h-4 w-4 text-primary" />
+                HTML (.html)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Tablet/Desktop: full button row */}
+        <div className="hidden sm:flex flex-wrap gap-2">
           {/* Import Button */}
           <input
             type="file"
