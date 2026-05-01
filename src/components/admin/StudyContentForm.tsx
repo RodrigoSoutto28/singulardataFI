@@ -364,8 +364,18 @@ export function StudyContentForm({
                       {...field}
                     />
                     <div className="h-full border-l bg-muted/10 p-4 overflow-y-auto prose prose-sm dark:prose-invert max-w-none">
-                      {/* Very simple markdown preview, since we don't have a full MD parser available right away */}
-                      <div dangerouslySetInnerHTML={{ __html: simpleMarkdownParse(field.value || '') }} />
+                      {/* Safe markdown rendering — react-markdown escapes HTML and disables raw HTML by default. javascript: URIs are stripped. */}
+                      <ReactMarkdown
+                        urlTransform={(url) => {
+                          const safe = url.trim().toLowerCase();
+                          if (safe.startsWith('javascript:') || safe.startsWith('data:') || safe.startsWith('vbscript:')) {
+                            return '';
+                          }
+                          return url;
+                        }}
+                      >
+                        {field.value || ''}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </FormControl>
