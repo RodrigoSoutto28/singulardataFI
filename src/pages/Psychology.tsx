@@ -28,6 +28,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePsychologyEntries, PsychologyEntry } from '@/hooks/usePsychologyEntries';
 import { toast } from 'sonner';
+import { psychologyEntrySchema } from '@/lib/validation';
 
 type Emotion = 'confident' | 'fearful' | 'greedy' | 'calm' | 'anxious' | 'frustrated' | 'excited' | 'neutral' | 'fomo' | 'vengeful';
 
@@ -61,26 +62,40 @@ export default function Psychology() {
   const [stressLevel, setStressLevel] = useState([3]);
   const [lessonsLearned, setLessonsLearned] = useState('');
   const [goals, setGoals] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
   const getEmotionLabel = (emotion: Emotion) => {
     return t.psychology.emotions[emotion];
   };
 
   const handleSaveEntry = async () => {
-    if (!selectedEmotion) {
-      toast.error('Selecciona tu estado emocional');
+    setFormError(null);
+
+    const parsed = psychologyEntrySchema.safeParse({
+      emotion: selectedEmotion ?? undefined,
+      disciplineScore: disciplineScore[0],
+      sleepQuality: sleepQuality[0],
+      stressLevel: stressLevel[0],
+      lessonsLearned,
+      goals,
+    });
+
+    if (!parsed.success) {
+      const msg = parsed.error.issues[0]?.message ?? 'Datos inválidos';
+      setFormError(msg);
+      toast.error(msg);
       return;
     }
 
     try {
       await createEntry.mutateAsync({
-        pre_trade_emotion: selectedEmotion,
-        discipline_score: disciplineScore[0],
-        sleep_quality: sleepQuality[0],
-        stress_level: stressLevel[0],
-        lessons_learned: lessonsLearned || null,
-        goals_for_tomorrow: goals || null,
-        followed_rules: disciplineScore[0] >= 7,
+        pre_trade_emotion: parsed.data.emotion,
+        discipline_score: parsed.data.disciplineScore,
+        sleep_quality: parsed.data.sleepQuality,
+        stress_level: parsed.data.stressLevel,
+        lessons_learned: parsed.data.lessonsLearned || null,
+        goals_for_tomorrow: parsed.data.goals || null,
+        followed_rules: parsed.data.disciplineScore >= 7,
       });
 
       // Reset form
