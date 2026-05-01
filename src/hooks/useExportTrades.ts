@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { writeXLSXFile } from '@/lib/xlsx-adapter';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -51,32 +51,9 @@ export function useExportTrades() {
     }));
   };
 
-  const exportToExcel = useCallback((trades: Trade[], filename = 'trading-journal') => {
+  const exportToExcel = useCallback(async (trades: Trade[], filename = 'trading-journal') => {
     const data = prepareTradeData(trades);
-    const ws = XLSX.utils.json_to_sheet(data);
-    
-    // Set column widths
-    ws['!cols'] = [
-      { wch: 12 }, // Symbol
-      { wch: 10 }, // Direction
-      { wch: 10 }, // Status
-      { wch: 12 }, // Entry Price
-      { wch: 12 }, // Exit Price
-      { wch: 10 }, // Quantity
-      { wch: 12 }, // P&L ($)
-      { wch: 10 }, // P&L (%)
-      { wch: 18 }, // Entry Date
-      { wch: 18 }, // Exit Date
-      { wch: 15 }, // Strategy
-      { wch: 8 },  // Rating
-      { wch: 20 }, // Tags
-      { wch: 30 }, // Notes
-    ];
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Trades');
-    
-    // Add summary sheet
     const summary = calculateSummary(trades);
     const summaryData = [
       { Metric: 'Total Trades', Value: summary.totalTrades },
@@ -89,11 +66,19 @@ export function useExportTrades() {
       { Metric: 'Largest Loss', Value: `$${summary.largestLoss.toFixed(2)}` },
       { Metric: 'Profit Factor', Value: summary.profitFactor.toFixed(2) },
     ];
-    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-    wsSummary['!cols'] = [{ wch: 20 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
-    
-    XLSX.writeFile(wb, `${filename}.xlsx`);
+
+    await writeXLSXFile(filename, [
+      {
+        name: 'Trades',
+        data,
+        columnWidths: [12, 10, 10, 12, 12, 10, 12, 10, 18, 18, 15, 8, 20, 30],
+      },
+      {
+        name: 'Summary',
+        data: summaryData,
+        columnWidths: [20, 15],
+      },
+    ]);
   }, []);
 
   const exportToPDF = useCallback((trades: Trade[], filename = 'trading-journal') => {

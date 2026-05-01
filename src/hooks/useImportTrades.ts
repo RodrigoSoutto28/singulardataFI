@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { parseXLSXBuffer } from '@/lib/xlsx-adapter';
 
 interface ImportedTrade {
   symbol: string;
@@ -394,18 +394,18 @@ function scoreHeaderRow(row: unknown[]): number {
   return score;
 }
 
-function parseExcelBuffer(buffer: ArrayBuffer): ParseResult {
+async function parseExcelBuffer(buffer: ArrayBuffer): Promise<ParseResult> {
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   try {
-    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
-    if (!wb.SheetNames.length) {
+    const wb = await parseXLSXBuffer(buffer);
+    if (!wb.sheetNames.length) {
       return { trades: [], errors: ['El archivo Excel no contiene hojas'] };
     }
 
-    for (const sheetName of wb.SheetNames) {
-      const sheet = wb.Sheets[sheetName];
-      const data: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+    for (const sheet of wb.sheets) {
+      const sheetName = sheet.name;
+      const data: unknown[][] = sheet.rows;
       if (data.length < 2) continue;
 
       // Auto-detect header row by scoring the first 15 rows
