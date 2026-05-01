@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import "@/lib/toast"; // Aplica reglas globales de toast (errores persistentes)
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,9 +7,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/ui/page-loader";
+import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { AdminRoute } from "./components/auth/AdminRoute";
 
 // Lazy-loaded pages — code splitting per route
