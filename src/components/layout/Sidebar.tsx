@@ -59,8 +59,19 @@ export function Sidebar({
 
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
+    const tourTag =
+      item.href === '/analytics'
+        ? 'analytics'
+        : item.href === '/psychology'
+        ? 'psychology'
+        : undefined;
     const content = (
-      <Link to={item.href} className="block group" onClick={onItemClick}>
+      <Link
+        to={item.href}
+        className="block group"
+        onClick={onItemClick}
+        data-tour={tourTag}
+      >
         <div
           className={cn(
             'relative flex items-center h-10 rounded-md text-sm font-medium transition-all duration-200',
