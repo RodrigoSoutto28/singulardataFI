@@ -368,7 +368,10 @@ export default function Psychology() {
           </CardContent>
 
           {/* Sticky footer — save button always visible */}
-          <div className="sticky bottom-0 z-10 p-4 border-t border-border bg-card/95 backdrop-blur-sm rounded-b-lg">
+          <div className="sticky bottom-0 z-10 p-4 border-t border-border bg-card/95 backdrop-blur-sm rounded-b-lg space-y-2">
+            {formError && (
+              <p className="text-xs text-destructive text-center">{formError}</p>
+            )}
             <Button
               className="w-full"
               onClick={handleSaveEntry}
