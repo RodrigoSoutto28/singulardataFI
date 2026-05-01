@@ -29,23 +29,26 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePsychologyEntries, PsychologyEntry } from '@/hooks/usePsychologyEntries';
 import { toast } from 'sonner';
 
-type Emotion = 'confident' | 'fearful' | 'greedy' | 'calm' | 'anxious' | 'frustrated' | 'excited' | 'neutral';
+type Emotion = 'confident' | 'fearful' | 'greedy' | 'calm' | 'anxious' | 'frustrated' | 'excited' | 'neutral' | 'fomo' | 'vengeful';
 
 interface EmotionOption {
   value: Emotion;
   color: string;
   Icon: LucideIcon;
+  negative?: boolean;
 }
 
 const emotions: EmotionOption[] = [
+  // Positive / neutral
   { value: 'confident', color: 'bg-success/20 text-success border-success/30', Icon: Shield },
   { value: 'calm', color: 'bg-primary/20 text-primary border-primary/30', Icon: Leaf },
   { value: 'neutral', color: 'bg-muted text-muted-foreground border-border', Icon: Minus },
-  { value: 'excited', color: 'bg-warning/20 text-warning border-warning/30', Icon: Zap },
-  { value: 'anxious', color: 'bg-warning/20 text-warning border-warning/30', Icon: AlertCircle },
-  { value: 'fearful', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: ShieldAlert },
-  { value: 'greedy', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: TrendingUp },
-  { value: 'frustrated', color: 'bg-destructive/20 text-destructive border-destructive/30', Icon: Flame },
+  { value: 'excited', color: 'bg-accent/20 text-accent border-accent/30', Icon: Zap },
+  // Negative (warning/destructive tones)
+  { value: 'fomo', color: 'bg-warning/20 text-warning border-warning/40', Icon: AlertCircle, negative: true },
+  { value: 'anxious', color: 'bg-warning/20 text-warning border-warning/40', Icon: ShieldAlert, negative: true },
+  { value: 'frustrated', color: 'bg-destructive/20 text-destructive border-destructive/40', Icon: Flame, negative: true },
+  { value: 'vengeful', color: 'bg-destructive/20 text-destructive border-destructive/40', Icon: TrendingUp, negative: true },
 ];
 
 export default function Psychology() {
