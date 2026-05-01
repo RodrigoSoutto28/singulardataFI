@@ -11,9 +11,12 @@ import {
   Shield,
   ChevronsLeft,
   ChevronsRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Language } from '@/i18n/translations';
 
@@ -50,13 +53,25 @@ export function Sidebar({
   const location = useLocation();
   const { signOut, profile } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   const languages: Language[] = ['ES', 'EN', 'PT'];
 
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
+    const tourTag =
+      item.href === '/analytics'
+        ? 'analytics'
+        : item.href === '/psychology'
+        ? 'psychology'
+        : undefined;
     const content = (
-      <Link to={item.href} className="block group" onClick={onItemClick}>
+      <Link
+        to={item.href}
+        className="block group"
+        onClick={onItemClick}
+        data-tour={tourTag}
+      >
         <div
           className={cn(
             'relative flex items-center h-10 rounded-md text-sm font-medium transition-all duration-200',
@@ -99,6 +114,8 @@ export function Sidebar({
   return (
     <TooltipProvider delayDuration={200}>
       <aside
+        data-tour="sidebar"
+        aria-label="Navegación principal"
         className={cn(
           'flex flex-col h-screen sticky top-0 glass-sidebar transition-[width] duration-200',
           collapsed ? 'w-[64px]' : 'w-[230px]'
@@ -160,6 +177,36 @@ export function Sidebar({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Theme toggle (mobile drawer) */}
+        {showLanguageSelector && !collapsed && (
+          <div className="px-3 pb-3">
+            <div className="px-2 pb-1.5">
+              <span className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70 uppercase">
+                Tema
+              </span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              className="w-full flex items-center justify-between gap-2 h-9 px-3 rounded-md border border-border/60 bg-muted/60 text-sm text-foreground hover:bg-muted transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                {theme === 'dark' ? (
+                  <Moon className="h-4 w-4 text-primary" />
+                ) : (
+                  <Sun className="h-4 w-4 text-warning" />
+                )}
+                <span className="font-medium">
+                  {theme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+                </span>
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Cambiar
+              </span>
+            </button>
           </div>
         )}
 

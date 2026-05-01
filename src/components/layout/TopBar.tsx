@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { Language } from '@/i18n/translations';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -22,19 +23,14 @@ interface TopBarProps {
 export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
   const { profile, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [, setCurrentTime] = useState(new Date());
-  const [isDark, setIsDark] = useState(false);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle('dark', next);
-  };
 
   const initials =
     profile?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase() || 'T';
