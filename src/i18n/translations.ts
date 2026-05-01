@@ -980,6 +980,8 @@ export const translations: Record<Language, Translations> = {
         fearful: 'Fearful',
         greedy: 'Greedy',
         frustrated: 'Frustrated',
+        fomo: 'FOMO',
+        vengeful: 'Vengeful',
       },
     },
     insights: {
