@@ -21,30 +21,35 @@ const STEPS: Step[] = [
     title: 'Navegación',
     body: 'Desde aquí navegás entre las secciones de tu workspace.',
     placement: 'right',
+    route: '/dashboard',
   },
   {
     selector: '[data-tour="dashboard"]',
     title: 'Panel de Control',
     body: 'Este es tu resumen del día — objetivos, alertas y métricas clave.',
     placement: 'bottom',
+    route: '/dashboard',
   },
   {
     selector: '[data-tour="add-trade"]',
     title: 'Agregar Operación',
     body: 'Registrá tu primera operación manualmente o importala desde tu broker.',
     placement: 'bottom',
+    route: '/journal',
   },
   {
     selector: '[data-tour="analytics"]',
     title: 'Centro de Análisis',
     body: 'Aquí la IA analiza tus patrones de trading.',
     placement: 'right',
+    route: '/analytics',
   },
   {
     selector: '[data-tour="psychology"]',
     title: 'Métricas Conductuales',
     body: 'Registrá tu estado mental cada día para entender cómo afecta tu rendimiento.',
     placement: 'right',
+    route: '/psychology',
   },
 ];
 
