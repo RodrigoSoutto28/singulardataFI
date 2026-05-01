@@ -128,8 +128,8 @@ export function ImportPreviewModal({
         </DialogHeader>
 
         {/* Summary Stats */}
-        <div className="px-6 py-4 border-b border-border bg-muted/30">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-foreground">
                 {selectedIndices.size}
