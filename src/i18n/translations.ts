@@ -251,6 +251,8 @@ export interface Translations {
       fearful: string;
       greedy: string;
       frustrated: string;
+      fomo: string;
+      vengeful: string;
     };
   };
 
@@ -617,6 +619,8 @@ export const translations: Record<Language, Translations> = {
         fearful: 'Temeroso',
         greedy: 'Codicioso',
         frustrated: 'Frustrado',
+        fomo: 'FOMO',
+        vengeful: 'Vengativo',
       },
     },
     insights: {
@@ -976,6 +980,8 @@ export const translations: Record<Language, Translations> = {
         fearful: 'Fearful',
         greedy: 'Greedy',
         frustrated: 'Frustrated',
+        fomo: 'FOMO',
+        vengeful: 'Vengeful',
       },
     },
     insights: {
@@ -1335,6 +1341,8 @@ export const translations: Record<Language, Translations> = {
         fearful: 'Temeroso',
         greedy: 'Ganancioso',
         frustrated: 'Frustrado',
+        fomo: 'FOMO',
+        vengeful: 'Vingativo',
       },
     },
     insights: {
