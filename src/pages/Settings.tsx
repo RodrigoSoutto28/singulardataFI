@@ -25,8 +25,13 @@ import {
   Check,
   Crown,
   Rocket,
+  Database,
+  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLoadSampleData } from '@/components/onboarding/WelcomeModal';
+import { resetOnboardingTour } from '@/components/onboarding/OnboardingTour';
 
 export default function Settings() {
   const { profile } = useAuth();
