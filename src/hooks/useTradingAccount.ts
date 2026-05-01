@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { getUserErrorMessage } from '@/lib/errors';
 
 export type TradingAccount = Tables<'trading_accounts'>;
 export type TradingAccountInsert = TablesInsert<'trading_accounts'>;
@@ -50,7 +51,7 @@ export function useTradingAccount() {
       toast.success('Cuenta creada correctamente');
     },
     onError: (error) => {
-      toast.error(`Error al crear cuenta: ${error.message}`);
+      toast.error(getUserErrorMessage(error, 'No se pudo crear la cuenta.'));
     },
   });
 
@@ -112,8 +113,8 @@ export function useTradingAccount() {
       queryClient.invalidateQueries({ queryKey: ['analytics_snapshots'] });
       toast.success('Balance inicial actualizado');
     },
-    onError: (error: any) => {
-      toast.error(`No se pudo actualizar el balance inicial: ${error?.message ?? 'error'}`);
+    onError: (error) => {
+      toast.error(getUserErrorMessage(error, 'No se pudo actualizar el balance inicial.'));
     },
   });
 
