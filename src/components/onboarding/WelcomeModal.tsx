@@ -24,7 +24,7 @@ interface Props {
 
 export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: Props) {
   const { user } = useAuth();
-  const { trades, importTrades } = useTrades();
+  const { trades, isLoading, importTrades } = useTrades();
   const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,15 +35,15 @@ export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: P
   useEffect(() => {
     if (manual) return;
     if (!user) return;
+    if (isLoading) return;
     const seen = localStorage.getItem(STORAGE_KEY);
     if (seen) return;
-    // Esperar a que cargue trades antes de decidir
     if (trades.length > 0) {
       localStorage.setItem(STORAGE_KEY, 'true');
       return;
     }
     setInternalOpen(true);
-  }, [user, trades.length, manual]);
+  }, [user, trades.length, isLoading, manual]);
 
   const handleStartEmpty = () => {
     localStorage.setItem(STORAGE_KEY, 'true');
