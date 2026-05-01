@@ -138,13 +138,16 @@ export function OnboardingTour() {
     };
 
     update();
+    // Reintentar tras navegación / lazy mount
+    const retries = [120, 350, 800].map((ms) => window.setTimeout(update, ms));
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
     return () => {
+      retries.forEach(clearTimeout);
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };
-  }, [active, stepIdx]);
+  }, [active, stepIdx, location.pathname]);
 
   if (!active) return null;
   const step = STEPS[stepIdx];
