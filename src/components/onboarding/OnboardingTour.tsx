@@ -63,6 +63,8 @@ interface Position {
 
 export function OnboardingTour() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [active, setActive] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [pos, setPos] = useState<Position>({ top: 0, left: 0, targetRect: null });
@@ -80,6 +82,15 @@ export function OnboardingTour() {
     setActive(false);
     setStepIdx(0);
   }, []);
+
+  // Navegar a la ruta del paso si es necesario
+  useEffect(() => {
+    if (!active) return;
+    const step = STEPS[stepIdx];
+    if (step.route && location.pathname !== step.route) {
+      navigate(step.route);
+    }
+  }, [active, stepIdx, location.pathname, navigate]);
 
   // Calcular posición del tooltip
   useEffect(() => {
