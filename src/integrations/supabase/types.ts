@@ -644,6 +644,8 @@ export type Database = {
         | "frustrated"
         | "excited"
         | "neutral"
+        | "fomo"
+        | "vengeful"
       study_content_type: "summary" | "paper_pdf"
       subscription_plan: "free" | "pro" | "power"
       trade_direction: "long" | "short"
@@ -792,6 +794,8 @@ export const Constants = {
         "frustrated",
         "excited",
         "neutral",
+        "fomo",
+        "vengeful",
       ],
       study_content_type: ["summary", "paper_pdf"],
       subscription_plan: ["free", "pro", "power"],
