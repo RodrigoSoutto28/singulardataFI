@@ -36,6 +36,7 @@ import { resetOnboardingTour } from '@/components/onboarding/OnboardingTour';
 export default function Settings() {
   const { profile } = useAuth();
   const { t } = useLanguage();
+  const { load: loadSample, loading: loadingSample } = useLoadSampleData();
 
   const plans = [
     {
