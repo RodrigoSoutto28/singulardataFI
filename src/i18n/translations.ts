@@ -1341,6 +1341,8 @@ export const translations: Record<Language, Translations> = {
         fearful: 'Temeroso',
         greedy: 'Ganancioso',
         frustrated: 'Frustrado',
+        fomo: 'FOMO',
+        vengeful: 'Vingativo',
       },
     },
     insights: {
