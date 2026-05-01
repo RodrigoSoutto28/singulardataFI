@@ -185,8 +185,12 @@ export default function Auth() {
                       type="email"
                       placeholder="trader@example.com"
                       required
+                      aria-invalid={!!fieldErrors.email}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">{t.auth.password}</Label>
@@ -196,8 +200,12 @@ export default function Auth() {
                       type="password"
                       placeholder="••••••••"
                       required
+                      aria-invalid={!!fieldErrors.password}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.password && (
+                      <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
@@ -220,8 +228,12 @@ export default function Auth() {
                       type="text"
                       placeholder="John Trader"
                       required
+                      aria-invalid={!!fieldErrors.fullName}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.fullName && (
+                      <p className="text-xs text-destructive">{fieldErrors.fullName}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">{t.auth.email}</Label>
@@ -231,8 +243,12 @@ export default function Auth() {
                       type="email"
                       placeholder="trader@example.com"
                       required
+                      aria-invalid={!!fieldErrors.email}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">{t.auth.password}</Label>
@@ -243,8 +259,12 @@ export default function Auth() {
                       placeholder="••••••••"
                       minLength={6}
                       required
+                      aria-invalid={!!fieldErrors.password}
                       className="bg-muted/50 border-border"
                     />
+                    {fieldErrors.password && (
+                      <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
