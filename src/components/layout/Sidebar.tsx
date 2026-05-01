@@ -11,9 +11,12 @@ import {
   Shield,
   ChevronsLeft,
   ChevronsRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Language } from '@/i18n/translations';
 
@@ -50,6 +53,7 @@ export function Sidebar({
   const location = useLocation();
   const { signOut, profile } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   const languages: Language[] = ['ES', 'EN', 'PT'];
 
