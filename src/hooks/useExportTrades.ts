@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { writeXLSXFile } from '@/lib/xlsx-adapter';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
