@@ -568,14 +568,7 @@ export default function Journal() {
 
         {/* Tablet/Desktop: full button row */}
         <div className="hidden sm:flex flex-wrap gap-2">
-          {/* Import Button */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.ods,.json,.html,.htm,.xml,.pdf"
-            className="hidden"
-          />
+          {/* Import Button (file input lives in the mobile block above and is shared via ref) */}
           <Button 
             variant="outline" 
             size="sm"
