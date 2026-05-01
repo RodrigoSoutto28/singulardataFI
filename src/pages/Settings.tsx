@@ -155,6 +155,64 @@ export default function Settings() {
         </CardContent>
       </Card>
 
+      {/* Data & Onboarding */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            Datos y Onboarding
+          </CardTitle>
+          <CardDescription>
+            Cargá datos de ejemplo para explorar la plataforma o reiniciá el
+            tour de bienvenida.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
+              <p className="font-medium text-sm">Cargar datos de ejemplo</p>
+              <p className="text-xs text-muted-foreground">
+                Agrega 30 operaciones distribuidas en los últimos 2 meses.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadSample}
+              disabled={loadingSample}
+              className="gap-2"
+              aria-label="Cargar datos de ejemplo"
+            >
+              {loadingSample ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Database className="h-4 w-4" />
+              )}
+              {loadingSample ? 'Cargando...' : 'Cargar ejemplos'}
+            </Button>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
+              <p className="font-medium text-sm">Tour de bienvenida</p>
+              <p className="text-xs text-muted-foreground">
+                Vuelve a mostrar la guía interactiva de 5 pasos.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetOnboardingTour}
+              className="gap-2"
+              aria-label="Repetir tour de bienvenida"
+            >
+              <Sparkles className="h-4 w-4" />
+              Repetir tour
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Notifications */}
       <Card className="bg-card border-border">
         <CardHeader>
