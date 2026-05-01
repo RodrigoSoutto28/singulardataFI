@@ -69,12 +69,14 @@ export default function Analytics() {
 
   return (
     <div className="space-y-6">
-      {/* Date range filter */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="outline" size="sm">{t.analytics.last30Days}</Button>
-        <Button variant="outline" size="sm">{t.analytics.last90Days}</Button>
-        <Button variant="default" size="sm">{t.analytics.sixMonths}</Button>
-        <Button variant="outline" size="sm">{t.analytics.allTime}</Button>
+      {/* Date range filter — horizontal scroll pills on mobile */}
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 w-max sm:flex-wrap sm:w-auto">
+          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.last30Days}</Button>
+          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.last90Days}</Button>
+          <Button variant="default" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.sixMonths}</Button>
+          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.allTime}</Button>
+        </div>
       </div>
 
       {/* Key Metrics */}
