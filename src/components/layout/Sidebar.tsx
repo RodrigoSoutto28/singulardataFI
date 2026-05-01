@@ -180,6 +180,36 @@ export function Sidebar({
           </div>
         )}
 
+        {/* Theme toggle (mobile drawer) */}
+        {showLanguageSelector && !collapsed && (
+          <div className="px-3 pb-3">
+            <div className="px-2 pb-1.5">
+              <span className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70 uppercase">
+                Tema
+              </span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              className="w-full flex items-center justify-between gap-2 h-9 px-3 rounded-md border border-border/60 bg-muted/60 text-sm text-foreground hover:bg-muted transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                {theme === 'dark' ? (
+                  <Moon className="h-4 w-4 text-primary" />
+                ) : (
+                  <Sun className="h-4 w-4 text-warning" />
+                )}
+                <span className="font-medium">
+                  {theme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+                </span>
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Cambiar
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Footer */}
         <div className={cn('py-3 border-t border-border flex flex-col gap-0.5', collapsed ? 'px-2' : 'px-3')}>
           {profile?.role === 'admin' && (
