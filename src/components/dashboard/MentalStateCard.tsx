@@ -11,6 +11,9 @@ interface MentalStateCardProps {
 
 export function MentalStateCard({ disciplineScore, className }: MentalStateCardProps) {
   const { t } = useLanguage();
+  const [insightExpanded, setInsightExpanded] = useState(false);
+  const insightText = t.dashboard.tiltDescription;
+  const isLong = insightText.length > 140;
   
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success bg-success/10';
