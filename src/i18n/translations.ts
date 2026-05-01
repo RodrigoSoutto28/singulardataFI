@@ -251,6 +251,8 @@ export interface Translations {
       fearful: string;
       greedy: string;
       frustrated: string;
+      fomo: string;
+      vengeful: string;
     };
   };
 
