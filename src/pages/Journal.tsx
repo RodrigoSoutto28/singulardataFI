@@ -637,7 +637,12 @@ export default function Journal() {
             }}
           >
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-2 btn-press" onClick={() => resetForm()}>
+              <Button
+                size="sm"
+                className="gap-2 btn-press"
+                onClick={() => resetForm()}
+                data-tour="add-trade"
+              >
                 <Plus className="h-4 w-4" />
                 {t.journal.addTrade}
               </Button>
