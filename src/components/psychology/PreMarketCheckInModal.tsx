@@ -78,11 +78,10 @@ export function PreMarketCheckInModal({ open, onComplete }: PreMarketCheckInModa
   return (
     <Dialog open={open}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="max-w-2xl max-h-[90vh] overflow-y-auto [&>button.absolute]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
-        hideCloseButton
       >
         {/* Header */}
         <div className="space-y-3">
