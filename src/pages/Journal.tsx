@@ -1175,6 +1175,13 @@ export default function Journal() {
         )}
       </div>
 
+      <TaxometerAlert
+        open={taxometerOpen}
+        errors={pendingErrors}
+        onContinue={handleTaxometerContinue}
+        onCancel={handleTaxometerCancel}
+      />
+
       {validatorTrade && (
         <ProcessValidatorModal
           open={!!validatorTrade}
