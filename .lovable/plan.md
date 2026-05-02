@@ -1,51 +1,51 @@
-## Process Validator System
+## Taxímetro de Malos Hábitos
 
-Implements a post-trade validation modal that triggers after closing a trade, evaluates adherence to plan (5 questions), and shows context-aware AI feedback celebrating discipline over P&L.
+System that detects psychological trading errors, quantifies their dollar cost, and surfaces them via a Psychology tab + Dashboard widget + a blocking pre-trade alert.
 
 ### Database (new migration)
 
-Two new tables with RLS (user owns rows):
-
-**`process_validations`**
-- `id uuid pk`, `user_id uuid not null`, `trade_id uuid not null`
-- `matched_setup bool`, `respected_sl bool`, `correct_position_size bool`, `waited_confirmation bool`, `closed_as_planned bool`
-- `adherence_score int` (0–5), `reflection_note text`, `ai_message_type text`, `ai_message_shown text`
-- `created_at timestamptz default now()`
-- Unique `(user_id, trade_id)` so each trade is validated once
-
-**`user_streaks`**
-- `id uuid pk`, `user_id uuid`, `streak_type text` (e.g. `validation`, `discipline`)
-- `current_count int`, `best_count int`, `start_date date`, `last_activity_date date`
-- `created_at`, `updated_at timestamptz`
-- Unique `(user_id, streak_type)`
-
-RLS: standard `auth.uid() = user_id` for select/insert/update/delete on both.
+**`psychological_errors`** table with RLS (`auth.uid() = user_id` for all CRUD):
+- `id`, `user_id`, `trade_id` (nullable)
+- `error_type text` (`revenge_trading | fomo | overtrading | risk_exceeded | no_stop_loss | holding_losers`)
+- `confidence text` (`high | medium | low`), `reason text`
+- `cost_dollars numeric default 0`, `was_prevented boolean default false`
+- `metadata jsonb`, `timestamp timestamptz default now()`, `created_at`
+- Index on `(user_id, timestamp desc)`
 
 ### Files to create
 
-1. **`src/lib/ai-messages.ts`** — `getAIMessage(result, score, pnl)` returns one of 4 message variants (loss+discipline = celebration, win+no-discipline = warning, loss+no-discipline = intervention, win+discipline = excellence) plus breakeven neutral. Returns icon node, title, message, stat, suggested actions.
+1. **`src/lib/error-detection.ts`** — Pure detection logic:
+   - `ErrorType` union, `DetectedError` interface.
+   - `detectPsychologicalErrors(currentTrade, recentTrades, todayCheckIn)` — checks: revenge trading (<15 min after a loss), overtrading (exceeds `max_daily_trades`), risk exceeded (`stop_loss` distance > `max_risk_per_trade`%), missing stop loss, FOMO keyword in notes.
+   - `calculateErrorCost(errorType, trade, historicalData)` — uses real loss when present, else multiplies user's avg loss.
 
-2. **`src/lib/streak-manager.ts`** — Helper `updateStreak(userId, streakType)` encapsulating the consecutive-day logic (increment if diff=1, no-op if 0, reset if >1, insert if missing).
+2. **`src/hooks/useTaxometer.ts`** — React Query hook reading `psychological_errors` for the user, computing `{ totalCost, weekCost, monthCost, quarterCost, savingsFromImprovement }` and grouping by `error_type`. Also exports a `logError(...)` mutation that inserts a row.
 
-3. **`src/hooks/useProcessValidation.ts`** — React Query mutation that inserts into `process_validations`, then calls `updateStreak(user.id, 'validation')`, invalidates `['trades']`, `['user-streaks']`, `['analytics']`. Uses `useAuth` from `@/contexts/AuthContext`.
+3. **`src/components/psychology/TaxometerDashboard.tsx`** — Full dashboard:
+   - Hero card with total lost, tangible comparison ($500 = "Un curso profesional", etc.).
+   - 4 period stat cards (week / month / quarter / total).
+   - Recharts bar chart of cost per error type with semantic-token colors.
+   - List breakdown with counts per type.
+   - Optional savings card.
+   - Empty state when no errors detected yet.
 
-4. **`src/components/trades/ProcessValidatorModal.tsx`** — 2-step Dialog:
-   - Step 1: Trade summary (symbol/direction/PnL), 5 Yes/No adherence questions with Lucide icons, live discipline score 0–5 with colored progress bar.
-   - Step 2: AI message card (color-coded by variant), suggested actions list, optional 500-char reflection textarea, Submit.
-   - Auto-detects `win/loss/breakeven` from `trade.pnl`.
+4. **`src/components/psychology/TaxometerWidget.tsx`** — Compact card for Dashboard showing total + this-week cost + small CTA linking to `/psychology` taxímetro tab. Uses semantic tokens (warning/destructive). Empty state: "Sin errores registrados — sigue así".
 
-### File to modify
+5. **`src/components/psychology/TaxometerAlert.tsx`** — `AlertDialog` triggered before opening risky trades:
+   - Lists high-confidence detected errors.
+   - Shows estimated historical cost.
+   - 60-second reflection countdown progress bar before "Continuar de todas formas" enables.
+   - "Cancelar trade" primary action.
 
-**`src/pages/Journal.tsx`** — In `handleAddTrade`, after a successful update/create where the resulting status is `'closed'` (and previously was open or new), open the validator with the closed trade. Add state `validatorOpen`, `tradeToValidate`. Render `<ProcessValidatorModal>` at the end of the JSX. Capture the returned trade record from `updateTrade.mutateAsync` / `createTrade.mutateAsync` to pass `id`, `pnl`, `pnl_percentage`, `symbol`, `direction`.
+### Files to modify
 
-### Trigger logic
-
-- Only fires when `status === 'closed'` and `pnl` is non-null.
-- For edits: only open if the trade was previously open (avoid re-prompting on every edit). If validation already exists for that trade, skip (best-effort check via select before opening).
+- **`src/pages/Psychology.tsx`** — Add a 4th tab `taxometer` with `DollarSign` icon rendering `<TaxometerDashboard />`.
+- **`src/pages/Dashboard.tsx`** — Insert `<TaxometerWidget />` in the metrics/cards grid.
+- **`src/pages/Journal.tsx`** — On submit of a new (open or closed) trade, run `detectPsychologicalErrors` against today's check-in (`usePreMarketCheckIn`) and recent trades (`useTrades`); if any high-confidence error: open `<TaxometerAlert>`. On "Cancelar" abort save; on "Continuar" save the trade AND insert a `psychological_errors` row via `useTaxometer.logError`. Also auto-log post-close errors when applicable (e.g. `no_stop_loss` confirmed) using the closed trade's loss as `cost_dollars`.
 
 ### Notes
 
-- All UI strings in Spanish to match existing Journal page.
-- Icons rendered as JSX elements inside `ai-messages.ts` (file becomes `.tsx`).
-- Toast on save success/failure via `sonner`.
-- Modal is closeable normally (unlike pre-market check-in).
+- All copy in Spanish.
+- All colors via semantic tokens (`destructive`, `warning`, `success`, `muted-foreground`) — no hardcoded hex in components. The chart uses HSL values resolved from CSS vars.
+- Types: extend project types or use lightweight local interfaces (`PreMarketCheckIn` shape already exists in `src/lib/checkin-helpers.ts`; `Trade` from `@/hooks/useTrades`).
+- `useAuth` from `@/contexts/AuthContext` (project does not have a `useAuth` hook file).

@@ -310,6 +310,48 @@ export type Database = {
         }
         Relationships: []
       }
+      psychological_errors: {
+        Row: {
+          confidence: string
+          cost_dollars: number
+          created_at: string
+          error_type: string
+          id: string
+          metadata: Json | null
+          reason: string | null
+          timestamp: string
+          trade_id: string | null
+          user_id: string
+          was_prevented: boolean
+        }
+        Insert: {
+          confidence?: string
+          cost_dollars?: number
+          created_at?: string
+          error_type: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          timestamp?: string
+          trade_id?: string | null
+          user_id: string
+          was_prevented?: boolean
+        }
+        Update: {
+          confidence?: string
+          cost_dollars?: number
+          created_at?: string
+          error_type?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          timestamp?: string
+          trade_id?: string | null
+          user_id?: string
+          was_prevented?: boolean
+        }
+        Relationships: []
+      }
       psychology_entries: {
         Row: {
           broken_rules: string[] | null
