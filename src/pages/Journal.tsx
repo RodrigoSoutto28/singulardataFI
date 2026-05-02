@@ -84,6 +84,7 @@ interface ImportedTrade {
 
 export default function Journal() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -91,6 +92,7 @@ export default function Journal() {
   const [isImporting, setIsImporting] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
 
   // Reset paginación al cambiar filtros
