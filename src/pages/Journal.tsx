@@ -1083,6 +1083,20 @@ export default function Journal() {
           />
         )}
       </div>
+
+      {validatorTrade && (
+        <ProcessValidatorModal
+          open={!!validatorTrade}
+          onClose={() => setValidatorTrade(null)}
+          trade={{
+            id: validatorTrade.id,
+            pnl: validatorTrade.pnl ?? 0,
+            pnl_percentage: validatorTrade.pnl_percentage ?? 0,
+            symbol: validatorTrade.symbol,
+            direction: validatorTrade.direction as 'long' | 'short',
+          }}
+        />
+      )}
     </div>
   );
 }
