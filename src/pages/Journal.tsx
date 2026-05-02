@@ -60,6 +60,9 @@ import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/components/journal/ImportPreviewModal';
 import { useDebounce } from '@/hooks/useDebounce';
 import { tradeFormSchema } from '@/lib/validation';
+import { ProcessValidatorModal } from '@/components/trades/ProcessValidatorModal';
+import { hasValidation } from '@/hooks/useProcessValidation';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Types for import preview
 interface ImportedTrade {
@@ -81,6 +84,7 @@ interface ImportedTrade {
 
 export default function Journal() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -88,6 +92,7 @@ export default function Journal() {
   const [isImporting, setIsImporting] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
 
   // Reset paginación al cambiar filtros
@@ -370,13 +375,23 @@ export default function Journal() {
     };
 
     try {
+      const wasOpen = !editingTrade || editingTrade.status !== 'closed';
+      let savedTrade: Trade | null = null;
       if (editingTrade) {
-        await updateTrade.mutateAsync({ id: editingTrade.id, ...payload });
+        savedTrade = await updateTrade.mutateAsync({ id: editingTrade.id, ...payload }) as Trade;
       } else {
-        await createTrade.mutateAsync(payload);
+        savedTrade = await createTrade.mutateAsync(payload) as Trade;
       }
       setIsAddTradeOpen(false);
       resetForm();
+
+      // Trigger Process Validator when a trade transitions to closed
+      if (savedTrade && savedTrade.status === 'closed' && wasOpen && user?.id) {
+        const already = await hasValidation(savedTrade.id, user.id);
+        if (!already) {
+          setValidatorTrade(savedTrade);
+        }
+      }
     } catch (error) {
       // handled by mutation
     }
@@ -1068,6 +1083,20 @@ export default function Journal() {
           />
         )}
       </div>
+
+      {validatorTrade && (
+        <ProcessValidatorModal
+          open={!!validatorTrade}
+          onClose={() => setValidatorTrade(null)}
+          trade={{
+            id: validatorTrade.id,
+            pnl: validatorTrade.pnl ?? 0,
+            pnl_percentage: validatorTrade.pnl_percentage ?? 0,
+            symbol: validatorTrade.symbol,
+            direction: validatorTrade.direction as 'long' | 'short',
+          }}
+        />
+      )}
     </div>
   );
 }
