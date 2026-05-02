@@ -388,16 +388,64 @@ export default function Journal() {
       status,
     };
 
+    // Detect psychological errors before saving
+    const detected = detectPsychologicalErrors(
+      {
+        entry_price: payload.entry_price,
+        stop_loss: payload.stop_loss,
+        quantity: payload.quantity,
+        entry_date: payload.entry_date,
+        notes: payload.notes,
+        status: payload.status,
+      },
+      trades.filter((t) => !editingTrade || t.id !== editingTrade.id),
+      todayCheckIn
+        ? {
+            max_daily_trades: todayCheckIn.max_daily_trades,
+            max_risk_per_trade: Number(todayCheckIn.max_risk_per_trade),
+          }
+        : null,
+    );
+
+    const highErrors = detected.filter((e) => e.confidence === 'high');
+    if (highErrors.length > 0 && !editingTrade) {
+      setPendingErrors(detected);
+      setPendingPayload(payload);
+      setTaxometerOpen(true);
+      return;
+    }
+
+    await commitTrade(payload, detected);
+  };
+
+  const commitTrade = async (payload: any, detected: DetectedError[] = []) => {
     try {
       const wasOpen = !editingTrade || editingTrade.status !== 'closed';
       let savedTrade: Trade | null = null;
       if (editingTrade) {
-        savedTrade = await updateTrade.mutateAsync({ id: editingTrade.id, ...payload }) as Trade;
+        savedTrade = (await updateTrade.mutateAsync({ id: editingTrade.id, ...payload })) as Trade;
       } else {
-        savedTrade = await createTrade.mutateAsync(payload) as Trade;
+        savedTrade = (await createTrade.mutateAsync(payload)) as Trade;
       }
       setIsAddTradeOpen(false);
       resetForm();
+
+      // Log psychological errors that were not prevented
+      if (savedTrade && detected.length > 0 && user?.id) {
+        for (const err of detected) {
+          await logError({
+            trade_id: savedTrade.id,
+            error_type: err.type,
+            confidence: err.confidence,
+            reason: err.reason,
+            cost_dollars:
+              savedTrade.status === 'closed' && (savedTrade.pnl ?? 0) < 0
+                ? Math.abs(savedTrade.pnl ?? 0)
+                : err.costEstimate ?? 0,
+            was_prevented: false,
+          }).catch(() => {});
+        }
+      }
 
       // Trigger Process Validator when a trade transitions to closed
       if (savedTrade && savedTrade.status === 'closed' && wasOpen && user?.id) {
@@ -409,6 +457,35 @@ export default function Journal() {
     } catch (error) {
       // handled by mutation
     }
+  };
+
+  const handleTaxometerCancel = async () => {
+    // User cancelled the trade — log prevented errors
+    if (user?.id) {
+      for (const err of pendingErrors.filter((e) => e.confidence === 'high')) {
+        await logError({
+          trade_id: null,
+          error_type: err.type,
+          confidence: err.confidence,
+          reason: err.reason,
+          cost_dollars: 0,
+          was_prevented: true,
+        }).catch(() => {});
+      }
+    }
+    toast.success('Trade cancelado. Buena decisión.');
+    setTaxometerOpen(false);
+    setPendingErrors([]);
+    setPendingPayload(null);
+  };
+
+  const handleTaxometerContinue = async () => {
+    setTaxometerOpen(false);
+    if (pendingPayload) {
+      await commitTrade(pendingPayload, pendingErrors);
+    }
+    setPendingErrors([]);
+    setPendingPayload(null);
   };
 
   const handleDeleteTrade = async (id: string) => {
