@@ -102,6 +102,13 @@ export default function Journal() {
   const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
 
+  // Taxometer alert state
+  const { todayCheckIn } = usePreMarketCheckIn();
+  const { logError } = useTaxometer();
+  const [pendingErrors, setPendingErrors] = useState<DetectedError[]>([]);
+  const [pendingPayload, setPendingPayload] = useState<any>(null);
+  const [taxometerOpen, setTaxometerOpen] = useState(false);
+
   // Reset paginación al cambiar filtros
   useEffect(() => {
     setVisibleCount(50);
