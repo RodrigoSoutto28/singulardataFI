@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { Brain, Sparkles, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Brain, Lightbulb, CheckCircle2, Sparkles } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface MentalStateCardProps {
   disciplineScore: number;
@@ -10,100 +11,89 @@ interface MentalStateCardProps {
 }
 
 export function MentalStateCard({ disciplineScore, className }: MentalStateCardProps) {
-  const { t } = useLanguage();
-  const [insightExpanded, setInsightExpanded] = useState(false);
-  const insightText = t.dashboard.tiltDescription;
-  const isLong = insightText.length > 140;
-  
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-success bg-success/10';
-    if (score >= 60) return 'text-warning bg-warning/10';
-    return 'text-destructive bg-destructive/10';
+  const navigate = useNavigate();
+
+  const getDisciplineStatus = (score: number) => {
+    if (score >= 8) return { label: 'Excelente', color: 'text-success', emoji: '🔥' };
+    if (score >= 6) return { label: 'Bien', color: 'text-warning', emoji: '👍' };
+    return { label: 'Mejorable', color: 'text-[hsl(28_95%_55%)]', emoji: '⚠️' };
   };
 
+  const status = getDisciplineStatus(disciplineScore);
+  const circumference = 2 * Math.PI * 56;
+  const dashLength = (disciplineScore / 10) * circumference;
+
   return (
-    <div className={cn("space-y-4 my-0 mx-0 border-card border-0", className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {t.dashboard.mentalState}
-        </h3>
-        <Badge className={cn('font-mono', getScoreColor(disciplineScore))}>
-          {t.dashboard.discipline}: {disciplineScore}
-        </Badge>
-      </div>
+    <Card className={cn('bg-gradient-to-br from-card to-muted/20', className)}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Brain className="h-5 w-5 text-primary" />
+          Estado Mental
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Score Visual */}
+        <div className="text-center">
+          <div className="text-5xl mb-2">{status.emoji}</div>
+          <div className="text-3xl font-bold font-mono mb-1">{disciplineScore}/10</div>
+          <Badge variant="secondary" className={cn('text-xs', status.color)}>
+            {status.label}
+          </Badge>
+        </div>
 
-      {/* Insight Card */}
-      <div className="p-4 rounded-lg bg-card border border-border space-y-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Brain className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                {t.dashboard.insightOfDay}
-              </p>
-              <p className="text-sm font-medium">{t.dashboard.tiltAlert}</p>
+        {/* Progress Ring */}
+        <div className="relative w-32 h-32 mx-auto">
+          <svg className="transform -rotate-90 w-32 h-32">
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="currentColor"
+              strokeWidth="8"
+              fill="transparent"
+              className="text-muted"
+            />
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="currentColor"
+              strokeWidth="8"
+              fill="transparent"
+              strokeDasharray={`${dashLength} ${circumference}`}
+              strokeLinecap="round"
+              className="text-primary transition-all duration-500"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-2xl font-bold font-mono">
+              {(disciplineScore * 10).toFixed(0)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Quick AI Insight */}
+        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="flex items-start gap-2">
+            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div className="text-xs text-muted-foreground">
+              {disciplineScore >= 8
+                ? 'Mantén este nivel de disciplina. Eres Top 10% de traders.'
+                : 'Pequeños ajustes en tu rutina pueden mejorar tu score. Revisa tu check-in.'}
             </div>
           </div>
-          <Badge variant="secondary" className="text-[10px]">{t.dashboard.aiFree}</Badge>
         </div>
-        <div>
-          <p
-            className={cn(
-              'text-sm text-muted-foreground',
-              isLong && !insightExpanded && 'line-clamp-3'
-            )}
-          >
-            {insightText}
-          </p>
-          {isLong && (
-            <button
-              type="button"
-              onClick={() => setInsightExpanded((v) => !v)}
-              className="mt-1 text-xs font-medium text-primary hover:underline"
-            >
-              {insightExpanded ? 'Ver menos' : 'Ver más'}
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-warning">
-          <Lightbulb className="h-4 w-4" />
-          <span>{t.dashboard.tiltAdvice}</span>
-        </div>
-      </div>
 
-      {/* Ritual Completed */}
-      <div className="p-4 rounded-lg border border-success/30 bg-success/5 flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-success/20">
-          <CheckCircle2 className="h-5 w-5 text-success" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">{t.dashboard.ritualCompleted}</p>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </div>
-          <p className="text-xs text-muted-foreground">{t.dashboard.comeBackTomorrow}</p>
-        </div>
-        <Badge variant="secondary" className="text-[10px]">{t.dashboard.dailyStreak}</Badge>
-      </div>
-
-      {/* Weekly Summary */}
-      <div className="p-4 rounded-lg bg-card border border-border">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <p className="text-xs font-medium uppercase tracking-wider">{t.dashboard.weeklySummary}</p>
-        </div>
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-xl font-bold font-mono text-success">+$0</span>
-          <Badge variant="secondary" className="text-[10px]">0% WR</Badge>
-        </div>
-        <p className="text-xs text-muted-foreground">{t.dashboard.bestDay}: -</p>
-        <p className="text-xs text-muted-foreground mt-2 italic">
-          {t.dashboard.noTrades} {t.dashboard.patienceMessage}
-        </p>
-      </div>
-    </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          size="sm"
+          onClick={() => navigate('/psychology')}
+        >
+          <Target className="h-4 w-4 mr-2" />
+          Ver Análisis Completo
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
