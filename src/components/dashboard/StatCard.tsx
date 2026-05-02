@@ -1,83 +1,59 @@
-import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
+  label: string;
+  value: string;
   change?: number;
-  changeLabel?: string;
   icon: LucideIcon;
-  variant?: 'default' | 'profit' | 'loss' | 'primary';
+  trend?: 'up' | 'down';
+  color?: 'primary' | 'teal' | 'purple' | 'orange';
   className?: string;
 }
 
 export function StatCard({
-  title,
+  label,
   value,
   change,
-  changeLabel,
   icon: Icon,
-  variant = 'default',
+  trend,
+  color = 'primary',
   className,
 }: StatCardProps) {
-  const isPositive = change !== undefined && change >= 0;
-
-  const variantStyles = {
-    default: 'bg-card border-border',
-    profit: 'bg-card border-success/30',
-    loss: 'bg-card border-destructive/30',
-    primary: 'bg-card border-primary/30',
-  };
-
-  const iconStyles = {
-    default: 'bg-muted text-muted-foreground',
-    profit: 'bg-success/10 text-success',
-    loss: 'bg-destructive/10 text-destructive',
+  const colorClasses: Record<string, string> = {
     primary: 'bg-primary/10 text-primary',
+    teal: 'bg-[hsl(173_80%_40%/0.1)] text-[hsl(173_80%_40%)]',
+    purple: 'bg-[hsl(265_84%_60%/0.1)] text-[hsl(265_84%_60%)]',
+    orange: 'bg-[hsl(28_95%_55%/0.1)] text-[hsl(28_95%_55%)]',
   };
 
   return (
-    <div
-      className={cn(
-        'stat-card rounded-lg border p-5',
-        variantStyles[variant],
-        className
-      )}
-    >
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold font-mono-numbers tracking-tight">
-            {value}
-          </p>
+    <Card className={cn('relative overflow-hidden', className)}>
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className={cn('p-2 rounded-lg', colorClasses[color])}>
+            <Icon className="h-5 w-5" />
+          </div>
           {change !== undefined && (
-            <div className="flex items-center gap-1.5">
-              <span
-                className={cn(
-                  'text-xs font-semibold font-mono-numbers',
-                  isPositive ? 'text-profit' : 'text-loss'
-                )}
-              >
-                {isPositive ? '+' : ''}
-                {change.toFixed(2)}%
-              </span>
-              {changeLabel && (
-                <span className="text-xs text-muted-foreground">
-                  {changeLabel}
-                </span>
+            <Badge
+              variant={trend === 'up' ? 'default' : 'destructive'}
+              className={cn(
+                'text-xs font-mono',
+                trend === 'up' && 'bg-success/15 text-success hover:bg-success/20'
               )}
-            </div>
+            >
+              {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
+            </Badge>
           )}
         </div>
-        <div
-          className={cn(
-            'flex items-center justify-center h-10 w-10 rounded-lg',
-            iconStyles[variant]
-          )}
-        >
-          <Icon className="h-6 w-6" />
-        </div>
-      </div>
-    </div>
+        <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">
+          {label}
+        </p>
+        <p className="text-2xl font-bold font-mono tracking-tight">{value}</p>
+      </CardContent>
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-primary/5 pointer-events-none" />
+    </Card>
   );
 }
