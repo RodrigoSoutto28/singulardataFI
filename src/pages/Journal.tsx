@@ -60,6 +60,9 @@ import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/components/journal/ImportPreviewModal';
 import { useDebounce } from '@/hooks/useDebounce';
 import { tradeFormSchema } from '@/lib/validation';
+import { ProcessValidatorModal } from '@/components/trades/ProcessValidatorModal';
+import { hasValidation } from '@/hooks/useProcessValidation';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Types for import preview
 interface ImportedTrade {
