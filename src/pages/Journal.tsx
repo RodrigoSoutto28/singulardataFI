@@ -63,6 +63,13 @@ import { tradeFormSchema } from '@/lib/validation';
 import { ProcessValidatorModal } from '@/components/trades/ProcessValidatorModal';
 import { hasValidation } from '@/hooks/useProcessValidation';
 import { useAuth } from '@/contexts/AuthContext';
+import { TaxometerAlert } from '@/components/psychology/TaxometerAlert';
+import {
+  detectPsychologicalErrors,
+  type DetectedError,
+} from '@/lib/error-detection';
+import { useTaxometer } from '@/hooks/useTaxometer';
+import { usePreMarketCheckIn } from '@/hooks/usePreMarketCheckIn';
 
 // Types for import preview
 interface ImportedTrade {
