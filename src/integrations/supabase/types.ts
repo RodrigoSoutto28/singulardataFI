@@ -214,6 +214,54 @@ export type Database = {
         }
         Relationships: []
       }
+      process_validations: {
+        Row: {
+          adherence_score: number
+          ai_message_shown: string | null
+          ai_message_type: string | null
+          closed_as_planned: boolean
+          correct_position_size: boolean
+          created_at: string
+          id: string
+          matched_setup: boolean
+          reflection_note: string | null
+          respected_sl: boolean
+          trade_id: string
+          user_id: string
+          waited_confirmation: boolean
+        }
+        Insert: {
+          adherence_score: number
+          ai_message_shown?: string | null
+          ai_message_type?: string | null
+          closed_as_planned: boolean
+          correct_position_size: boolean
+          created_at?: string
+          id?: string
+          matched_setup: boolean
+          reflection_note?: string | null
+          respected_sl: boolean
+          trade_id: string
+          user_id: string
+          waited_confirmation: boolean
+        }
+        Update: {
+          adherence_score?: number
+          ai_message_shown?: string | null
+          ai_message_type?: string | null
+          closed_as_planned?: boolean
+          correct_position_size?: boolean
+          created_at?: string
+          id?: string
+          matched_setup?: boolean
+          reflection_note?: string | null
+          respected_sl?: boolean
+          trade_id?: string
+          user_id?: string
+          waited_confirmation?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -673,6 +721,42 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          best_count: number
+          created_at: string
+          current_count: number
+          id: string
+          last_activity_date: string | null
+          start_date: string | null
+          streak_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_count?: number
+          created_at?: string
+          current_count?: number
+          id?: string
+          last_activity_date?: string | null
+          start_date?: string | null
+          streak_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_count?: number
+          created_at?: string
+          current_count?: number
+          id?: string
+          last_activity_date?: string | null
+          start_date?: string | null
+          streak_type?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

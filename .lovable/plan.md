@@ -1,77 +1,51 @@
-## Sistema de Check-in Pre-Mercado Obligatorio
+## Process Validator System
 
-Modal bloqueante de 4 pasos que se muestra cada día al entrar a la app y obliga al trader a definir su plan (setups válidos, riesgo, estado emocional, metas) antes de acceder al Dashboard. Los datos se persisten en una nueva tabla y se invalida al día siguiente.
+Implements a post-trade validation modal that triggers after closing a trade, evaluates adherence to plan (5 questions), and shows context-aware AI feedback celebrating discipline over P&L.
 
-### Cambios en la base de datos
+### Database (new migration)
 
-Nueva tabla `pre_market_checkins` con un check-in único por usuario y por día:
+Two new tables with RLS (user owns rows):
 
-```text
-pre_market_checkins
-├── id              uuid PK
-├── user_id         uuid (auth.uid)
-├── checkin_date    date  (DEFAULT CURRENT_DATE)
-├── allowed_setups  text[]                — setups válidos del día
-├── max_risk_per_trade   numeric(4,2)    — % riesgo
-├── max_daily_trades     int             — tope de operaciones
-├── emotional_state text                  — confident|calm|neutral|anxious|fearful
-├── goals_today     text                  — opcional
-├── created_at      timestamptz
-└── UNIQUE (user_id, checkin_date)
-```
+**`process_validations`**
+- `id uuid pk`, `user_id uuid not null`, `trade_id uuid not null`
+- `matched_setup bool`, `respected_sl bool`, `correct_position_size bool`, `waited_confirmation bool`, `closed_as_planned bool`
+- `adherence_score int` (0–5), `reflection_note text`, `ai_message_type text`, `ai_message_shown text`
+- `created_at timestamptz default now()`
+- Unique `(user_id, trade_id)` so each trade is validated once
 
-- RLS habilitado.
-- Políticas: SELECT/INSERT/UPDATE/DELETE solo cuando `auth.uid() = user_id`.
+**`user_streaks`**
+- `id uuid pk`, `user_id uuid`, `streak_type text` (e.g. `validation`, `discipline`)
+- `current_count int`, `best_count int`, `start_date date`, `last_activity_date date`
+- `created_at`, `updated_at timestamptz`
+- Unique `(user_id, streak_type)`
 
-### Archivos nuevos
+RLS: standard `auth.uid() = user_id` for select/insert/update/delete on both.
 
-1. **`src/lib/checkin-helpers.ts`**
-   - Tipo `PreMarketCheckInData`.
-   - Constantes `SETUPS` y `EMOTIONS` (con emojis y colores semánticos del design system, sin colores hardcoded como `bg-green-100`).
-   - Helper `getTodayDateString()`.
+### Files to create
 
-2. **`src/hooks/usePreMarketCheckIn.ts`**
-   - `useQuery` por `['pre-market-checkin', userId, today]` que busca el registro del día.
-   - `useMutation` `saveCheckIn` que inserta en `pre_market_checkins` y refresca caché.
-   - Devuelve `{ todayCheckIn, hasCheckedInToday, isLoading, saveCheckIn, isSaving }`.
+1. **`src/lib/ai-messages.ts`** — `getAIMessage(result, score, pnl)` returns one of 4 message variants (loss+discipline = celebration, win+no-discipline = warning, loss+no-discipline = intervention, win+discipline = excellence) plus breakeven neutral. Returns icon node, title, message, stat, suggested actions.
 
-3. **`src/components/psychology/PreMarketCheckInModal.tsx`**
-   - `<Dialog>` no cerrable: `onPointerDownOutside` y `onEscapeKeyDown` con `e.preventDefault()`, sin botón X (`hideClose` o sobreescribir contenido).
-   - Header con `Brain` icon + barra de progreso (`Paso X de 4` + Progress).
-   - **Paso 1 — Setups válidos**: grid de tarjetas seleccionables (multi). Bloquea avance si vacío.
-   - **Paso 2 — Riesgo**: Slider 0.5-5% (default 1%) con badge `destructive` cuando >2% y alerta. Selector de máx trades (1-6).
-   - **Paso 3 — Estado emocional**: 5 opciones; alerta si `anxious|fearful` (corrige el bug de precedencia del snippet original usando paréntesis).
-   - **Paso 4 — Metas + Resumen**: textarea (max 300) + tarjeta resumen con setups/riesgo/trades/estado, botón "Comprometerme" llama `saveCheckIn` y luego `onComplete()`.
-   - Toast de éxito al guardar.
+2. **`src/lib/streak-manager.ts`** — Helper `updateStreak(userId, streakType)` encapsulating the consecutive-day logic (increment if diff=1, no-op if 0, reset if >1, insert if missing).
 
-### Integración en `src/App.tsx`
+3. **`src/hooks/useProcessValidation.ts`** — React Query mutation that inserts into `process_validations`, then calls `updateStreak(user.id, 'validation')`, invalidates `['trades']`, `['user-streaks']`, `['analytics']`. Uses `useAuth` from `@/contexts/AuthContext`.
 
-Crear un componente interno `PreMarketGate` que envuelve el `<AppLayout />` dentro de `ProtectedRoute`:
+4. **`src/components/trades/ProcessValidatorModal.tsx`** — 2-step Dialog:
+   - Step 1: Trade summary (symbol/direction/PnL), 5 Yes/No adherence questions with Lucide icons, live discipline score 0–5 with colored progress bar.
+   - Step 2: AI message card (color-coded by variant), suggested actions list, optional 500-char reflection textarea, Submit.
+   - Auto-detects `win/loss/breakeven` from `trade.pnl`.
 
-- Llama `usePreMarketCheckIn()`.
-- Mientras `isLoading` → no renderiza nada (evita parpadeo).
-- Si `!hasCheckedInToday` → muestra solo el `<PreMarketCheckInModal open onComplete={…} />` encima del layout (el modal bloqueante impide interacción con la UI debajo).
-- Tras completar, la query se invalida → el modal desaparece automáticamente.
+### File to modify
 
-Esto mantiene el `<Outlet />` y todas las rutas hijas intactos.
+**`src/pages/Journal.tsx`** — In `handleAddTrade`, after a successful update/create where the resulting status is `'closed'` (and previously was open or new), open the validator with the closed trade. Add state `validatorOpen`, `tradeToValidate`. Render `<ProcessValidatorModal>` at the end of the JSX. Capture the returned trade record from `updateTrade.mutateAsync` / `createTrade.mutateAsync` to pass `id`, `pnl`, `pnl_percentage`, `symbol`, `direction`.
 
-### Detalles técnicos / correcciones al snippet original
+### Trigger logic
 
-- **Tokens del design system**: reemplazar `bg-green-100`, `bg-red-100`, etc. por tokens HSL del proyecto (`bg-success/10`, `bg-destructive/10`, `bg-warning/10`, `bg-muted`).
-- **Bug lógico** `emotionalState === 'anxious' || emotionalState === 'fearful' && (...)` se corrige envolviendo en paréntesis.
-- **Auth**: usar `useAuth` desde `@/contexts/AuthContext` (no `./useAuth`).
-- **Tipos TS**: `selectedSetups: string[]`, evitar `any`.
-- i18n: por simplicidad inicial los textos quedan en español hardcoded (consistente con el snippet del usuario); se puede migrar a `LanguageContext` luego.
-- El modal **no se puede saltar** desde rutas autenticadas; rutas públicas (`/auth`, `/terms`, `/privacy`) no se ven afectadas porque `PreMarketGate` solo aplica dentro de `ProtectedRoute`.
+- Only fires when `status === 'closed'` and `pnl` is non-null.
+- For edits: only open if the trade was previously open (avoid re-prompting on every edit). If validation already exists for that trade, skip (best-effort check via select before opening).
 
-### Flujo del usuario
+### Notes
 
-```text
-Login → ProtectedRoute → PreMarketGate
-                           │
-                  ┌────────┴────────┐
-       hasCheckedInToday?         no → Modal bloqueante (4 pasos)
-                  │ yes                        │
-                  ▼                            ▼ commit
-              Dashboard                  invalidate query → Dashboard
-```
+- All UI strings in Spanish to match existing Journal page.
+- Icons rendered as JSX elements inside `ai-messages.ts` (file becomes `.tsx`).
+- Toast on save success/failure via `sonner`.
+- Modal is closeable normally (unlike pre-market check-in).
