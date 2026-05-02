@@ -36,7 +36,7 @@ export function useTaxometer() {
     queryFn: async (): Promise<PsychErrorRow[]> => {
       if (!user?.id) return [];
       const { data, error } = await supabase
-        .from('psychological_errors' as never)
+        .from('psychological_errors')
         .select('*')
         .eq('user_id', user.id)
         .order('timestamp', { ascending: false });
@@ -78,7 +78,7 @@ export function useTaxometer() {
     mutationFn: async (input: LogErrorInput) => {
       if (!user?.id) throw new Error('No user');
       const { data, error } = await supabase
-        .from('psychological_errors' as never)
+        .from('psychological_errors')
         .insert({
           user_id: user.id,
           trade_id: input.trade_id ?? null,
@@ -88,7 +88,7 @@ export function useTaxometer() {
           cost_dollars: input.cost_dollars ?? 0,
           was_prevented: input.was_prevented ?? false,
           metadata: input.metadata ?? null,
-        } as never)
+        })
         .select()
         .single();
       if (error) throw error;
