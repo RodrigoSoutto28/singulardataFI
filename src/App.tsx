@@ -14,6 +14,8 @@ import { PageLoader } from "@/components/ui/page-loader";
 import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { AdminRoute } from "./components/auth/AdminRoute";
+import { PreMarketCheckInModal } from "@/components/psychology/PreMarketCheckInModal";
+import { usePreMarketCheckIn } from "@/hooks/usePreMarketCheckIn";
 
 // Lazy-loaded pages — code splitting per route
 const Auth = lazy(() => import("./pages/Auth"));
@@ -50,6 +52,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function PreMarketGate({ children }: { children: React.ReactNode }) {
+  const { hasCheckedInToday, isLoading } = usePreMarketCheckIn();
+  if (isLoading) {
+    return <PageLoader />;
+  }
+  return (
+    <>
+      {children}
+      <PreMarketCheckInModal open={!hasCheckedInToday} onComplete={() => { /* query invalidates itself */ }} />
+    </>
+  );
+}
+
 function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -62,11 +77,11 @@ function AppRoutes() {
           path="/"
           element={
             <ProtectedRoute>
-              <>
+              <PreMarketGate>
                 <AppLayout />
                 <WelcomeModal />
                 <OnboardingTour />
-              </>
+              </PreMarketGate>
             </ProtectedRoute>
           }
         >

@@ -178,6 +178,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pre_market_checkins: {
+        Row: {
+          allowed_setups: string[]
+          checkin_date: string
+          created_at: string
+          emotional_state: string
+          goals_today: string | null
+          id: string
+          max_daily_trades: number
+          max_risk_per_trade: number
+          user_id: string
+        }
+        Insert: {
+          allowed_setups?: string[]
+          checkin_date?: string
+          created_at?: string
+          emotional_state: string
+          goals_today?: string | null
+          id?: string
+          max_daily_trades?: number
+          max_risk_per_trade?: number
+          user_id: string
+        }
+        Update: {
+          allowed_setups?: string[]
+          checkin_date?: string
+          created_at?: string
+          emotional_state?: string
+          goals_today?: string | null
+          id?: string
+          max_daily_trades?: number
+          max_risk_per_trade?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
