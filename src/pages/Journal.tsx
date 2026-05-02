@@ -375,13 +375,23 @@ export default function Journal() {
     };
 
     try {
+      const wasOpen = !editingTrade || editingTrade.status !== 'closed';
+      let savedTrade: Trade | null = null;
       if (editingTrade) {
-        await updateTrade.mutateAsync({ id: editingTrade.id, ...payload });
+        savedTrade = await updateTrade.mutateAsync({ id: editingTrade.id, ...payload }) as Trade;
       } else {
-        await createTrade.mutateAsync(payload);
+        savedTrade = await createTrade.mutateAsync(payload) as Trade;
       }
       setIsAddTradeOpen(false);
       resetForm();
+
+      // Trigger Process Validator when a trade transitions to closed
+      if (savedTrade && savedTrade.status === 'closed' && wasOpen && user?.id) {
+        const already = await hasValidation(savedTrade.id, user.id);
+        if (!already) {
+          setValidatorTrade(savedTrade);
+        }
+      }
     } catch (error) {
       // handled by mutation
     }
