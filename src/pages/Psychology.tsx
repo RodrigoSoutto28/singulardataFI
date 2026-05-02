@@ -30,8 +30,10 @@ import {
   Trophy,
   Clock,
   Target,
+  DollarSign,
   type LucideIcon,
 } from 'lucide-react';
+import { TaxometerDashboard } from '@/components/psychology/TaxometerDashboard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePsychologyEntries, PsychologyEntry } from '@/hooks/usePsychologyEntries';
 import { toast } from 'sonner';
@@ -70,7 +72,7 @@ const emotions: EmotionOption[] = [
 // ---------- Page ----------
 export default function Psychology() {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'today' | 'history' | 'insights'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'history' | 'insights' | 'taxometer'>('today');
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -94,6 +96,10 @@ export default function Psychology() {
               <Sparkles className="h-4 w-4 mr-2" />
               Insights
             </TabsTrigger>
+            <TabsTrigger value="taxometer">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Taxímetro
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="today" className="mt-6">
@@ -104,6 +110,9 @@ export default function Psychology() {
           </TabsContent>
           <TabsContent value="insights" className="mt-6">
             <InsightsView />
+          </TabsContent>
+          <TabsContent value="taxometer" className="mt-6">
+            <TaxometerDashboard />
           </TabsContent>
         </Tabs>
       </div>

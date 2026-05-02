@@ -4,6 +4,7 @@ import { MentalStateCard } from '@/components/dashboard/MentalStateCard';
 import { QuickActionsCard } from '@/components/dashboard/QuickActionsCard';
 import { EquityChart } from '@/components/dashboard/EquityChart';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
+import { TaxometerWidget } from '@/components/psychology/TaxometerWidget';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { TrendingUp, Wallet, Target, Brain } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -136,6 +137,7 @@ export default function Dashboard() {
 
         <div className="space-y-4">
           <MentalStateCard disciplineScore={disciplineScore} />
+          <TaxometerWidget />
           <QuickActionsCard />
         </div>
       </div>
