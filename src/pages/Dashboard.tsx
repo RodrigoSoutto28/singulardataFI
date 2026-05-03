@@ -86,6 +86,9 @@ export default function Dashboard() {
         <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
       </div>
 
+      {/* Quick Actions Bar */}
+      <QuickActionsCard />
+
       {/* Achievement Badges */}
       <AchievementBadges />
 
@@ -129,7 +132,7 @@ export default function Dashboard() {
                 Curva de Equity
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-2">
               <EquityChart data={equityCurve} className="border-0 bg-transparent p-0" />
             </CardContent>
           </Card>
@@ -138,7 +141,6 @@ export default function Dashboard() {
         <div className="space-y-4">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
-          <QuickActionsCard />
         </div>
       </div>
 

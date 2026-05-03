@@ -51,9 +51,9 @@ export function EquityChart({ data, className }: EquityChartProps) {
   const isPositiveTrend = data.length > 1 && data[data.length - 1].equity >= data[0].equity;
 
   return (
-    <div className={cn('p-5 rounded-lg bg-card border border-border', className)}>
+    <div className={cn('p-5 pb-2 rounded-lg bg-card border border-border', className)}>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3">
         <TrendingUp className={cn('h-5 w-5', isPositiveTrend ? 'text-success' : 'text-destructive')} />
         <h3 className="text-sm font-medium">{t.dashboard.equityCurve}</h3>
       </div>
