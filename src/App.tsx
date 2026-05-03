@@ -11,8 +11,6 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/ui/page-loader";
-import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
-import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { PreMarketCheckInModal } from "@/components/psychology/PreMarketCheckInModal";
 import { usePreMarketCheckIn } from "@/hooks/usePreMarketCheckIn";
