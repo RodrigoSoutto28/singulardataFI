@@ -1,82 +1,93 @@
-# Sistema de internacionalización (i18n) con detección automática
+# Detección de idioma por geolocalización IP
 
 ## Estado actual
 
-- `src/contexts/LanguageContext.tsx` ya existe y maneja `Language = 'ES' | 'EN' | 'PT'` (uppercase) con persistencia en `localStorage('app-language')`.
-- `src/i18n/translations.ts` (1472 líneas) tiene un diccionario muy completo en ES/EN/PT con tipo `Translations` estructurado.
-- `TopBar.tsx` ya incluye un mini-selector de idioma con códigos uppercase.
-- No existe columna `language` en `profiles`, ni `useLanguageDetection`, ni archivo `src/lib/i18n/*`.
-- El hook de auth real es `useAuth` desde `@/contexts/AuthContext` (no `@/hooks/useAuth`).
+- `src/lib/i18n/detector.ts` ya existe con `SupportedLanguage = 'es'|'en'|'pt'|'fr'`, `detectBrowserLanguage()` y `detectUserLanguage(saved?)`. Tiene `LanguageDetectionResult` con `source: 'database' | 'browser' | 'ip' | 'fallback'` (`'ip'` ya está previsto en el tipo).
+- `useLanguageDetection.ts` invoca `detectUserLanguage(saved)` y persiste en `profiles.language`.
+- `Settings.tsx`, `LanguageSelector.tsx` y la migración de `profiles.language` ya están en producción.
+- No existen archivos en `src/lib/geolocation/` ni `useIPGeolocation`.
 
 ## Decisiones de diseño
 
-Para no romper las 1472 líneas de traducciones existentes ni todos los componentes que usan `language: 'ES'|'EN'|'PT'` y `t.xxx`:
+1. **Solo HTTPS** entre los servicios free para evitar mixed-content (descarto `http://ip-api.com`; uso `https://ipapi.co` y `https://ipwho.is` — endpoint actual de ipwhois).
+2. **No bloquear el primer render**: en `useLanguageDetection`, la IP se consulta solo si:
+   - No hay idioma guardado en BD ni en `localStorage`, **o**
+   - El usuario activa explícitamente la opción en Settings.
+   El resultado se aplica de forma asíncrona; si llega antes de que el usuario interactúe, se actualiza el contexto.
+3. **Cache de 7 días en `localStorage`** (`singular_geolocation_cache`) con `expiresAt` para evitar requests repetidos. No persiste la IP en BD.
+4. **Override del usuario es ley**: si el usuario eligió un idioma manualmente (existe en `localStorage`), nunca lo sobrescribimos por IP.
+5. **Tabla de analytics OPCIONAL**: la dejo fuera del scope inicial para no añadir migraciones/RLS hasta que el usuario lo pida.
+6. **Sin secretos / sin API keys**: todos los servicios usados son free-tier sin auth. Omito `ipgeolocation.io`.
 
-1. **Mantener** los códigos internos del contexto (`'ES' | 'EN' | 'PT'`) y **agregar** `'FR'` como cuarto idioma soportado.
-2. El detector trabaja con códigos minúsculos (`es/en/pt/fr`) por convención BCP-47, y se mapea a/desde los códigos uppercase del contexto.
-3. La columna `language` en BD se guarda en minúsculas (`es/en/pt/fr`) para alinearse con estándar y con `navigator.language`.
-4. Reemplazar el mini-selector inline del `TopBar` por el nuevo `<LanguageSelector variant="compact" />` reutilizable.
+## Archivos nuevos
 
-## Cambios
+1. **`src/lib/geolocation/services.ts`**
+   - `GeolocationResult`, `GeolocationService` (interfaces).
+   - Servicios HTTPS: `IPAPI_CO` (`https://ipapi.co/json/`) y `IPWHO_IS` (`https://ipwho.is/`).
+   - `fetchGeolocation(service, timeoutMs=5000)` con `AbortController`.
+   - `fetchGeolocationWithFallback()` itera por prioridad y devuelve el primer éxito; agrega errores acumulados al fallar todos.
 
-### Base de datos (migración)
+2. **`src/lib/geolocation/country-language-map.ts`**
+   - `COUNTRY_TO_LANGUAGE` con ~70 países cubriendo ES/EN/PT/FR.
+   - **Fix duplicado del spec**: el spec mapea `CA` dos veces (en y fr). Lo defino como `'en'` por defecto y muevo Quebec/New Brunswick a `MULTILINGUAL_COUNTRIES.regions`.
+   - `getLanguageFromCountry(code, fallback='en')`.
+   - `MULTILINGUAL_COUNTRIES` (CA, BE, CH) con `regions` para sub-detección.
+   - `getLanguageFromCountryAndRegion(code, region?)`.
+   - `getCountryMappingConfidence(code) -> 'high'|'medium'|'low'`.
 
-```sql
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'es'
-    CHECK (language IN ('es','en','pt','fr'));
+3. **`src/lib/geolocation/cache.ts`**
+   - Constantes: `CACHE_KEY = 'singular_geolocation_cache'`, `CACHE_DURATION_MS = 7d`.
+   - `cacheGeolocation`, `getCachedGeolocation` (auto-limpia si expiró), `clearGeolocationCache`, `isCacheValid`, `getCacheTimeRemaining`.
 
-CREATE INDEX IF NOT EXISTS idx_profiles_language ON public.profiles(language);
-```
+4. **`src/lib/geolocation/ip-detector.ts`**
+   - `IPLanguageDetection` interface.
+   - `detectLanguageByIP()`: lee cache → si no hay, llama `fetchGeolocationWithFallback()` → cachea → mapea país+región a idioma → confianza. En error, devuelve `{ language: 'en', confidence: 'low', country: 'UNKNOWN', cached: false }`.
+   - `detectLanguageByIPFromCache()`: variante síncrona, solo cache.
 
-Tras la migración, `src/integrations/supabase/types.ts` se regenera automáticamente con la nueva columna.
+5. **`src/hooks/useIPGeolocation.ts`**
+   - Estado `{ detection, isLoading, error }`.
+   - Lee cache al montar (síncrono, vía `detectLanguageByIPFromCache`).
+   - `detectLocation()` async para disparar fetch manual.
+   - Opción `{ autoDetect?: boolean }`.
 
-### Archivos nuevos
+## Archivos modificados
 
-1. **`src/lib/i18n/detector.ts`** — `SupportedLanguage = 'es'|'en'|'pt'|'fr'`, `detectBrowserLanguage()`, `detectUserLanguage(saved?)`, `validateLanguage()`, `getLanguageName()`, `getLanguageFlag()`. Helpers `toContextCode('es') -> 'ES'` y `toDbCode('ES') -> 'es'` para puentear ambos sistemas. (Sin `detectLanguageByIP` activo: queda comentado para evitar llamadas externas no deseadas.)
+6. **`src/lib/i18n/detector.ts`**
+   - Añadir `'browser+ip'` y `'ip'` ya cubiertos por el tipo `source` (extender union si falta).
+   - Sobrecargar `detectUserLanguage(saved?, useIPDetection=false)`:
+     - Si `saved` válido → devolver `database` (sin tocar IP).
+     - Detectar navegador.
+     - Si `useIPDetection`: intentar IP con `try/catch`.
+       - Coinciden → `confidence='high', source='browser+ip'`.
+       - IP `high` y navegador no `high` → IP gana.
+       - Navegador `high` y diferentes (probable VPN) → navegador gana.
+       - Si IP `medium`/`high` → IP.
+     - Fallback navegador.
+   - **Default `useIPDetection=false`** para preservar comportamiento actual; los call-sites deciden si activar.
 
-2. **`src/hooks/useLanguageDetection.ts`** — Hook que en el primer render:
-   - Si hay user, lee `profiles.language` de la BD.
-   - Si no hay valor en BD ni en `localStorage('app-language')`, ejecuta `detectUserLanguage()` y aplica el resultado vía `setLanguage(toContextCode(...))`.
-   - Si hay user pero su perfil no tenía `language`, persiste el detectado en BD.
-   - Devuelve `{ isDetecting, detectionComplete }`. No bloquea UI por defecto (la detección es no-bloqueante; solo evita parpadeos).
+7. **`src/hooks/useLanguageDetection.ts`**
+   - Leer flag `localStorage.getItem('singular_use_ip_detection') !== 'false'` (opt-out, default ON).
+   - Solo activar IP cuando NO hay `saved` en BD ni en `localStorage('app-language')`.
+   - Pasar `useIPDetection` a `detectUserLanguage`.
+   - Mantener no-bloqueante: la detección sigue corriendo en background.
 
-3. **`src/components/LanguageSelector.tsx`** — Dropdown con bandera + nombre. Variantes:
-   - `variant="default"`: botón ancho con `Globe` + bandera + nombre actual.
-   - `variant="compact"`: solo bandera (para `TopBar`).
-   - Al cambiar: actualiza contexto y, si hay usuario, persiste `profiles.language` (en minúsculas). Toast de confirmación en el nuevo idioma.
+8. **`src/pages/Settings.tsx`** — añadir card "Detección de Ubicación":
+   - Toggle `Switch` que escribe `localStorage('singular_use_ip_detection')`.
+   - Bloque informativo de privacidad.
+   - Si está activo, mostrar país/ciudad/idioma/servicio del cache (vía `useIPGeolocation()`).
+   - Botón "Detectar ahora" que llama `detectLocation()` y refresca.
+   - Botón "Limpiar cache" que llama `clearGeolocationCache()`.
+   - Strings i18n: agregar claves `t.settings.geolocation.*` en ES/EN/PT (FR cae a EN por el proxy de fallback existente).
 
-### Archivos modificados
+## Fuera de scope (mencionado en el spec, lo omito intencionalmente)
 
-4. **`src/i18n/translations.ts`** — Añadir `'FR'` al type `Language` y un objeto `fr` con la misma forma que `es/en/pt`. Para no expandir 1472 líneas en una sola pasada, el objeto `fr` se construye reutilizando claves: traducción completa de las secciones críticas (common, nav, topbar, auth, dashboard, settings, journal, analytics, psychology, insights, reports, onboarding, errors, toasts) y para el resto se hace fallback automático a `en` mediante un proxy `Proxy`-based deep-merge en runtime, garantizando que `t.xxx.yyy` nunca devuelva `undefined`.
-
-5. **`src/contexts/LanguageContext.tsx`** — Añadir `'FR'` al inicializador (validar contra los 4 idiomas). Sin cambios estructurales.
-
-6. **`src/components/layout/TopBar.tsx`** — Reemplazar el bloque `languages.map(...)` actual por `<LanguageSelector variant="compact" />`.
-
-7. **`src/pages/Auth.tsx`** — En `useEffect` al montar: si no hay user y no hay `localStorage('app-language')`, ejecutar `detectUserLanguage()` y aplicar. En `handleSignUp`, tras `signUp` exitoso, guardar el idioma actual en `profiles.language` (al perfil recién creado por el trigger `handle_new_user`).
-
-8. **`src/App.tsx`** — Montar `useLanguageDetection()` dentro del provider para que se ejecute una vez por sesión. **No** mostrar splash bloqueante (la detección inicial usa el valor de `localStorage` sincrónicamente; solo persiste/sincroniza con BD en background).
-
-## Flujo resultante
-
-```text
-Primera visita (sin login)
-  -> detectBrowserLanguage() -> setLanguage en contexto + localStorage
-  
-Sign up
-  -> trigger crea profile -> Auth.tsx update profiles.language = idioma actual
-  
-Login posterior
-  -> useLanguageDetection lee profiles.language -> setLanguage si difiere
-  
-Cambio manual via LanguageSelector
-  -> setLanguage + localStorage + (si user) update profiles.language
-```
+- **Tabla `language_detection_logs`** y `analytics.ts`: requeriría migración + RLS y captura de datos por usuario. Lo dejo para una iteración posterior si lo confirmás — agregar telemetría de IP toca privacidad y conviene decidir explícitamente.
+- **`ipgeolocation.io`**: necesita API key; lo agregamos cuando quieras.
 
 ## Notas técnicas
 
-- No se usa detección por IP (latencia + privacidad). El stub queda en el detector pero no se invoca.
-- El selector usa `getLanguageFlag` con emojis Unicode; no se añaden imágenes.
-- El hook `useAuth` correcto es `from '@/contexts/AuthContext'` (no `@/hooks/useAuth` como sugería el spec).
-- Las traducciones FR cubren todas las strings visibles en navegación principal; cualquier clave no traducida cae a EN automáticamente vía proxy de fallback (sin romper TypeScript ni mostrar `undefined`).
+- Todos los fetch usan `AbortController` con timeout 5s.
+- Logging con `console.log/warn` con prefijo `[Geolocation]` para debug; ningún `console.error` que rompa.
+- Sin nuevas dependencias.
+- TypeScript estricto: tipos exportados, sin `any` salvo en parsers de respuestas externas.
+- El mapeo `getLanguageFromCountry` con fallback a `'en'` significa que países no listados (ej. JP, DE, IT) no fuerzan cambio de idioma vs. navegador, lo cual es deseado.
