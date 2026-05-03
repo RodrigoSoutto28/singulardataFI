@@ -24,13 +24,16 @@ export function useLanguageDetection() {
 
   useEffect(() => {
     let cancelled = false;
+    // Opt-out flag for IP-based detection (default ON).
+    const useIP = localStorage.getItem('singular_use_ip_detection') !== 'false';
+
     async function run() {
       try {
         const hasStored = !!localStorage.getItem('app-language');
 
         if (!user) {
           if (!hasStored) {
-            const detection = await detectUserLanguage();
+            const detection = await detectUserLanguage(null, useIP);
             if (!cancelled) setLanguage(toContextCode(detection.language));
           }
           if (!cancelled) {
@@ -50,7 +53,9 @@ export function useLanguageDetection() {
           .maybeSingle();
 
         const saved = (profile as any)?.language as string | null | undefined;
-        const detection = await detectUserLanguage(saved);
+        // Only spend an IP request when no stored preference exists anywhere.
+        const shouldUseIP = useIP && !saved && !hasStored;
+        const detection = await detectUserLanguage(saved, shouldUseIP);
         const nextCtx = toContextCode(detection.language);
         if (!cancelled && nextCtx !== language) setLanguage(nextCtx);
 
