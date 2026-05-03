@@ -138,7 +138,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-4 md:space-y-6 [&>*]:animate-fade-in [&>*]:stagger-item">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
         </div>
