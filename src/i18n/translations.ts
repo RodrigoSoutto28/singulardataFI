@@ -385,7 +385,7 @@ export interface Translations {
   };
 }
 
-export const translations: Record<Language, Translations> = {
+const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
   ES: {
     common: {
       save: 'Guardar',
