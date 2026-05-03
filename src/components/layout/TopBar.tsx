@@ -35,7 +35,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
   const initials =
     profile?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase() || 'T';
 
-  const languages: Language[] = ['ES', 'EN', 'PT'];
+  
 
   return (
     <header className="sticky top-0 z-40 h-16 glass-topbar">
