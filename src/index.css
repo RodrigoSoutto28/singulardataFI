@@ -129,6 +129,21 @@
     font-feature-settings: "tnum", "zero", "ss01";
   }
 
+  /* Light mode: refuerzo de contraste tipográfico */
+  :root:not(.dark) body {
+    font-weight: 450;
+  }
+  :root:not(.dark) h1,
+  :root:not(.dark) h2,
+  :root:not(.dark) h3,
+  :root:not(.dark) h4 {
+    color: hsl(205 70% 6%);
+    font-weight: 700;
+  }
+  :root:not(.dark) .text-muted-foreground {
+    font-weight: 500;
+  }
+
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
