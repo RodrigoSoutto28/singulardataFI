@@ -93,7 +93,7 @@ export default function Dashboard() {
       <AchievementBadges />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard
           label="Balance"
           value={formatCurrency(balance)}
@@ -138,7 +138,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 md:space-y-6">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
         </div>
