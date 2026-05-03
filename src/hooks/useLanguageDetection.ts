@@ -74,15 +74,6 @@ export function useLanguageDetection() {
         }
       }
     }
-      } catch (e) {
-        console.warn('Language detection failed:', e);
-      } finally {
-        if (!cancelled) {
-          setDetectionComplete(true);
-          setIsDetecting(false);
-        }
-      }
-    }
     run();
     return () => {
       cancelled = true;
