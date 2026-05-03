@@ -1,4 +1,4 @@
-export type Language = 'ES' | 'EN' | 'PT';
+export type Language = 'ES' | 'EN' | 'PT' | 'FR';
 
 export interface Translations {
   // Common
