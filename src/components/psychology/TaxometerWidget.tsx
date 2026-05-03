@@ -9,13 +9,13 @@ export function TaxometerWidget() {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-4">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-destructive" />
           Taxímetro de Errores
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {isLoading ? (
           <p className="text-xs text-muted-foreground">Cargando…</p>
         ) : stats.count === 0 ? (

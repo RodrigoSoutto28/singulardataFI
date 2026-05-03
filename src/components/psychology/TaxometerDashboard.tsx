@@ -35,7 +35,7 @@ export function TaxometerDashboard() {
   if (stats.count === 0) {
     return (
       <Card>
-        <CardContent className="p-10 text-center space-y-3">
+        <CardContent className="p-8 text-center space-y-3">
           <Shield className="h-10 w-10 mx-auto text-success" />
           <h3 className="text-lg font-semibold">Sin errores registrados</h3>
           <p className="text-sm text-muted-foreground">
@@ -82,7 +82,7 @@ export function TaxometerDashboard() {
             <p className="text-xs text-muted-foreground mt-1">USD</p>
           </div>
 
-          <div className="rounded-lg border bg-muted/30 p-4 flex items-start gap-3">
+          <div className="rounded-lg border bg-muted/30 p-4 flex items-start gap-4">
             <span className="text-2xl">{cmp.emoji}</span>
             <p className="text-sm">
               <span className="text-muted-foreground">Podrías haber comprado: </span>
@@ -90,7 +90,7 @@ export function TaxometerDashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: 'Esta Semana', value: stats.weekCost },
               { label: 'Este Mes', value: stats.monthCost },
@@ -146,9 +146,9 @@ export function TaxometerDashboard() {
               .map((e) => (
                 <div
                   key={e.type}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <span
                       className="w-3 h-3 rounded-full shrink-0"
                       style={{ background: e.color }}

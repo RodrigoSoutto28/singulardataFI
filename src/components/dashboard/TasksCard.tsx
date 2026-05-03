@@ -81,7 +81,7 @@ export function TasksCard({ className }: { className?: string }) {
             key={item.id}
             onClick={() => toggleItem(item.id)}
             className={cn(
-              'flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors',
+              'flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-colors',
               item.completed 
                 ? 'bg-success/5 border border-success/30' 
                 : 'bg-muted/50 hover:bg-muted'

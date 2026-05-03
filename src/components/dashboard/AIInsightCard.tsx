@@ -38,7 +38,7 @@ const iconStyles = {
 
 export function AIInsightCard({ insights, className }: AIInsightCardProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-lg p-5', className)}>
+    <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20">
@@ -54,7 +54,7 @@ export function AIInsightCard({ insights, className }: AIInsightCardProps) {
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {insights.map((insight) => {
           const Icon = insightIcons[insight.type];
           return (
@@ -65,7 +65,7 @@ export function AIInsightCard({ insights, className }: AIInsightCardProps) {
                 insightStyles[insight.type]
               )}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-4">
                 <Icon className={cn('h-5 w-5 mt-0.5 shrink-0', iconStyles[insight.type])} />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{insight.title}</p>

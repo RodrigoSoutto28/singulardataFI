@@ -19,7 +19,7 @@ interface RecentTradesProps {
 
 export function RecentTrades({ trades, className }: RecentTradesProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-lg p-5', className)}>
+    <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold">Recent Trades</h3>
@@ -28,13 +28,13 @@ export function RecentTrades({ trades, className }: RecentTradesProps) {
         <button className="text-sm text-primary hover:underline">View all</button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {trades.map((trade) => (
           <div
             key={trade.id}
-            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+            className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div
                 className={cn(
                   'flex items-center justify-center h-10 w-10 rounded-lg',

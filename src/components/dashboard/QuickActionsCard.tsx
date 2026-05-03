@@ -52,13 +52,13 @@ export function QuickActionsCard() {
 
   return (
     <Card className="bg-gradient-to-r from-primary/5 via-card to-accent/5 border-primary/20">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
         {actions.map((action) => (
           <button
             key={action.label}
             onClick={() => navigate(action.path)}
             className={cn(
-              'group flex items-center gap-3 p-3 rounded-lg',
+              'group flex items-center gap-4 p-4 rounded-lg',
               'bg-card border border-border',
               'hover:border-primary/40 hover:shadow-lg hover:scale-[1.02]',
               'transition-all duration-200 text-left'
