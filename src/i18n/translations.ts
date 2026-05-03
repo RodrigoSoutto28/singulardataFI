@@ -1470,3 +1470,69 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     },
   },
 };
+
+/**
+ * French translations: covers high-traffic surfaces; any missing key
+ * falls back to the English value via deep merge so `t.xxx.yyy` is always defined.
+ */
+const frenchOverrides: any = {
+  common: {
+    save: 'Enregistrer', cancel: 'Annuler', delete: 'Supprimer', edit: 'Modifier', view: 'Voir',
+    add: 'Ajouter', search: 'Rechercher', filter: 'Filtrer', loading: 'Chargement...',
+    noResults: 'Aucun résultat', pending: 'En attente', completed: 'Terminé',
+    inProgress: 'En cours', all: 'Tous', new: 'Nouveau', dismiss: 'Ignorer',
+    enable: 'Activer', change: 'Changer', export: 'Exporter', upgrade: 'Améliorer',
+    currentPlan: 'Plan actuel', mostPopular: 'Plus populaire',
+  },
+  nav: {
+    dashboard: 'Tableau de bord', journal: 'Journal', analytics: 'Analyses',
+    psychology: 'Psychologie', insights: 'Aperçus', settings: 'Paramètres',
+    logout: 'Déconnexion', reports: 'Rapports',
+  },
+  topbar: {
+    title: 'Trading Intelligence Platform',
+    myAccount: 'Mon compte', profile: 'Profil', billing: 'Facturation',
+    settings: 'Paramètres', signOut: 'Se déconnecter',
+  },
+  auth: {
+    welcome: 'Bienvenue',
+    subtitle: 'Connectez-vous ou créez un compte',
+    signIn: 'Connexion', signUp: 'Créer un compte',
+    email: 'Email', password: 'Mot de passe', fullName: 'Nom complet',
+    signingIn: 'Connexion...', creatingAccount: 'Création du compte...',
+    createAccount: 'Créer un compte', welcomeBack: 'Heureux de vous revoir',
+    accountCreated: 'Compte créé', welcomeToApp: 'Bienvenue sur SINGULAR dataFI',
+    headline: 'Tradez avec', headlineHighlight: 'intelligence',
+    subheadline: 'La plateforme tout-en-un pour analyser, optimiser et améliorer vos performances.',
+    features: {
+      analytics: 'Analyses avancées', analyticsDesc: 'Métriques en temps réel',
+      ai: 'IA intégrée', aiDesc: 'Aperçus automatiques',
+      equity: 'Courbe d’équité', equityDesc: 'Visualisation claire',
+      psychology: 'Psychologie', psychologyDesc: 'Suivi émotionnel',
+    },
+    stats: {
+      activeTraders: 'Traders actifs', analyzedTrades: 'Trades analysés',
+      satisfaction: 'Satisfaction',
+    },
+  },
+};
+
+function deepMerge<T>(base: T, overrides: any): T {
+  if (Array.isArray(base) || typeof base !== 'object' || base === null) {
+    return (overrides ?? base) as T;
+  }
+  const out: any = Array.isArray(base) ? [...(base as any)] : { ...(base as any) };
+  if (overrides && typeof overrides === 'object') {
+    for (const k of Object.keys(overrides)) {
+      out[k] = k in (base as any)
+        ? deepMerge((base as any)[k], overrides[k])
+        : overrides[k];
+    }
+  }
+  return out as T;
+}
+
+export const translations: Record<Language, Translations> = {
+  ...baseTranslations,
+  FR: deepMerge(baseTranslations.EN, frenchOverrides),
+};
