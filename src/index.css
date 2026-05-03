@@ -477,7 +477,7 @@
     width: 100%;
     height: 2px;
     background: hsl(var(--primary));
-    transform: translateX(var(--tab-position, 0));
+    transform: translateX(var(--tab-position, 0px));
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 

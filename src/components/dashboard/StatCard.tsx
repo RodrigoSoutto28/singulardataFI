@@ -26,31 +26,31 @@ export function StatCard({
     primary: {
       bg: 'bg-primary/10 hover:bg-primary/15',
       icon: 'text-primary',
-      glow: 'hover:shadow-[0_0_24px_-4px_hsl(var(--primary)/0.4)]',
+      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-primary/40',
       gradient: 'to-primary/5',
     },
     teal: {
       bg: 'bg-[hsl(173_80%_40%/0.1)] hover:bg-[hsl(173_80%_40%/0.15)]',
       icon: 'text-[hsl(173_80%_40%)]',
-      glow: 'hover:shadow-[0_0_24px_-4px_hsl(173_80%_40%/0.4)]',
+      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(173_80%_40%/0.4)]',
       gradient: 'to-[hsl(173_80%_40%/0.05)]',
     },
     purple: {
       bg: 'bg-[hsl(265_84%_60%/0.1)] hover:bg-[hsl(265_84%_60%/0.15)]',
       icon: 'text-[hsl(265_84%_60%)]',
-      glow: 'hover:shadow-[0_0_24px_-4px_hsl(265_84%_60%/0.4)]',
+      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(265_84%_60%/0.4)]',
       gradient: 'to-[hsl(265_84%_60%/0.05)]',
     },
     orange: {
       bg: 'bg-[hsl(28_95%_55%/0.1)] hover:bg-[hsl(28_95%_55%/0.15)]',
       icon: 'text-[hsl(28_95%_55%)]',
-      glow: 'hover:shadow-[0_0_24px_-4px_hsl(28_95%_55%/0.4)]',
+      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(28_95%_55%/0.4)]',
       gradient: 'to-[hsl(28_95%_55%/0.05)]',
     },
     green: {
       bg: 'bg-success/10 hover:bg-success/15',
       icon: 'text-success',
-      glow: 'hover:shadow-[0_0_24px_-4px_hsl(var(--success)/0.4)]',
+      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-success/40',
       gradient: 'to-success/5',
     },
   } as const;
