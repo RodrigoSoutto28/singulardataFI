@@ -279,6 +279,98 @@
     outline: none;
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.5);
   }
+
+  /* ===== Modern micro-interactions ===== */
+
+  .btn-ripple { position: relative; overflow: hidden; }
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: hsl(0 0% 100% / 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+  }
+  .btn-ripple:active::after { width: 320px; height: 320px; }
+
+  .card-magnetic { transition: transform 0.1s ease-out; }
+
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .reveal-on-scroll.revealed { opacity: 1; transform: translateY(0); }
+
+  .stagger-reveal > * {
+    opacity: 0;
+    animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .stagger-reveal > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-reveal > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-reveal > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-reveal > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-reveal > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-reveal > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger-reveal > *:nth-child(7) { animation-delay: 300ms; }
+  .stagger-reveal > *:nth-child(8) { animation-delay: 350ms; }
+
+  .shimmer-effect {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--muted) / 0.5) 50%, hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .glow-primary { box-shadow: 0 0 20px hsl(var(--primary) / 0.4); animation: pulse-glow 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+  .glow-success { box-shadow: 0 0 20px hsl(var(--success) / 0.4); animation: pulse-glow 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+  .glow-danger  { box-shadow: 0 0 20px hsl(var(--destructive) / 0.4); animation: pulse-glow 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+
+  .underline-expand { position: relative; }
+  .underline-expand::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 100%; height: 2px;
+    background: hsl(var(--primary));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .underline-expand:hover::after { transform: scaleX(1); }
+
+  .number-counter { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  .skeleton {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 0.5) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius);
+  }
+
+  .badge-bounce { animation: bounce-subtle 1s ease-in-out; }
+
+  .icon-rotate-hover { transition: transform 0.3s cubic-bezier(0.68,-0.55,0.265,1.55); }
+  .icon-rotate-hover:hover { transform: rotate(90deg); }
+
+  .wobble-attention { animation: wiggle 0.5s ease-in-out 3; }
+
+  .expand-center { transform: scale(0); transition: transform 0.3s cubic-bezier(0.68,-0.55,0.265,1.55); }
+  .expand-center.active { transform: scale(1); }
+
+  .smooth-colors {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .flip-card { perspective: 1000px; }
+  .flip-card-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+  .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+  .flip-card-front, .flip-card-back { backface-visibility: hidden; }
+  .flip-card-back { transform: rotateY(180deg); }
 }
 
 @layer utilities {
