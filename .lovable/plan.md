@@ -1,93 +1,38 @@
-# Detección de idioma por geolocalización IP
+## Vibrant Color System Upgrade
 
-## Estado actual
+Boost saturation and contrast in light mode (and refine dark mode), introduce psychology-driven utility classes, and apply them to key components.
 
-- `src/lib/i18n/detector.ts` ya existe con `SupportedLanguage = 'es'|'en'|'pt'|'fr'`, `detectBrowserLanguage()` y `detectUserLanguage(saved?)`. Tiene `LanguageDetectionResult` con `source: 'database' | 'browser' | 'ip' | 'fallback'` (`'ip'` ya está previsto en el tipo).
-- `useLanguageDetection.ts` invoca `detectUserLanguage(saved)` y persiste en `profiles.language`.
-- `Settings.tsx`, `LanguageSelector.tsx` y la migración de `profiles.language` ya están en producción.
-- No existen archivos en `src/lib/geolocation/` ni `useIPGeolocation`.
+### 1. `src/index.css` — Token overhaul
+Replace the `:root` and `.dark` blocks with the more saturated values:
+- **Light**: bg `210 35% 97%`, fg `205 45% 12%`, primary `197 100% 35%`, accent `199 70% 52%`, success `165 65% 40%`, destructive `0 75% 52%`, warning `32 95% 50%`, profit `165 70% 38%`, loss `0 80% 50%`, border `210 35% 88%`, input `210 35% 90%`, ring matches primary. Sidebar tokens updated to match.
+- **Dark**: bg `210 35% 7%`, fg `210 25% 95%`, card `210 32% 10%`, primary `199 75% 58%`, accent `197 100% 45%`.
+- **Charts**: full vibrant palette (chart-1..5 + teal).
 
-## Decisiones de diseño
+### 2. `src/index.css` — Append utilities
+Add a new block at the end of `@layer utilities` with:
+- Semantic color classes: `.bg-trust`, `.bg-growth`, `.bg-urgent`, `.bg-attention`, `.bg-premium` (+ matching `.text-*`).
+- Gradients: `.gradient-primary`, `.gradient-success`, `.gradient-profit`, `.bg-success-glow`, `.bg-danger-glow`.
+- Hover overlay: `.overlay-primary` with `::before`.
+- `.text-shadow-soft`.
+- Intense borders + ring (`.border-primary-intense`, `.border-success-intense`, `.border-danger-intense`, `.ring-primary-intense`).
+- Tinted bg scales: `.bg-{primary|success|danger}-{subtle|medium|strong}`.
 
-1. **Solo HTTPS** entre los servicios free para evitar mixed-content (descarto `http://ip-api.com`; uso `https://ipapi.co` y `https://ipwho.is` — endpoint actual de ipwhois).
-2. **No bloquear el primer render**: en `useLanguageDetection`, la IP se consulta solo si:
-   - No hay idioma guardado en BD ni en `localStorage`, **o**
-   - El usuario activa explícitamente la opción en Settings.
-   El resultado se aplica de forma asíncrona; si llega antes de que el usuario interactúe, se actualiza el contexto.
-3. **Cache de 7 días en `localStorage`** (`singular_geolocation_cache`) con `expiresAt` para evitar requests repetidos. No persiste la IP en BD.
-4. **Override del usuario es ley**: si el usuario eligió un idioma manualmente (existe en `localStorage`), nunca lo sobrescribimos por IP.
-5. **Tabla de analytics OPCIONAL**: la dejo fuera del scope inicial para no añadir migraciones/RLS hasta que el usuario lo pida.
-6. **Sin secretos / sin API keys**: todos los servicios usados son free-tier sin auth. Omito `ipgeolocation.io`.
+### 3. `src/components/ui/badge.tsx`
+Rewrite `badgeVariants` so all variants use `bg-*/15` + `text-*` + `border border-*/30` with hover `bg-*/25`, plus `hover:scale-105` and `font-semibold`. Add a `success` and `warning` variant alongside `default`, `destructive`, `secondary`, `outline`.
 
-## Archivos nuevos
+### 4. `src/components/ui/button.tsx`
+Update `default`, `success`, `destructive` variants to add `hover:shadow-lg hover:shadow-{color}/25 hover:scale-[1.02] active:scale-[0.98]`. Keep existing variants intact.
 
-1. **`src/lib/geolocation/services.ts`**
-   - `GeolocationResult`, `GeolocationService` (interfaces).
-   - Servicios HTTPS: `IPAPI_CO` (`https://ipapi.co/json/`) y `IPWHO_IS` (`https://ipwho.is/`).
-   - `fetchGeolocation(service, timeoutMs=5000)` con `AbortController`.
-   - `fetchGeolocationWithFallback()` itera por prioridad y devuelve el primer éxito; agrega errores acumulados al fallar todos.
+### 5. `src/components/dashboard/StatCard.tsx`
+Extend `colorClasses` into `colorVariants` with `bg`, `icon`, and `glow` (`hover:shadow-[0_0_20px_...]`). Apply `glow` and `transition-all duration-300` to the `Card`. Keep existing color keys (`primary`, `teal`, `purple`, `orange`) and add `green` mapped to success.
 
-2. **`src/lib/geolocation/country-language-map.ts`**
-   - `COUNTRY_TO_LANGUAGE` con ~70 países cubriendo ES/EN/PT/FR.
-   - **Fix duplicado del spec**: el spec mapea `CA` dos veces (en y fr). Lo defino como `'en'` por defecto y muevo Quebec/New Brunswick a `MULTILINGUAL_COUNTRIES.regions`.
-   - `getLanguageFromCountry(code, fallback='en')`.
-   - `MULTILINGUAL_COUNTRIES` (CA, BE, CH) con `regions` para sub-detección.
-   - `getLanguageFromCountryAndRegion(code, region?)`.
-   - `getCountryMappingConfidence(code) -> 'high'|'medium'|'low'`.
+### 6. New file `src/lib/color-psychology.ts`
+Export `ColorPsychology` object (trust/growth/urgency/attention/premium with primary/light/dark/glow) and `getColorForContext(context)` helper mapping `profit|loss|warning|achievement|neutral` → token group. Pure helper, no imports needed.
 
-3. **`src/lib/geolocation/cache.ts`**
-   - Constantes: `CACHE_KEY = 'singular_geolocation_cache'`, `CACHE_DURATION_MS = 7d`.
-   - `cacheGeolocation`, `getCachedGeolocation` (auto-limpia si expiró), `clearGeolocationCache`, `isCacheValid`, `getCacheTimeRemaining`.
+### Out of scope
+No changes to MetricCard, charts, or other components — saturation tokens propagate automatically. Existing components consuming `--primary`, `--success`, etc. will visually intensify with no code changes.
 
-4. **`src/lib/geolocation/ip-detector.ts`**
-   - `IPLanguageDetection` interface.
-   - `detectLanguageByIP()`: lee cache → si no hay, llama `fetchGeolocationWithFallback()` → cachea → mapea país+región a idioma → confianza. En error, devuelve `{ language: 'en', confidence: 'low', country: 'UNKNOWN', cached: false }`.
-   - `detectLanguageByIPFromCache()`: variante síncrona, solo cache.
-
-5. **`src/hooks/useIPGeolocation.ts`**
-   - Estado `{ detection, isLoading, error }`.
-   - Lee cache al montar (síncrono, vía `detectLanguageByIPFromCache`).
-   - `detectLocation()` async para disparar fetch manual.
-   - Opción `{ autoDetect?: boolean }`.
-
-## Archivos modificados
-
-6. **`src/lib/i18n/detector.ts`**
-   - Añadir `'browser+ip'` y `'ip'` ya cubiertos por el tipo `source` (extender union si falta).
-   - Sobrecargar `detectUserLanguage(saved?, useIPDetection=false)`:
-     - Si `saved` válido → devolver `database` (sin tocar IP).
-     - Detectar navegador.
-     - Si `useIPDetection`: intentar IP con `try/catch`.
-       - Coinciden → `confidence='high', source='browser+ip'`.
-       - IP `high` y navegador no `high` → IP gana.
-       - Navegador `high` y diferentes (probable VPN) → navegador gana.
-       - Si IP `medium`/`high` → IP.
-     - Fallback navegador.
-   - **Default `useIPDetection=false`** para preservar comportamiento actual; los call-sites deciden si activar.
-
-7. **`src/hooks/useLanguageDetection.ts`**
-   - Leer flag `localStorage.getItem('singular_use_ip_detection') !== 'false'` (opt-out, default ON).
-   - Solo activar IP cuando NO hay `saved` en BD ni en `localStorage('app-language')`.
-   - Pasar `useIPDetection` a `detectUserLanguage`.
-   - Mantener no-bloqueante: la detección sigue corriendo en background.
-
-8. **`src/pages/Settings.tsx`** — añadir card "Detección de Ubicación":
-   - Toggle `Switch` que escribe `localStorage('singular_use_ip_detection')`.
-   - Bloque informativo de privacidad.
-   - Si está activo, mostrar país/ciudad/idioma/servicio del cache (vía `useIPGeolocation()`).
-   - Botón "Detectar ahora" que llama `detectLocation()` y refresca.
-   - Botón "Limpiar cache" que llama `clearGeolocationCache()`.
-   - Strings i18n: agregar claves `t.settings.geolocation.*` en ES/EN/PT (FR cae a EN por el proxy de fallback existente).
-
-## Fuera de scope (mencionado en el spec, lo omito intencionalmente)
-
-- **Tabla `language_detection_logs`** y `analytics.ts`: requeriría migración + RLS y captura de datos por usuario. Lo dejo para una iteración posterior si lo confirmás — agregar telemetría de IP toca privacidad y conviene decidir explícitamente.
-- **`ipgeolocation.io`**: necesita API key; lo agregamos cuando quieras.
-
-## Notas técnicas
-
-- Todos los fetch usan `AbortController` con timeout 5s.
-- Logging con `console.log/warn` con prefijo `[Geolocation]` para debug; ningún `console.error` que rompa.
-- Sin nuevas dependencias.
-- TypeScript estricto: tipos exportados, sin `any` salvo en parsers de respuestas externas.
-- El mapeo `getLanguageFromCountry` con fallback a `'en'` significa que países no listados (ej. JP, DE, IT) no fuerzan cambio de idioma vs. navegador, lo cual es deseado.
+### Verification
+- Toggle light/dark on `/dashboard` to confirm new palette.
+- Confirm StatCards show glow on hover.
+- Confirm badges/buttons feel more vibrant with hover scale + shadow.

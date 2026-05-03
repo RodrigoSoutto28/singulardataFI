@@ -9,7 +9,7 @@ interface StatCardProps {
   change?: number;
   icon: LucideIcon;
   trend?: 'up' | 'down';
-  color?: 'primary' | 'teal' | 'purple' | 'orange';
+  color?: 'primary' | 'teal' | 'purple' | 'orange' | 'green';
   className?: string;
 }
 
@@ -22,18 +22,20 @@ export function StatCard({
   color = 'primary',
   className,
 }: StatCardProps) {
-  const colorClasses: Record<string, string> = {
-    primary: 'bg-primary/10 text-primary',
-    teal: 'bg-[hsl(173_80%_40%/0.1)] text-[hsl(173_80%_40%)]',
-    purple: 'bg-[hsl(265_84%_60%/0.1)] text-[hsl(265_84%_60%)]',
-    orange: 'bg-[hsl(28_95%_55%/0.1)] text-[hsl(28_95%_55%)]',
-  };
+  const colorVariants = {
+    primary: { bg: 'bg-primary/10', icon: 'text-primary', glow: 'hover:shadow-[0_0_24px_-4px_hsl(var(--primary)/0.4)]' },
+    teal:    { bg: 'bg-[hsl(173_80%_40%/0.1)]', icon: 'text-[hsl(173_80%_40%)]', glow: 'hover:shadow-[0_0_24px_-4px_hsl(173_80%_40%/0.4)]' },
+    purple:  { bg: 'bg-[hsl(265_84%_60%/0.1)]', icon: 'text-[hsl(265_84%_60%)]', glow: 'hover:shadow-[0_0_24px_-4px_hsl(265_84%_60%/0.4)]' },
+    orange:  { bg: 'bg-[hsl(28_95%_55%/0.1)]', icon: 'text-[hsl(28_95%_55%)]', glow: 'hover:shadow-[0_0_24px_-4px_hsl(28_95%_55%/0.4)]' },
+    green:   { bg: 'bg-success/10', icon: 'text-success', glow: 'hover:shadow-[0_0_24px_-4px_hsl(var(--success)/0.4)]' },
+  } as const;
+  const v = colorVariants[color];
 
   return (
-    <Card className={cn('relative overflow-hidden', className)}>
+    <Card className={cn('relative overflow-hidden transition-all duration-300', v.glow, className)}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
-          <div className={cn('p-2 rounded-lg', colorClasses[color])}>
+          <div className={cn('p-2 rounded-lg', v.bg, v.icon)}>
             <Icon className="h-5 w-5" />
           </div>
           {change !== undefined && (
