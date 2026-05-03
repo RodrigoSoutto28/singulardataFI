@@ -22,7 +22,7 @@ interface TopBarProps {
 
 export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
   const { profile, signOut } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [, setCurrentTime] = useState(new Date());
   const isDark = theme === 'dark';
