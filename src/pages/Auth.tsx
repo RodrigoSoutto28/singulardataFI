@@ -227,11 +227,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="flex items-center gap-12 relative z-10">
-            <div><p className="text-3xl font-bold font-mono">10K+</p><p className="text-sm text-muted-foreground">{t.auth.stats.activeTraders}</p></div>
-            <div><p className="text-3xl font-bold font-mono">2M+</p><p className="text-sm text-muted-foreground">{t.auth.stats.analyzedTrades}</p></div>
-            <div><p className="text-3xl font-bold font-mono">94%</p><p className="text-sm text-muted-foreground">{t.auth.stats.satisfaction}</p></div>
-          </div>
+          {/* Marketing stats removed pending real metrics */}
         </div>
 
         {/* Form */}
