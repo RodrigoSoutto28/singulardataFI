@@ -96,13 +96,12 @@ export default function Settings() {
     if (!user) return;
     setDeleting(true);
     try {
-      // Borrar datos del usuario (RLS limita al propio usuario)
-      await Promise.all([
-        supabase.from('trades').delete().eq('user_id', user.id),
-        supabase.from('psychology_entries').delete().eq('user_id', user.id),
-        supabase.from('trading_accounts').delete().eq('user_id', user.id),
-        supabase.from('profiles').delete().eq('id', user.id),
-      ]);
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        method: 'POST',
+      });
+      if (error || !(data as { success?: boolean })?.success) {
+        throw error ?? new Error('delete failed');
+      }
       toast.success('Tu cuenta y datos fueron eliminados.');
       await signOut();
     } catch {
