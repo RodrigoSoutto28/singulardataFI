@@ -560,6 +560,133 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
+
+      <GeolocationCard />
     </div>
+  );
+}
+
+// ============================================================
+// IP geolocation settings card
+// ============================================================
+import { useEffect as _useEffectGeo, useState as _useStateGeo } from 'react';
+import { Globe as _GlobeIcon, MapPin as _MapPinIcon, Info as _InfoIcon, RefreshCw as _RefreshIcon, Trash2 as _TrashIcon } from 'lucide-react';
+import { useIPGeolocation } from '@/hooks/useIPGeolocation';
+
+function GeolocationCard() {
+  const { t } = useLanguage();
+  const [enabled, setEnabled] = _useStateGeo(
+    () => localStorage.getItem('singular_use_ip_detection') !== 'false',
+  );
+  const { detection, isLoading, detectLocation, reset, hasCache } = useIPGeolocation();
+
+  _useEffectGeo(() => {
+    localStorage.setItem('singular_use_ip_detection', enabled ? 'true' : 'false');
+  }, [enabled]);
+
+  const labels = {
+    title: (t as any)?.settings?.geolocation?.title || 'Detección de Ubicación',
+    description:
+      (t as any)?.settings?.geolocation?.description ||
+      'Usa tu ubicación para detectar automáticamente el idioma apropiado.',
+    toggle: (t as any)?.settings?.geolocation?.toggle || 'Detección de idioma por IP',
+    privacy:
+      (t as any)?.settings?.geolocation?.privacy ||
+      'Privacidad: Solo detectamos tu país (no guardamos tu IP). Los resultados se guardan localmente por 7 días.',
+    detected: (t as any)?.settings?.geolocation?.detected || 'Ubicación detectada',
+    country: (t as any)?.settings?.geolocation?.country || 'País',
+    city: (t as any)?.settings?.geolocation?.city || 'Ciudad',
+    language: (t as any)?.settings?.geolocation?.language || 'Idioma',
+    source: (t as any)?.settings?.geolocation?.source || 'Servicio',
+    detectNow: (t as any)?.settings?.geolocation?.detectNow || 'Detectar ahora',
+    clear: (t as any)?.settings?.geolocation?.clear || 'Limpiar caché',
+  };
+
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <_GlobeIcon className="h-5 w-5 text-primary" />
+          {labels.title}
+        </CardTitle>
+        <CardDescription>{labels.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="ip-detection-toggle" className="text-sm font-medium">
+              {labels.toggle}
+            </Label>
+            <p className="text-xs text-muted-foreground">{labels.privacy.split(':')[1]?.trim()}</p>
+          </div>
+          <Switch
+            id="ip-detection-toggle"
+            checked={enabled}
+            onCheckedChange={setEnabled}
+          />
+        </div>
+
+        <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-3">
+          <_InfoIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+          <p className="text-xs text-muted-foreground">{labels.privacy}</p>
+        </div>
+
+        {enabled && (
+          <div className="rounded-md border border-border bg-muted/30 p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <_MapPinIcon className="h-4 w-4 text-primary" />
+              {labels.detected}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+              <div>
+                <span className="text-muted-foreground">{labels.country}: </span>
+                <span className="text-foreground">
+                  {detection?.countryName || '—'}{' '}
+                  {detection?.country && detection.country !== 'UNKNOWN' && `(${detection.country})`}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{labels.city}: </span>
+                <span className="text-foreground">{detection?.city || '—'}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{labels.language}: </span>
+                <span className="text-foreground uppercase">{detection?.language || '—'}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{labels.source}: </span>
+                <span className="text-foreground">
+                  {detection?.service || '—'}
+                  {detection?.cached && ' (cache)'}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => detectLocation().catch(() => {})}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <_RefreshIcon className={cn('h-3.5 w-3.5', isLoading && 'animate-spin')} />
+                {labels.detectNow}
+              </Button>
+              {hasCache && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={reset}
+                  className="gap-2 text-muted-foreground"
+                >
+                  <_TrashIcon className="h-3.5 w-3.5" />
+                  {labels.clear}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
