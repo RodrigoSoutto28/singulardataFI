@@ -12,8 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
-import { Language } from '@/i18n/translations';
 import { useTheme } from '@/contexts/ThemeContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -89,21 +89,9 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
-          {/* Language Selector — desktop/tablet only (mobile lives inside drawer) */}
-          <div className="hidden md:flex items-center bg-muted/60 rounded-md p-0.5 border border-border/60">
-            {languages.map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                className={`h-7 px-2.5 rounded text-[11px] font-semibold tracking-wider transition-all duration-200 ${
-                  language === lang
-                    ? 'bg-card text-primary shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {lang}
-              </button>
-            ))}
+          {/* Language Selector */}
+          <div className="hidden md:block">
+            <LanguageSelector variant="compact" />
           </div>
 
           {/* Profile */}
