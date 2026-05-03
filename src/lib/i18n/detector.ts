@@ -10,7 +10,7 @@ export type SupportedLanguage = 'es' | 'en' | 'pt' | 'fr';
 export interface LanguageDetectionResult {
   language: SupportedLanguage;
   confidence: 'high' | 'medium' | 'low';
-  source: 'database' | 'browser' | 'ip' | 'fallback';
+  source: 'database' | 'browser' | 'ip' | 'browser+ip' | 'fallback';
 }
 
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['es', 'en', 'pt', 'fr'];
@@ -41,11 +41,44 @@ export function detectBrowserLanguage(): LanguageDetectionResult {
 
 export async function detectUserLanguage(
   userSavedLanguage?: string | null,
+  useIPDetection: boolean = false,
 ): Promise<LanguageDetectionResult> {
   if (userSavedLanguage && SUPPORTED_LANGUAGES.includes(userSavedLanguage as SupportedLanguage)) {
     return { language: userSavedLanguage as SupportedLanguage, confidence: 'high', source: 'database' };
   }
-  return detectBrowserLanguage();
+
+  const browser = detectBrowserLanguage();
+
+  if (useIPDetection) {
+    try {
+      // Lazy import to avoid loading geolocation code when not needed.
+      const { detectLanguageByIP } = await import('@/lib/geolocation/ip-detector');
+      const ip = await detectLanguageByIP();
+
+      if (ip.country !== 'UNKNOWN') {
+        // Browser + IP agree → highest confidence.
+        if (browser.confidence === 'high' && browser.language === ip.language) {
+          return { language: ip.language, confidence: 'high', source: 'browser+ip' };
+        }
+        // Browser is "high" but disagrees → likely VPN; trust browser.
+        if (browser.confidence === 'high' && browser.language !== ip.language) {
+          return browser;
+        }
+        // IP is high and browser is not → IP wins.
+        if (ip.confidence === 'high') {
+          return { language: ip.language, confidence: 'high', source: 'ip' };
+        }
+        // IP medium → still better than fallback.
+        if (ip.confidence === 'medium') {
+          return { language: ip.language, confidence: 'medium', source: 'ip' };
+        }
+      }
+    } catch (err) {
+      console.warn('[i18n] IP detection failed, falling back to browser:', err);
+    }
+  }
+
+  return browser;
 }
 
 export function validateLanguage(lang: string | null | undefined): SupportedLanguage {
