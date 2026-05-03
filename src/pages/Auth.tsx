@@ -25,7 +25,13 @@ const GoogleIcon = () => (
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+
+  // On mount: if no stored preference, detect from browser.
+  useEffect(() => {
+    if (localStorage.getItem('app-language')) return;
+    detectUserLanguage().then((d) => setLanguage(toContextCode(d.language))).catch(() => {});
+  }, [setLanguage]);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -133,7 +139,16 @@ export default function Auth() {
     setIsLoading(true);
     const { error } = await signUp(parsed.data!.email, parsed.data!.password, parsed.data!.fullName);
     if (error) toast.error(translateAuthError(error.message));
-    else toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
+    else {
+      // Persist detected/current language onto the new profile (best-effort).
+      try {
+        const { data: { user: created } } = await supabase.auth.getUser();
+        if (created) {
+          await supabase.from('profiles').update({ language: toDbCode(language) } as any).eq('id', created.id);
+        }
+      } catch { /* no-op */ }
+      toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
+    }
     setIsLoading(false);
   };
 
