@@ -189,7 +189,10 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector variant="compact" />
+      </div>
       <div className="flex-1 flex">
         {/* Branding */}
         <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-background p-12 flex-col justify-between relative overflow-hidden">
