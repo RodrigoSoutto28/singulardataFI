@@ -11,11 +11,11 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/ui/page-loader";
-import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
-import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { PreMarketCheckInModal } from "@/components/psychology/PreMarketCheckInModal";
 import { usePreMarketCheckIn } from "@/hooks/usePreMarketCheckIn";
+import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 // Lazy-loaded pages — code splitting per route
 const Auth = lazy(() => import("./pages/Auth"));
@@ -54,13 +54,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PreMarketGate({ children }: { children: React.ReactNode }) {
   const { hasCheckedInToday, isLoading } = usePreMarketCheckIn();
-  if (isLoading) {
+  const { isOnboardingComplete, isLoading: onboardingLoading } = useOnboarding();
+  if (isLoading || onboardingLoading) {
     return <PageLoader />;
   }
+  // Onboarding handles initial check-in; only show daily check-in once onboarding is done.
   return (
     <>
       {children}
-      <PreMarketCheckInModal open={!hasCheckedInToday} onComplete={() => { /* query invalidates itself */ }} />
+      {isOnboardingComplete && (
+        <PreMarketCheckInModal open={!hasCheckedInToday} onComplete={() => { /* query invalidates itself */ }} />
+      )}
     </>
   );
 }
@@ -79,8 +83,7 @@ function AppRoutes() {
             <ProtectedRoute>
               <PreMarketGate>
                 <AppLayout />
-                <WelcomeModal />
-                <OnboardingTour />
+                <OnboardingWizard />
               </PreMarketGate>
             </ProtectedRoute>
           }

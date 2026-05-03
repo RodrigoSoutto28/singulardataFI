@@ -270,6 +270,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          onboarding_completed: boolean
+          onboarding_step: number
           role: string | null
           subscription_expires_at: string | null
           subscription_plan:
@@ -285,6 +287,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          onboarding_completed?: boolean
+          onboarding_step?: number
           role?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
@@ -300,6 +304,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          onboarding_completed?: boolean
+          onboarding_step?: number
           role?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:

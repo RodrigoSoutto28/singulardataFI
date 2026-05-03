@@ -87,7 +87,7 @@ export function useTaxometer() {
           reason: input.reason ?? null,
           cost_dollars: input.cost_dollars ?? 0,
           was_prevented: input.was_prevented ?? false,
-          metadata: input.metadata ?? null,
+          metadata: (input.metadata ?? null) as never,
         })
         .select()
         .single();
