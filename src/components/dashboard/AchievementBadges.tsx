@@ -84,7 +84,7 @@ export function AchievementBadges() {
     <>
       {/* Mobile: horizontal snap-scroll carousel */}
       <div
-        className="sm:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none"
+        className="sm:hidden -mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none"
         style={{ scrollbarWidth: 'none' }}
       >
         {metrics.map((metric) => {
@@ -94,7 +94,7 @@ export function AchievementBadges() {
             <div
               key={metric.id}
               className={cn(
-                'snap-start shrink-0 w-[78%] max-w-[260px] flex items-center gap-3 p-4 rounded-lg border transition-colors',
+                'snap-start shrink-0 w-[78%] max-w-[260px] flex items-center gap-4 p-4 rounded-lg border transition-colors',
                 styles.container
               )}
             >
@@ -124,7 +124,7 @@ export function AchievementBadges() {
       </div>
 
       {/* Tablet/Desktop: grid */}
-      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric) => {
           const styles = getStatusStyles(metric.status);
           const Icon = metric.icon;
@@ -132,7 +132,7 @@ export function AchievementBadges() {
             <div
               key={metric.id}
               className={cn(
-                'flex items-center gap-3 p-4 rounded-lg border transition-colors',
+                'flex items-center gap-4 p-4 rounded-lg border transition-colors',
                 styles.container
               )}
             >
