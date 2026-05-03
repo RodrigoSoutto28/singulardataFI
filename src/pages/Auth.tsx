@@ -13,6 +13,9 @@ import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/lib/validation';
 import { PublicFooter } from '@/components/layout/PublicFooter';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { detectUserLanguage, toContextCode, toDbCode } from '@/lib/i18n/detector';
+import { useEffect } from 'react';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
