@@ -8,7 +8,7 @@ export function TaxometerWidget() {
   const { stats, isLoading } = useTaxometer();
 
   return (
-    <Card>
+    <Card className="lift-strong">
       <CardHeader className="pb-4">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-destructive" />
@@ -29,7 +29,7 @@ export function TaxometerWidget() {
           <>
             <div>
               <p className="text-xs text-muted-foreground">Total perdido</p>
-              <p className="font-mono text-2xl font-bold text-destructive">
+              <p className="font-mono text-2xl font-bold text-destructive number-pop">
                 ${stats.totalCost.toFixed(2)}
               </p>
             </div>

@@ -52,7 +52,7 @@ export function QuickActionsCard() {
 
   return (
     <Card className="bg-gradient-to-r from-primary/5 via-card to-accent/5 border-primary/20">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 [&>*]:animate-fade-in [&>*]:stagger-item">
         {actions.map((action) => (
           <button
             key={action.label}
@@ -70,7 +70,7 @@ export function QuickActionsCard() {
                 action.iconBg
               )}
             >
-              <action.icon className={cn('h-5 w-5', action.iconColor)} />
+              <action.icon className={cn('h-5 w-5 icon-spring', action.iconColor)} />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-foreground truncate">

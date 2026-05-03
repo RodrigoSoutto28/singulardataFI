@@ -48,19 +48,19 @@ export function AchievementBadges() {
     switch (status) {
       case 'completed':
         return {
-          container: 'border-success/30 bg-success/5',
+          container: 'border-success/30 bg-success/5 lift-strong',
           icon: 'bg-success/10 text-success',
           text: 'text-foreground',
         };
       case 'in-progress':
         return {
-          container: 'border-primary/30 bg-primary/5',
-          icon: 'bg-primary/10 text-primary',
+          container: 'border-primary/30 bg-primary/5 lift-strong',
+          icon: 'bg-primary/10 text-primary pulse-incomplete',
           text: 'text-foreground',
         };
       default:
         return {
-          container: 'border-border bg-card',
+          container: 'border-border bg-card opacity-70',
           icon: 'bg-muted text-muted-foreground',
           text: 'text-muted-foreground',
         };

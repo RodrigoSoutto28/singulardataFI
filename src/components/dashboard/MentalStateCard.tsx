@@ -34,8 +34,8 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       <CardContent className="space-y-4">
         {/* Score Visual */}
         <div className="text-center">
-          <div className="text-5xl mb-2">{status.emoji}</div>
-          <div className="text-3xl font-bold font-mono mb-1">{disciplineScore}/10</div>
+          <div className="text-4xl mb-1.5 animate-subtle-bounce">{status.emoji}</div>
+          <div className="text-3xl font-bold font-mono mb-1 number-pop">{disciplineScore}/10</div>
           <Badge variant="secondary" className={cn('text-xs', status.color)}>
             {status.label}
           </Badge>
