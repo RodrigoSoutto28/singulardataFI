@@ -12,12 +12,14 @@ import { useTrades } from '@/hooks/useTrades';
 import { useTradingAccount } from '@/hooks/useTradingAccount';
 import { usePsychologyEntries } from '@/hooks/usePsychologyEntries';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-function getGreeting() {
+function getGreeting(t: ReturnType<typeof useLanguage>['t']) {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Buenos días';
-  if (hour < 18) return 'Buenas tardes';
-  return 'Buenas noches';
+  if (hour < 12) return t.dashboard.goodMorning;
+  if (hour < 18) return t.dashboard.goodAfternoon;
+  return t.dashboard.goodEvening;
 }
 
 function formatCurrency(value: number): string {
@@ -29,6 +31,7 @@ function formatCurrency(value: number): string {
 }
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const { trades } = useTrades();
   const { account } = useTradingAccount();
@@ -66,7 +69,7 @@ export default function Dashboard() {
   }));
 
   const userName =
-    (profile as any)?.full_name || (profile as any)?.email?.split('@')[0] || 'Trader';
+    profile?.full_name || profile?.email?.split('@')[0] || 'Trader';
 
   return (
     <div className="space-y-4 md:space-y-6" data-tour="dashboard">
@@ -74,12 +77,12 @@ export default function Dashboard() {
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 p-6 md:p-8 animate-slide-up-fade">
         <div className="relative z-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
-            {getGreeting()}, {userName} 👋
+            {getGreeting(t)}, {userName} 👋
           </h1>
           <p className="text-muted-foreground">
             {hasCheckedInToday
-              ? 'Tu plan de hoy está activo. Mantén la disciplina.'
-              : 'Completa tu check-in pre-mercado para comenzar.'}
+              ? t.dashboard.planActive
+              : t.dashboard.completeCheckIn}
           </p>
         </div>
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
@@ -129,7 +132,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Curva de Equity
+                {t.dashboard.equityCurve}
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-2">
@@ -147,12 +150,12 @@ export default function Dashboard() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Actividad Reciente</CardTitle>
+          <CardTitle>{t.dashboard.recentActivity}</CardTitle>
         </CardHeader>
         <CardContent>
           {recentTrades.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Aún no tienes operaciones registradas.
+              {t.dashboard.noTrades}
             </p>
           ) : (
             <RecentTrades trades={recentTrades} className="border-0 bg-transparent p-0" />

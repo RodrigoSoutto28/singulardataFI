@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Trade {
   id: string;
@@ -18,14 +20,18 @@ interface RecentTradesProps {
 }
 
 export function RecentTrades({ trades, className }: RecentTradesProps) {
+  const { t } = useLanguage();
+
   return (
     <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold">Recent Trades</h3>
-          <p className="text-sm text-muted-foreground">Your latest trading activity</p>
+          <h3 className="text-lg font-semibold">{t.dashboard.recentTradesTitle}</h3>
+          <p className="text-sm text-muted-foreground">{t.dashboard.recentTradesSubtitle}</p>
         </div>
-        <button className="text-sm text-primary hover:underline">View all</button>
+        <Link to="/journal" className="text-sm text-primary hover:underline">
+          {t.dashboard.viewAll}
+        </Link>
       </div>
 
       <div className="space-y-4">
@@ -38,15 +44,13 @@ export function RecentTrades({ trades, className }: RecentTradesProps) {
               <div
                 className={cn(
                   'flex items-center justify-center h-10 w-10 rounded-lg',
-                  trade.direction === 'long'
-                    ? 'bg-success/20'
-                    : 'bg-destructive/20'
+                  trade.direction === 'long' ? 'bg-success/20' : 'bg-destructive/20'
                 )}
               >
                 {trade.direction === 'long' ? (
-                  <ArrowUpRight className="h-5 w-5 text-success" />
+                  <ArrowUpRight className="h-5 w-5 text-success" aria-hidden />
                 ) : (
-                  <ArrowDownRight className="h-5 w-5 text-destructive" />
+                  <ArrowDownRight className="h-5 w-5 text-destructive" aria-hidden />
                 )}
               </div>
               <div>

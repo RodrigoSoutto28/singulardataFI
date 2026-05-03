@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useState, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 
@@ -24,13 +23,8 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
   const { profile, signOut } = useAuth();
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const [, setCurrentTime] = useState(new Date());
+  
   const isDark = theme === 'dark';
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const initials =
     profile?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase() || 'T';

@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MentalStateCardProps {
   disciplineScore: number;
@@ -11,12 +12,13 @@ interface MentalStateCardProps {
 }
 
 export function MentalStateCard({ disciplineScore, className }: MentalStateCardProps) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const getDisciplineStatus = (score: number) => {
-    if (score >= 8) return { label: 'Excelente', color: 'text-success', emoji: '🔥' };
-    if (score >= 6) return { label: 'Bien', color: 'text-warning', emoji: '👍' };
-    return { label: 'Mejorable', color: 'text-[hsl(28_95%_55%)]', emoji: '⚠️' };
+    if (score >= 8) return { label: t.common?.excellent ?? 'Excelente', color: 'text-success', emoji: '🔥' };
+    if (score >= 6) return { label: t.common?.good ?? 'Bien', color: 'text-warning', emoji: '👍' };
+    return { label: t.common?.improvable ?? 'Mejorable', color: 'text-[hsl(28_95%_55%)]', emoji: '⚠️' };
   };
 
   const status = getDisciplineStatus(disciplineScore);
@@ -28,7 +30,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Brain className="h-5 w-5 text-primary" />
-          Estado Mental
+          {t.dashboard.mentalStateTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -78,8 +80,8 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
             <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div className="text-xs text-muted-foreground">
               {disciplineScore >= 8
-                ? 'Mantén este nivel de disciplina. Eres Top 10% de traders.'
-                : 'Pequeños ajustes en tu rutina pueden mejorar tu score. Revisa tu check-in.'}
+                ? t.dashboard.disciplineTopTier
+                : t.dashboard.disciplineImprovement}
             </div>
           </div>
         </div>
@@ -91,7 +93,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
           onClick={() => navigate('/psychology')}
         >
           <Target className="h-4 w-4 mr-2" />
-          Ver Análisis Completo
+          {t.dashboard.viewFullAnalysis}
         </Button>
       </CardContent>
     </Card>

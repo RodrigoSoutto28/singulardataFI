@@ -90,7 +90,23 @@ export interface Translations {
   // Dashboard
   dashboard: {
     mentalState: string;
-    discipline: string;
+    goodMorning: string;
+    goodAfternoon: string;
+    goodEvening: string;
+    recentActivity: string;
+    completeCheckIn: string;
+    planActive: string;
+    mentalStateTitle: string;
+    disciplineTopTier: string;
+    disciplineImprovement: string;
+    viewFullAnalysis: string;
+    recentTradesTitle: string;
+    recentTradesSubtitle: string;
+    viewAll: string;
+    quickActionNewTrade: string;
+    quickActionJournal: string;
+    quickActionCheckIn: string;
+    quickActionAnalytics: string;
     insightOfDay: string;
     tiltAlert: string;
     tiltDescription: string;
@@ -226,6 +242,12 @@ export interface Translations {
   psychology: {
     title: string;
     subtitle: string;
+    errorTaxometer: string;
+    loading: string;
+    noErrorsRegistered: string;
+    totalLost: string;
+    thisWeek: string;
+    viewDetail: string;
     newEntry: string;
     avgDiscipline: string;
     rulesFollowed: string;
@@ -467,6 +489,23 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     },
     dashboard: {
       mentalState: 'Estado Operacional',
+      goodMorning: 'Buenos días',
+      goodAfternoon: 'Buenas tardes',
+      goodEvening: 'Buenas noches',
+      recentActivity: 'Actividad Reciente',
+      completeCheckIn: 'Completa tu check-in pre-mercado para comenzar.',
+      planActive: 'Tu plan de hoy está activo. Mantén la disciplina.',
+      mentalStateTitle: 'Estado Mental',
+      disciplineTopTier: 'Mantén este nivel de disciplina. Eres Top 10% de traders.',
+      disciplineImprovement: 'Pequeños ajustes en tu rutina pueden mejorar tu score. Revisa tu check-in.',
+      viewFullAnalysis: 'Ver Análisis Completo',
+      recentTradesTitle: 'Operaciones Recientes',
+      recentTradesSubtitle: 'Tu actividad de trading más reciente',
+      viewAll: 'Ver todo',
+      quickActionNewTrade: 'Nuevo Trade',
+      quickActionJournal: 'Mi Journal',
+      quickActionCheckIn: 'Check-in',
+      quickActionAnalytics: 'Analytics',
       discipline: 'Índice de Disciplina',
       insightOfDay: 'Insight del Día',
       tiltAlert: 'Alerta de Riesgo Conductual',
@@ -594,6 +633,12 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     psychology: {
       title: 'Seguimiento Psicológico',
       subtitle: 'Monitorea tu mentalidad y emociones de trading',
+      errorTaxometer: 'Taxímetro de Errores',
+      loading: 'Cargando…',
+      noErrorsRegistered: 'Sin errores registrados — sigue así.',
+      totalLost: 'Total perdido',
+      thisWeek: 'Esta semana',
+      viewDetail: 'Ver detalle',
       newEntry: 'Nueva Entrada',
       avgDiscipline: 'Disciplina Promedio',
       rulesFollowed: 'Reglas Seguidas',
@@ -828,6 +873,23 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     },
     dashboard: {
       mentalState: 'Operational State',
+      goodMorning: 'Good morning',
+      goodAfternoon: 'Good afternoon',
+      goodEvening: 'Good evening',
+      recentActivity: 'Recent Activity',
+      completeCheckIn: 'Complete your pre-market check-in to get started.',
+      planActive: 'Your plan for today is active. Stay disciplined.',
+      mentalStateTitle: 'Mental State',
+      disciplineTopTier: 'Keep this discipline level. You are Top 10% of traders.',
+      disciplineImprovement: 'Small routine adjustments can improve your score. Review your check-in.',
+      viewFullAnalysis: 'View Full Analysis',
+      recentTradesTitle: 'Recent Trades',
+      recentTradesSubtitle: 'Your latest trading activity',
+      viewAll: 'View all',
+      quickActionNewTrade: 'New Trade',
+      quickActionJournal: 'My Journal',
+      quickActionCheckIn: 'Check-in',
+      quickActionAnalytics: 'Analytics',
       discipline: 'Discipline Index',
       insightOfDay: 'Insight of the Day',
       tiltAlert: 'Behavioral Risk Alert',
@@ -955,6 +1017,12 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     psychology: {
       title: 'Psychology Tracker',
       subtitle: 'Monitor your trading mindset and emotions',
+      errorTaxometer: 'Error Taximeter',
+      loading: 'Loading…',
+      noErrorsRegistered: 'No errors registered — keep it up.',
+      totalLost: 'Total lost',
+      thisWeek: 'This week',
+      viewDetail: 'View detail',
       newEntry: 'New Entry',
       avgDiscipline: 'Avg Discipline',
       rulesFollowed: 'Rules Followed',
@@ -1189,6 +1257,23 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     },
     dashboard: {
       mentalState: 'Estado Operacional',
+      goodMorning: 'Bom dia',
+      goodAfternoon: 'Boa tarde',
+      goodEvening: 'Boa noite',
+      recentActivity: 'Atividade Recente',
+      completeCheckIn: 'Complete seu check-in pré-mercado para começar.',
+      planActive: 'Seu plano de hoje está ativo. Mantenha a disciplina.',
+      mentalStateTitle: 'Estado Mental',
+      disciplineTopTier: 'Mantenha este nível de disciplina. Você está no Top 10% dos traders.',
+      disciplineImprovement: 'Pequenos ajustes na sua rotina podem melhorar sua pontuação. Revise seu check-in.',
+      viewFullAnalysis: 'Ver Análise Completa',
+      recentTradesTitle: 'Operações Recentes',
+      recentTradesSubtitle: 'Sua atividade de trading mais recente',
+      viewAll: 'Ver tudo',
+      quickActionNewTrade: 'Nova Operação',
+      quickActionJournal: 'Meu Diário',
+      quickActionCheckIn: 'Check-in',
+      quickActionAnalytics: 'Análises',
       discipline: 'Índice de Disciplina',
       insightOfDay: 'Insight do Dia',
       tiltAlert: 'Alerta de Risco Comportamental',
@@ -1316,6 +1401,12 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
     psychology: {
       title: 'Rastreador Psicológico',
       subtitle: 'Monitore sua mentalidade e emoções de trading',
+      errorTaxometer: 'Taxímetro de Erros',
+      loading: 'Carregando…',
+      noErrorsRegistered: 'Sem erros registrados — continue assim.',
+      totalLost: 'Total perdido',
+      thisWeek: 'Esta semana',
+      viewDetail: 'Ver detalhes',
       newEntry: 'Nova Entrada',
       avgDiscipline: 'Disciplina Média',
       rulesFollowed: 'Regras Seguidas',

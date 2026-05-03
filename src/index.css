@@ -102,12 +102,37 @@
     --accent: 197 100% 45%;
     --accent-foreground: 0 0% 100%;
 
+    /* Semantic colors - calibrados para fondo oscuro */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 165 60% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 58%;
+    --warning-foreground: 210 35% 7%;
+    --profit: 165 65% 48%;
+    --loss: 0 75% 60%;
+
     --border: 210 25% 20%;
     --input: 210 28% 17%;
+    --ring: 199 75% 58%;
+
+    /* Charts - tonos más luminosos para dark */
+    --chart-1: 199 75% 58%;
+    --chart-2: 197 100% 45%;
+    --chart-3: 217 70% 60%;
+    --chart-4: 183 90% 55%;
+    --chart-5: 167 55% 65%;
+
+    --teal: 183 90% 55%;
 
     --sidebar-background: 210 35% 8%;
     --sidebar-foreground: 210 20% 65%;
+    --sidebar-primary: 199 75% 58%;
+    --sidebar-primary-foreground: 210 35% 7%;
+    --sidebar-accent: 210 30% 15%;
+    --sidebar-accent-foreground: 210 25% 92%;
     --sidebar-border: 210 25% 18%;
+    --sidebar-ring: 199 75% 58%;
   }
 }
 
@@ -608,5 +633,10 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     transform: none !important;
+  }
+
+  /* Prevent stagger items from being invisible when motion is reduced */
+  .stagger-item {
+    opacity: 1 !important;
   }
 }
