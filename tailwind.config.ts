@@ -86,6 +86,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        section: '48px',
+        container: '80px',
+      },
       screens: {
         'xs': '375px',
         '3xl': '1920px',
