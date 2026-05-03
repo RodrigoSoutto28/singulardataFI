@@ -93,7 +93,7 @@ export default function Dashboard() {
       <AchievementBadges />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 [&>*]:animate-fade-in [&>*]:stagger-item">
         <StatCard
           label="Balance"
           value={formatCurrency(balance)}
