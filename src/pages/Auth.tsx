@@ -156,11 +156,11 @@ export default function Auth() {
     if (oauthLoading) return;
     setOauthLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: `${window.location.origin}/dashboard` },
+      const { lovable } = await import('@/integrations/lovable');
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/dashboard`,
       });
-      if (error) toast.error(localized.oauthError);
+      if (result.error) toast.error(localized.oauthError);
     } catch {
       toast.error(localized.oauthError);
     } finally {
