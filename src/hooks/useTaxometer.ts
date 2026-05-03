@@ -79,7 +79,7 @@ export function useTaxometer() {
       if (!user?.id) throw new Error('No user');
       const { data, error } = await supabase
         .from('psychological_errors')
-        .insert({
+        .insert([{
           user_id: user.id,
           trade_id: input.trade_id ?? null,
           error_type: input.error_type,
@@ -88,7 +88,7 @@ export function useTaxometer() {
           cost_dollars: input.cost_dollars ?? 0,
           was_prevented: input.was_prevented ?? false,
           metadata: (input.metadata ?? null) as never,
-        })
+        }])
         .select()
         .single();
       if (error) throw error;
