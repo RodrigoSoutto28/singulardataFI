@@ -87,7 +87,7 @@ export function CapitalCard({
   };
 
   return (
-    <div className={cn('p-4 md:p-5 rounded-lg bg-card border border-border relative group', className)}>
+    <div className={cn('p-4 md:p-6 rounded-lg bg-card border border-border relative group', className)}>
       {/* Top-right action area */}
       <div className="absolute top-2 right-2 flex items-center gap-1">
         {isEditing ? (

@@ -38,7 +38,7 @@ const iconStyles = {
 
 export function AIInsightCard({ insights, className }: AIInsightCardProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-lg p-5', className)}>
+    <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/20">

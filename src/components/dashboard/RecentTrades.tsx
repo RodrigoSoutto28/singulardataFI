@@ -19,7 +19,7 @@ interface RecentTradesProps {
 
 export function RecentTrades({ trades, className }: RecentTradesProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-lg p-5', className)}>
+    <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold">Recent Trades</h3>
