@@ -1,51 +1,82 @@
-## Taxímetro de Malos Hábitos
+# Sistema de internacionalización (i18n) con detección automática
 
-System that detects psychological trading errors, quantifies their dollar cost, and surfaces them via a Psychology tab + Dashboard widget + a blocking pre-trade alert.
+## Estado actual
 
-### Database (new migration)
+- `src/contexts/LanguageContext.tsx` ya existe y maneja `Language = 'ES' | 'EN' | 'PT'` (uppercase) con persistencia en `localStorage('app-language')`.
+- `src/i18n/translations.ts` (1472 líneas) tiene un diccionario muy completo en ES/EN/PT con tipo `Translations` estructurado.
+- `TopBar.tsx` ya incluye un mini-selector de idioma con códigos uppercase.
+- No existe columna `language` en `profiles`, ni `useLanguageDetection`, ni archivo `src/lib/i18n/*`.
+- El hook de auth real es `useAuth` desde `@/contexts/AuthContext` (no `@/hooks/useAuth`).
 
-**`psychological_errors`** table with RLS (`auth.uid() = user_id` for all CRUD):
-- `id`, `user_id`, `trade_id` (nullable)
-- `error_type text` (`revenge_trading | fomo | overtrading | risk_exceeded | no_stop_loss | holding_losers`)
-- `confidence text` (`high | medium | low`), `reason text`
-- `cost_dollars numeric default 0`, `was_prevented boolean default false`
-- `metadata jsonb`, `timestamp timestamptz default now()`, `created_at`
-- Index on `(user_id, timestamp desc)`
+## Decisiones de diseño
 
-### Files to create
+Para no romper las 1472 líneas de traducciones existentes ni todos los componentes que usan `language: 'ES'|'EN'|'PT'` y `t.xxx`:
 
-1. **`src/lib/error-detection.ts`** — Pure detection logic:
-   - `ErrorType` union, `DetectedError` interface.
-   - `detectPsychologicalErrors(currentTrade, recentTrades, todayCheckIn)` — checks: revenge trading (<15 min after a loss), overtrading (exceeds `max_daily_trades`), risk exceeded (`stop_loss` distance > `max_risk_per_trade`%), missing stop loss, FOMO keyword in notes.
-   - `calculateErrorCost(errorType, trade, historicalData)` — uses real loss when present, else multiplies user's avg loss.
+1. **Mantener** los códigos internos del contexto (`'ES' | 'EN' | 'PT'`) y **agregar** `'FR'` como cuarto idioma soportado.
+2. El detector trabaja con códigos minúsculos (`es/en/pt/fr`) por convención BCP-47, y se mapea a/desde los códigos uppercase del contexto.
+3. La columna `language` en BD se guarda en minúsculas (`es/en/pt/fr`) para alinearse con estándar y con `navigator.language`.
+4. Reemplazar el mini-selector inline del `TopBar` por el nuevo `<LanguageSelector variant="compact" />` reutilizable.
 
-2. **`src/hooks/useTaxometer.ts`** — React Query hook reading `psychological_errors` for the user, computing `{ totalCost, weekCost, monthCost, quarterCost, savingsFromImprovement }` and grouping by `error_type`. Also exports a `logError(...)` mutation that inserts a row.
+## Cambios
 
-3. **`src/components/psychology/TaxometerDashboard.tsx`** — Full dashboard:
-   - Hero card with total lost, tangible comparison ($500 = "Un curso profesional", etc.).
-   - 4 period stat cards (week / month / quarter / total).
-   - Recharts bar chart of cost per error type with semantic-token colors.
-   - List breakdown with counts per type.
-   - Optional savings card.
-   - Empty state when no errors detected yet.
+### Base de datos (migración)
 
-4. **`src/components/psychology/TaxometerWidget.tsx`** — Compact card for Dashboard showing total + this-week cost + small CTA linking to `/psychology` taxímetro tab. Uses semantic tokens (warning/destructive). Empty state: "Sin errores registrados — sigue así".
+```sql
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'es'
+    CHECK (language IN ('es','en','pt','fr'));
 
-5. **`src/components/psychology/TaxometerAlert.tsx`** — `AlertDialog` triggered before opening risky trades:
-   - Lists high-confidence detected errors.
-   - Shows estimated historical cost.
-   - 60-second reflection countdown progress bar before "Continuar de todas formas" enables.
-   - "Cancelar trade" primary action.
+CREATE INDEX IF NOT EXISTS idx_profiles_language ON public.profiles(language);
+```
 
-### Files to modify
+Tras la migración, `src/integrations/supabase/types.ts` se regenera automáticamente con la nueva columna.
 
-- **`src/pages/Psychology.tsx`** — Add a 4th tab `taxometer` with `DollarSign` icon rendering `<TaxometerDashboard />`.
-- **`src/pages/Dashboard.tsx`** — Insert `<TaxometerWidget />` in the metrics/cards grid.
-- **`src/pages/Journal.tsx`** — On submit of a new (open or closed) trade, run `detectPsychologicalErrors` against today's check-in (`usePreMarketCheckIn`) and recent trades (`useTrades`); if any high-confidence error: open `<TaxometerAlert>`. On "Cancelar" abort save; on "Continuar" save the trade AND insert a `psychological_errors` row via `useTaxometer.logError`. Also auto-log post-close errors when applicable (e.g. `no_stop_loss` confirmed) using the closed trade's loss as `cost_dollars`.
+### Archivos nuevos
 
-### Notes
+1. **`src/lib/i18n/detector.ts`** — `SupportedLanguage = 'es'|'en'|'pt'|'fr'`, `detectBrowserLanguage()`, `detectUserLanguage(saved?)`, `validateLanguage()`, `getLanguageName()`, `getLanguageFlag()`. Helpers `toContextCode('es') -> 'ES'` y `toDbCode('ES') -> 'es'` para puentear ambos sistemas. (Sin `detectLanguageByIP` activo: queda comentado para evitar llamadas externas no deseadas.)
 
-- All copy in Spanish.
-- All colors via semantic tokens (`destructive`, `warning`, `success`, `muted-foreground`) — no hardcoded hex in components. The chart uses HSL values resolved from CSS vars.
-- Types: extend project types or use lightweight local interfaces (`PreMarketCheckIn` shape already exists in `src/lib/checkin-helpers.ts`; `Trade` from `@/hooks/useTrades`).
-- `useAuth` from `@/contexts/AuthContext` (project does not have a `useAuth` hook file).
+2. **`src/hooks/useLanguageDetection.ts`** — Hook que en el primer render:
+   - Si hay user, lee `profiles.language` de la BD.
+   - Si no hay valor en BD ni en `localStorage('app-language')`, ejecuta `detectUserLanguage()` y aplica el resultado vía `setLanguage(toContextCode(...))`.
+   - Si hay user pero su perfil no tenía `language`, persiste el detectado en BD.
+   - Devuelve `{ isDetecting, detectionComplete }`. No bloquea UI por defecto (la detección es no-bloqueante; solo evita parpadeos).
+
+3. **`src/components/LanguageSelector.tsx`** — Dropdown con bandera + nombre. Variantes:
+   - `variant="default"`: botón ancho con `Globe` + bandera + nombre actual.
+   - `variant="compact"`: solo bandera (para `TopBar`).
+   - Al cambiar: actualiza contexto y, si hay usuario, persiste `profiles.language` (en minúsculas). Toast de confirmación en el nuevo idioma.
+
+### Archivos modificados
+
+4. **`src/i18n/translations.ts`** — Añadir `'FR'` al type `Language` y un objeto `fr` con la misma forma que `es/en/pt`. Para no expandir 1472 líneas en una sola pasada, el objeto `fr` se construye reutilizando claves: traducción completa de las secciones críticas (common, nav, topbar, auth, dashboard, settings, journal, analytics, psychology, insights, reports, onboarding, errors, toasts) y para el resto se hace fallback automático a `en` mediante un proxy `Proxy`-based deep-merge en runtime, garantizando que `t.xxx.yyy` nunca devuelva `undefined`.
+
+5. **`src/contexts/LanguageContext.tsx`** — Añadir `'FR'` al inicializador (validar contra los 4 idiomas). Sin cambios estructurales.
+
+6. **`src/components/layout/TopBar.tsx`** — Reemplazar el bloque `languages.map(...)` actual por `<LanguageSelector variant="compact" />`.
+
+7. **`src/pages/Auth.tsx`** — En `useEffect` al montar: si no hay user y no hay `localStorage('app-language')`, ejecutar `detectUserLanguage()` y aplicar. En `handleSignUp`, tras `signUp` exitoso, guardar el idioma actual en `profiles.language` (al perfil recién creado por el trigger `handle_new_user`).
+
+8. **`src/App.tsx`** — Montar `useLanguageDetection()` dentro del provider para que se ejecute una vez por sesión. **No** mostrar splash bloqueante (la detección inicial usa el valor de `localStorage` sincrónicamente; solo persiste/sincroniza con BD en background).
+
+## Flujo resultante
+
+```text
+Primera visita (sin login)
+  -> detectBrowserLanguage() -> setLanguage en contexto + localStorage
+  
+Sign up
+  -> trigger crea profile -> Auth.tsx update profiles.language = idioma actual
+  
+Login posterior
+  -> useLanguageDetection lee profiles.language -> setLanguage si difiere
+  
+Cambio manual via LanguageSelector
+  -> setLanguage + localStorage + (si user) update profiles.language
+```
+
+## Notas técnicas
+
+- No se usa detección por IP (latencia + privacidad). El stub queda en el detector pero no se invoca.
+- El selector usa `getLanguageFlag` con emojis Unicode; no se añaden imágenes.
+- El hook `useAuth` correcto es `from '@/contexts/AuthContext'` (no `@/hooks/useAuth` como sugería el spec).
+- Las traducciones FR cubren todas las strings visibles en navegación principal; cualquier clave no traducida cae a EN automáticamente vía proxy de fallback (sin romper TypeScript ni mostrar `undefined`).
