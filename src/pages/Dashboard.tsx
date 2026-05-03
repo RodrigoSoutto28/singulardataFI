@@ -69,9 +69,9 @@ export default function Dashboard() {
     (profile as any)?.full_name || (profile as any)?.email?.split('@')[0] || 'Trader';
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-fade-in" data-tour="dashboard">
+    <div className="space-y-4 md:space-y-6" data-tour="dashboard">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 p-6 md:p-8 animate-slide-up-fade">
         <div className="relative z-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
             {getGreeting()}, {userName} 👋
@@ -93,7 +93,7 @@ export default function Dashboard() {
       <AchievementBadges />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 [&>*]:animate-fade-in [&>*]:stagger-item">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 stagger-reveal">
         <StatCard
           label="Balance"
           value={formatCurrency(balance)}
@@ -124,7 +124,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        <div className="lg:col-span-2 animate-fade-in">
+        <div className="lg:col-span-2 animate-fade-in-up">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="space-y-4 md:space-y-6 [&>*]:animate-fade-in [&>*]:stagger-item">
+        <div className="space-y-4 md:space-y-6 stagger-reveal">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
         </div>
