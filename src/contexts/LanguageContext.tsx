@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Language, translations, Translations } from '@/i18n/translations';
 
+const VALID: Language[] = ['ES', 'EN', 'PT', 'FR'];
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -11,19 +13,18 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
-    const stored = localStorage.getItem('app-language');
-    return (stored as Language) || 'ES';
+    const stored = localStorage.getItem('app-language') as Language | null;
+    return stored && VALID.includes(stored) ? stored : 'ES';
   });
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('app-language', lang);
+    const safe = VALID.includes(lang) ? lang : 'ES';
+    setLanguageState(safe);
+    localStorage.setItem('app-language', safe);
   }, []);
 
-  const t = translations[language];
-
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t: translations[language] }}>
       {children}
     </LanguageContext.Provider>
   );
