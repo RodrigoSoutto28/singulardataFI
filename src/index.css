@@ -374,8 +374,47 @@
 }
 
 @layer utilities {
-  .responsive-padding { @apply p-4 md:p-6 lg:p-7; }
-  .responsive-gap { @apply gap-3 sm:gap-4 md:gap-6; }
+  /* ----- 8pt grid spacing system ----- */
+  .responsive-padding-sm { @apply p-3 md:p-4 lg:p-5; }
+  .responsive-padding    { @apply p-4 md:p-6 lg:p-7; }
+  .responsive-padding-lg { @apply p-6 md:p-8 lg:p-10; }
+
+  .responsive-gap-sm { @apply gap-2 md:gap-3 lg:gap-4; }
+  .responsive-gap    { @apply gap-3 sm:gap-4 md:gap-6; }
+  .responsive-gap-lg { @apply gap-4 md:gap-6 lg:gap-8; }
+
+  .responsive-space-sm { @apply space-y-3 md:space-y-4 lg:space-y-5; }
+  .responsive-space    { @apply space-y-4 md:space-y-6 lg:space-y-8; }
+  .responsive-space-lg { @apply space-y-6 md:space-y-8 lg:space-y-10; }
+
+  .container-optimal {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  @media (min-width: 768px) {
+    .container-optimal { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .container-optimal { padding-left: 2rem; padding-right: 2rem; }
+  }
+
+  .grid-optimal { display: grid; gap: 1rem; }
+  @media (min-width: 768px) { .grid-optimal { gap: 1.5rem; } }
+  @media (min-width: 1024px) { .grid-optimal { gap: 2rem; } }
+
+  .compact-section { @apply space-y-3 md:space-y-4; }
+
+  .stack-tight   { @apply flex flex-col gap-2; }
+  .stack-normal  { @apply flex flex-col gap-4; }
+  .stack-relaxed { @apply flex flex-col gap-6; }
+
+  .inline-tight   { @apply flex items-center gap-2; }
+  .inline-normal  { @apply flex items-center gap-4; }
+  .inline-relaxed { @apply flex items-center gap-6; }
+
   .font-mono-numbers { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 
   /* Hide scrollbars while preserving scroll behavior */
