@@ -13,6 +13,9 @@ import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/lib/validation';
 import { PublicFooter } from '@/components/layout/PublicFooter';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { detectUserLanguage, toContextCode, toDbCode } from '@/lib/i18n/detector';
+import { useEffect } from 'react';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
@@ -22,7 +25,13 @@ const GoogleIcon = () => (
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+
+  // On mount: if no stored preference, detect from browser.
+  useEffect(() => {
+    if (localStorage.getItem('app-language')) return;
+    detectUserLanguage().then((d) => setLanguage(toContextCode(d.language))).catch(() => {});
+  }, [setLanguage]);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -130,7 +139,16 @@ export default function Auth() {
     setIsLoading(true);
     const { error } = await signUp(parsed.data!.email, parsed.data!.password, parsed.data!.fullName);
     if (error) toast.error(translateAuthError(error.message));
-    else toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
+    else {
+      // Persist detected/current language onto the new profile (best-effort).
+      try {
+        const { data: { user: created } } = await supabase.auth.getUser();
+        if (created) {
+          await supabase.from('profiles').update({ language: toDbCode(language) } as any).eq('id', created.id);
+        }
+      } catch { /* no-op */ }
+      toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });
+    }
     setIsLoading(false);
   };
 
@@ -171,7 +189,10 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector variant="compact" />
+      </div>
       <div className="flex-1 flex">
         {/* Branding */}
         <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-background p-12 flex-col justify-between relative overflow-hidden">

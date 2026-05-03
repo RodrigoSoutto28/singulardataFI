@@ -16,6 +16,7 @@ import { PreMarketCheckInModal } from "@/components/psychology/PreMarketCheckInM
 import { usePreMarketCheckIn } from "@/hooks/usePreMarketCheckIn";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useLanguageDetection } from "@/hooks/useLanguageDetection";
 
 // Lazy-loaded pages — code splitting per route
 const Auth = lazy(() => import("./pages/Auth"));
@@ -70,6 +71,7 @@ function PreMarketGate({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  useLanguageDetection();
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
