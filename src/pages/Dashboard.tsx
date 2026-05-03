@@ -69,7 +69,7 @@ export default function Dashboard() {
     (profile as any)?.full_name || (profile as any)?.email?.split('@')[0] || 'Trader';
 
   return (
-    <div className="space-y-6 animate-fade-in" data-tour="dashboard">
+    <div className="space-y-4 md:space-y-6 animate-fade-in" data-tour="dashboard">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 p-6 md:p-8">
         <div className="relative z-10">
@@ -93,7 +93,7 @@ export default function Dashboard() {
       <AchievementBadges />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           label="Balance"
           value={formatCurrency(balance)}
@@ -123,7 +123,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
