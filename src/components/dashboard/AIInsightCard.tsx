@@ -54,7 +54,7 @@ export function AIInsightCard({ insights, className }: AIInsightCardProps) {
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {insights.map((insight) => {
           const Icon = insightIcons[insight.type];
           return (
@@ -65,7 +65,7 @@ export function AIInsightCard({ insights, className }: AIInsightCardProps) {
                 insightStyles[insight.type]
               )}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-4">
                 <Icon className={cn('h-5 w-5 mt-0.5 shrink-0', iconStyles[insight.type])} />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{insight.title}</p>
