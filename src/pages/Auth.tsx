@@ -217,6 +217,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
+      <ParticleBackground />
       <div className="absolute top-4 right-4 z-50">
         <LanguageSelector variant="compact" />
       </div>
