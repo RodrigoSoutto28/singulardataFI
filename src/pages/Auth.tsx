@@ -261,7 +261,7 @@ export default function Auth() {
 
         {/* Form */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-          <Card className="w-full max-w-md border-border bg-card/90 backdrop-blur-sm">
+          <Card className="w-full max-w-md border-border bg-card/95 backdrop-blur-md shadow-2xl supports-[backdrop-filter]:bg-card/85">
             <CardHeader className="text-center pb-2">
               <div className="flex items-center justify-center mb-4 lg:hidden">
                 <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
