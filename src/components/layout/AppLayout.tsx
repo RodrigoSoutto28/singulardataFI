@@ -70,7 +70,7 @@ export function AppLayout() {
           <Sidebar
             collapsed={false}
             onItemClick={() => setMobileMenuOpen(false)}
-            showLanguageSelector
+            showQuickToggles
           />
         </SheetContent>
       </Sheet>
@@ -81,8 +81,10 @@ export function AppLayout() {
           onMenuClick={() => setMobileMenuOpen(true)}
           sectionTitle={sectionTitle}
         />
-        <main className="flex-1 p-4 md:p-6 lg:p-7 overflow-x-hidden overflow-y-auto">
-          <Outlet />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-6 lg:px-8 lg:py-7 page-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

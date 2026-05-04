@@ -18,7 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Language } from '@/i18n/translations';
+
 
 interface NavItem {
   titleKey: 'dashboard' | 'journal' | 'analytics' | 'psychology';
@@ -40,22 +40,20 @@ interface SidebarProps {
   onToggleCollapsed?: () => void;
   /** Called when a nav item is selected (used to close mobile drawer). */
   onItemClick?: () => void;
-  /** Show language selector inside the sidebar (used in mobile drawer). */
-  showLanguageSelector?: boolean;
+  /** Show quick toggles inside the sidebar (used in mobile drawer). */
+  showQuickToggles?: boolean;
 }
 
 export function Sidebar({
   collapsed = false,
   onToggleCollapsed,
   onItemClick,
-  showLanguageSelector = false,
+  showQuickToggles = false,
 }: SidebarProps) {
   const location = useLocation();
   const { signOut, profile } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-
-  const languages: Language[] = ['ES', 'EN', 'PT'];
 
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
@@ -153,35 +151,9 @@ export function Sidebar({
           ))}
         </nav>
 
-        {/* Language selector (mobile drawer) */}
-        {showLanguageSelector && !collapsed && (
-          <div className="px-3 pb-2">
-            <div className="px-2 pb-1.5">
-              <span className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70 uppercase">
-                Idioma
-              </span>
-            </div>
-            <div className="flex items-center bg-muted/60 rounded-md p-0.5 border border-border/60">
-              {languages.map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setLanguage(lang)}
-                  className={cn(
-                    'flex-1 h-8 rounded text-[11px] font-semibold tracking-wider transition-all',
-                    language === lang
-                      ? 'bg-card text-primary shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Theme toggle (mobile drawer) */}
-        {showLanguageSelector && !collapsed && (
+        {showQuickToggles && !collapsed && (
           <div className="px-3 pb-3">
             <div className="px-2 pb-1.5">
               <span className="text-[10px] font-semibold tracking-[0.15em] text-muted-foreground/70 uppercase">

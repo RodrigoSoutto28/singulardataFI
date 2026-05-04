@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AchievementBadges } from '@/components/dashboard/AchievementBadges';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { MentalStateCard } from '@/components/dashboard/MentalStateCard';
@@ -5,8 +6,10 @@ import { QuickActionsCard } from '@/components/dashboard/QuickActionsCard';
 import { EquityChart } from '@/components/dashboard/EquityChart';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { TaxometerWidget } from '@/components/psychology/TaxometerWidget';
+import { AccountSetupModal } from '@/components/dashboard/AccountSetupModal';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { TrendingUp, Wallet, Target, Brain } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TrendingUp, Wallet, Target, Brain, Pencil } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/hooks/useTrades';
 import { useTradingAccount } from '@/hooks/useTradingAccount';
@@ -25,6 +28,7 @@ function getGreeting(t: ReturnType<typeof useLanguage>['t']) {
 export default function Dashboard() {
   const { t } = useLanguage();
   const { profile } = useAuth();
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
   const { trades } = useTrades();
   const { account } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
@@ -89,13 +93,25 @@ export default function Dashboard() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 [&>*]:stagger-item">
-        <StatCard
-          label="Balance"
-          value={formatCurrency(balance)}
-          change={balanceChange}
-          icon={Wallet}
-          trend={balanceChange >= 0 ? 'up' : 'down'}
-        />
+        <div className="relative group">
+          <StatCard
+            label="Balance"
+            value={formatCurrency(balance)}
+            change={balanceChange}
+            icon={Wallet}
+            trend={balanceChange >= 0 ? 'up' : 'down'}
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={() => setAccountModalOpen(true)}
+            aria-label="Editar balance de la cuenta"
+            className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-primary/10 hover:text-primary z-10"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        </div>
         <StatCard
           label="P&L Hoy"
           value={formatCurrency(todayPnL)}
@@ -154,6 +170,8 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      <AccountSetupModal open={accountModalOpen} onOpenChange={setAccountModalOpen} />
     </div>
   );
 }

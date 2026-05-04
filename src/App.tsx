@@ -28,6 +28,7 @@ const Journal = lazy(() => import("./pages/Journal"));
 const Psychology = lazy(() => import("./pages/Psychology"));
 const AnalyticsHub = lazy(() => import("./pages/AnalyticsHub"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const StudyAdmin = lazy(() => import("./pages/admin/StudyAdmin"));
 
@@ -98,6 +99,7 @@ function AppRoutes() {
           <Route path="insights" element={<Navigate to="/analytics" replace />} />
           <Route path="reports" element={<Navigate to="/analytics" replace />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
           <Route
             path="admin/study"
             element={

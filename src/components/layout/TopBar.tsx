@@ -1,4 +1,5 @@
-import { Sun, Moon, Menu, TrendingUp } from 'lucide-react';
+import { Sun, Moon, Menu, TrendingUp, User as UserIcon, Settings as SettingsIcon, CreditCard, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/contexts/ThemeContext';
-import { LanguageSelector } from '@/components/LanguageSelector';
+// LanguageSelector removed: language preference is managed in Settings + auto-detection
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -25,6 +26,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
 
   const initials =
     profile?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase() || 'T';
@@ -83,10 +85,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
-          {/* Language Selector */}
-          <div className="hidden md:block">
-            <LanguageSelector variant="compact" />
-          </div>
+
 
           {/* Profile */}
           <DropdownMenu>
@@ -106,11 +105,21 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
               <DropdownMenuLabel>{t.topbar.myAccount}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>{t.topbar.profile}</DropdownMenuItem>
-              <DropdownMenuItem>{t.topbar.billing}</DropdownMenuItem>
-              <DropdownMenuItem>{t.topbar.settings}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer gap-2">
+                <UserIcon className="h-4 w-4" />
+                {t.topbar.profile}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer gap-2">
+                <CreditCard className="h-4 w-4" />
+                {t.topbar.billing}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer gap-2">
+                <SettingsIcon className="h-4 w-4" />
+                {t.topbar.settings}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="text-destructive">
+              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer gap-2">
+                <LogOut className="h-4 w-4" />
                 {t.topbar.signOut}
               </DropdownMenuItem>
             </DropdownMenuContent>
