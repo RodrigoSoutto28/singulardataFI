@@ -152,7 +152,7 @@ const ParticleBackground = ({ className }: ParticleBackgroundProps) => {
       aria-hidden
       className={
         className ??
-        'pointer-events-none fixed inset-0 -z-10 h-full w-full opacity-60'
+        'pointer-events-none fixed inset-0 z-0 h-full w-full opacity-90'
       }
     />
   );
