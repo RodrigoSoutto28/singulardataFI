@@ -25,6 +25,9 @@ export interface Translations {
     upgrade: string;
     currentPlan: string;
     mostPopular: string;
+    excellent: string;
+    good: string;
+    improvable: string;
   };
 
   // Navigation
@@ -140,6 +143,7 @@ export interface Translations {
     noAccountYet: string;
     clickToSetup: string;
     portfolioValue: string;
+    discipline: string;
   };
 
   // Discipline Metrics

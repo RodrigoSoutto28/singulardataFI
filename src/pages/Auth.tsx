@@ -82,7 +82,34 @@ export default function Auth() {
       googleSignIn: 'Continuar com Google',
       oauthError: 'Não foi possível entrar com Google. Tente novamente.',
     },
-  }[language];
+    FR: {
+      tagline: 'Trading Intelligence Platform',
+      confirmPassword: 'Confirmer le mot de passe',
+      confirmMismatch: 'Les mots de passe ne correspondent pas',
+      acceptTerms: 'J’accepte les',
+      termsLink: 'Conditions Générales',
+      and: 'et la',
+      privacyLink: 'Politique de Confidentialité',
+      mustAccept: 'Vous devez accepter les conditions pour continuer',
+      forgot: 'Mot de passe oublié ?',
+      orContinueWith: 'ou continuer avec',
+      googleSignIn: 'Continuer avec Google',
+      oauthError: 'Impossible de se connecter avec Google. Veuillez réessayer.',
+    },
+  }[language] ?? {
+    tagline: 'Trading Intelligence Platform',
+    confirmPassword: 'Confirm password',
+    confirmMismatch: 'Passwords do not match',
+    acceptTerms: 'I agree to the',
+    termsLink: 'Terms and Conditions',
+    and: 'and',
+    privacyLink: 'Privacy Policy',
+    mustAccept: 'You must accept the terms to continue',
+    forgot: 'Forgot your password?',
+    orContinueWith: 'or continue with',
+    googleSignIn: 'Continue with Google',
+    oauthError: 'Could not sign in with Google. Please try again.',
+  };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
