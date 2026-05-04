@@ -10,6 +10,7 @@ interface StatCardProps {
   icon: LucideIcon;
   trend?: 'up' | 'down';
   color?: 'primary' | 'teal' | 'purple' | 'orange' | 'green';
+  negative?: boolean;
   className?: string;
 }
 
