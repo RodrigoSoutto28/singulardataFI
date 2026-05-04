@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function TaxometerWidget() {
   const { stats, isLoading } = useTaxometer();
   const { t } = useLanguage();
-  const ps = (t as { psychology?: Record<string, string> })?.psychology ?? {};
+  const ps = t.psychology;
 
   return (
     <Card className="lift-strong">
