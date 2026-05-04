@@ -21,6 +21,7 @@ export function StatCard({
   icon: Icon,
   trend,
   color = 'primary',
+  negative,
   className,
 }: StatCardProps) {
   const colorVariants = {
