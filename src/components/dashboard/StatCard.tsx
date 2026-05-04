@@ -103,7 +103,7 @@ export function StatCard({
           {label}
         </p>
 
-        <p className="text-2xl font-bold font-mono tracking-tight">
+        <p className={cn('text-2xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
           {value}
         </p>
       </CardContent>
