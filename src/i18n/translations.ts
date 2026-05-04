@@ -436,6 +436,9 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
       upgrade: 'Mejorar',
       currentPlan: 'Plan Actual',
       mostPopular: 'Más Popular',
+      excellent: 'Excelente',
+      good: 'Bien',
+      improvable: 'Mejorable',
     },
     nav: {
       dashboard: 'Panel de Control',
@@ -820,6 +823,9 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
       upgrade: 'Upgrade',
       currentPlan: 'Current Plan',
       mostPopular: 'Most Popular',
+      excellent: 'Excellent',
+      good: 'Good',
+      improvable: 'Improvable',
     },
     nav: {
       dashboard: 'Command Center',
@@ -1204,6 +1210,9 @@ const baseTranslations: Record<Exclude<Language, 'FR'>, Translations> = {
       upgrade: 'Atualizar',
       currentPlan: 'Plano Atual',
       mostPopular: 'Mais Popular',
+      excellent: 'Excelente',
+      good: 'Bom',
+      improvable: 'Melhorável',
     },
     nav: {
       dashboard: 'Painel de Controle',
