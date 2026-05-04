@@ -10,6 +10,7 @@ interface StatCardProps {
   icon: LucideIcon;
   trend?: 'up' | 'down';
   color?: 'primary' | 'teal' | 'purple' | 'orange' | 'green';
+  negative?: boolean;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export function StatCard({
   icon: Icon,
   trend,
   color = 'primary',
+  negative,
   className,
 }: StatCardProps) {
   const colorVariants = {
@@ -101,7 +103,7 @@ export function StatCard({
           {label}
         </p>
 
-        <p className="text-2xl font-bold font-mono tracking-tight">
+        <p className={cn('text-2xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
           {value}
         </p>
       </CardContent>

@@ -100,6 +100,7 @@ export default function Dashboard() {
             change={balanceChange}
             icon={Wallet}
             trend={balanceChange >= 0 ? 'up' : 'down'}
+            negative={balance < 0}
           />
           <Button
             type="button"
@@ -118,6 +119,7 @@ export default function Dashboard() {
           change={todayPnLPercent}
           icon={TrendingUp}
           trend={todayPnL >= 0 ? 'up' : 'down'}
+          negative={todayPnL < 0}
         />
         <StatCard
           label="Win Rate"
