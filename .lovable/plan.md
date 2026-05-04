@@ -1,28 +1,21 @@
-## Objetivo
-Resolver los 2 bloqueantes legales para poder comercializar SINGULAR dataFI.
+## Fix: crash al ingresar + errores de build
 
-## Cambios
+### Causa raíz
+`src/pages/Dashboard.tsx` declara `formatCurrency` localmente Y la importa desde `@/lib/utils` (donde no existe) → error de build. Además `src/pages/Auth.tsx` accede a `localized[language].tagline` sin fallback para `'FR'`, y faltan claves i18n (`dashboard.discipline`, `common.excellent/good/improvable`).
 
-### 1. Borrado de cuenta completo (privacidad/GDPR)
-**Nueva Edge Function:** `supabase/functions/delete-account/index.ts`
-- Verifica el JWT del usuario llamante (`getClaims`).
-- Con `service_role` borra todas las filas del usuario en: `trades`, `psychology_entries`, `trading_accounts`, `pre_market_checkins`, `process_validations`, `user_streaks`, `psychological_errors`, `ai_insights`, `analytics_snapshots`, `trade_screenshots`, `trading_rules`, `study_progress`, `user_roles`, `profiles`.
-- Llama a `auth.admin.deleteUser(userId)` para eliminar el registro en `auth.users` (impide re-login).
+### Cambios
 
-**Actualizar `src/pages/Settings.tsx → handleDeleteAccount`:**
-- Reemplazar los 4 deletes directos por `supabase.functions.invoke('delete-account')`.
-- Mantener toast + `signOut()` al éxito.
+1. **`src/lib/utils.ts`** — Exportar `formatCurrency(value)` usando `Intl.NumberFormat` USD.
 
-### 2. Quitar métricas falsas en `/auth`
-**`src/pages/Auth.tsx` (líneas 230–234):** eliminar el bloque "10K+ Active traders / 2M+ Trades analyzed / 94% Satisfaction" que está hardcoded. Dejar el resto del hero intacto. Cuando tengas métricas reales, las reincorporamos.
+2. **`src/pages/Dashboard.tsx`** — Eliminar la función local `formatCurrency` (mantener el import desde `@/lib/utils`).
 
-## Fuera de alcance (para próximas iteraciones)
-- Limpieza de `any` en ESLint (#4 del informe).
-- Warnings SECURITY DEFINER (#5) — requiere revisar `is_admin`/`has_role` con cuidado.
-- Tests unitarios para fórmulas P&L (#3).
-- Activar HIBP password check.
+3. **`src/pages/Auth.tsx`** — Añadir entrada `FR` al diccionario `localized` y usar fallback `localized[language] ?? localized.EN` para evitar crashes con idiomas no soportados.
 
-## Verificación post-cambio
-1. Deploy de la edge function (automático).
-2. Probar borrado de cuenta con un usuario de prueba: confirmar que `auth.users` ya no tiene la fila y que no se puede re-loguear.
-3. Confirmar que la página `/auth` ya no muestra las estadísticas hardcoded.
+4. **`src/i18n/translations.ts`** — Añadir claves faltantes en `dashboard` (`discipline`) y `common` (`excellent`, `good`, `improvable`) para los 4 idiomas (ES, EN, PT, FR).
+
+5. **`src/components/psychology/TaxometerWidget.tsx`** — Reemplazar el cast `(t as { psychology?: ... })` por acceso tipado directo `t.psychology` una vez confirmadas las claves en translations.
+
+### Resultado esperado
+- Login y Dashboard cargan sin crash en los 4 idiomas.
+- Build pasa sin errores de TypeScript.
+- Sin regresiones visuales.

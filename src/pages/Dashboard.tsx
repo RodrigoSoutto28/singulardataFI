@@ -22,14 +22,6 @@ function getGreeting(t: ReturnType<typeof useLanguage>['t']) {
   return t.dashboard.goodEvening;
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(value);
-}
-
 export default function Dashboard() {
   const { t } = useLanguage();
   const { profile } = useAuth();
