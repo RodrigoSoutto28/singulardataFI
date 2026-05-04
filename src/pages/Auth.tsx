@@ -217,14 +217,14 @@ export default function Auth() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative">
+    <div className="min-h-screen flex flex-col relative">
       <ParticleBackground />
       <div className="absolute top-4 right-4 z-50">
         <LanguageSelector variant="compact" />
       </div>
-      <div className="flex-1 flex">
+      <div className="flex-1 flex relative z-10">
         {/* Branding */}
-        <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-background p-12 flex-col justify-between relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 p-12 flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/3 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/2 rounded-full blur-3xl" />
 
@@ -261,7 +261,7 @@ export default function Auth() {
 
         {/* Form */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-          <Card className="w-full max-w-md border-border bg-card">
+          <Card className="w-full max-w-md border-border bg-card/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-2">
               <div className="flex items-center justify-center mb-4 lg:hidden">
                 <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
