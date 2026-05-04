@@ -13,6 +13,7 @@ import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/lib/validation';
 import { PublicFooter } from '@/components/layout/PublicFooter';
+import ParticleBackground from '@/components/effects/ParticleBackground';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { detectUserLanguage, toContextCode, toDbCode } from '@/lib/i18n/detector';
 import { useEffect } from 'react';
