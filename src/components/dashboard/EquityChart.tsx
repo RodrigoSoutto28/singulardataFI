@@ -133,8 +133,14 @@ export function EquityChart({ data, className }: EquityChartProps) {
                 tickLine={false}
                 axisLine={false}
                 domain={yDomain}
-                tickFormatter={(value) => formatCurrency(Number(value), { compact: true })}
-                width={70}
+                tickFormatter={(value) => {
+                  const n = Number(value);
+                  const abs = Math.abs(n);
+                  const sign = n < 0 ? '-' : '';
+                  if (abs >= 1000) return `${sign}$${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k`;
+                  return `${sign}$${abs.toFixed(0)}`;
+                }}
+                width={60}
               />
               <Tooltip content={<CustomTooltip />} />
               {showZeroLine && (
