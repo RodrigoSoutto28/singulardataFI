@@ -175,3 +175,6 @@ export interface StudyProgress {
   started_at: string | null;
   completed_at: string | null;
 }
+
+// Re-export Supabase generated helpers for hooks that need them
+export type { Tables, TablesInsert, TablesUpdate, Database } from '@/integrations/supabase/types';
