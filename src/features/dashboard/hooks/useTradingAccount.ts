@@ -39,7 +39,7 @@ export function useTradingAccount() {
       
       const { data, error } = await supabase
         .from('trading_accounts')
-        .insert({ ...account, user_id: user.id })
+        .insert({ ...account, user_id: user.id } as TradingAccountInsert)
         .select()
         .single();
 
