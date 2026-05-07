@@ -1,58 +1,58 @@
-# Plan: Regenerate `ANALYSIS.md` Baseline
+# Plan: completar la migración a feature-based architecture
 
-The existing `ANALYSIS.md` is **stale** — it references the old structure (`src/pages/`, `src/hooks/`, `src/components/`) but the codebase has since been reorganized into a feature-based layout (`src/features/*`, `src/shared/*`, `src/app/*`). The baseline must be rewritten against the real current code so future improvement prompts measure against accurate numbers.
+## Estado actual
 
-## Scope
+La estructura objetivo **ya está casi totalmente implementada**:
 
-- **Read-only audit** of the entire `src/` tree, `package.json`, `supabase/`, and config files.
-- **Write a single file**: `ANALYSIS.md` at the project root (overwrite existing).
-- **No code changes** anywhere else.
+- `src/app/` con `App.tsx`, `main.tsx`, `routes.tsx`, `providers.tsx` ✅
+- `src/config/` con `supabase.ts`, `queryClient.ts`, `lovable.ts` ✅
+- `src/features/{dashboard,journal,analytics,behavioral,auth,settings,study}/` con `components/`, `hooks/`, `index.ts` ✅
+- `src/shared/{components/{ui,layout,feedback},hooks,lib,types}/` ✅
+- `src/styles/index.css` ✅
+- Alias `@/` configurado en `tsconfig.json` y `vite.config.ts` ✅
 
-## Steps
+Faltan solo **scaffolds/archivos accesorios** descritos en la spec.
 
-1. **File inventory**
-   - Run `wc -l` over every file in `src/` and `supabase/functions/`.
-   - Flag files > 300 lines as refactor candidates.
-   - Note files with mixed responsibilities (UI + data + business logic).
+## Cambios a aplicar
 
-2. **React component inventory**
-   - For each `.tsx` in `src/features/**` and `src/shared/components/**`: count `useState`, `useEffect`, custom hooks, props, and approximate JSX lines (via `rg`).
-   - Mark > 200 JSX lines as "needs split", > 5 `useState` as "needs reducer/context".
+### 1. `src/config/`
+- **Crear** `constants.ts` — `ROLES`, `PLANS`, `LIMITS`, `SUPPORTED_LANGUAGES`, `QUERY_KEYS`.
 
-3. **Custom hooks inventory**
-   - Enumerate every hook under `src/features/**/hooks/` and `src/shared/hooks/`.
-   - Identify duplicated logic (e.g., balance sync, geolocation, IP detection).
+### 2. `src/shared/`
+- **Crear** `types/common.ts` — `Pagination`, `ApiResponse`, `SortState`, `AsyncStatus`, `ID`.
+- **Crear** `lib/formatters.ts` — `formatCurrency`, `formatNumber`, `formatPercent`, `formatDate`, `formatDateTime`.
+- **Crear** `lib/validators.ts` — schemas zod compartidos (email, password, fecha ISO, etc.).
+- **Crear** `hooks/useMediaQuery.ts` — listener `matchMedia` SSR-safe.
+- **Crear** `hooks/useLocalStorage.ts` — estado persistido con sync entre pestañas.
 
-4. **Supabase queries inventory**
-   - `rg "supabase\.from\("` across the codebase.
-   - For each call: table, operation (select/insert/update/delete), file, and whether it sits inside a TanStack Query/Mutation.
-   - Flag direct calls bypassing TanStack as improvement opportunities.
+### 3. `src/features/auth/`
+- **Crear** `hooks/useAuth.ts` — re-export de `useAuth` desde `AuthContext`.
+- **Crear** `hooks/useSession.ts` — wrapper que expone solo `session`/`user`/`loading`.
+- **Crear** `types.ts` — `Profile` re-export, `AuthCredentials`, `SignUpInput`.
+- **Actualizar** `index.ts` para exportar nuevos hooks/types.
 
-5. **TypeScript types inventory**
-   - List declared `interface` / `type` in `src/shared/types/` and feature folders.
-   - Count and locate `any` / `as any` usages.
-   - Detect overlap between manual types and auto-generated `integrations/supabase/types.ts`.
+### 4. Resto de features (`dashboard`, `journal`, `analytics`, `behavioral`, `settings`)
+- **Crear** `types.ts` por feature, re-exportando desde `@/shared/types/database` los `Tables<>` específicos del dominio + un par de tipos UI propios (KPI, EquityPoint, etc.).
+- **Actualizar** cada `index.ts` para exportar `* from './types'`.
 
-6. **UI strings inventory**
-   - Scan for hardcoded user-facing strings (toast messages, button labels, headings) outside `src/shared/lib/i18n/translations.ts`.
-   - Highlight English strings in Spanish-first UI and missing translation keys.
+### 5. `src/features/journal/utils/brokerParsers/`
+- **Crear** scaffolds: `ctrader.ts`, `mt4.ts`, `mt5.ts`, `tradingview.ts`, `index.ts`.
+- Cada parser exporta una función `parse(input: string | ArrayBuffer): BrokerParseResult` que por ahora delega a `useImportTrades` lógica existente o devuelve `{ rows: [], warnings: ['not implemented'] }`. La división lógica real se hará en el prompt 03.
+- `index.ts` exporta `detectBroker(filename, sample) → BrokerId` que retorna `'unknown'` por defecto.
+- **No tocar** `useImportTrades.ts` ni `xlsx-adapter.ts` en este prompt.
 
-7. **Dependencies**
-   - Parse `package.json`.
-   - Flag known-vulnerable versions (notably `xlsx@0.18.5`).
-   - Mark dependencies with no `import` matches as likely unused (`input-otp`, etc.).
+## Reglas que respeto
 
-8. **Quality score (0–100)**
-   - Score: cohesion, separation of concerns, type consistency, error handling, TanStack Query usage, accessibility, responsive design, security.
-   - Compute a weighted global score and a short "Top Priorities" list.
+- **No elimino** ningún archivo existente.
+- **No muevo** archivos (todos los movimientos previstos en la spec ya estaban hechos).
+- **No divido** componentes con responsabilidades mezcladas (queda para prompt 03).
+- Imports nuevos usan exclusivamente alias `@/`.
+- Verifico que el build (`tsc --noEmit`) siga limpio al terminar.
 
-## Deliverable
+## Out of scope
 
-Single file: **`ANALYSIS.md`** (root), formatted with markdown tables, ready to serve as the diff baseline for subsequent refactor prompts.
+- Refactorizar `Journal.tsx`, `Psychology.tsx`, `Settings.tsx`, `useImportTrades.ts`.
+- Cambiar contenidos de archivos existentes salvo los `index.ts` de feature para añadir los nuevos exports.
+- Tocar `src/integrations/supabase/*` (auto-generado).
 
-## Out of Scope
-
-- No edits to `src/`, `supabase/`, configs, or dependencies.
-- No security scan re-runs, no migrations, no commits other than the documentation file.
-
-Commit message on apply: `docs: add initial codebase analysis baseline`.
+Commit message al aplicar: `refactor(structure): migrate to feature-based architecture`.
