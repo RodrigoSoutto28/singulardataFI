@@ -77,7 +77,7 @@ export function useTrades() {
       
       const { data, error } = await supabase
         .from('trades')
-        .insert({ ...trade, user_id: user.id })
+        .insert({ ...trade, user_id: user.id } as TradeInsert)
         .select()
         .single();
 
@@ -143,7 +143,7 @@ export function useTrades() {
 
       const { data, error } = await supabase
         .from('trades')
-        .insert(tradesWithUser)
+        .insert(tradesWithUser as TradeInsert[])
         .select();
 
       if (error) throw error;
