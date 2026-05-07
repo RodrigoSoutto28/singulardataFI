@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Trade } from './useTrades';
+import { Trade } from '@/features/journal/hooks/useTrades';
 
 interface AnalyticsStats {
   totalPnl: number;

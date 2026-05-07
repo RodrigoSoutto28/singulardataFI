@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { StudyContentList } from "@/features/study/components/StudyContentList";
 import { StudyContentForm } from "@/features/study/components/StudyContentForm";
-import { StudyContent } from "@/types/database";
+import { StudyContent } from "@/shared/types/database";
 
 export default function StudyAdmin() {
   const [activeTab, setActiveTab] = useState("list");
