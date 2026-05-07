@@ -1,63 +1,58 @@
-## Problemas detectados
+# Plan: Regenerate `ANALYSIS.md` Baseline
 
-### 1. El fondo de partículas no se ve
-En `src/pages/Auth.tsx` el contenedor raíz tiene `bg-background` (color sólido). El `<canvas>` del `ParticleBackground` está en `fixed inset-0 -z-10`, por lo que queda **detrás** del fondo sólido del propio div raíz y nunca se ve.
+The existing `ANALYSIS.md` is **stale** — it references the old structure (`src/pages/`, `src/hooks/`, `src/components/`) but the codebase has since been reorganized into a feature-based layout (`src/features/*`, `src/shared/*`, `src/app/*`). The baseline must be rewritten against the real current code so future improvement prompts measure against accurate numbers.
 
-Adicionalmente, el componente `Card` y la columna de branding también tienen `bg-background` / `bg-card` opacos que tapan el efecto.
+## Scope
 
-### 2. La ruta `/` no muestra landing
-`/` redirige directamente al dashboard tras autenticación. El usuario pidió ver el fondo "en la página principal antes del inicio" — esto se interpreta como la página de Auth (login), que es la primera vista para usuarios sin sesión.
+- **Read-only audit** of the entire `src/` tree, `package.json`, `supabase/`, and config files.
+- **Write a single file**: `ANALYSIS.md` at the project root (overwrite existing).
+- **No code changes** anywhere else.
 
-### 3. Base de datos
-Hay 2 usuarios, 2 cuentas y 120 trades. El usuario solicita reset total a 0.
+## Steps
 
----
+1. **File inventory**
+   - Run `wc -l` over every file in `src/` and `supabase/functions/`.
+   - Flag files > 300 lines as refactor candidates.
+   - Note files with mixed responsibilities (UI + data + business logic).
 
-## Cambios propuestos
+2. **React component inventory**
+   - For each `.tsx` in `src/features/**` and `src/shared/components/**`: count `useState`, `useEffect`, custom hooks, props, and approximate JSX lines (via `rg`).
+   - Mark > 200 JSX lines as "needs split", > 5 `useState` as "needs reducer/context".
 
-### A. Arreglar visibilidad del ParticleBackground (`src/pages/Auth.tsx`)
-- Quitar `bg-background` del div raíz (usar `bg-transparent` o ninguno) para que el canvas detrás sea visible.
-- Mantener `bg-background` aplicado al `<body>` global (ya lo está vía `index.css`) para no romper temas claro/oscuro.
-- Quitar `bg-background` de la columna de branding izquierda; mantener `Card` con `bg-card/80 backdrop-blur-sm` para que el formulario sea legible **pero deje ver el fondo** alrededor.
-- Subir el `z-index` del canvas a `z-0` y poner el contenido en `relative z-10`, para garantizar el orden de pintura sin depender de `-z-10` (que falla cuando el padre crea su propio stacking context con bg).
+3. **Custom hooks inventory**
+   - Enumerate every hook under `src/features/**/hooks/` and `src/shared/hooks/`.
+   - Identify duplicated logic (e.g., balance sync, geolocation, IP detection).
 
-### B. Aumentar opacidad/visibilidad del efecto (`src/components/effects/ParticleBackground.tsx`)
-- Cambiar `opacity-60` por `opacity-90` en la clase por defecto.
-- Subir partículas mínimas a 60 para pantallas pequeñas.
+4. **Supabase queries inventory**
+   - `rg "supabase\.from\("` across the codebase.
+   - For each call: table, operation (select/insert/update/delete), file, and whether it sits inside a TanStack Query/Mutation.
+   - Flag direct calls bypassing TanStack as improvement opportunities.
 
-### C. Reset de la base de datos a 0
-Migración SQL que vacía (en orden, respetando dependencias) todos los datos de usuario y borra cuentas de auth:
+5. **TypeScript types inventory**
+   - List declared `interface` / `type` in `src/shared/types/` and feature folders.
+   - Count and locate `any` / `as any` usages.
+   - Detect overlap between manual types and auto-generated `integrations/supabase/types.ts`.
 
-```sql
-TRUNCATE
-  public.process_validations,
-  public.psychological_errors,
-  public.user_streaks,
-  public.pre_market_checkins,
-  public.trade_screenshots,
-  public.psychology_entries,
-  public.analytics_snapshots,
-  public.ai_insights,
-  public.trading_rules,
-  public.study_progress,
-  public.trades,
-  public.trading_accounts,
-  public.user_roles,
-  public.profiles
-RESTART IDENTITY CASCADE;
+6. **UI strings inventory**
+   - Scan for hardcoded user-facing strings (toast messages, button labels, headings) outside `src/shared/lib/i18n/translations.ts`.
+   - Highlight English strings in Spanish-first UI and missing translation keys.
 
-DELETE FROM auth.users;
-```
+7. **Dependencies**
+   - Parse `package.json`.
+   - Flag known-vulnerable versions (notably `xlsx@0.18.5`).
+   - Mark dependencies with no `import` matches as likely unused (`input-otp`, etc.).
 
-Las tablas `feature_flags` y `study_content` (contenido del producto) **se conservan**.
+8. **Quality score (0–100)**
+   - Score: cohesion, separation of concerns, type consistency, error handling, TanStack Query usage, accessibility, responsive design, security.
+   - Compute a weighted global score and a short "Top Priorities" list.
 
-### D. QA funcional
-1. Verificar que el build compila sin errores.
-2. Cargar `/auth` con el browser y comprobar visualmente con screenshot que el fondo de partículas se ve.
-3. Confirmar con `read_query` que `auth.users`, `profiles`, `trades` quedan en 0.
+## Deliverable
 
----
+Single file: **`ANALYSIS.md`** (root), formatted with markdown tables, ready to serve as the diff baseline for subsequent refactor prompts.
 
-## Confirmación requerida
+## Out of Scope
 
-⚠️ La opción C **borra todos los usuarios y sus datos de forma irreversible**. Necesito tu aprobación explícita para ejecutarla. Si solo querés el arreglo visual y el QA (A, B, D), aprobá el plan y avisame "no borres datos" en el siguiente mensaje.
+- No edits to `src/`, `supabase/`, configs, or dependencies.
+- No security scan re-runs, no migrations, no commits other than the documentation file.
+
+Commit message on apply: `docs: add initial codebase analysis baseline`.
