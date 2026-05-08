@@ -1,58 +1,43 @@
-# Plan: completar la migración a feature-based architecture
-
 ## Estado actual
 
-La estructura objetivo **ya está casi totalmente implementada**:
+Al inspeccionar el repo, la migración a **feature-based architecture** ya está aplicada en su mayor parte (resultado de los prompts anteriores 01–02):
 
-- `src/app/` con `App.tsx`, `main.tsx`, `routes.tsx`, `providers.tsx` ✅
-- `src/config/` con `supabase.ts`, `queryClient.ts`, `lovable.ts` ✅
-- `src/features/{dashboard,journal,analytics,behavioral,auth,settings,study}/` con `components/`, `hooks/`, `index.ts` ✅
-- `src/shared/{components/{ui,layout,feedback},hooks,lib,types}/` ✅
-- `src/styles/index.css` ✅
-- Alias `@/` configurado en `tsconfig.json` y `vite.config.ts` ✅
+```
+src/
+  app/        App.tsx, main.tsx, routes.tsx, providers.tsx, Index/Terms/Privacy/NotFound
+  config/     supabase.ts, queryClient.ts, constants.ts, lovable.ts
+  features/   auth, dashboard, journal, analytics, behavioral, settings, study
+  shared/     components/{ui,layout,feedback,effects}, hooks/, lib/, types/
+  styles/     index.css, App.css
+  integrations/supabase/  (auto-generado, no tocar)
+```
 
-Faltan solo **scaffolds/archivos accesorios** descritos en la spec.
+- `index.html` ya apunta a `/src/app/main.tsx`.
+- No quedan imports legacy (`@/lib/...`, `@/components/...`, `@/contexts/...`, `@/pages/...`, `@/types/...`) en `src/` ni en `supabase/`.
+- Alias `@/` configurado en `vite.config.ts` y ambos `tsconfig`.
+- Barrels (`index.ts`) presentes en cada feature.
 
-## Cambios a aplicar
+## Gaps menores a cerrar en este prompt
 
-### 1. `src/config/`
-- **Crear** `constants.ts` — `ROLES`, `PLANS`, `LIMITS`, `SUPPORTED_LANGUAGES`, `QUERY_KEYS`.
+1. **Barrels incompletos** — algunas features no exponen sus `components/` o `utils/`. Ampliar barrels para que el resto del código pueda importar desde `@/features/<feature>` sin paths profundos:
+   - `journal/index.ts` → exportar `components/ImportPreviewModal`, `components/ProcessValidatorModal`, `utils/brokerParsers`, `utils/error-detection`, `utils/xlsx-adapter`, `hooks/useProcessValidation`.
+   - `behavioral/index.ts` → exportar `components/PreMarketCheckInModal`, `PreMarketGate`, `TaxometerAlert`, `TaxometerDashboard`, `TaxometerWidget`, `utils/*`.
+   - `dashboard/index.ts` → exportar `components/*` y `utils/ai-messages`, `utils/sampleData`.
+   - `auth/index.ts` → exportar `components/ProtectedRoute`, `AdminRoute`, `onboarding/*`.
+   - `settings/index.ts` → exportar `components/AvatarUploader`.
+   - `analytics/index.ts` → exportar `Insights` (ya tiene `Analytics`/`Reports`/`AnalyticsHub`).
+   - `study/` no tiene `index.ts` → crear uno.
 
-### 2. `src/shared/`
-- **Crear** `types/common.ts` — `Pagination`, `ApiResponse`, `SortState`, `AsyncStatus`, `ID`.
-- **Crear** `lib/formatters.ts` — `formatCurrency`, `formatNumber`, `formatPercent`, `formatDate`, `formatDateTime`.
-- **Crear** `lib/validators.ts` — schemas zod compartidos (email, password, fecha ISO, etc.).
-- **Crear** `hooks/useMediaQuery.ts` — listener `matchMedia` SSR-safe.
-- **Crear** `hooks/useLocalStorage.ts` — estado persistido con sync entre pestañas.
+2. **`shared/types/`** — `database.ts` re-exporta de `@/integrations/supabase/types`; `common.ts` y `types.ts` coexisten. Verificar que `types.ts` no duplique a `common.ts`; si está vacío o duplicado, dejar nota (sin borrar archivos, según la regla del prompt).
 
-### 3. `src/features/auth/`
-- **Crear** `hooks/useAuth.ts` — re-export de `useAuth` desde `AuthContext`.
-- **Crear** `hooks/useSession.ts` — wrapper que expone solo `session`/`user`/`loading`.
-- **Crear** `types.ts` — `Profile` re-export, `AuthCredentials`, `SignUpInput`.
-- **Actualizar** `index.ts` para exportar nuevos hooks/types.
+3. **Verificación de build** — correr typecheck (`tsc --noEmit` vía harness) tras los cambios para confirmar que ningún import quedó roto.
 
-### 4. Resto de features (`dashboard`, `journal`, `analytics`, `behavioral`, `settings`)
-- **Crear** `types.ts` por feature, re-exportando desde `@/shared/types/database` los `Tables<>` específicos del dominio + un par de tipos UI propios (KPI, EquityPoint, etc.).
-- **Actualizar** cada `index.ts` para exportar `* from './types'`.
+## Reglas respetadas
 
-### 5. `src/features/journal/utils/brokerParsers/`
-- **Crear** scaffolds: `ctrader.ts`, `mt4.ts`, `mt5.ts`, `tradingview.ts`, `index.ts`.
-- Cada parser exporta una función `parse(input: string | ArrayBuffer): BrokerParseResult` que por ahora delega a `useImportTrades` lógica existente o devuelve `{ rows: [], warnings: ['not implemented'] }`. La división lógica real se hará en el prompt 03.
-- `index.ts` exporta `detectBroker(filename, sample) → BrokerId` que retorna `'unknown'` por defecto.
-- **No tocar** `useImportTrades.ts` ni `xlsx-adapter.ts` en este prompt.
+- No se elimina ningún archivo.
+- Solo se editan los `index.ts` de cada feature (barrels) — no se mueve código adicional, no se divide ningún componente con responsabilidades mezcladas (eso queda para el prompt 03).
+- Imports siguen usando alias `@/`.
 
-## Reglas que respeto
+## Commit
 
-- **No elimino** ningún archivo existente.
-- **No muevo** archivos (todos los movimientos previstos en la spec ya estaban hechos).
-- **No divido** componentes con responsabilidades mezcladas (queda para prompt 03).
-- Imports nuevos usan exclusivamente alias `@/`.
-- Verifico que el build (`tsc --noEmit`) siga limpio al terminar.
-
-## Out of scope
-
-- Refactorizar `Journal.tsx`, `Psychology.tsx`, `Settings.tsx`, `useImportTrades.ts`.
-- Cambiar contenidos de archivos existentes salvo los `index.ts` de feature para añadir los nuevos exports.
-- Tocar `src/integrations/supabase/*` (auto-generado).
-
-Commit message al aplicar: `refactor(structure): migrate to feature-based architecture`.
+`refactor(structure): migrate to feature-based architecture`
