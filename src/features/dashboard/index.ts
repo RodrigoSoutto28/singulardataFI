@@ -1,4 +1,17 @@
 export { default as Dashboard } from './Dashboard';
 export * from './hooks/useAnalytics';
 export * from './hooks/useTradingAccount';
+export { AIInsightCard } from './components/AIInsightCard';
+export { AccountSetupModal } from './components/AccountSetupModal';
+export { AchievementBadges } from './components/AchievementBadges';
+export { CapitalCard } from './components/CapitalCard';
+export { EquityChart } from './components/EquityChart';
+export { MentalStateCard } from './components/MentalStateCard';
+export { MetricCard } from './components/MetricCard';
+export { QuickActionsCard } from './components/QuickActionsCard';
+export { RecentTrades } from './components/RecentTrades';
+export { StatCard } from './components/StatCard';
+export { TasksCard } from './components/TasksCard';
+export * from './utils/ai-messages';
+export * from './utils/sampleData';
 export * from './types';
