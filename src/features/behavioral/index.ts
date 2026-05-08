@@ -10,4 +10,4 @@ export { TaxometerWidget } from './components/TaxometerWidget';
 export * from './utils/checkin-helpers';
 export * from './utils/color-psychology';
 export * from './utils/streak-manager';
-export * from './types';
+// types re-exported via hooks to avoid duplicate symbols

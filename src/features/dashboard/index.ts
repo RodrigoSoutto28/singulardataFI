@@ -14,4 +14,4 @@ export { StatCard } from './components/StatCard';
 export { TasksCard } from './components/TasksCard';
 export * from './utils/ai-messages';
 export * from './utils/sampleData';
-export * from './types';
+// types re-exported via hooks to avoid duplicate symbols

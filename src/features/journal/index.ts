@@ -8,4 +8,4 @@ export { ProcessValidatorModal } from './components/ProcessValidatorModal';
 export * from './utils/brokerParsers';
 export * from './utils/error-detection';
 export * from './utils/xlsx-adapter';
-export * from './types';
+// types re-exported via hooks to avoid duplicate symbols
