@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useInfiniteTrades } from '@/features/journal/hooks/useInfiniteTrades';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { EmptyState } from '@/shared/components/ui/empty-state';
 import { Button } from '@/shared/components/ui/button';
@@ -100,7 +101,6 @@ export default function Journal() {
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
-  const [visibleCount, setVisibleCount] = useState(50);
 
   // Taxometer alert state
   const { todayCheckIn } = usePreMarketCheckIn();
@@ -109,10 +109,33 @@ export default function Journal() {
   const [pendingPayload, setPendingPayload] = useState<any>(null);
   const [taxometerOpen, setTaxometerOpen] = useState(false);
 
-  // Reset paginación al cambiar filtros
+  // Server-side paginated list (50 per page) with infinite scroll
+  const {
+    trades: paginatedTrades,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTrades({
+    pageSize: 50,
+    search: debouncedSearch,
+    status: statusFilter,
+  });
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    setVisibleCount(50);
-  }, [debouncedSearch, statusFilter]);
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Import preview state
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -1142,20 +1165,23 @@ export default function Journal() {
               <Skeleton key={i} className="h-20 w-full rounded-lg" />
             ))}
           </div>
-        ) : filteredTrades.length > 0 ? (
+        ) : paginatedTrades.length > 0 ? (
           <>
-            {filteredTrades.slice(0, visibleCount).map((trade, index) => (
+            {paginatedTrades.map((trade, index) => (
               <TradeRow key={trade.id} trade={trade} index={index} />
             ))}
-            {visibleCount < filteredTrades.length && (
-              <div className="flex flex-col items-center gap-2 pt-4">
-                <p className="text-xs text-muted-foreground">
-                  Mostrando {visibleCount} de {filteredTrades.length}
-                </p>
+            <div ref={sentinelRef} aria-hidden="true" className="h-1" />
+            {isFetchingNextPage && (
+              <div className="flex justify-center pt-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+            {hasNextPage && !isFetchingNextPage && (
+              <div className="flex justify-center pt-4">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setVisibleCount((c) => c + 50)}
+                  onClick={() => fetchNextPage()}
                   className="gap-2"
                 >
                   Cargar más
