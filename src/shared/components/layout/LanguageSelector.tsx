@@ -43,7 +43,6 @@ export function LanguageSelector({ variant = 'default' }: Props) {
         es: 'Idioma cambiado a Español',
         en: 'Language changed to English',
         pt: 'Idioma alterado para Português',
-        fr: 'Langue changée en Français',
       };
       toast.success(messages[next]);
     } catch (e) {

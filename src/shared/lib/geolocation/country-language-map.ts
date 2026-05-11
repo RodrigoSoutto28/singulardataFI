@@ -13,11 +13,6 @@ export const COUNTRY_TO_LANGUAGE: Record<string, SupportedLanguage> = {
   // Portuguese
   BR: 'pt', PT: 'pt', AO: 'pt', MZ: 'pt', GW: 'pt', TL: 'pt', MO: 'pt', CV: 'pt',
   ST: 'pt',
-  // French
-  FR: 'fr', BE: 'fr', CH: 'fr', LU: 'fr', MC: 'fr', SN: 'fr', CI: 'fr', CM: 'fr',
-  BF: 'fr', ML: 'fr', NE: 'fr', TD: 'fr', MG: 'fr', HT: 'fr', BJ: 'fr', TG: 'fr',
-  RW: 'fr', BI: 'fr', CF: 'fr', CG: 'fr', GA: 'fr', GN: 'fr', DJ: 'fr', KM: 'fr',
-  VU: 'fr',
 };
 
 export function getLanguageFromCountry(
@@ -34,26 +29,7 @@ export interface MultilingualCountry {
   regions?: Record<string, SupportedLanguage>;
 }
 
-export const MULTILINGUAL_COUNTRIES: MultilingualCountry[] = [
-  {
-    countryCode: 'CA',
-    languages: ['en', 'fr'],
-    primary: 'en',
-    regions: { Quebec: 'fr', 'New Brunswick': 'fr', QC: 'fr', NB: 'fr' },
-  },
-  {
-    countryCode: 'BE',
-    languages: ['fr', 'en'],
-    primary: 'fr',
-    regions: { Wallonia: 'fr', Brussels: 'fr', Flanders: 'en' },
-  },
-  {
-    countryCode: 'CH',
-    languages: ['fr', 'en'],
-    primary: 'en',
-    regions: { Geneva: 'fr', Vaud: 'fr', Lausanne: 'fr', Neuchâtel: 'fr', Jura: 'fr' },
-  },
-];
+export const MULTILINGUAL_COUNTRIES: MultilingualCountry[] = [];
 
 export function getLanguageFromCountryAndRegion(
   countryCode: string,
@@ -73,7 +49,7 @@ export function getLanguageFromCountryAndRegion(
 }
 
 const HIGH_CONFIDENCE = new Set([
-  'ES', 'MX', 'AR', 'CO', 'CL', 'PE', 'BR', 'PT', 'US', 'GB', 'AU', 'IE', 'NZ', 'FR',
+  'ES', 'MX', 'AR', 'CO', 'CL', 'PE', 'BR', 'PT', 'US', 'GB', 'AU', 'IE', 'NZ',
 ]);
 
 export function getCountryMappingConfidence(
