@@ -164,48 +164,71 @@ function TodayCheckInView() {
   }, [entries]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
       {/* Left - Stats */}
       <div className="space-y-4">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Tu Progreso</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Tu Progreso
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
+            {/* Disciplina con barra */}
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs mb-1.5">
                 <span className="text-muted-foreground">Disciplina Promedio</span>
-                <span className="font-bold font-mono">{stats.avgDiscipline.toFixed(1)}/10</span>
+                <span className="font-bold font-mono text-sm">{stats.avgDiscipline.toFixed(1)}/10</span>
               </div>
-              <Progress value={(stats.avgDiscipline / 10) * 100} className="h-2" />
+              <Progress value={(stats.avgDiscipline / 10) * 100} className="h-1.5" />
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Racha Actual</span>
-              <span className="font-bold flex items-center gap-1">
-                <Flame className="h-4 w-4 text-[hsl(28_95%_55%)]" />
-                {currentStreak} días
-              </span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Mejor Racha</span>
-              <span className="font-bold font-mono">{bestStreak} días</span>
+            {/* Rachas en grid de 2 columnas */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md bg-muted/40 px-2.5 py-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                  Racha actual
+                </p>
+                <p className="font-bold text-sm flex items-center gap-1">
+                  <Flame className="h-3.5 w-3.5 text-[hsl(28_95%_55%)]" aria-hidden />
+                  {currentStreak} días
+                </p>
+              </div>
+              <div className="rounded-md bg-muted/40 px-2.5 py-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                  Mejor racha
+                </p>
+                <p className="font-bold text-sm font-mono">{bestStreak} días</p>
+              </div>
             </div>
 
             <Separator />
 
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Esta Semana</h4>
+            {/* Tracker semanal con labels de días */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Esta semana
+                </h4>
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  {checkedInThisWeek}/7
+                </span>
+              </div>
               <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      'aspect-square rounded-sm',
-                      i < checkedInThisWeek ? 'bg-success' : 'bg-muted'
-                    )}
-                  />
+                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-medium text-muted-foreground">{day}</span>
+                    <div
+                      className={cn(
+                        'w-full h-6 rounded-sm transition-colors',
+                        i < checkedInThisWeek
+                          ? 'bg-success/80'
+                          : 'bg-muted border border-border/50'
+                      )}
+                      aria-label={i < checkedInThisWeek ? 'Check-in completado' : 'Sin check-in'}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -221,19 +244,19 @@ function TodayCheckInView() {
           </CardHeader>
           <CardContent className="space-y-2">
             <AchievementBadge
-              icon="🔥"
+              Icon={Flame}
               title="Racha de Hierro"
               description="7 días consecutivos"
               unlocked={currentStreak >= 7}
             />
             <AchievementBadge
-              icon="🎯"
+              Icon={Target}
               title="Disciplinado"
               description="Score promedio > 8"
               unlocked={stats.avgDiscipline >= 8}
             />
             <AchievementBadge
-              icon="📚"
+              Icon={BookOpen}
               title="Introspectivo"
               description="20 entradas de journal"
               unlocked={stats.totalEntries >= 20}
@@ -243,7 +266,7 @@ function TodayCheckInView() {
       </div>
 
       {/* Right - Form / Summary */}
-      <div className="lg:col-span-2">
+      <div>
         {hasCheckedIn ? <CheckInSummaryCard entry={todayEntry!} /> : <CheckInFormCard />}
       </div>
     </div>
@@ -252,12 +275,12 @@ function TodayCheckInView() {
 
 // ---------- Achievement Badge ----------
 function AchievementBadge({
-  icon,
+  Icon,
   title,
   description,
   unlocked,
 }: {
-  icon: string;
+  Icon: LucideIcon;
   title: string;
   description: string;
   unlocked: boolean;
@@ -265,16 +288,25 @@ function AchievementBadge({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-2 rounded-lg border transition-opacity',
-        unlocked ? 'border-primary/30 bg-primary/5' : 'border-border opacity-50'
+        'flex items-center gap-3 p-2.5 rounded-lg border transition-all',
+        unlocked
+          ? 'border-primary/30 bg-primary/5'
+          : 'border-border opacity-55 hover:opacity-75'
       )}
     >
-      <div className="text-2xl">{icon}</div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
+      <div
+        className={cn(
+          'flex items-center justify-center h-9 w-9 rounded-md shrink-0',
+          unlocked ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+        )}
+      >
+        <Icon className="h-4 w-4" aria-hidden />
       </div>
-      {unlocked && <CheckCircle className="h-4 w-4 text-success" />}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium leading-tight">{title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      {unlocked && <CheckCircle className="h-4 w-4 text-success shrink-0" />}
     </div>
   );
 }
@@ -424,24 +456,46 @@ function CheckInFormCard() {
         <div className="space-y-3">
           <Label className="text-base font-semibold">1. ¿Cómo te sientes ahora?</Label>
           <div className="grid grid-cols-4 gap-2">
-            {emotions.map((emotion) => (
-              <button
-                key={emotion.value}
-                type="button"
-                onClick={() => setSelectedEmotion(emotion.value)}
-                className={cn(
-                  'p-3 rounded-lg border-2 transition-all text-center',
-                  selectedEmotion === emotion.value
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50'
-                )}
-              >
-                <div className="text-2xl mb-1">{emotion.emoji}</div>
-                <div className="text-[11px] font-medium leading-tight">
-                  {t.psychology.emotions[emotion.value]}
-                </div>
-              </button>
-            ))}
+            {emotions.map((emotion) => {
+              const isSelected = selectedEmotion === emotion.value;
+              const isNegative = emotion.negative;
+              return (
+                <button
+                  key={emotion.value}
+                  type="button"
+                  onClick={() => setSelectedEmotion(emotion.value)}
+                  className={cn(
+                    'group p-2.5 rounded-lg border transition-all text-center',
+                    'flex flex-col items-center justify-center gap-1.5 min-h-[78px]',
+                    isSelected
+                      ? isNegative
+                        ? 'border-destructive bg-destructive/10 ring-1 ring-destructive/30'
+                        : 'border-primary bg-primary/10 ring-1 ring-primary/30'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/40'
+                  )}
+                  aria-pressed={isSelected}
+                  aria-label={t.psychology.emotions[emotion.value]}
+                >
+                  <div
+                    className={cn(
+                      'flex items-center justify-center h-8 w-8 rounded-md transition-colors',
+                      isSelected
+                        ? isNegative
+                          ? 'bg-destructive/15 text-destructive'
+                          : 'bg-primary/15 text-primary'
+                        : isNegative
+                          ? 'bg-muted text-muted-foreground group-hover:text-destructive/70'
+                          : 'bg-muted text-muted-foreground group-hover:text-primary'
+                    )}
+                  >
+                    <emotion.Icon className="h-4 w-4" aria-hidden />
+                  </div>
+                  <div className="text-[11px] font-medium leading-tight">
+                    {t.psychology.emotions[emotion.value]}
+                  </div>
+                </button>
+              );
+            })}
           </div>
           {selectedEmotion && negativeSelected && (
             <Alert variant="destructive">
@@ -615,8 +669,14 @@ function EntryCard({ entry }: { entry: PsychologyEntry }) {
           </span>
         </div>
         {emotion && emotionData && (
-          <Badge variant="outline" className="gap-1">
-            <span>{emotionData.emoji}</span>
+          <Badge
+            variant="outline"
+            className={cn(
+              'gap-1.5 pl-1.5',
+              emotionData.negative ? 'border-destructive/40 text-destructive' : 'border-primary/40 text-primary'
+            )}
+          >
+            <emotionData.Icon className="h-3 w-3" aria-hidden />
             {t.psychology.emotions[emotion]}
           </Badge>
         )}
