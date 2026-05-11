@@ -115,7 +115,7 @@ export function Sidebar({
         data-tour="sidebar"
         aria-label="Navegación principal"
         className={cn(
-          'flex flex-col h-screen sticky top-0 glass-sidebar transition-[width] duration-200',
+          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200',
           collapsed ? 'w-[64px]' : 'w-[230px]'
         )}
       >
@@ -145,7 +145,7 @@ export function Sidebar({
         )}
 
         {/* Nav */}
-        <nav className={cn('flex-1 flex flex-col gap-0.5', collapsed ? 'px-2 pt-3' : 'px-3')}>
+        <nav className={cn('flex-1 flex flex-col gap-0.5 overflow-y-auto scrollbar-none', collapsed ? 'px-2 pt-3' : 'px-3')}>
           {navItems.map((item) => (
             <NavRow key={item.href} item={item} />
           ))}
@@ -183,7 +183,7 @@ export function Sidebar({
         )}
 
         {/* Footer */}
-        <div className={cn('py-3 border-t border-border flex flex-col gap-0.5', collapsed ? 'px-2' : 'px-3')}>
+        <div className={cn('py-3 border-t border-border flex flex-col gap-0.5 mt-auto shrink-0', collapsed ? 'px-2' : 'px-3')}>
           {profile?.role === 'admin' && (
             <Link to="/admin/study" className="block group" onClick={onItemClick}>
               {collapsed ? (

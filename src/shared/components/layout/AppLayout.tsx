@@ -56,11 +56,11 @@ export function AppLayout() {
   })();
 
   return (
-    <div className="flex min-h-screen w-full bg-background relative overflow-hidden">
+    <div className="flex h-[100dvh] w-full bg-background relative overflow-hidden">
       <CorporateGrid />
 
       {/* Desktop / Tablet Sidebar */}
-      <div className="hidden md:block relative z-10">
+      <div className="hidden md:block relative z-10 h-full">
         <Sidebar collapsed={collapsed} onToggleCollapsed={handleToggleCollapsed} />
       </div>
 
