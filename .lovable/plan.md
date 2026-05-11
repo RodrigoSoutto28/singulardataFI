@@ -1,59 +1,28 @@
-## Estado actual: 6 de 7 pasos ya están aplicados
+## Reestructurar Métricas Conductuales — Iconos Lucide y compactación
 
-Al revisar el código actual, los pasos 1–6 y casi todo el paso 7 ya están implementados (probablemente por iteraciones previas tras la refactorización a feature-based architecture). Solo queda **una pieza pendiente**: el bucket `avatars` en Lovable Cloud no existe, por lo que el upload de foto de perfil falla.
+Aplicaremos 5 ediciones quirúrgicas en `src/features/behavioral/Psychology.tsx`. Cada cambio respeta las reglas globales: sin tocar hooks, tipos, schemas, el array `emotions` (solo se usa la propiedad `Icon` ya existente), ni las pestañas Historial/Insights/Taxímetro fuera de los puntos indicados.
 
-### Verificación realizada
+### Paso 1 — Selector de emociones (tab Hoy)
+Reemplazar el render de `emotion.emoji` (text-2xl) por `<emotion.Icon />` dentro de un contenedor circular 32px. Estados seleccionados muestran ring + color destructive (negativas) o primary (positivas). Añadir `aria-pressed` y `aria-label`. Botón ~25% más compacto (min-h 78px).
 
-| Paso | Estado | Evidencia |
-|---|---|---|
-| 1 — Botón editar Balance | ✅ Listo | `Dashboard.tsx` líneas 9, 31, 96–115, 176 ya tienen modal + botón |
-| 2 — Animaciones futuristas | ✅ Listo | `index.css` líneas 560–693: holo-shimmer, border-glow-pulse, data-flow, scale-in-spring, letter-reveal, border-trace, page-enter |
-| 3 — Centrado dinámico | ✅ Listo | `AppLayout.tsx`: `mx-auto w-full max-w-[1440px] ... page-enter` |
-| 4 — Quitar selector idioma | ✅ Listo | `TopBar.tsx` línea 16 (comentario), `Sidebar.tsx` usa `showQuickToggles` |
-| 5 — Dark mode neutral | ✅ Listo | `index.css` líneas 81–139 con `--background: 220 10% 5%` |
-| 6 — Glassmorphism | ✅ Listo | `index.css` líneas 190–243 con `backdrop-filter` en surface-card y glass-chrome |
-| 7 — Perfil + foto | ⚠️ Casi | AvatarUploader, Profile.tsx, ruta `/profile`, dropdown items con onClick y `refreshProfile` en AuthContext: todo existe. **Falta el bucket `avatars` en storage** (consulta SQL devolvió 0 filas) |
+### Paso 2 — AchievementBadge
+Cambiar la prop `icon: string` por `Icon: LucideIcon`. Renderizar el icono en un cuadrado 36px con fondo según estado. Actualizar las 3 llamadas para pasar `Flame`, `Target`, `BookOpen` (ya importados).
 
-Las rutas mencionadas en el prompt (`src/components/...`, `src/contexts/...`, `src/pages/...`, `src/index.css`) ya no existen porque el repo se migró a estructura feature-based; los cambios equivalentes ya están aplicados sobre las nuevas rutas (`src/features/...`, `src/shared/...`, `src/styles/index.css`).
+### Paso 3 — Card "Tu Progreso"
+- Añadir icono `TrendingUp` al título; `pb-3` en header.
+- Reducir spacing global a `space-y-3`, progress a `h-1.5`.
+- Reorganizar Racha actual / Mejor racha en grid 2-col con cards muted.
+- Tracker semanal: añadir labels `L M X J V S D` arriba, cambiar cuadrados `aspect-square` por barras `h-6`, agregar contador `X/7`.
 
-## Acción propuesta
+### Paso 4 — Badge de emoción en Historial
+Sustituir `<span>{emotionData.emoji}</span>` por `<emotionData.Icon className="h-3 w-3" />` y aplicar color del badge según `emotionData.negative` (destructive vs primary).
 
-**Único cambio:** crear el bucket de Storage `avatars` con sus políticas RLS, vía migración SQL.
+### Paso 5 — Layout de columnas
+- `grid-cols-1 lg:grid-cols-3` → `grid-cols-1 lg:grid-cols-[300px_1fr]`.
+- Eliminar `lg:col-span-2` de la columna derecha.
+- Mobile sin cambios (sigue 1 columna).
 
-```sql
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('avatars', 'avatars', true)
-ON CONFLICT (id) DO NOTHING;
-
-CREATE POLICY "Avatars are publicly accessible"
-  ON storage.objects FOR SELECT TO public
-  USING (bucket_id = 'avatars');
-
-CREATE POLICY "Users can upload own avatar"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'avatars'
-    AND auth.uid()::text = (storage.foldername(name))[1]);
-
-CREATE POLICY "Users can update own avatar"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'avatars'
-    AND auth.uid()::text = (storage.foldername(name))[1]);
-
-CREATE POLICY "Users can delete own avatar"
-  ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'avatars'
-    AND auth.uid()::text = (storage.foldername(name))[1]);
-```
-
-Tras la migración, el flujo del paso 7 quedará 100% operativo: subir foto desde `/profile`, persistencia, eliminación y refresco del avatar en TopBar.
-
-## Lo que NO se va a tocar
-
-- Estructura de carpetas (ya feature-based).
-- Lógica de hooks existentes.
-- Componentes ya alineados con las instrucciones.
-- `tailwind.config.ts`.
-
-## Memoria del proyecto
-
-La memoria `Core` indica explícitamente "NO glassmorphism, NO neon glows". El paso 6 ya está aplicado y contradice esa regla. No es parte del cambio actual, pero conviene que confirmes si querés que actualice la memoria para reflejar la nueva dirección visual (glass sutil aceptado) o si preferís revertir el paso 6 en una iteración posterior.
+### Verificación
+- Confirmar que el bloque del selector (líneas ~423-454), el componente AchievementBadge (~253-280) y sus 3 llamadas (~222-241), la card Progreso (~170-213), el badge en historial (~617-622) y las dos líneas del grid (~167 y ~246) coinciden exactamente. Si alguno difiere, reportar y detener.
+- Build sin errores nuevos; todos los iconos usados ya están importados.
+- Funcionalidad de selección/submit/streaks/i18n intacta.
