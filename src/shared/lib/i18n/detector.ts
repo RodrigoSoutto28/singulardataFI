@@ -1,11 +1,11 @@
 /**
  * Language detection utilities.
- * Internal context codes are uppercase ('ES'|'EN'|'PT'|'FR') while
- * BCP-47 / DB codes are lowercase ('es'|'en'|'pt'|'fr').
+ * Internal context codes are uppercase ('ES'|'EN'|'PT') while
+ * BCP-47 / DB codes are lowercase ('es'|'en'|'pt').
  */
 import type { Language } from '@/shared/lib/i18n/translations';
 
-export type SupportedLanguage = 'es' | 'en' | 'pt' | 'fr';
+export type SupportedLanguage = 'es' | 'en' | 'pt';
 
 export interface LanguageDetectionResult {
   language: SupportedLanguage;
@@ -13,14 +13,13 @@ export interface LanguageDetectionResult {
   source: 'database' | 'browser' | 'ip' | 'browser+ip' | 'fallback';
 }
 
-const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['es', 'en', 'pt', 'fr'];
+const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['es', 'en', 'pt'];
 const DEFAULT_LANGUAGE: SupportedLanguage = 'es';
 
 const LANGUAGE_MAPPING: Record<string, SupportedLanguage> = {
   es: 'es', 'es-ES': 'es', 'es-MX': 'es', 'es-AR': 'es', 'es-CO': 'es', 'es-CL': 'es', 'es-PE': 'es',
   en: 'en', 'en-US': 'en', 'en-GB': 'en', 'en-CA': 'en', 'en-AU': 'en',
   pt: 'pt', 'pt-BR': 'pt', 'pt-PT': 'pt',
-  fr: 'fr', 'fr-FR': 'fr', 'fr-CA': 'fr', 'fr-BE': 'fr',
 };
 
 export function detectBrowserLanguage(): LanguageDetectionResult {
@@ -88,11 +87,11 @@ export function validateLanguage(lang: string | null | undefined): SupportedLang
 }
 
 export function getLanguageName(lang: SupportedLanguage): string {
-  return { es: 'Español', en: 'English', pt: 'Português', fr: 'Français' }[lang];
+  return { es: 'Español', en: 'English', pt: 'Português' }[lang];
 }
 
 export function getLanguageFlag(lang: SupportedLanguage): string {
-  return { es: '🇪🇸', en: '🇺🇸', pt: '🇧🇷', fr: '🇫🇷' }[lang];
+  return { es: '🇪🇸', en: '🇺🇸', pt: '🇧🇷' }[lang];
 }
 
 /** Bridge helpers between BCP-47 lowercase and the in-app uppercase context code. */
