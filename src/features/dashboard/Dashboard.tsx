@@ -9,7 +9,8 @@ import { TaxometerWidget } from '@/features/behavioral/components/TaxometerWidge
 import { AccountSetupModal } from '@/features/dashboard/components/AccountSetupModal';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
-import { TrendingUp, Wallet, Target, Brain, Pencil } from 'lucide-react';
+import { TrendingUp, Wallet, Target, Brain, Pencil, Plus, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTrades } from '@/features/journal/hooks/useTrades';
 import { useTradingAccount } from '@/features/dashboard/hooks/useTradingAccount';
@@ -159,14 +160,33 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t.dashboard.recentActivity}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            {t.dashboard.recentActivity}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {recentTrades.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t.dashboard.noTrades}
-            </p>
+            <div className="rounded-md bg-muted/40 border border-dashed border-border px-4 py-6 flex flex-col items-center justify-center gap-3 text-center">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-foreground">
+                  {t.dashboard.noTrades}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t.dashboard.completeCheckIn}
+                </p>
+              </div>
+              <Button asChild size="sm" variant="outline" className="gap-1.5 mt-1">
+                <Link to="/journal">
+                  <Plus className="h-3.5 w-3.5" />
+                  {t.dashboard.quickActionNewTrade}
+                </Link>
+              </Button>
+            </div>
           ) : (
             <RecentTrades trades={recentTrades} className="border-0 bg-transparent p-0" />
           )}

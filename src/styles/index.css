@@ -9,51 +9,56 @@
 
 @layer base {
   :root {
-    /* Light surface - MEJORADO: más contraste */
-    --background: 210 35% 97%;
-    --foreground: 205 45% 12%;
+    /* Light surface — Jerarquía de grises profesional
+       Estructura:
+       - background: gris muy sutil (95%) → fondo que "respira"
+       - card: blanco puro (100%) → cards flotan con contraste real
+       - sidebar: gris levemente más cálido → profundidad lateral
+       - muted: gris medio claro → para zonas secundarias y empty states */
+    --background: 210 20% 95%;
+    --foreground: 215 28% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 205 45% 12%;
+    --card-foreground: 215 28% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 205 45% 12%;
+    --popover-foreground: 215 28% 14%;
 
     /* Primary: #0779A2 - INTENSIFICADO */
     --primary: 197 100% 35%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - más presencia */
-    --secondary: 210 40% 94%;
-    --secondary-foreground: 205 50% 18%;
+    /* Secondary - gris cálido sutil para chips/badges */
+    --secondary: 215 16% 91%;
+    --secondary-foreground: 215 28% 20%;
 
-    /* Muted - menos gris, más color */
-    --muted: 210 35% 93%;
-    --muted-foreground: 205 25% 40%;
+    /* Muted - tono gris medio para empty states y zonas secundarias */
+    --muted: 215 16% 89%;
+    --muted-foreground: 215 16% 42%;
 
     /* Accent: #40A9D3 - VIBRANTE */
     --accent: 199 70% 52%;
     --accent-foreground: 0 0% 100%;
 
-    /* Destructive - ROJO MÁS INTENSO (psicología: urgencia) */
+    /* Destructive - ROJO INTENSO */
     --destructive: 0 75% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success - VERDE MÁS VIVO (psicología: confianza) */
+    /* Success - VERDE VIVO */
     --success: 165 65% 40%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning - NARANJA MÁS BRILLANTE (psicología: atención) */
+    /* Warning - NARANJA BRILLANTE */
     --warning: 32 95% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Profit/Loss - MÁXIMO CONTRASTE para impacto emocional */
+    /* Profit/Loss - MÁXIMO CONTRASTE */
     --profit: 165 70% 38%;
     --loss: 0 80% 50%;
 
-    /* Borders - MÁS DEFINIDOS */
-    --border: 210 35% 88%;
-    --input: 210 35% 90%;
+    /* Borders - sutiles pero visibles */
+    --border: 215 16% 84%;
+    --input: 215 16% 86%;
     --ring: 197 100% 35%;
 
     --radius: 0.625rem;
@@ -67,14 +72,14 @@
 
     --teal: 183 100% 42%;
 
-    /* Sidebar */
-    --sidebar-background: 210 35% 97%;
-    --sidebar-foreground: 205 30% 35%;
+    /* Sidebar — tono propio para crear profundidad lateral */
+    --sidebar-background: 215 18% 93%;
+    --sidebar-foreground: 215 20% 32%;
     --sidebar-primary: 197 100% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 35% 92%;
-    --sidebar-accent-foreground: 205 45% 12%;
-    --sidebar-border: 210 35% 88%;
+    --sidebar-accent: 215 16% 88%;
+    --sidebar-accent-foreground: 215 28% 14%;
+    --sidebar-border: 215 16% 82%;
     --sidebar-ring: 197 100% 35%;
   }
 
