@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Language, translations, Translations } from '@/shared/lib/i18n/translations';
 
-const VALID: Language[] = ['ES', 'EN', 'PT', 'FR'];
+const VALID: Language[] = ['ES', 'EN', 'PT'];
 
 interface LanguageContextType {
   language: Language;
