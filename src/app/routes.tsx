@@ -1,7 +1,6 @@
 import { lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
-import { PreMarketGate } from "@/features/behavioral/components/PreMarketGate";
 import { AdminRoute } from "@/features/auth/components/AdminRoute";
 import { AppLayout } from "@/shared/components/layout/AppLayout";
 import { OnboardingWizard } from "@/features/auth/components/onboarding/OnboardingWizard";
@@ -35,10 +34,10 @@ export const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <PreMarketGate>
+            <>
               <AppLayout />
               <OnboardingWizard />
-            </PreMarketGate>
+            </>
           </ProtectedRoute>
         }
       >
