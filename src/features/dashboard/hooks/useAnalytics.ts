@@ -112,15 +112,17 @@ export function useAnalytics(trades: Trade[]) {
     if (!trades.length) return [];
 
     const closedTrades = trades
-      .filter(t => t.status === 'closed' && t.exit_date)
-      .sort((a, b) => new Date(a.exit_date!).getTime() - new Date(b.exit_date!).getTime());
+      .filter(t => t.status === 'closed')
+      .map(t => ({ ...t, _ref: t.exit_date ?? t.entry_date }))
+      .filter(t => !!t._ref)
+      .sort((a, b) => new Date(a._ref!).getTime() - new Date(b._ref!).getTime());
 
     let cumulative = 0;
     return closedTrades.map(t => {
       const pnl = t.pnl ?? 0;
       cumulative += pnl;
       return {
-        date: new Date(t.exit_date!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        date: new Date(t._ref!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         equity: cumulative,
         pnl,
       };
@@ -130,11 +132,12 @@ export function useAnalytics(trades: Trade[]) {
   const monthlyPnl = useMemo(() => {
     if (!trades.length) return [];
 
-    const closedTrades = trades.filter(t => t.status === 'closed' && t.exit_date);
+    const closedTrades = trades.filter(t => t.status === 'closed' && (t.exit_date || t.entry_date));
     const monthlyData: Record<string, { pnl: number; trades: number }> = {};
 
     closedTrades.forEach(t => {
-      const month = new Date(t.exit_date!).toLocaleDateString('en-US', { month: 'short' });
+      const ref = t.exit_date ?? t.entry_date;
+      const month = new Date(ref!).toLocaleDateString('en-US', { month: 'short' });
       if (!monthlyData[month]) {
         monthlyData[month] = { pnl: 0, trades: 0 };
       }

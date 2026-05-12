@@ -170,7 +170,7 @@ export default function Journal() {
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
-  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
@@ -379,6 +379,7 @@ export default function Journal() {
 
       importedKeys.add(key);
       const isClosed = tradeHasExitData(trade);
+      const exitDateIso = trade.exitDate ?? (isClosed ? trade.entryDate : null);
 
       dbTrades.push({
         symbol: trade.symbol,
@@ -389,11 +390,12 @@ export default function Journal() {
         pnl: trade.pnl ?? null,
         pnl_percentage: trade.pnlPercentage ?? null,
         entry_date: trade.entryDate,
-        exit_date: trade.exitDate ?? null,
+        exit_date: exitDateIso,
         strategy: trade.strategy ?? null,
         notes: trade.notes ?? null,
         stop_loss: trade.stopLoss ?? null,
         take_profit: trade.takeProfit ?? null,
+        asset_class: trade.assetClass ?? 'forex',
         status: isClosed ? 'closed' as const : 'open' as const,
       });
     });
