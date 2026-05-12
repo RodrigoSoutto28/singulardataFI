@@ -260,6 +260,34 @@ export default function Journal() {
     }
   };
 
+  const buildImportTradeKey = (trade: ImportedTrade) => {
+    const normalize = (value: unknown) =>
+      value === undefined || value === null ? '' : String(value).trim();
+
+    return [
+      normalize(trade.symbol).toUpperCase(),
+      normalize(trade.direction),
+      normalize(trade.entryPrice),
+      normalize(trade.exitPrice),
+      normalize(trade.quantity),
+      normalize(trade.entryDate),
+      normalize(trade.exitDate),
+      normalize(trade.pnl),
+      normalize(trade.pnlPercentage),
+      normalize(trade.strategy),
+      normalize(trade.notes),
+      normalize(trade.stopLoss),
+      normalize(trade.takeProfit),
+      normalize(trade.assetClass),
+    ].join('|');
+  };
+
+  const tradeHasExitData = (trade: ImportedTrade) =>
+    trade.exitDate !== undefined ||
+    trade.exitPrice !== undefined ||
+    trade.pnl !== undefined ||
+    trade.pnlPercentage !== undefined;
+
   // Handle file selection - opens preview modal
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -295,13 +323,45 @@ export default function Journal() {
 
     setIsImporting(true);
 
-    // Pre-validate every trade and split valid/invalid
+    const importedKeys = new Set<string>();
+    const existingKeys = new Set<string>(
+      trades.map((trade) =>
+        buildImportTradeKey({
+          symbol: trade.symbol ?? '',
+          direction: trade.direction as 'long' | 'short',
+          entryPrice: Number(trade.entry_price ?? 0),
+          exitPrice: trade.exit_price ?? undefined,
+          quantity: Number(trade.quantity ?? 0),
+          entryDate: trade.entry_date ?? '',
+          exitDate: trade.exit_date ?? undefined,
+          pnl: trade.pnl ?? undefined,
+          pnlPercentage: trade.pnl_percentage ?? undefined,
+          strategy: trade.strategy ?? undefined,
+          notes: trade.notes ?? undefined,
+          stopLoss: trade.stop_loss ?? undefined,
+          takeProfit: trade.take_profit ?? undefined,
+          assetClass: trade.asset_class ?? undefined,
+        })
+      )
+    );
+
     const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never>> = [];
     const validationErrors: string[] = [];
+    let skippedDuplicates = 0;
 
     selectedTrades.forEach((trade, i) => {
       const row = i + 1;
-      if (!trade.symbol) { validationErrors.push(`Operación #${row}: falta símbolo`); return; }
+      const key = buildImportTradeKey(trade);
+      if (importedKeys.has(key) || existingKeys.has(key)) {
+        skippedDuplicates += 1;
+        importedKeys.add(key);
+        return;
+      }
+
+      if (!trade.symbol) {
+        validationErrors.push(`Operación #${row}: falta símbolo`);
+        return;
+      }
       if (typeof trade.entryPrice !== 'number' || isNaN(trade.entryPrice)) {
         validationErrors.push(`Operación #${row} (${trade.symbol}): precio de entrada inválido`);
         return;
@@ -310,6 +370,10 @@ export default function Journal() {
         validationErrors.push(`Operación #${row} (${trade.symbol}): cantidad inválida`);
         return;
       }
+
+      importedKeys.add(key);
+      const isClosed = tradeHasExitData(trade);
+
       dbTrades.push({
         symbol: trade.symbol,
         direction: trade.direction,
@@ -324,21 +388,26 @@ export default function Journal() {
         notes: trade.notes ?? null,
         stop_loss: trade.stopLoss ?? null,
         take_profit: trade.takeProfit ?? null,
-        status: trade.exitDate ? 'closed' as const : 'open' as const,
+        status: isClosed ? 'closed' as const : 'open' as const,
       });
     });
 
     if (dbTrades.length === 0) {
-      toast.error(`Ninguna operación válida para importar. ${validationErrors[0] ?? ''}`);
+      if (validationErrors.length > 0) {
+        toast.error(`Ninguna operación válida para importar. ${validationErrors[0] ?? ''}`);
+      } else if (skippedDuplicates > 0) {
+        toast.warning('No se importaron operaciones porque ya existían en tu registro.');
+      }
       setIsImporting(false);
       return;
     }
 
     try {
       await importTrades.mutateAsync(dbTrades);
-      const failed = selectedTrades.length - dbTrades.length;
-      if (failed > 0) {
-        toast.warning(`${dbTrades.length} operación(es) importada(s). ${failed} fallaron en validación.`);
+      if (validationErrors.length > 0) {
+        toast.warning(`${dbTrades.length} operación(es) importada(s). ${validationErrors.length} fallaron en validación.`);
+      } else if (skippedDuplicates > 0) {
+        toast.success(`${dbTrades.length} operación(es) importada(s). ${skippedDuplicates} duplicada(s) omitida(s).`);
       }
       setPreviewOpen(false);
       setPreviewTrades([]);
