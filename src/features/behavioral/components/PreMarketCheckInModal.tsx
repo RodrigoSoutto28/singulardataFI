@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
 import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Slider } from '@/shared/components/ui/slider';
 import { Textarea } from '@/shared/components/ui/textarea';
@@ -38,6 +39,7 @@ export function PreMarketCheckInModal({ open, onComplete }: PreMarketCheckInModa
   const totalSteps = 4;
 
   const [selectedSetups, setSelectedSetups] = useState<string[]>([]);
+  const [customSetup, setCustomSetup] = useState('');
   const [maxRisk, setMaxRisk] = useState<number[]>([1.0]);
   const [maxTrades, setMaxTrades] = useState(3);
   const [emotionalState, setEmotionalState] = useState<EmotionalState | ''>('');
@@ -47,6 +49,24 @@ export function PreMarketCheckInModal({ open, onComplete }: PreMarketCheckInModa
     setSelectedSetups((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
+  };
+
+  const addCustomSetup = () => {
+    const normalized = customSetup.trim();
+    if (!normalized) {
+      toast.error('Ingresa un setup personalizado válido');
+      return;
+    }
+    if (selectedSetups.includes(normalized) || SETUPS.some((s) => s.label === normalized || s.id === normalized.toLowerCase())) {
+      toast.error('Este setup ya está seleccionado');
+      return;
+    }
+    setSelectedSetups((prev) => [...prev, normalized]);
+    setCustomSetup('');
+  };
+
+  const removeCustomSetup = (id: string) => {
+    setSelectedSetups((prev) => prev.filter((setup) => setup !== id));
   };
 
   const handleSubmit = async () => {
@@ -139,6 +159,37 @@ export function PreMarketCheckInModal({ open, onComplete }: PreMarketCheckInModa
                   </button>
                 );
               })}
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm">Agregar setup personalizado</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={customSetup}
+                  onChange={(event) => setCustomSetup(event.target.value)}
+                  placeholder="Ej: Breakout en 15m con volumen"
+                />
+                <Button type="button" onClick={addCustomSetup} className="whitespace-nowrap">
+                  Agregar
+                </Button>
+              </div>
+              {selectedSetups.filter((setup) => !SETUPS.some((s) => s.id === setup)).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedSetups
+                    .filter((setup) => !SETUPS.some((s) => s.id === setup))
+                    .map((setup) => (
+                      <button
+                        key={setup}
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1 text-sm"
+                        onClick={() => removeCustomSetup(setup)}
+                      >
+                        {setup}
+                        <X className="h-3 w-3" />
+                      </button>
+                    ))}
+                </div>
+              )}
             </div>
 
             <Button

@@ -5,7 +5,6 @@ import { Progress } from '@/shared/components/ui/progress';
 import { Sparkles, ArrowRight, Check, ChevronLeft } from 'lucide-react';
 import { WelcomeScreen } from './WelcomeScreen';
 import { AccountSetupStep } from './AccountSetupStep';
-import { FirstCheckInStep } from './FirstCheckInStep';
 import { TourStep } from './TourStep';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
 import { cn } from '@/shared/lib/utils';
@@ -17,13 +16,12 @@ export function OnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    if (typeof savedStep === 'number') setCurrentStep(Math.min(savedStep, 3));
+    if (typeof savedStep === 'number') setCurrentStep(Math.min(savedStep, 2));
   }, [savedStep]);
 
   const steps = [
     { id: 'welcome', title: 'Bienvenida', canSkip: false, manualAdvance: false },
     { id: 'account', title: 'Cuenta', canSkip: false, manualAdvance: true },
-    { id: 'checkin', title: 'Check-in', canSkip: false, manualAdvance: true },
     { id: 'tour', title: 'Tour', canSkip: true, manualAdvance: false },
   ];
 
@@ -104,8 +102,7 @@ export function OnboardingWizard() {
         <div className="px-6 py-4">
           {currentStep === 0 && <WelcomeScreen />}
           {currentStep === 1 && <AccountSetupStep onNext={handleNext} />}
-          {currentStep === 2 && <FirstCheckInStep onNext={handleNext} />}
-          {currentStep === 3 && <TourStep />}
+          {currentStep === 2 && <TourStep />}
         </div>
 
         {/* Footer */}
