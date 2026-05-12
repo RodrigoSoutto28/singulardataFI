@@ -56,7 +56,7 @@ import {
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useExportTrades } from '@/features/journal/hooks/useExportTrades';
 import { useImportTrades } from '@/features/journal/hooks/useImportTrades';
-import { useTrades, Trade } from '@/features/journal/hooks/useTrades';
+import { useTrades, Trade, type TradeInsert } from '@/features/journal/hooks/useTrades';
 import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/features/journal/components/ImportPreviewModal';
 import { useDebounce } from '@/shared/hooks/useDebounce';
