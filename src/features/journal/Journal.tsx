@@ -855,6 +855,14 @@ export default function Journal() {
                 {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {t.journal.import ?? 'Import'}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleUndoLastImport}
+                disabled={isUndoing}
+                className="gap-2"
+              >
+                {isUndoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+                Deshacer último proceso
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleExport('excel')} className="gap-2" disabled={trades.length === 0}>
                 <FileSpreadsheet className="h-4 w-4 text-success" />
