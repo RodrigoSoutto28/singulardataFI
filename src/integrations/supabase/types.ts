@@ -178,6 +178,50 @@ export type Database = {
         }
         Relationships: []
       }
+      import_batches: {
+        Row: {
+          created_at: string
+          file_hash: string
+          file_name: string
+          id: string
+          imported_count: number
+          is_undone: boolean
+          skipped_duplicates: number
+          undone_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_hash: string
+          file_name: string
+          id?: string
+          imported_count?: number
+          is_undone?: boolean
+          skipped_duplicates?: number
+          undone_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_hash?: string
+          file_name?: string
+          id?: string
+          imported_count?: number
+          is_undone?: boolean
+          skipped_duplicates?: number
+          undone_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_market_checkins: {
         Row: {
           allowed_setups: string[]
@@ -577,6 +621,8 @@ export type Database = {
           exit_date: string | null
           exit_price: number | null
           id: string
+          import_batch_id: string | null
+          import_row_hash: string | null
           notes: string | null
           pnl: number | null
           pnl_percentage: number | null
@@ -605,6 +651,8 @@ export type Database = {
           exit_date?: string | null
           exit_price?: number | null
           id?: string
+          import_batch_id?: string | null
+          import_row_hash?: string | null
           notes?: string | null
           pnl?: number | null
           pnl_percentage?: number | null
@@ -633,6 +681,8 @@ export type Database = {
           exit_date?: string | null
           exit_price?: number | null
           id?: string
+          import_batch_id?: string | null
+          import_row_hash?: string | null
           notes?: string | null
           pnl?: number | null
           pnl_percentage?: number | null
@@ -656,6 +706,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "trading_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trades_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
             referencedColumns: ["id"]
           },
           {
