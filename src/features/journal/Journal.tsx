@@ -71,6 +71,15 @@ import {
 } from '@/features/journal/utils/error-detection';
 import { useTaxometer } from '@/features/behavioral/hooks/useTaxometer';
 import { usePreMarketCheckIn } from '@/features/behavioral/hooks/usePreMarketCheckIn';
+import {
+  hashFile,
+  hashRow,
+  findActiveBatchByFileHash,
+  createImportBatch,
+  getLastActiveBatch,
+  undoImportBatch,
+} from '@/features/journal/hooks/useImportBatches';
+import { Undo2 } from 'lucide-react';
 
 // Types for import preview
 interface ImportedTrade {
