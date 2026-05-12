@@ -323,6 +323,12 @@ export default function Journal() {
 
     setIsImporting(true);
 
+    try {
+      await refetch();
+    } catch (error) {
+      console.warn('[ImportTrades] No se pudo refrescar el registro antes de importar:', error);
+    }
+
     const importedKeys = new Set<string>();
     const existingKeys = new Set<string>(
       trades.map((trade) =>
