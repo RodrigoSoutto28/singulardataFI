@@ -458,15 +458,49 @@ export default function Journal() {
     }
 
     try {
-      await importTrades.mutateAsync(dbTrades);
-      if (validationErrors.length > 0) {
-        toast.warning(`${dbTrades.length} operación(es) importada(s). ${validationErrors.length} fallaron en validación.`);
-      } else if (skippedDuplicates > 0) {
-        toast.success(`${dbTrades.length} operación(es) importada(s). ${skippedDuplicates} duplicada(s) omitida(s).`);
+      if (!user?.id) throw new Error('User not authenticated');
+
+      // Create the import batch first so each trade can reference it
+      const batchId = await createImportBatch({
+        userId: user.id,
+        fileName: previewFileName || 'imported-file',
+        fileHash: previewFileHash || `manual-${Date.now()}`,
+        importedCount: dbTrades.length,
+        skippedDuplicates,
+      });
+
+      // Attach batch + per-row hash to every trade
+      const tradesWithBatch = await Promise.all(
+        dbTrades.map(async (t, idx) => ({
+          ...t,
+          import_batch_id: batchId,
+          import_row_hash: await hashRow(
+            user.id,
+            buildImportTradeKey(selectedTrades[idx] ?? (t as unknown as ImportedTrade)),
+          ),
+        })),
+      );
+
+      const inserted = await importTrades.mutateAsync(tradesWithBatch);
+      const insertedCount = inserted.length;
+      const dbSkipped = dbTrades.length - insertedCount;
+      const totalSkipped = skippedDuplicates + dbSkipped;
+
+      if (insertedCount === 0) {
+        toast.warning('No se importaron operaciones porque ya existían en tu registro.');
+      } else if (validationErrors.length > 0) {
+        toast.warning(`${insertedCount} operación(es) importada(s). ${validationErrors.length} fallaron en validación.`);
+      } else if (totalSkipped > 0) {
+        toast.success(`${insertedCount} operación(es) importada(s). ${totalSkipped} duplicada(s) omitida(s).`);
+      } else {
+        toast.success(`${insertedCount} operación(es) importada(s).`);
       }
+
       setPreviewOpen(false);
       setPreviewTrades([]);
       setPreviewErrors([]);
+      setPreviewFileHash('');
+      setPreviewFileName('');
     } catch (error) {
       console.error('[ImportTrades] Insert failed:', error);
       toast.error('No se pudieron guardar las operaciones. Inténtalo de nuevo.');
