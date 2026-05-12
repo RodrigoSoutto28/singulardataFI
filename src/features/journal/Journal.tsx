@@ -181,7 +181,7 @@ export default function Journal() {
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
-  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
