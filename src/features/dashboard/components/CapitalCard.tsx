@@ -41,7 +41,7 @@ export function CapitalCard({
   const numericValue =
     typeof value === 'number'
       ? value
-      : parseFloat(String(value).replace(/[^0-9.\-]/g, '')) || 0;
+      : parseFloat(String(value).replace(/[^0-9.-]/g, '')) || 0;
 
   const displayValue =
     typeof value === 'number'

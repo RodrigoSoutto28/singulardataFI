@@ -583,22 +583,19 @@ function GeolocationCard() {
     localStorage.setItem('singular_use_ip_detection', enabled ? 'true' : 'false');
   }, [enabled]);
 
+  const geo = t.settings.geolocation;
   const labels = {
-    title: (t as any)?.settings?.geolocation?.title || 'Detección de Ubicación',
-    description:
-      (t as any)?.settings?.geolocation?.description ||
-      'Usa tu ubicación para detectar automáticamente el idioma apropiado.',
-    toggle: (t as any)?.settings?.geolocation?.toggle || 'Detección de idioma por IP',
-    privacy:
-      (t as any)?.settings?.geolocation?.privacy ||
-      'Privacidad: Solo detectamos tu país (no guardamos tu IP). Los resultados se guardan localmente por 7 días.',
-    detected: (t as any)?.settings?.geolocation?.detected || 'Ubicación detectada',
-    country: (t as any)?.settings?.geolocation?.country || 'País',
-    city: (t as any)?.settings?.geolocation?.city || 'Ciudad',
-    language: (t as any)?.settings?.geolocation?.language || 'Idioma',
-    source: (t as any)?.settings?.geolocation?.source || 'Servicio',
-    detectNow: (t as any)?.settings?.geolocation?.detectNow || 'Detectar ahora',
-    clear: (t as any)?.settings?.geolocation?.clear || 'Limpiar caché',
+    title: geo?.title ?? 'Detección de Ubicación',
+    description: geo?.description ?? 'Usa tu ubicación para detectar automáticamente el idioma apropiado.',
+    toggle: geo?.toggle ?? 'Detección de idioma por IP',
+    privacy: geo?.privacy ?? 'Privacidad: Solo detectamos tu país (no guardamos tu IP). Los resultados se guardan localmente por 7 días.',
+    detected: geo?.detected ?? 'Ubicación detectada',
+    country: geo?.country ?? 'País',
+    city: geo?.city ?? 'Ciudad',
+    language: geo?.language ?? 'Idioma',
+    source: geo?.source ?? 'Servicio',
+    detectNow: geo?.detectNow ?? 'Detectar ahora',
+    clear: geo?.clear ?? 'Limpiar caché',
   };
 
   return (

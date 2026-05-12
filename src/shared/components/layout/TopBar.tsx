@@ -92,7 +92,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-3 h-10 px-1 md:px-2">
                 <span className="hidden lg:block text-sm font-medium truncate max-w-[140px]">
-                  {profile?.full_name || 'Trader Demo'}
+                  {profile?.full_name || t.topbar.defaultTraderName}
                 </span>
                 <Avatar className="h-8 w-8 border-2 border-border">
                   <AvatarImage src={profile?.avatar_url || undefined} />

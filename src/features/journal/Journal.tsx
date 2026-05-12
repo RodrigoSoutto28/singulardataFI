@@ -56,7 +56,7 @@ import {
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useExportTrades } from '@/features/journal/hooks/useExportTrades';
 import { useImportTrades } from '@/features/journal/hooks/useImportTrades';
-import { useTrades, Trade } from '@/features/journal/hooks/useTrades';
+import { useTrades, Trade, type TradeInsert } from '@/features/journal/hooks/useTrades';
 import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/features/journal/components/ImportPreviewModal';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -106,7 +106,7 @@ export default function Journal() {
   const { todayCheckIn } = usePreMarketCheckIn();
   const { logError } = useTaxometer();
   const [pendingErrors, setPendingErrors] = useState<DetectedError[]>([]);
-  const [pendingPayload, setPendingPayload] = useState<any>(null);
+  const [pendingPayload, setPendingPayload] = useState<Omit<TradeInsert, 'user_id'> | null>(null);
   const [taxometerOpen, setTaxometerOpen] = useState(false);
 
   // Server-side paginated list (50 per page) with infinite scroll
@@ -441,7 +441,7 @@ export default function Journal() {
     await commitTrade(payload, detected);
   };
 
-  const commitTrade = async (payload: any, detected: DetectedError[] = []) => {
+  const commitTrade = async (payload: Omit<TradeInsert, 'user_id'>, detected: DetectedError[] = []) => {
     try {
       const wasOpen = !editingTrade || editingTrade.status !== 'closed';
       let savedTrade: Trade | null = null;

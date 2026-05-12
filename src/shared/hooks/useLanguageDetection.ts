@@ -52,7 +52,7 @@ export function useLanguageDetection() {
           .eq('id', user.id)
           .maybeSingle();
 
-        const saved = (profile as any)?.language as string | null | undefined;
+        const saved = profile?.language as string | null | undefined;
         // Only spend an IP request when no stored preference exists anywhere.
         const shouldUseIP = useIP && !saved && !hasStored;
         const detection = await detectUserLanguage(saved, shouldUseIP);
@@ -62,7 +62,7 @@ export function useLanguageDetection() {
         if (!saved) {
           await supabase
             .from('profiles')
-            .update({ language: validateLanguage(toDbCode(nextCtx)) } as any)
+            .update({ language: validateLanguage(toDbCode(nextCtx)) })
             .eq('id', user.id);
         }
       } catch (e) {

@@ -50,6 +50,7 @@ export interface Translations {
     billing: string;
     settings: string;
     signOut: string;
+    defaultTraderName: string;
   };
 
   // Auth
@@ -408,6 +409,25 @@ export interface Translations {
         whiteLabel: string;
       };
     };
+    geolocation?: {
+      title: string;
+      description: string;
+      toggle: string;
+      privacy: string;
+      detected: string;
+      country: string;
+      city: string;
+      language: string;
+      source: string;
+      detectNow: string;
+      clear: string;
+    };
+  };
+
+  welcomeModal?: {
+    sampleLoaded: string;
+    sampleLoadedDesc: string;
+    sampleFailed: string;
   };
 }
 
@@ -457,6 +477,7 @@ const baseTranslations: Record<Language, Translations> = {
       billing: 'Facturación',
       settings: 'Configuración',
       signOut: 'Cerrar sesión',
+      defaultTraderName: 'Trader',
     },
     auth: {
       welcome: 'Bienvenido a SINGULAR dataFI',
@@ -797,6 +818,19 @@ const baseTranslations: Record<Language, Translations> = {
           whiteLabel: 'Opción white-label',
         },
       },
+      geolocation: {
+        title: 'Detección de Ubicación',
+        description: 'Usa tu ubicación para detectar automáticamente el idioma apropiado.',
+        toggle: 'Detección de idioma por IP',
+        privacy: 'Privacidad: Solo detectamos tu país (no guardamos tu IP). Los resultados se guardan localmente por 7 días.',
+        detected: 'Ubicación detectada',
+        country: 'País',
+        city: 'Ciudad',
+        language: 'Idioma',
+        source: 'Servicio',
+        detectNow: 'Detectar ahora',
+        clear: 'Limpiar caché',
+      },
     },
   },
   EN: {
@@ -844,6 +878,7 @@ const baseTranslations: Record<Language, Translations> = {
       billing: 'Billing',
       settings: 'Settings',
       signOut: 'Sign out',
+      defaultTraderName: 'Trader',
     },
     auth: {
       welcome: 'Welcome to SINGULAR dataFI',
@@ -1184,6 +1219,19 @@ const baseTranslations: Record<Language, Translations> = {
           whiteLabel: 'White-label option',
         },
       },
+      geolocation: {
+        title: 'Location Detection',
+        description: 'Use your location to automatically detect the appropriate language.',
+        toggle: 'IP-based language detection',
+        privacy: 'Privacy: We only detect your country (we do not store your IP). Results are saved locally for 7 days.',
+        detected: 'Detected location',
+        country: 'Country',
+        city: 'City',
+        language: 'Language',
+        source: 'Service',
+        detectNow: 'Detect now',
+        clear: 'Clear cache',
+      },
     },
   },
   PT: {
@@ -1231,6 +1279,7 @@ const baseTranslations: Record<Language, Translations> = {
       billing: 'Faturamento',
       settings: 'Configurações',
       signOut: 'Sair',
+      defaultTraderName: 'Trader',
     },
     auth: {
       welcome: 'Bem-vindo ao SINGULAR dataFI',
@@ -1570,6 +1619,19 @@ const baseTranslations: Record<Language, Translations> = {
           dedicatedSupport: 'Suporte dedicado',
           whiteLabel: 'Opção white-label',
         },
+      },
+      geolocation: {
+        title: 'Detecção de Localização',
+        description: 'Use sua localização para detectar automaticamente o idioma apropriado.',
+        toggle: 'Detecção de idioma por IP',
+        privacy: 'Privacidade: Apenas detectamos seu país (não armazenamos seu IP). Os resultados são salvos localmente por 7 dias.',
+        detected: 'Localização detectada',
+        country: 'País',
+        city: 'Cidade',
+        language: 'Idioma',
+        source: 'Serviço',
+        detectNow: 'Detectar agora',
+        clear: 'Limpar cache',
       },
     },
   },

@@ -172,7 +172,7 @@ export default function Auth() {
       try {
         const { data: { user: created } } = await supabase.auth.getUser();
         if (created) {
-          await supabase.from('profiles').update({ language: toDbCode(language) } as any).eq('id', created.id);
+          await supabase.from('profiles').update({ language: toDbCode(language) }).eq('id', created.id);
         }
       } catch { /* no-op */ }
       toast.success(t.auth.accountCreated, { description: t.auth.welcomeToApp });

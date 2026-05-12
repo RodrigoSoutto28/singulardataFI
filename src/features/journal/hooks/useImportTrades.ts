@@ -54,7 +54,7 @@ function parseDate(dateStr: string | number | Date | null | undefined, dayFirstH
   }
 
   // DD/MM/YYYY HH:MM[:SS] or MM/DD/YYYY HH:MM[:SS]
-  const m = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  const m = str.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
     const year = y.length === 2 ? 2000 + +y : +y;
