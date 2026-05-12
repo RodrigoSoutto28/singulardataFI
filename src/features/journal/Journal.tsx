@@ -151,6 +151,8 @@ export default function Journal() {
   const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
   const [previewErrors, setPreviewErrors] = useState<string[]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
+  const [previewFileHash, setPreviewFileHash] = useState('');
+  const [isUndoing, setIsUndoing] = useState(false);
 
   // Form state
   const nowLocalIso = () => {
