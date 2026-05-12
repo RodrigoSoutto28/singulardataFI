@@ -1,21 +1,38 @@
-## Plan
+Plan de implementación:
 
-1. **Eliminar el check-in obligatorio al entrar a la app**
-   - Quitar `PreMarketGate` del layout principal en `src/app/routes.tsx`.
-   - Mantener intactos los componentes y hooks del Pre-Market Protocol para que sigan disponibles si se usan desde Behavioral Metrics, pero que ya no aparezca como modal obligatorio al crear cuenta o iniciar sesión.
+1. Crear control persistente de importaciones en Lovable Cloud
+   - Agregar una tabla de lotes de importación para registrar: usuario, nombre de archivo, hash del archivo, cantidad importada y duplicados omitidos.
+   - Agregar a `trades` los campos de trazabilidad del lote y una huella única por operación importada.
+   - Proteger todo con reglas por usuario: cada usuario solo ve, crea y deshace sus propios lotes.
 
-2. **Corregir operaciones importadas para que entren como cerradas**
-   - Ajustar la importación en `src/features/journal/Journal.tsx` para que toda operación con P&L, precio de salida, fecha de salida o resultado importado se guarde con `status: 'closed'`.
-   - Si viene cerrada pero sin `exit_date`, asignar una fecha de cierre segura basada en `entryDate`, para que el dashboard, curva de equity y P&L mensual puedan leerla.
-   - Incluir `asset_class` en el payload importado, porque hoy se detecta pero no se guarda.
+2. Bloquear doble carga del mismo archivo
+   - Calcular un hash SHA-256 del archivo antes de parsearlo.
+   - Si ya existe un lote activo con ese hash para el usuario, detener la importación antes del preview y mostrar un aviso claro.
+   - Esto evita que el usuario cargue el mismo CSV/Excel dos veces por accidente.
 
-3. **Hacer que el dashboard lea operaciones cerradas aunque falte fecha de salida histórica**
-   - Ajustar `useAnalytics` para que la curva de equity y métricas mensuales usen `exit_date` si existe y, como fallback, `entry_date`.
-   - Esto protege datos ya importados anteriormente que quedaron cerrados pero sin `exit_date`.
+3. Detectar clones de operaciones antes de guardar
+   - Generar una huella normalizada por operación con campos estables: símbolo, dirección, entry/exit, cantidad, fechas, P&L, SL/TP, estrategia y asset class.
+   - Marcar y omitir duplicados dentro del mismo archivo.
+   - Comparar contra operaciones importadas existentes para omitir clones ya guardados.
+   - Añadir una restricción única en la base para impedir duplicados incluso si dos importaciones se ejecutan casi al mismo tiempo.
 
-4. **Revalidar flujo principal**
-   - Verificar que la ruta `/dashboard` ya no abra el check-in automáticamente.
-   - Verificar que las importaciones cerradas alimenten Win Rate, P&L, curva de equity y balance.
+4. Guardar importaciones por lote
+   - Al confirmar el preview, crear un lote de importación.
+   - Insertar las operaciones con `import_batch_id` y `import_row_hash`.
+   - Mantener el estado `closed` cuando el archivo trae datos de cierre o P&L, para que el dashboard las lea correctamente.
 
-5. **Sobre GitHub**
-   - No haré comandos manuales de Git porque Lovable sincroniza los cambios automáticamente con GitHub cuando la integración está conectada.
+5. Agregar “Deshacer último proceso”
+   - Añadir una acción en Trade Ledger junto a Importar/Exportar.
+   - Buscar el último lote activo del usuario.
+   - Eliminar solo las operaciones asociadas a ese lote.
+   - Marcar el lote como deshecho para que quede auditoría y para permitir volver a cargar ese archivo si el usuario realmente quiere rehacer la importación.
+   - Sin afectar operaciones manuales ni importaciones anteriores.
+
+6. Ajustar mensajes e i18n
+   - Agregar textos en ES/EN/PT para: archivo ya importado, duplicados omitidos, importación deshecha, no hay proceso para deshacer y errores del flujo.
+
+7. Validación
+   - Probar el flujo con el mismo archivo dos veces: la segunda carga debe bloquearse.
+   - Probar un archivo con filas repetidas: debe omitir clones.
+   - Probar “Deshacer último proceso”: debe borrar solo el último lote y recalcular balance/dashboard.
+   - Probar recarga posterior del mismo archivo tras deshacer: debe permitir importarlo nuevamente.

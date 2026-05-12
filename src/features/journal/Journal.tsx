@@ -71,6 +71,15 @@ import {
 } from '@/features/journal/utils/error-detection';
 import { useTaxometer } from '@/features/behavioral/hooks/useTaxometer';
 import { usePreMarketCheckIn } from '@/features/behavioral/hooks/usePreMarketCheckIn';
+import {
+  hashFile,
+  hashRow,
+  findActiveBatchByFileHash,
+  createImportBatch,
+  getLastActiveBatch,
+  undoImportBatch,
+} from '@/features/journal/hooks/useImportBatches';
+import { Undo2 } from 'lucide-react';
 
 // Types for import preview
 interface ImportedTrade {
@@ -142,6 +151,8 @@ export default function Journal() {
   const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
   const [previewErrors, setPreviewErrors] = useState<string[]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
+  const [previewFileHash, setPreviewFileHash] = useState('');
+  const [isUndoing, setIsUndoing] = useState(false);
 
   // Form state
   const nowLocalIso = () => {
@@ -170,7 +181,7 @@ export default function Journal() {
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
-  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
@@ -294,6 +305,19 @@ export default function Journal() {
     if (!file) return;
 
     try {
+      // 1. Hash the file and check if it was already imported
+      const fileHash = await hashFile(file);
+      if (user?.id) {
+        const existing = await findActiveBatchByFileHash(user.id, fileHash);
+        if (existing) {
+          const when = new Date(existing.created_at).toLocaleString();
+          toast.error(
+            `Este archivo ya fue importado (${existing.file_name}, ${when}). Si deseas volver a cargarlo, primero usa "Deshacer último proceso".`
+          );
+          return;
+        }
+      }
+
       const result = await importFromFile(file);
 
       // Always open the preview so the user can see errors when no trades parsed
@@ -306,6 +330,7 @@ export default function Journal() {
             : []
       );
       setPreviewFileName(file.name);
+      setPreviewFileHash(fileHash);
       setPreviewOpen(true);
     } catch (error) {
       console.error('[ImportTrades] Unexpected error:', error);
@@ -314,6 +339,28 @@ export default function Journal() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleUndoLastImport = async () => {
+    if (!user?.id) return;
+    if (!confirm('¿Deshacer la última importación? Se eliminarán las operaciones cargadas en ese proceso.')) return;
+    setIsUndoing(true);
+    try {
+      const last = await getLastActiveBatch(user.id);
+      if (!last) {
+        toast.info('No hay importaciones para deshacer.');
+        return;
+      }
+      const removed = await undoImportBatch(user.id, last.id);
+      await invalidateAndSyncBalance();
+      await refetch();
+      toast.success(`Importación deshecha (${last.file_name}). ${removed} operación(es) eliminada(s).`);
+    } catch (error) {
+      console.error('[ImportTrades] Undo failed:', error);
+      toast.error('No se pudo deshacer la última importación.');
+    } finally {
+      setIsUndoing(false);
     }
   };
 
@@ -411,15 +458,49 @@ export default function Journal() {
     }
 
     try {
-      await importTrades.mutateAsync(dbTrades);
-      if (validationErrors.length > 0) {
-        toast.warning(`${dbTrades.length} operación(es) importada(s). ${validationErrors.length} fallaron en validación.`);
-      } else if (skippedDuplicates > 0) {
-        toast.success(`${dbTrades.length} operación(es) importada(s). ${skippedDuplicates} duplicada(s) omitida(s).`);
+      if (!user?.id) throw new Error('User not authenticated');
+
+      // Create the import batch first so each trade can reference it
+      const batchId = await createImportBatch({
+        userId: user.id,
+        fileName: previewFileName || 'imported-file',
+        fileHash: previewFileHash || `manual-${Date.now()}`,
+        importedCount: dbTrades.length,
+        skippedDuplicates,
+      });
+
+      // Attach batch + per-row hash to every trade
+      const tradesWithBatch = await Promise.all(
+        dbTrades.map(async (t, idx) => ({
+          ...t,
+          import_batch_id: batchId,
+          import_row_hash: await hashRow(
+            user.id,
+            buildImportTradeKey(selectedTrades[idx] ?? (t as unknown as ImportedTrade)),
+          ),
+        })),
+      );
+
+      const inserted = await importTrades.mutateAsync(tradesWithBatch);
+      const insertedCount = inserted.length;
+      const dbSkipped = dbTrades.length - insertedCount;
+      const totalSkipped = skippedDuplicates + dbSkipped;
+
+      if (insertedCount === 0) {
+        toast.warning('No se importaron operaciones porque ya existían en tu registro.');
+      } else if (validationErrors.length > 0) {
+        toast.warning(`${insertedCount} operación(es) importada(s). ${validationErrors.length} fallaron en validación.`);
+      } else if (totalSkipped > 0) {
+        toast.success(`${insertedCount} operación(es) importada(s). ${totalSkipped} duplicada(s) omitida(s).`);
+      } else {
+        toast.success(`${insertedCount} operación(es) importada(s).`);
       }
+
       setPreviewOpen(false);
       setPreviewTrades([]);
       setPreviewErrors([]);
+      setPreviewFileHash('');
+      setPreviewFileName('');
     } catch (error) {
       console.error('[ImportTrades] Insert failed:', error);
       toast.error('No se pudieron guardar las operaciones. Inténtalo de nuevo.');
@@ -774,6 +855,14 @@ export default function Journal() {
                 {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {t.journal.import ?? 'Import'}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleUndoLastImport}
+                disabled={isUndoing}
+                className="gap-2"
+              >
+                {isUndoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+                Deshacer último proceso
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleExport('excel')} className="gap-2" disabled={trades.length === 0}>
                 <FileSpreadsheet className="h-4 w-4 text-success" />
@@ -807,6 +896,18 @@ export default function Journal() {
               <Upload className="h-4 w-4" />
             )}
             {t.journal.import ?? 'Import'}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 btn-press"
+            onClick={handleUndoLastImport}
+            disabled={isUndoing}
+            title="Elimina las operaciones de la última importación"
+          >
+            {isUndoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+            Deshacer último proceso
           </Button>
 
           {/* Export Dropdown */}

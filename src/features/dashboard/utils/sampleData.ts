@@ -2,7 +2,7 @@ import { Trade } from '@/features/journal/hooks/useTrades';
 
 type SampleTrade = Omit<
   Trade,
-  'id' | 'user_id' | 'created_at' | 'updated_at' | 'account_id'
+  'id' | 'user_id' | 'created_at' | 'updated_at' | 'account_id' | 'import_batch_id' | 'import_row_hash'
 >;
 
 const SYMBOLS = [
