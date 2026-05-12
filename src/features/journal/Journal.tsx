@@ -898,6 +898,18 @@ export default function Journal() {
             {t.journal.import ?? 'Import'}
           </Button>
 
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 btn-press"
+            onClick={handleUndoLastImport}
+            disabled={isUndoing}
+            title="Elimina las operaciones de la última importación"
+          >
+            {isUndoing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+            Deshacer último proceso
+          </Button>
+
           {/* Export Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
