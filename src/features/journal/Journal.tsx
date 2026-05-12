@@ -305,6 +305,19 @@ export default function Journal() {
     if (!file) return;
 
     try {
+      // 1. Hash the file and check if it was already imported
+      const fileHash = await hashFile(file);
+      if (user?.id) {
+        const existing = await findActiveBatchByFileHash(user.id, fileHash);
+        if (existing) {
+          const when = new Date(existing.created_at).toLocaleString();
+          toast.error(
+            `Este archivo ya fue importado (${existing.file_name}, ${when}). Si deseas volver a cargarlo, primero usa "Deshacer último proceso".`
+          );
+          return;
+        }
+      }
+
       const result = await importFromFile(file);
 
       // Always open the preview so the user can see errors when no trades parsed
@@ -317,6 +330,7 @@ export default function Journal() {
             : []
       );
       setPreviewFileName(file.name);
+      setPreviewFileHash(fileHash);
       setPreviewOpen(true);
     } catch (error) {
       console.error('[ImportTrades] Unexpected error:', error);
@@ -325,6 +339,28 @@ export default function Journal() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleUndoLastImport = async () => {
+    if (!user?.id) return;
+    if (!confirm('¿Deshacer la última importación? Se eliminarán las operaciones cargadas en ese proceso.')) return;
+    setIsUndoing(true);
+    try {
+      const last = await getLastActiveBatch(user.id);
+      if (!last) {
+        toast.info('No hay importaciones para deshacer.');
+        return;
+      }
+      const removed = await undoImportBatch(user.id, last.id);
+      await invalidateAndSyncBalance();
+      await refetch();
+      toast.success(`Importación deshecha (${last.file_name}). ${removed} operación(es) eliminada(s).`);
+    } catch (error) {
+      console.error('[ImportTrades] Undo failed:', error);
+      toast.error('No se pudo deshacer la última importación.');
+    } finally {
+      setIsUndoing(false);
     }
   };
 
