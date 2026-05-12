@@ -135,23 +135,27 @@ export function useTrades() {
   const importTrades = useMutation({
     mutationFn: async (trades: Omit<TradeInsert, 'user_id'>[]) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
+
       const tradesWithUser = trades.map(trade => ({
         ...trade,
         user_id: user.id,
       }));
 
+      // upsert with ignoreDuplicates so the unique (user_id, import_row_hash)
+      // index silently skips clones at the database level.
       const { data, error } = await supabase
         .from('trades')
-        .insert(tradesWithUser as TradeInsert[])
+        .upsert(tradesWithUser as TradeInsert[], {
+          onConflict: 'user_id,import_row_hash',
+          ignoreDuplicates: true,
+        })
         .select();
 
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       await invalidateAndSyncBalance();
-      toast.success(`${data.length} operaciones importadas`);
     },
     onError: (error) => {
       toast.error(getUserErrorMessage(error, 'No se pudieron importar las operaciones.'));
@@ -168,6 +172,7 @@ export function useTrades() {
     importTrades,
     refetch: tradesQuery.refetch,
     syncBalance: () => user?.id ? syncAccountBalance(user.id) : Promise.resolve(),
+    invalidateAndSyncBalance,
   };
 }
 
