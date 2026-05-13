@@ -390,13 +390,40 @@ function processRows(
 }
 
 function parseCSV(content: string): ParseResult {
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').filter(l => l.trim());
+  // Strip UTF-8 BOM
+  const cleaned = content.replace(/^\uFEFF/, '');
+  const lines = cleaned
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n')
+    .filter((l) => l.trim());
   if (lines.length < 2) return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
 
-  const delim = detectDelimiter(lines[0]);
-  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase().trim());
-  const rows = lines.slice(1).map(l => splitCSVLine(l, delim));
-  return processRows(headers, rows, { source: 'CSV' });
+  const delim = detectDelimiter(lines);
+
+  // Parse all rows once, then auto-detect header row by scoring (handles
+  // exports with metadata lines like "Account: 12345" before the header).
+  const allRows = lines.map((l) => splitCSVLine(l, delim));
+  const scanLimit = Math.min(15, allRows.length);
+  let headerIdx = 0;
+  let bestScore = scoreHeaderRow(allRows[0]);
+  for (let i = 1; i < scanLimit; i++) {
+    const s = scoreHeaderRow(allRows[i]);
+    if (s > bestScore) {
+      bestScore = s;
+      headerIdx = i;
+    }
+  }
+  if (bestScore < 2) {
+    return {
+      trades: [],
+      errors: ['No se reconocieron columnas válidas en el CSV. Revisa que la primera fila contenga encabezados como symbol, direction, entry price, etc.'],
+    };
+  }
+
+  const headers = allRows[headerIdx].map((h) => String(h ?? '').toLowerCase().trim());
+  const dataRows = allRows.slice(headerIdx + 1).filter((r) => !isSummaryRow(r));
+  return processRows(headers, dataRows, { source: 'CSV' });
 }
 
 // Score how "header-like" a row is by counting matches against known field aliases
