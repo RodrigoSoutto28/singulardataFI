@@ -316,10 +316,12 @@ export default function Journal() {
       if (user?.id) {
         const existing = await findActiveBatchByFileHash(user.id, fileHash);
         if (existing) {
-          const when = new Date(existing.created_at).toLocaleString();
-          toast.error(
-            `Este archivo ya fue importado (${existing.file_name}, ${when}). Si deseas volver a cargarlo, primero usa "Deshacer último proceso".`
-          );
+          setDuplicateInfo({
+            fileName: file.name,
+            previousName: existing.file_name,
+            date: new Date(existing.created_at).toLocaleString(),
+            count: existing.imported_count ?? 0,
+          });
           return;
         }
       }
