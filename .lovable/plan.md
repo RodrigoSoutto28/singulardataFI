@@ -1,38 +1,45 @@
-Plan de implementación:
+## Objetivo
+El sistema ya tiene importación CSV con autodetección de broker (cTrader, MT4, MT5, TradingView, genérico) y bloqueo por hash de archivo. Esta iteración refuerza el reconocimiento CSV, mejora la alerta visual de duplicado y agrega tests automáticos que validen el flujo.
 
-1. Crear control persistente de importaciones en Lovable Cloud
-   - Agregar una tabla de lotes de importación para registrar: usuario, nombre de archivo, hash del archivo, cantidad importada y duplicados omitidos.
-   - Agregar a `trades` los campos de trazabilidad del lote y una huella única por operación importada.
-   - Proteger todo con reglas por usuario: cada usuario solo ve, crea y deshace sus propios lotes.
+## Cambios
 
-2. Bloquear doble carga del mismo archivo
-   - Calcular un hash SHA-256 del archivo antes de parsearlo.
-   - Si ya existe un lote activo con ese hash para el usuario, detener la importación antes del preview y mostrar un aviso claro.
-   - Esto evita que el usuario cargue el mismo CSV/Excel dos veces por accidente.
+### 1. Reconocimiento CSV más robusto (`useImportTrades.ts`)
+- Detectar fila de encabezado en CSV con el mismo scoring que ya se usa para Excel (`scoreHeaderRow`), para tolerar archivos con líneas de metadatos arriba (ej. exports de cTrader/MT4 con "Account: …", "Statement", etc.).
+- Saltar filas de totales/subtotales al final ("Total", "Summary", "Closed P/L").
+- Aceptar BOM UTF-8 al inicio del archivo.
+- Mejorar detección de delimitador con desempate por consistencia entre filas, no solo la primera línea.
+- Devolver en `errors` un mensaje informativo cuando se descartaron filas no parseables, indicando cuántas se reconocieron.
 
-3. Detectar clones de operaciones antes de guardar
-   - Generar una huella normalizada por operación con campos estables: símbolo, dirección, entry/exit, cantidad, fechas, P&L, SL/TP, estrategia y asset class.
-   - Marcar y omitir duplicados dentro del mismo archivo.
-   - Comparar contra operaciones importadas existentes para omitir clones ya guardados.
-   - Añadir una restricción única en la base para impedir duplicados incluso si dos importaciones se ejecutan casi al mismo tiempo.
+### 2. Alerta de duplicado más visible (`Journal.tsx`)
+- Reemplazar el `toast.error` actual por un diálogo modal de confirmación (usando `Dialog` ya importado) que muestre:
+  - Nombre del archivo previamente cargado
+  - Fecha/hora de la importación previa
+  - Cantidad de operaciones que trajo
+  - Botón "Entendido" y botón "Ir a Deshacer último proceso" que dispara `handleUndoLastImport`.
+- Agregar textos i18n en ES/EN/PT (`translations.ts`) para el modal.
 
-4. Guardar importaciones por lote
-   - Al confirmar el preview, crear un lote de importación.
-   - Insertar las operaciones con `import_batch_id` y `import_row_hash`.
-   - Mantener el estado `closed` cuando el archivo trae datos de cierre o P&L, para que el dashboard las lea correctamente.
+### 3. Tests automatizados (Vitest)
+Crear `src/features/journal/hooks/__tests__/useImportTrades.test.ts`:
+- CSV genérico con headers estándar → parsea N trades.
+- CSV con BOM y líneas de metadatos antes del header → autodetecta header.
+- CSV cTrader real (snippet) → broker = ctrader, mapea symbol/direction/pnl correctamente.
+- CSV con punto y coma como delimitador → parsea bien.
+- Fila de "Total" al final → se ignora sin error.
 
-5. Agregar “Deshacer último proceso”
-   - Añadir una acción en Trade Ledger junto a Importar/Exportar.
-   - Buscar el último lote activo del usuario.
-   - Eliminar solo las operaciones asociadas a ese lote.
-   - Marcar el lote como deshecho para que quede auditoría y para permitir volver a cargar ese archivo si el usuario realmente quiere rehacer la importación.
-   - Sin afectar operaciones manuales ni importaciones anteriores.
+Crear `src/features/journal/hooks/__tests__/useImportBatches.test.ts`:
+- `hashFile` produce el mismo hash para el mismo contenido y distinto para contenido diferente.
+- `hashRow` es estable y depende del `userId`.
 
-6. Ajustar mensajes e i18n
-   - Agregar textos en ES/EN/PT para: archivo ya importado, duplicados omitidos, importación deshecha, no hay proceso para deshacer y errores del flujo.
+Ejecutar con `bunx vitest run` y validar que pasan antes de cerrar.
 
-7. Validación
-   - Probar el flujo con el mismo archivo dos veces: la segunda carga debe bloquearse.
-   - Probar un archivo con filas repetidas: debe omitir clones.
-   - Probar “Deshacer último proceso”: debe borrar solo el último lote y recalcular balance/dashboard.
-   - Probar recarga posterior del mismo archivo tras deshacer: debe permitir importarlo nuevamente.
+## Detalle técnico
+- No se modifica el esquema de base de datos (la tabla `import_batches` y los índices únicos ya existen).
+- No se toca lógica de negocio del dashboard ni de balance.
+- El modal de duplicado solo es UI; la verificación sigue siendo `findActiveBatchByFileHash` por `(user_id, file_hash)` con `is_undone = false`.
+
+## Archivos afectados
+- `src/features/journal/hooks/useImportTrades.ts` (reconocimiento CSV)
+- `src/features/journal/Journal.tsx` (modal duplicado)
+- `src/shared/lib/i18n/translations.ts` (textos)
+- `src/features/journal/hooks/__tests__/useImportTrades.test.ts` (nuevo)
+- `src/features/journal/hooks/__tests__/useImportBatches.test.ts` (nuevo)
