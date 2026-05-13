@@ -1449,6 +1449,11 @@ const baseTranslations: Record<Language, Translations> = {
       importEmptyHint: 'Importe um arquivo CSV/Excel ou adicione sua primeira operação para começar.',
       loadingTrades: 'Carregando operações...',
       closed: 'Fechada',
+      duplicateFileTitle: 'Arquivo duplicado detectado',
+      duplicateFileBody: 'Este arquivo já foi importado como "{name}" em {date}. Trouxe {count} operação(ões).',
+      duplicateFileHint: 'Para enviá-lo novamente, desfaça a importação anterior primeiro.',
+      duplicateFileUnderstood: 'Entendido',
+      duplicateFileUndo: 'Desfazer último processo',
     },
     analytics: {
       title: 'Análises',
