@@ -153,6 +153,12 @@ export default function Journal() {
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
   const [isUndoing, setIsUndoing] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState<{
+    fileName: string;
+    previousName: string;
+    date: string;
+    count: number;
+  } | null>(null);
 
   // Form state
   const nowLocalIso = () => {
