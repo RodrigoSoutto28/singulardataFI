@@ -1,26 +1,22 @@
 import { useCallback } from 'react';
 import { parseXLSXBuffer } from '@/features/journal/utils/xlsx-adapter';
 
-interface ImportedTrade {
-  symbol: string;
-  direction: 'long' | 'short';
-  entryPrice: number;
-  exitPrice?: number;
-  quantity: number;
-  pnl?: number;
-  pnlPercentage?: number;
-  entryDate: string;
-  exitDate?: string;
-  strategy?: string;
-  notes?: string;
-  stopLoss?: number;
-  takeProfit?: number;
-  assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+export interface ParseMetadata {
+  delimiter?: string;
+  headerRowIndex?: number;
+  totalRows: number;
+  validRows: number;
+  ignoredRows: number;
+  missingColumns: string[];
+  columnMapping: Record<string, string>; // internal field -> CSV header
+  ignoredDetails: { row: number; reason: string; data?: string[] }[];
 }
 
-interface ParseResult {
+export interface ParseResult {
   trades: ImportedTrade[];
   errors: string[];
+  metadata?: ParseMetadata;
+  rawRows?: string[][];
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -136,6 +132,24 @@ function splitCSVLine(line: string, delim: string): string[] {
 }
 
 // ─── Field mapping ──────────────────────────────────────────────────────────
+
+const MANDATORY_FIELDS: (keyof typeof FIELD_ALIASES)[] = ['symbol', 'direction', 'entryPrice', 'exitPrice', 'quantity', 'entryDate'];
+
+const FIELD_LABELS: Record<keyof typeof FIELD_ALIASES, string> = {
+  symbol: 'Activo',
+  direction: 'Tipo (Compra/Venta)',
+  entryPrice: 'Precio Entrada',
+  exitPrice: 'Precio Salida',
+  quantity: 'Volumen',
+  pnl: 'P&L',
+  pnlPercentage: 'P&L %',
+  entryDate: 'Fecha',
+  exitDate: 'Fecha Cierre',
+  strategy: 'Estrategia',
+  notes: 'Notas',
+  stopLoss: 'Stop Loss',
+  takeProfit: 'Take Profit',
+};
 
 const FIELD_ALIASES = {
   symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product'],
@@ -359,26 +373,83 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
 function processRows(
   headers: string[],
   rows: unknown[][],
-  ctx: { source: string },
+  ctx: { source: string; metadata?: Partial<ParseMetadata> },
 ): ParseResult {
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   const broker = detectBroker(headers);
   const brokerMap = broker !== 'generic' ? BROKER_MAPS[broker] : null;
 
+  const metadata: ParseMetadata = {
+    totalRows: rows.length,
+    validRows: 0,
+    ignoredRows: 0,
+    missingColumns: [],
+    columnMapping: {},
+    ignoredDetails: [],
+    ...ctx.metadata,
+  };
+
+  // Identify column mapping
+  Object.keys(FIELD_ALIASES).forEach((key) => {
+    const fieldKey = key as keyof typeof FIELD_ALIASES;
+    const norm = headers.map((h) => String(h ?? '').toLowerCase().trim());
+    const aliases = FIELD_ALIASES[fieldKey];
+    for (const alias of aliases) {
+      const idx = norm.findIndex((h) => h === alias || h.includes(alias) || (alias.length > 3 && alias.includes(h) && h.length > 2));
+      if (idx !== -1) {
+        metadata.columnMapping[fieldKey] = headers[idx];
+        break;
+      }
+    }
+  });
+
+  // Check for missing mandatory columns
+  MANDATORY_FIELDS.forEach((field) => {
+    if (!metadata.columnMapping[field]) {
+      metadata.missingColumns.push(FIELD_LABELS[field]);
+    }
+  });
+
   rows.forEach((values, idx) => {
-    if (!Array.isArray(values) || values.every(v => v === '' || v === null || v === undefined)) return;
-    const rowNum = idx + 2; // +1 for header, +1 for 1-indexed
+    if (!Array.isArray(values) || values.every((v) => v === '' || v === null || v === undefined)) {
+      metadata.ignoredRows++;
+      return;
+    }
+    const rowNum = (metadata.headerRowIndex ?? 0) + idx + 2; // +1 for header, +1 for 1-indexed
     try {
+      if (isSummaryRow(values)) {
+        metadata.ignoredRows++;
+        metadata.ignoredDetails.push({ row: rowNum, reason: 'Fila de sumario/pie de página', data: values.map(String) });
+        return;
+      }
+
+      let result: { trade: ImportedTrade | null; error?: string };
       if (brokerMap) {
-        const result = mapRowWithBroker(headers, values, brokerMap, rowNum);
-        if (result.trade) trades.push(result.trade);
-        else if (result.error) errors.push(result.error);
+        result = mapRowWithBroker(headers, values, brokerMap, rowNum);
       } else {
         const trade = mapRowToTrade(headers, values);
-        if (trade) trades.push(trade);
+        result = { trade };
+      }
+
+      if (result.trade) {
+        trades.push(result.trade);
+        metadata.validRows++;
+      } else {
+        metadata.ignoredRows++;
+        metadata.ignoredDetails.push({ 
+          row: rowNum, 
+          reason: result.error || 'Faltan datos obligatorios o formato inválido',
+          data: values.map(String) 
+        });
       }
     } catch (e) {
+      metadata.ignoredRows++;
+      metadata.ignoredDetails.push({ 
+        row: rowNum, 
+        reason: (e as Error)?.message ?? String(e),
+        data: values.map(String) 
+      });
       errors.push(`${ctx.source} fila ${rowNum}: ${(e as Error)?.message ?? e}`);
     }
   });
@@ -386,7 +457,8 @@ function processRows(
   if (broker !== 'generic' && trades.length > 0) {
     errors.unshift(`Formato detectado: ${broker.toUpperCase()} — ${trades.length} operación(es) interpretada(s)`);
   }
-  return { trades, errors };
+
+  return { trades, errors, metadata };
 }
 
 export function parseCSV(content: string): ParseResult {
@@ -401,8 +473,7 @@ export function parseCSV(content: string): ParseResult {
 
   const delim = detectDelimiter(lines);
 
-  // Parse all rows once, then auto-detect header row by scoring (handles
-  // exports with metadata lines like "Account: 12345" before the header).
+  // Parse all rows once, then auto-detect header row by scoring
   const allRows = lines.map((l) => splitCSVLine(l, delim));
   const scanLimit = Math.min(15, allRows.length);
   let headerIdx = 0;
@@ -414,16 +485,22 @@ export function parseCSV(content: string): ParseResult {
       headerIdx = i;
     }
   }
-  if (bestScore < 2) {
-    return {
-      trades: [],
-      errors: ['No se reconocieron columnas válidas en el CSV. Revisa que la primera fila contenga encabezados como symbol, direction, entry price, etc.'],
-    };
-  }
 
   const headers = allRows[headerIdx].map((h) => String(h ?? '').toLowerCase().trim());
-  const dataRows = allRows.slice(headerIdx + 1).filter((r) => !isSummaryRow(r));
-  return processRows(headers, dataRows, { source: 'CSV' });
+  const dataRows = allRows.slice(headerIdx + 1);
+  
+  const result = processRows(headers, dataRows, { 
+    source: 'CSV', 
+    metadata: { 
+      delimiter: delim, 
+      headerRowIndex: headerIdx 
+    } 
+  });
+  
+  return { 
+    ...result,
+    rawRows: allRows.slice(0, 100), // Limit to first 100 rows for preview performance
+  };
 }
 
 // Score how "header-like" a row is by counting matches against known field aliases

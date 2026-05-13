@@ -150,6 +150,8 @@ export default function Journal() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
   const [previewErrors, setPreviewErrors] = useState<string[]>([]);
+  const [previewMetadata, setPreviewMetadata] = useState<any>(null);
+  const [previewRawRows, setPreviewRawRows] = useState<string[][]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
   const [isUndoing, setIsUndoing] = useState(false);
@@ -330,6 +332,8 @@ export default function Journal() {
 
       // Always open the preview so the user can see errors when no trades parsed
       setPreviewTrades(result.trades);
+      setPreviewMetadata(result.metadata);
+      setPreviewRawRows(result.rawRows || []);
       setPreviewErrors(
         result.errors.length > 0
           ? result.errors
@@ -507,6 +511,8 @@ export default function Journal() {
       setPreviewOpen(false);
       setPreviewTrades([]);
       setPreviewErrors([]);
+      setPreviewMetadata(null);
+      setPreviewRawRows([]);
       setPreviewFileHash('');
       setPreviewFileName('');
     } catch (error) {
@@ -1250,9 +1256,12 @@ export default function Journal() {
           setPreviewOpen(false);
           setPreviewTrades([]);
           setPreviewErrors([]);
+          setPreviewMetadata(null);
         }}
         trades={previewTrades}
         errors={previewErrors}
+        metadata={previewMetadata}
+        rawRows={previewRawRows}
         fileName={previewFileName}
         onConfirm={handleConfirmImport}
         isImporting={isImporting}
