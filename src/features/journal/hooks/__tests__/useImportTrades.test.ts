@@ -1,15 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import { useImportTrades } from '../useImportTrades';
 
-// Tiny shim: invoke the hook's `importFromFile` outside React by calling the
-// module-level parsers indirectly via a constructed File. The hook returns a
-// stable callback the first render, but for tests we just need to call it.
 function getImporter() {
-  // useCallback with [] deps + no React state — safe to call outside renderer
-  // because it doesn't touch any React APIs.
-  // We invoke the hook function directly; the returned callback is plain.
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  return useImportTrades().importFromFile;
+  const { result } = renderHook(() => useImportTrades());
+  return result.current.importFromFile;
 }
 
 function makeFile(content: string, name: string, type = 'text/csv'): File {
