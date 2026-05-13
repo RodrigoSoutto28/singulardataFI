@@ -87,15 +87,35 @@ function parseNumber(value: unknown): number | undefined {
   return isNaN(num) ? undefined : num;
 }
 
-// Detect delimiter for CSV-like content
-function detectDelimiter(line: string): string {
+// Detect delimiter for CSV-like content. Picks the candidate that yields the
+// most consistent column count across the first non-empty rows.
+function detectDelimiter(lines: string[]): string {
   const candidates = [',', ';', '\t', '|'];
-  let best = ',', max = 0;
+  const sample = lines.slice(0, Math.min(10, lines.length)).filter((l) => l.trim());
+  if (sample.length === 0) return ',';
+  let bestDelim = ',';
+  let bestScore = -1;
   for (const d of candidates) {
-    const count = (line.match(new RegExp(`\\${d}`, 'g')) ?? []).length;
-    if (count > max) { max = count; best = d; }
+    const counts = sample.map((l) => splitCSVLine(l, d).length);
+    const max = Math.max(...counts);
+    if (max < 2) continue;
+    // score = avg cols, penalized by inconsistency between rows
+    const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
+    const variance = counts.reduce((a, b) => a + (b - avg) ** 2, 0) / counts.length;
+    const score = avg - variance;
+    if (score > bestScore) {
+      bestScore = score;
+      bestDelim = d;
+    }
   }
-  return best;
+  return bestDelim;
+}
+
+// Detect a row that looks like a totals/summary footer.
+function isSummaryRow(values: unknown[]): boolean {
+  const first = String(values[0] ?? '').toLowerCase().trim();
+  if (!first) return false;
+  return /^(total|totals|summary|resumen|subtotal|grand total|closed p\/l|balance)\b/.test(first);
 }
 
 // Robust CSV row split (supports quoted fields with embedded delimiters)
