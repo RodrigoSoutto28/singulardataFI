@@ -27,7 +27,7 @@ export async function hashRow(userId: string, key: string): Promise<string> {
 export async function findActiveBatchByFileHash(userId: string, fileHash: string) {
   const { data, error } = await supabase
     .from('import_batches')
-    .select('id, file_name, created_at')
+    .select('id, file_name, created_at, imported_count')
     .eq('user_id', userId)
     .eq('file_hash', fileHash)
     .eq('is_undone', false)
