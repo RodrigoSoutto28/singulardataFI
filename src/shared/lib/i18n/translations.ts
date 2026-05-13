@@ -214,6 +214,11 @@ export interface Translations {
     importEmptyHint: string;
     loadingTrades: string;
     closed: string;
+    duplicateFileTitle: string;
+    duplicateFileBody: string;
+    duplicateFileHint: string;
+    duplicateFileUnderstood: string;
+    duplicateFileUndo: string;
   };
 
   // Analytics
