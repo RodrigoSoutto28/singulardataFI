@@ -214,6 +214,11 @@ export interface Translations {
     importEmptyHint: string;
     loadingTrades: string;
     closed: string;
+    duplicateFileTitle: string;
+    duplicateFileBody: string;
+    duplicateFileHint: string;
+    duplicateFileUnderstood: string;
+    duplicateFileUndo: string;
   };
 
   // Analytics
@@ -632,6 +637,11 @@ const baseTranslations: Record<Language, Translations> = {
       importEmptyHint: 'Importá un archivo CSV/Excel o agregá tu primera operación para comenzar a registrar tu rendimiento.',
       loadingTrades: 'Cargando operaciones...',
       closed: 'Cerrada',
+      duplicateFileTitle: 'Archivo duplicado detectado',
+      duplicateFileBody: 'Este archivo ya fue importado anteriormente con el nombre "{name}" el {date}. Trajo {count} operación(es).',
+      duplicateFileHint: 'Para volver a cargarlo, primero deshaz la importación previa.',
+      duplicateFileUnderstood: 'Entendido',
+      duplicateFileUndo: 'Deshacer último proceso',
     },
     analytics: {
       title: 'Analítica',
@@ -1033,6 +1043,11 @@ const baseTranslations: Record<Language, Translations> = {
       importEmptyHint: 'Import a CSV/Excel file or add your first trade to get started tracking your performance.',
       loadingTrades: 'Loading trades...',
       closed: 'Closed',
+      duplicateFileTitle: 'Duplicate file detected',
+      duplicateFileBody: 'This file was already imported as "{name}" on {date}. It brought {count} trade(s).',
+      duplicateFileHint: 'To upload it again, undo the previous import first.',
+      duplicateFileUnderstood: 'Understood',
+      duplicateFileUndo: 'Undo last import',
     },
     analytics: {
       title: 'Analytics',
@@ -1434,6 +1449,11 @@ const baseTranslations: Record<Language, Translations> = {
       importEmptyHint: 'Importe um arquivo CSV/Excel ou adicione sua primeira operação para começar.',
       loadingTrades: 'Carregando operações...',
       closed: 'Fechada',
+      duplicateFileTitle: 'Arquivo duplicado detectado',
+      duplicateFileBody: 'Este arquivo já foi importado como "{name}" em {date}. Trouxe {count} operação(ões).',
+      duplicateFileHint: 'Para enviá-lo novamente, desfaça a importação anterior primeiro.',
+      duplicateFileUnderstood: 'Entendido',
+      duplicateFileUndo: 'Desfazer último processo',
     },
     analytics: {
       title: 'Análises',

@@ -87,15 +87,35 @@ function parseNumber(value: unknown): number | undefined {
   return isNaN(num) ? undefined : num;
 }
 
-// Detect delimiter for CSV-like content
-function detectDelimiter(line: string): string {
+// Detect delimiter for CSV-like content. Picks the candidate that yields the
+// most consistent column count across the first non-empty rows.
+function detectDelimiter(lines: string[]): string {
   const candidates = [',', ';', '\t', '|'];
-  let best = ',', max = 0;
+  const sample = lines.slice(0, Math.min(10, lines.length)).filter((l) => l.trim());
+  if (sample.length === 0) return ',';
+  let bestDelim = ',';
+  let bestScore = -1;
   for (const d of candidates) {
-    const count = (line.match(new RegExp(`\\${d}`, 'g')) ?? []).length;
-    if (count > max) { max = count; best = d; }
+    const counts = sample.map((l) => splitCSVLine(l, d).length);
+    const max = Math.max(...counts);
+    if (max < 2) continue;
+    // score = avg cols, penalized by inconsistency between rows
+    const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
+    const variance = counts.reduce((a, b) => a + (b - avg) ** 2, 0) / counts.length;
+    const score = avg - variance;
+    if (score > bestScore) {
+      bestScore = score;
+      bestDelim = d;
+    }
   }
-  return best;
+  return bestDelim;
+}
+
+// Detect a row that looks like a totals/summary footer.
+function isSummaryRow(values: unknown[]): boolean {
+  const first = String(values[0] ?? '').toLowerCase().trim();
+  if (!first) return false;
+  return /^(total|totals|summary|resumen|subtotal|grand total|closed p\/l|balance)\b/.test(first);
 }
 
 // Robust CSV row split (supports quoted fields with embedded delimiters)
@@ -369,14 +389,41 @@ function processRows(
   return { trades, errors };
 }
 
-function parseCSV(content: string): ParseResult {
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').filter(l => l.trim());
+export function parseCSV(content: string): ParseResult {
+  // Strip UTF-8 BOM
+  const cleaned = content.replace(/^\uFEFF/, '');
+  const lines = cleaned
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n')
+    .filter((l) => l.trim());
   if (lines.length < 2) return { trades: [], errors: ['El archivo está vacío o no tiene datos'] };
 
-  const delim = detectDelimiter(lines[0]);
-  const headers = splitCSVLine(lines[0], delim).map(h => h.toLowerCase().trim());
-  const rows = lines.slice(1).map(l => splitCSVLine(l, delim));
-  return processRows(headers, rows, { source: 'CSV' });
+  const delim = detectDelimiter(lines);
+
+  // Parse all rows once, then auto-detect header row by scoring (handles
+  // exports with metadata lines like "Account: 12345" before the header).
+  const allRows = lines.map((l) => splitCSVLine(l, delim));
+  const scanLimit = Math.min(15, allRows.length);
+  let headerIdx = 0;
+  let bestScore = scoreHeaderRow(allRows[0]);
+  for (let i = 1; i < scanLimit; i++) {
+    const s = scoreHeaderRow(allRows[i]);
+    if (s > bestScore) {
+      bestScore = s;
+      headerIdx = i;
+    }
+  }
+  if (bestScore < 2) {
+    return {
+      trades: [],
+      errors: ['No se reconocieron columnas válidas en el CSV. Revisa que la primera fila contenga encabezados como symbol, direction, entry price, etc.'],
+    };
+  }
+
+  const headers = allRows[headerIdx].map((h) => String(h ?? '').toLowerCase().trim());
+  const dataRows = allRows.slice(headerIdx + 1).filter((r) => !isSummaryRow(r));
+  return processRows(headers, dataRows, { source: 'CSV' });
 }
 
 // Score how "header-like" a row is by counting matches against known field aliases

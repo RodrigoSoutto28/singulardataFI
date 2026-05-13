@@ -153,6 +153,12 @@ export default function Journal() {
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
   const [isUndoing, setIsUndoing] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState<{
+    fileName: string;
+    previousName: string;
+    date: string;
+    count: number;
+  } | null>(null);
 
   // Form state
   const nowLocalIso = () => {
@@ -310,10 +316,12 @@ export default function Journal() {
       if (user?.id) {
         const existing = await findActiveBatchByFileHash(user.id, fileHash);
         if (existing) {
-          const when = new Date(existing.created_at).toLocaleString();
-          toast.error(
-            `Este archivo ya fue importado (${existing.file_name}, ${when}). Si deseas volver a cargarlo, primero usa "Deshacer último proceso".`
-          );
+          setDuplicateInfo({
+            fileName: file.name,
+            previousName: existing.file_name,
+            date: new Date(existing.created_at).toLocaleString(),
+            count: existing.imported_count ?? 0,
+          });
           return;
         }
       }
@@ -1250,7 +1258,49 @@ export default function Journal() {
         isImporting={isImporting}
       />
 
-      {/* Statistics Cards */}
+      {/* Duplicate file alert */}
+      <Dialog
+        open={duplicateInfo !== null}
+        onOpenChange={(open) => {
+          if (!open) setDuplicateInfo(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-warn" />
+              {t.journal.duplicateFileTitle}
+            </DialogTitle>
+            <DialogDescription className="pt-2 space-y-2">
+              <span className="block">
+                {t.journal.duplicateFileBody
+                  .replace('{name}', duplicateInfo?.previousName ?? '')
+                  .replace('{date}', duplicateInfo?.date ?? '')
+                  .replace('{count}', String(duplicateInfo?.count ?? 0))}
+              </span>
+              <span className="block text-muted-foreground">
+                {t.journal.duplicateFileHint}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDuplicateInfo(null)}>
+              {t.journal.duplicateFileUnderstood}
+            </Button>
+            <Button
+              onClick={async () => {
+                setDuplicateInfo(null);
+                await handleUndoLastImport();
+              }}
+              disabled={isUndoing}
+            >
+              <Undo2 className="h-4 w-4 mr-2" />
+              {t.journal.duplicateFileUndo}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
           <div className="flex items-center gap-2 mb-2">
