@@ -1043,6 +1043,11 @@ const baseTranslations: Record<Language, Translations> = {
       importEmptyHint: 'Import a CSV/Excel file or add your first trade to get started tracking your performance.',
       loadingTrades: 'Loading trades...',
       closed: 'Closed',
+      duplicateFileTitle: 'Duplicate file detected',
+      duplicateFileBody: 'This file was already imported as "{name}" on {date}. It brought {count} trade(s).',
+      duplicateFileHint: 'To upload it again, undo the previous import first.',
+      duplicateFileUnderstood: 'Understood',
+      duplicateFileUndo: 'Undo last import',
     },
     analytics: {
       title: 'Analytics',
