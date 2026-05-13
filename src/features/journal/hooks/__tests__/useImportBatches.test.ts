@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { hashFile, hashRow } from '../useImportBatches';
 
 function makeFile(content: string, name = 'a.csv'): File {
-  return new File([content], name, { type: 'text/csv' });
+  const file = new File([content], name, { type: 'text/csv' });
+  if (typeof (file as unknown as { arrayBuffer: unknown }).arrayBuffer !== 'function') {
+    Object.defineProperty(file, 'arrayBuffer', {
+      value: async () => new TextEncoder().encode(content).buffer,
+    });
+  }
+  return file;
 }
 
 describe('useImportBatches — hashing', () => {
