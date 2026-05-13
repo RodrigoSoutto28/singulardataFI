@@ -389,7 +389,7 @@ function processRows(
   return { trades, errors };
 }
 
-function parseCSV(content: string): ParseResult {
+export function parseCSV(content: string): ParseResult {
   // Strip UTF-8 BOM
   const cleaned = content.replace(/^\uFEFF/, '');
   const lines = cleaned
