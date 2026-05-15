@@ -58,6 +58,17 @@ export async function createImportBatch(params: {
   return data.id as string;
 }
 
+export async function listImportBatches(userId: string, limit = 50) {
+  const { data, error } = await supabase
+    .from('import_batches')
+    .select('id, file_name, file_hash, imported_count, skipped_duplicates, is_undone, created_at, undone_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getLastActiveBatch(userId: string) {
   const { data, error } = await supabase
     .from('import_batches')

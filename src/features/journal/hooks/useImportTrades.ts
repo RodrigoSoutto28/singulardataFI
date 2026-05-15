@@ -1,6 +1,23 @@
 import { useCallback } from 'react';
 import { parseXLSXBuffer } from '@/features/journal/utils/xlsx-adapter';
 
+export interface ImportedTrade {
+  symbol: string;
+  direction: 'long' | 'short';
+  entryPrice: number;
+  exitPrice?: number;
+  quantity: number;
+  pnl?: number;
+  pnlPercentage?: number;
+  entryDate: string;
+  exitDate?: string;
+  strategy?: string;
+  notes?: string;
+  stopLoss?: number;
+  takeProfit?: number;
+  assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+}
+
 export interface ParseMetadata {
   delimiter?: string;
   headerRowIndex?: number;

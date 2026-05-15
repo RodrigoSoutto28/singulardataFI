@@ -59,6 +59,7 @@ import { useImportTrades } from '@/features/journal/hooks/useImportTrades';
 import { useTrades, Trade, type TradeInsert } from '@/features/journal/hooks/useTrades';
 import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/features/journal/components/ImportPreviewModal';
+import { ImportHistorySection } from '@/features/journal/components/ImportHistorySection';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
@@ -1437,6 +1438,8 @@ export default function Journal() {
           />
         )}
       </div>
+
+      <ImportHistorySection />
 
       <TaxometerAlert
         open={taxometerOpen}
