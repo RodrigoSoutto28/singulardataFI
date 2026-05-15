@@ -10,7 +10,8 @@ import {
 } from '@/shared/components/ui/table';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
-import { History, Loader2, RefreshCw, Undo2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, History, Loader2, RefreshCw, Undo2, XCircle } from 'lucide-react';
+import { Progress } from '@/shared/components/ui/progress';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { listImportBatches, undoImportBatch } from '@/features/journal/hooks/useImportBatches';
 import { toast } from 'sonner';
