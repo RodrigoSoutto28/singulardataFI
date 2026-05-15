@@ -1438,7 +1438,9 @@ export default function Journal() {
         )}
       </div>
 
-      <TaxometerAlert
+      <ImportHistorySection />
+
+
         open={taxometerOpen}
         errors={pendingErrors}
         onContinue={handleTaxometerContinue}
