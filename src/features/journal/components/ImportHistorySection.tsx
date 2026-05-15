@@ -120,13 +120,47 @@ export function ImportHistorySection() {
                       {b.skipped_duplicates}
                     </TableCell>
                     <TableCell>
-                      {b.is_undone ? (
-                        <Badge variant="outline" className="text-muted-foreground">
-                          Deshecho
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Activo</Badge>
-                      )}
+                      {(() => {
+                        const total = b.imported_count + b.skipped_duplicates;
+                        const ratio = total > 0 ? (b.imported_count / total) * 100 : 0;
+                        const hasIssues = b.skipped_duplicates > 0;
+                        const allSkipped = total > 0 && b.imported_count === 0;
+                        return (
+                          <div className="flex flex-col gap-1.5 min-w-[140px]">
+                            <div className="flex items-center gap-1.5">
+                              {b.is_undone ? (
+                                <Badge variant="outline" className="gap-1 text-muted-foreground">
+                                  <XCircle className="h-3 w-3" />
+                                  Deshecho
+                                </Badge>
+                              ) : allSkipped ? (
+                                <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+                                  <XCircle className="h-3 w-3" />
+                                  Sin importar
+                                </Badge>
+                              ) : hasIssues ? (
+                                <Badge variant="outline" className="gap-1 border-warn/40 text-warn">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Con omisiones
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="gap-1">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Activo
+                                </Badge>
+                              )}
+                            </div>
+                            {!b.is_undone && total > 0 && (
+                              <div className="flex items-center gap-2">
+                                <Progress value={ratio} className="h-1.5 flex-1" />
+                                <span className="text-[10px] font-mono-numbers text-muted-foreground tabular-nums">
+                                  {Math.round(ratio)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-right">
                       {!b.is_undone && (
