@@ -1440,7 +1440,7 @@ export default function Journal() {
 
       <ImportHistorySection />
 
-
+      <TaxometerAlert
         open={taxometerOpen}
         errors={pendingErrors}
         onContinue={handleTaxometerContinue}
