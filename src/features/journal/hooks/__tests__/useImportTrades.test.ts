@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseCSV } from '../useImportTrades';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { parseCSV, parseExcelBuffer } from '../useImportTrades';
 
 describe('parseCSV — CSV recognition', () => {
   it('parses a generic CSV with standard headers', () => {
