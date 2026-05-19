@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { parseCSV, parseExcelBuffer } from '../useImportTrades';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 describe('parseCSV — CSV recognition', () => {
   it('parses a generic CSV with standard headers', () => {
