@@ -544,6 +544,11 @@ function processRows(
     }
   });
 
+  // Surface a clear error when cabeceras don't map any mandatory field
+  if (Object.keys(metadata.columnMapping).length === 0) {
+    errors.push(`No se reconocieron columnas de operaciones en ${ctx.source}. Cabeceras encontradas: ${headers.filter(Boolean).join(', ') || '(ninguna)'}.`);
+  }
+
   rows.forEach((values, idx) => {
     if (!Array.isArray(values) || values.every((v) => v === '' || v === null || v === undefined)) {
       metadata.ignoredRows++;
