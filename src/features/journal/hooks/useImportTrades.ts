@@ -504,7 +504,7 @@ function processRows(
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   const broker = detectBroker(headers);
-  const brokerMap = broker !== 'generic' ? BROKER_MAPS[broker] : null;
+  const brokerMap = broker !== 'generic' && broker !== 'ctrader-position-history' ? BROKER_MAPS[broker] : null;
 
   const metadata: ParseMetadata = {
     totalRows: rows.length,
@@ -516,7 +516,14 @@ function processRows(
     ...ctx.metadata,
   };
 
+  // Special path: cTrader Position History (1 trade = 2 transaction rows)
+  if (broker === 'ctrader-position-history') {
+    const agg = aggregateCtraderPositionHistory(headers, rows, metadata);
+    return { trades: agg.trades, errors: agg.errors, metadata };
+  }
+
   // Identify column mapping
+
   Object.keys(FIELD_ALIASES).forEach((key) => {
     const fieldKey = key as keyof typeof FIELD_ALIASES;
     const norm = headers.map((h) => String(h ?? '').toLowerCase().trim());
