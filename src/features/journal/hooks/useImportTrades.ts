@@ -651,7 +651,7 @@ function scoreHeaderRow(row: unknown[]): number {
   return score;
 }
 
-async function parseExcelBuffer(buffer: ArrayBuffer): Promise<ParseResult> {
+export async function parseExcelBuffer(buffer: ArrayBuffer): Promise<ParseResult> {
   const trades: ImportedTrade[] = [];
   const errors: string[] = [];
   try {
