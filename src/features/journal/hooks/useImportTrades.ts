@@ -267,15 +267,124 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
   },
 };
 
-function detectBroker(headers: string[]): BrokerFormat {
+function detectBroker(headers: string[]): BrokerFormat | 'ctrader-position-history' {
   const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
   const has = (s: string) => norm.includes(s);
+  // cTrader "Position History List" export: rows are individual transactions (Trade Buy / Trade Sell)
+  // paired by the Position column. Needs aggregation, not row-by-row mapping.
+  if (has('position') && has('transaction type') && has('date time') && (has('trade volume lots') || has('volume'))) {
+    return 'ctrader-position-history';
+  }
   if (has('position id') && (has('open price') || has('open time'))) return 'ctrader';
   if (has('ticket') && (has('open time') || has('s / l') || has('symbol'))) {
     return norm.includes('time.1') || norm.includes('price.1') ? 'mt5' : 'mt4';
   }
   if ((has('trade #') || has('trade')) && has('entry price')) return 'tradingview';
   return 'generic';
+}
+
+// ─── cTrader Position History aggregator ────────────────────────────────────
+// Each Position has 2 transaction rows (open + close). We group by Position ID
+// and merge them into a single trade.
+function aggregateCtraderPositionHistory(
+  headers: string[],
+  rows: unknown[][],
+  metadata: ParseMetadata,
+): { trades: ImportedTrade[]; errors: string[] } {
+  const norm = headers.map(h => String(h ?? '').toLowerCase().trim());
+  const col = (name: string) => norm.indexOf(name);
+  const cSymbol = col('symbol');
+  const cPosition = col('position');
+  const cDate = col('date time');
+  const cType = col('transaction type');
+  const cVolume = col('trade volume lots') !== -1 ? col('trade volume lots') : col('volume');
+  const cOpenPrice = col('open price');
+  const cProfit = col('profit') !== -1 ? col('profit') : col('net profit');
+  const cStatus = col('position status');
+
+  const groups = new Map<string, unknown[][]>();
+  rows.forEach((r, idx) => {
+    if (!Array.isArray(r) || r.every(v => v === '' || v == null)) {
+      metadata.ignoredRows++;
+      return;
+    }
+    if (isSummaryRow(r)) {
+      metadata.ignoredRows++;
+      metadata.ignoredDetails.push({ row: idx + 2, reason: 'Sumario/pie' });
+      return;
+    }
+    const posId = String(r[cPosition] ?? '').trim();
+    if (!posId) {
+      metadata.ignoredRows++;
+      return;
+    }
+    if (!groups.has(posId)) groups.set(posId, []);
+    groups.get(posId)!.push(r);
+  });
+
+  const trades: ImportedTrade[] = [];
+  const errors: string[] = [];
+
+  groups.forEach((legs, posId) => {
+    // Sort chronologically by Date Time
+    const sorted = [...legs].sort((a, b) => {
+      const da = parseDate(a[cDate] as string, false) ?? '';
+      const db = parseDate(b[cDate] as string, false) ?? '';
+      return da < db ? -1 : da > db ? 1 : 0;
+    });
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    const symbol = String(first[cSymbol] ?? '').trim().toUpperCase().replace(/\s+/g, '');
+    if (!symbol) {
+      metadata.ignoredRows += sorted.length;
+      return;
+    }
+
+    const firstType = String(first[cType] ?? '').toLowerCase();
+    const direction: 'long' | 'short' = firstType.includes('sell') ? 'short' : 'long';
+
+    const entryDate = parseDate(first[cDate] as string, false);
+    if (!entryDate) {
+      metadata.ignoredRows += sorted.length;
+      metadata.ignoredDetails.push({ row: 0, reason: `Position ${posId}: fecha apertura inválida` });
+      return;
+    }
+
+    // If only one leg → still open. Skip with note (closed-only flow for now).
+    const statusStr = String(first[cStatus] ?? '').toLowerCase();
+    if (sorted.length < 2 && statusStr !== 'closed') {
+      metadata.ignoredRows++;
+      metadata.ignoredDetails.push({ row: 0, reason: `Position ${posId}: posición abierta sin cierre` });
+      return;
+    }
+
+    const exitDate = sorted.length > 1 ? (parseDate(last[cDate] as string, false) ?? undefined) : undefined;
+    const quantity = parseNumber(first[cVolume]) ?? parseNumber(last[cVolume]) ?? 1;
+    const pnl = sorted.reduce((sum, r) => sum + (parseNumber(r[cProfit]) ?? 0), 0);
+    const openPx = cOpenPrice !== -1 ? parseNumber(first[cOpenPrice]) : undefined;
+    const closePx = cOpenPrice !== -1 && sorted.length > 1 ? parseNumber(last[cOpenPrice]) : undefined;
+    const entryPrice = openPx && openPx > 0 ? openPx : 0;
+    const exitPrice = closePx && closePx > 0 ? closePx : undefined;
+
+    trades.push({
+      symbol,
+      direction,
+      entryPrice,
+      exitPrice,
+      quantity,
+      pnl,
+      entryDate,
+      exitDate,
+      notes: `cTrader Position #${posId}${entryPrice === 0 ? ' (precios no incluidos en el export)' : ''}`,
+      assetClass: detectAssetClass(symbol),
+    });
+    metadata.validRows++;
+  });
+
+  if (trades.length > 0) {
+    errors.unshift(`Formato detectado: CTRADER Position History — ${trades.length} operación(es) agregada(s) desde ${rows.length} transacción(es)`);
+  }
+  return { trades, errors };
 }
 
 function buildExactGetter(headers: string[], values: unknown[], map: BrokerMap['fields']) {
