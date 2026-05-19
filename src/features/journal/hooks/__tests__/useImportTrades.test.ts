@@ -79,17 +79,19 @@ describe('parseCSV — CSV recognition', () => {
 });
 
 describe('parseExcelBuffer — cTrader Position History List', () => {
-  it('aggregates the real IC Markets cTrader xlsx into one trade per Position', async () => {
-    const path = resolve(__dirname, 'fixtures/ctrader-position-history.xlsx');
-    const buf = readFileSync(path);
-    const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const result = await parseExcelBuffer(ab as ArrayBuffer);
+  const loadFixture = (): ArrayBuffer => {
+    const buf = readFileSync(resolve(__dirname, 'fixtures/ctrader-position-history.xlsx'));
+    // Copy into a fresh ArrayBuffer so ExcelJS (JSZip) recognises it in jsdom.
+    const ab = new ArrayBuffer(buf.byteLength);
+    new Uint8Array(ab).set(buf);
+    return ab;
+  };
 
+  it('aggregates the real IC Markets cTrader xlsx into one trade per Position', async () => {
+    const result = await parseExcelBuffer(loadFixture());
     expect(result.trades.length).toBe(14);
-    // Total P&L matches the sum of the Profit column (34.32)
     const totalPnl = result.trades.reduce((s, t) => s + (t.pnl ?? 0), 0);
     expect(totalPnl).toBeCloseTo(34.32, 2);
-    // Every trade has chronological entry/exit
     for (const t of result.trades) {
       expect(t.entryDate).toBeTruthy();
       expect(t.exitDate).toBeTruthy();
@@ -97,20 +99,14 @@ describe('parseExcelBuffer — cTrader Position History List', () => {
       expect(['long', 'short']).toContain(t.direction);
       expect(t.symbol).not.toMatch(/\s/);
     }
-    // Notes carry the Position id for traceability → no duplicates
-    const positions = result.trades.map(t => t.notes);
-    expect(new Set(positions).size).toBe(result.trades.length);
-    // The format was detected
+    const ids = result.trades.map(t => t.notes);
+    expect(new Set(ids).size).toBe(result.trades.length);
     expect(result.errors.some(e => /CTRADER Position History/.test(e))).toBe(true);
   });
 
-  it('does not duplicate trades if the same buffer is parsed twice', async () => {
-    const path = resolve(__dirname, 'fixtures/ctrader-position-history.xlsx');
-    const buf = readFileSync(path);
-    const ab1 = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const ab2 = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const r1 = await parseExcelBuffer(ab1 as ArrayBuffer);
-    const r2 = await parseExcelBuffer(ab2 as ArrayBuffer);
+  it('produces identical output when parsed twice (deterministic, no duplicates)', async () => {
+    const r1 = await parseExcelBuffer(loadFixture());
+    const r2 = await parseExcelBuffer(loadFixture());
     expect(r1.trades.length).toBe(r2.trades.length);
     expect(r1.trades[0].notes).toBe(r2.trades[0].notes);
   });
