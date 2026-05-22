@@ -171,6 +171,51 @@ export function ImportPreviewModal({
           </div>
         </DialogHeader>
 
+        {/* Anti-duplicate validation panel — file hash + Position ID cross-check */}
+        {(fileHash || duplicatePositionIds.length > 0) && (
+          <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/40">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              {fileHash && (
+                <div className="flex items-center gap-2 min-w-0">
+                  <Hash className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
+                      Hash SHA-256 del archivo (verificado)
+                    </p>
+                    <p className="text-[11px] font-mono text-emerald-300 truncate" title={fileHash}>
+                      {fileHash.slice(0, 16)}…{fileHash.slice(-8)}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border px-3 py-1.5',
+                  duplicatePositionIds.length > 0
+                    ? 'border-amber-500/40 bg-amber-500/10'
+                    : 'border-emerald-500/30 bg-emerald-500/5'
+                )}
+              >
+                {duplicatePositionIds.length > 0 ? (
+                  <AlertTriangle className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                )}
+                <span
+                  className={cn(
+                    'text-xs font-semibold',
+                    duplicatePositionIds.length > 0 ? 'text-amber-300' : 'text-emerald-300'
+                  )}
+                >
+                  {duplicatePositionIds.length > 0
+                    ? `${duplicatePositionIds.length} Position ID ya existen — desmarcados`
+                    : 'Position IDs verificados sin duplicados'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Missing Columns Warning */}
         {metadata && metadata.missingColumns.length > 0 && (
           <div className="px-6 py-4 bg-amber-500/10 border-b border-amber-500/30">
