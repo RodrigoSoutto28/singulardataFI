@@ -368,12 +368,14 @@ export function ImportPreviewModal({
                     {trades.map((trade, index) => {
                       const isSelected = selectedIndices.has(index);
                       const isProfit = (trade.pnl ?? 0) >= 0;
+                      const isDup = isDuplicateRow(index);
 
                       return (
                         <TableRow
                           key={index}
                           className={cn(
                             'cursor-pointer transition-colors border-slate-800/50',
+                            isDup && 'bg-amber-500/5',
                             !isSelected ? 'opacity-40 grayscale-[0.5]' : 'hover:bg-slate-800/60'
                           )}
                           onClick={() => toggleRow(index)}
@@ -386,7 +388,16 @@ export function ImportPreviewModal({
                               className="border-slate-600 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                             />
                           </TableCell>
-                          <TableCell className="font-bold text-white tracking-tight">{trade.symbol}</TableCell>
+                          <TableCell className="font-bold text-white tracking-tight">
+                            <div className="flex items-center gap-2">
+                              {trade.symbol}
+                              {isDup && (
+                                <Badge variant="outline" className="border-amber-500/40 text-amber-300 bg-amber-500/10 text-[9px] uppercase tracking-wider">
+                                  Duplicado
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <div
                               className={cn(
