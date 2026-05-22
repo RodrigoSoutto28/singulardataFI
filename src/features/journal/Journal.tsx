@@ -1276,12 +1276,15 @@ export default function Journal() {
           setPreviewTrades([]);
           setPreviewErrors([]);
           setPreviewMetadata(null);
+          setDuplicatePositionIds([]);
         }}
         trades={previewTrades}
         errors={previewErrors}
         metadata={previewMetadata}
         rawRows={previewRawRows}
         fileName={previewFileName}
+        fileHash={previewFileHash}
+        duplicatePositionIds={duplicatePositionIds}
         onConfirm={handleConfirmImport}
         isImporting={isImporting}
       />
@@ -1309,6 +1312,12 @@ export default function Journal() {
               <span className="block text-muted-foreground">
                 {t.journal.duplicateFileHint}
               </span>
+              {duplicateInfo?.fileHash && (
+                <span className="block mt-2 rounded-md border border-warn/30 bg-warn/5 p-2 text-[11px] font-mono text-warn break-all">
+                  <span className="block text-[10px] uppercase tracking-wider opacity-70 mb-1">SHA-256 coincidente</span>
+                  {duplicateInfo.fileHash}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
