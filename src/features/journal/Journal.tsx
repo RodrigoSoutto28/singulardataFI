@@ -76,6 +76,7 @@ import {
   hashFile,
   hashRow,
   findActiveBatchByFileHash,
+  findExistingPositionIds,
   createImportBatch,
   getLastActiveBatch,
   undoImportBatch,
@@ -156,11 +157,13 @@ export default function Journal() {
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
   const [isUndoing, setIsUndoing] = useState(false);
+  const [duplicatePositionIds, setDuplicatePositionIds] = useState<string[]>([]);
   const [duplicateInfo, setDuplicateInfo] = useState<{
     fileName: string;
     previousName: string;
     date: string;
     count: number;
+    fileHash: string;
   } | null>(null);
 
   // Form state
@@ -324,12 +327,27 @@ export default function Journal() {
             previousName: existing.file_name,
             date: new Date(existing.created_at).toLocaleString(),
             count: existing.imported_count ?? 0,
+            fileHash,
           });
           return;
         }
       }
 
       const result = await importFromFile(file);
+
+      // 2. Cross-check Position IDs already in DB (cTrader exports)
+      let dupIds: string[] = [];
+      if (user?.id && result.trades.length > 0) {
+        try {
+          const existingIds = await findExistingPositionIds(user.id);
+          dupIds = result.trades
+            .map((t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1])
+            .filter((id): id is string => !!id && existingIds.has(id));
+        } catch (e) {
+          console.warn('[ImportTrades] Position ID validation skipped:', e);
+        }
+      }
+      setDuplicatePositionIds(dupIds);
 
       // Always open the preview so the user can see errors when no trades parsed
       setPreviewTrades(result.trades);
