@@ -61,6 +61,8 @@ interface ImportPreviewModalProps {
   metadata?: ParseMetadata | null;
   rawRows?: string[][];
   fileName: string;
+  fileHash?: string;
+  duplicatePositionIds?: string[];
   onConfirm: (selectedTrades: ImportedTrade[]) => void;
   isImporting: boolean;
 }
@@ -73,12 +75,22 @@ export function ImportPreviewModal({
   metadata,
   rawRows = [],
   fileName,
+  fileHash,
+  duplicatePositionIds = [],
   onConfirm,
   isImporting,
 }: ImportPreviewModalProps) {
   const [activeTab, setActiveTab] = useState<'trades' | 'raw'>('trades');
+  const dupSet = new Set(duplicatePositionIds);
+  const tradePositionIds = trades.map(
+    (t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1] ?? null,
+  );
+  const isDuplicateRow = (i: number) => {
+    const id = tradePositionIds[i];
+    return id !== null && dupSet.has(id);
+  };
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
-    new Set(trades.map((_, i) => i))
+    new Set(trades.map((_, i) => i).filter((i) => !isDuplicateRow(i)))
   );
 
   const toggleAll = () => {
