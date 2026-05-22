@@ -76,6 +76,7 @@ import {
   hashFile,
   hashRow,
   findActiveBatchByFileHash,
+  findExistingPositionIds,
   createImportBatch,
   getLastActiveBatch,
   undoImportBatch,
@@ -156,11 +157,13 @@ export default function Journal() {
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
   const [isUndoing, setIsUndoing] = useState(false);
+  const [duplicatePositionIds, setDuplicatePositionIds] = useState<string[]>([]);
   const [duplicateInfo, setDuplicateInfo] = useState<{
     fileName: string;
     previousName: string;
     date: string;
     count: number;
+    fileHash: string;
   } | null>(null);
 
   // Form state
@@ -324,12 +327,27 @@ export default function Journal() {
             previousName: existing.file_name,
             date: new Date(existing.created_at).toLocaleString(),
             count: existing.imported_count ?? 0,
+            fileHash,
           });
           return;
         }
       }
 
       const result = await importFromFile(file);
+
+      // 2. Cross-check Position IDs already in DB (cTrader exports)
+      let dupIds: string[] = [];
+      if (user?.id && result.trades.length > 0) {
+        try {
+          const existingIds = await findExistingPositionIds(user.id);
+          dupIds = result.trades
+            .map((t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1])
+            .filter((id): id is string => !!id && existingIds.has(id));
+        } catch (e) {
+          console.warn('[ImportTrades] Position ID validation skipped:', e);
+        }
+      }
+      setDuplicatePositionIds(dupIds);
 
       // Always open the preview so the user can see errors when no trades parsed
       setPreviewTrades(result.trades);
@@ -1258,12 +1276,15 @@ export default function Journal() {
           setPreviewTrades([]);
           setPreviewErrors([]);
           setPreviewMetadata(null);
+          setDuplicatePositionIds([]);
         }}
         trades={previewTrades}
         errors={previewErrors}
         metadata={previewMetadata}
         rawRows={previewRawRows}
         fileName={previewFileName}
+        fileHash={previewFileHash}
+        duplicatePositionIds={duplicatePositionIds}
         onConfirm={handleConfirmImport}
         isImporting={isImporting}
       />
@@ -1291,6 +1312,12 @@ export default function Journal() {
               <span className="block text-muted-foreground">
                 {t.journal.duplicateFileHint}
               </span>
+              {duplicateInfo?.fileHash && (
+                <span className="block mt-2 rounded-md border border-warn/30 bg-warn/5 p-2 text-[11px] font-mono text-warn break-all">
+                  <span className="block text-[10px] uppercase tracking-wider opacity-70 mb-1">SHA-256 coincidente</span>
+                  {duplicateInfo.fileHash}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">

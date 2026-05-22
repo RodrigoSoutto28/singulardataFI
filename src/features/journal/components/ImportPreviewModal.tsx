@@ -61,6 +61,8 @@ interface ImportPreviewModalProps {
   metadata?: ParseMetadata | null;
   rawRows?: string[][];
   fileName: string;
+  fileHash?: string;
+  duplicatePositionIds?: string[];
   onConfirm: (selectedTrades: ImportedTrade[]) => void;
   isImporting: boolean;
 }
@@ -73,12 +75,22 @@ export function ImportPreviewModal({
   metadata,
   rawRows = [],
   fileName,
+  fileHash,
+  duplicatePositionIds = [],
   onConfirm,
   isImporting,
 }: ImportPreviewModalProps) {
   const [activeTab, setActiveTab] = useState<'trades' | 'raw'>('trades');
+  const dupSet = new Set(duplicatePositionIds);
+  const tradePositionIds = trades.map(
+    (t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1] ?? null,
+  );
+  const isDuplicateRow = (i: number) => {
+    const id = tradePositionIds[i];
+    return id !== null && dupSet.has(id);
+  };
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
-    new Set(trades.map((_, i) => i))
+    new Set(trades.map((_, i) => i).filter((i) => !isDuplicateRow(i)))
   );
 
   const toggleAll = () => {
@@ -158,6 +170,51 @@ export function ImportPreviewModal({
             )}
           </div>
         </DialogHeader>
+
+        {/* Anti-duplicate validation panel — file hash + Position ID cross-check */}
+        {(fileHash || duplicatePositionIds.length > 0) && (
+          <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/40">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              {fileHash && (
+                <div className="flex items-center gap-2 min-w-0">
+                  <Hash className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
+                      Hash SHA-256 del archivo (verificado)
+                    </p>
+                    <p className="text-[11px] font-mono text-emerald-300 truncate" title={fileHash}>
+                      {fileHash.slice(0, 16)}…{fileHash.slice(-8)}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border px-3 py-1.5',
+                  duplicatePositionIds.length > 0
+                    ? 'border-amber-500/40 bg-amber-500/10'
+                    : 'border-emerald-500/30 bg-emerald-500/5'
+                )}
+              >
+                {duplicatePositionIds.length > 0 ? (
+                  <AlertTriangle className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                )}
+                <span
+                  className={cn(
+                    'text-xs font-semibold',
+                    duplicatePositionIds.length > 0 ? 'text-amber-300' : 'text-emerald-300'
+                  )}
+                >
+                  {duplicatePositionIds.length > 0
+                    ? `${duplicatePositionIds.length} Position ID ya existen — desmarcados`
+                    : 'Position IDs verificados sin duplicados'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Missing Columns Warning */}
         {metadata && metadata.missingColumns.length > 0 && (
@@ -311,12 +368,14 @@ export function ImportPreviewModal({
                     {trades.map((trade, index) => {
                       const isSelected = selectedIndices.has(index);
                       const isProfit = (trade.pnl ?? 0) >= 0;
+                      const isDup = isDuplicateRow(index);
 
                       return (
                         <TableRow
                           key={index}
                           className={cn(
                             'cursor-pointer transition-colors border-slate-800/50',
+                            isDup && 'bg-amber-500/5',
                             !isSelected ? 'opacity-40 grayscale-[0.5]' : 'hover:bg-slate-800/60'
                           )}
                           onClick={() => toggleRow(index)}
@@ -329,7 +388,16 @@ export function ImportPreviewModal({
                               className="border-slate-600 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                             />
                           </TableCell>
-                          <TableCell className="font-bold text-white tracking-tight">{trade.symbol}</TableCell>
+                          <TableCell className="font-bold text-white tracking-tight">
+                            <div className="flex items-center gap-2">
+                              {trade.symbol}
+                              {isDup && (
+                                <Badge variant="outline" className="border-amber-500/40 text-amber-300 bg-amber-500/10 text-[9px] uppercase tracking-wider">
+                                  Duplicado
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <div
                               className={cn(
