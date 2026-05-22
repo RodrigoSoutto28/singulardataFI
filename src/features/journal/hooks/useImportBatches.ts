@@ -36,6 +36,27 @@ export async function findActiveBatchByFileHash(userId: string, fileHash: string
   return data;
 }
 
+/**
+ * Returns the set of cTrader Position IDs already present in the user's
+ * trade history (extracted from the `notes` field where we persist them
+ * as `cTrader Position #<id>`). Used to flag per-row duplicates in the
+ * preview even when the file hash differs (e.g. re-export with a new name).
+ */
+export async function findExistingPositionIds(userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('trades')
+    .select('notes')
+    .eq('user_id', userId)
+    .ilike('notes', 'cTrader Position #%');
+  if (error) throw error;
+  const ids = new Set<string>();
+  for (const row of data ?? []) {
+    const m = String(row.notes ?? '').match(/cTrader Position #(\d+)/);
+    if (m) ids.add(m[1]);
+  }
+  return ids;
+}
+
 export async function createImportBatch(params: {
   userId: string;
   fileName: string;
