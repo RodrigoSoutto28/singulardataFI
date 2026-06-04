@@ -1,83 +1,68 @@
+# Compactar el dashboard y suavizar el modo claro
 
-## Objetivo
+## Objetivos
+1. Eliminar el espacio vacío debajo de la **Curva de Capital** y reorganizar el dashboard para que no queden huecos.
+2. Bajar la luminosidad del modo claro: tonos un poco más cálidos/grises para que no canse la vista, manteniendo legibilidad y jerarquía.
 
-Corregir el lector/analizador automático de trades para que entienda correctamente el formato real de exportación de cTrader (`Position History List`) — donde cada operación se compone de dos filas (apertura + cierre) unidas por el ID de posición — y validar el comportamiento con tests usando el archivo que subiste como fixture.
+---
 
-## Problema detectado (basado en tu archivo)
+## 1. Reorganización del dashboard (`src/features/dashboard/Dashboard.tsx`)
 
-Tu archivo `icmarkets_cTrader_position_history_6462681_April_2026.xlsx` tiene esta estructura:
+Problema actual: la columna izquierda (Curva de Capital) es más alta que la derecha (Estado Mental + Taxómetro), pero como en la fila siguiente solo hay "Actividad Reciente" full-width, queda un hueco vertical bajo la curva mientras la columna derecha "termina antes".
+
+Cambios de layout:
+- Mover **Actividad Reciente (RecentTrades)** dentro de la columna izquierda, justo debajo de la `EquityChart`, en lugar de fila propia más abajo. Así la columna izquierda crece y consume el espacio.
+- La columna derecha (Estado Mental + Taxómetro) puede recibir además el bloque de **Logros (AchievementBadges)** apilado, para equilibrar alturas.
+- Reducir paddings inferiores: en `EquityChart` el wrapper usa `p-6 pb-4`; al renderizarse dentro de un `Card` con `CardContent className="pb-2"` queda doble padding. Pasar a `p-0` (ya que `className="border-0 bg-transparent p-0"` se pasa pero el componente concatena, no reemplaza). Ajustar para que el padding venga solo del Card y eliminar el `mb-3` del indicador.
+- Bajar la altura del chart a `h-[200px] sm:h-[240px]` para densificar.
+- Quitar `CardContent pb-2` → usar `pb-0` y `CardHeader pb-2`.
+
+Estructura resultante:
 
 ```text
-Fila 1: Report
-Fila 2: Name / Produced At (metadata)
-Fila 3: Symbol | Account Number | Position | Position Status | Date Time | Transaction Type | Trade Volume Lots | Open Price | Profit
-Fila 4: BTCUSD | 6096132 | 83669833 | Closed | 1/31/2026 5:21 PM | Trade Buy  | 0.05 | 0 | 0
-Fila 5: BTCUSD | 6096132 | 83669833 | Closed | 1/31/2026 6:32 PM | Trade Sell | 0.05 | 0 | 4.77
-...
+[Hero]
+[QuickActions]
+[Stats 4 cards]
+┌──────────────────────────┬──────────────────┐
+│ Curva de Capital         │ Estado Mental    │
+│                          │ Taxómetro        │
+│ Actividad Reciente       │ Logros           │
+└──────────────────────────┴──────────────────┘
 ```
 
-El parser actual:
-- Detecta como `generic` (busca exactamente "position id" y "open price" con precios reales).
-- Trata cada fila como una operación independiente → o descarta todo, o crea trades duplicados al subir 2 veces.
-- No agrupa pares apertura/cierre por `Position`.
+Sin filas full-width sueltas debajo.
 
-## Cambios
+---
 
-### 1. Nuevo parser específico para cTrader Position History List
-Archivo: `src/features/journal/hooks/useImportTrades.ts`
+## 2. Suavizar tonos del modo claro (`src/styles/index.css`)
 
-- Ampliar `detectBroker(headers)` para reconocer la firma:
-  cabeceras que contengan `position`, `transaction type`, `date time` y `trade volume lots`. Marcar como `ctrader-position-history`.
-- Agregar función `aggregateCtraderPositions(headers, rows)` que:
-  1. Recorre filas y agrupa por valor de columna `Position`.
-  2. Por cada grupo (esperado: 2 filas) toma:
-     - `symbol` (trim de espacios — viene como `"BTCUSD    "`).
-     - `direction` = `long` si la primera fila (más antigua por Date Time) es `Trade Buy`, `short` si es `Trade Sell`.
-     - `entryDate` = Date Time de la fila más antigua.
-     - `exitDate` = Date Time de la fila más reciente.
-     - `quantity` = `Trade Volume Lots` (cualquiera de las dos filas — son iguales).
-     - `pnl` = suma de `Profit` de ambas filas (la apertura es 0).
-     - `entryPrice` = `Open Price` de la primera fila si > 0; si es 0, dejar 0 y agregar nota "Precio no incluido en el export de cTrader".
-     - `exitPrice` = `Open Price` de la segunda fila si > 0; si no, undefined.
-     - `notes` = `Position #<id>` para trazabilidad.
-  3. Si un grupo tiene una sola fila (posición aún abierta) → marcar como `status` open y omitir si no hay precio.
-- Incrustar este parser en `processRows` cuando el broker sea `ctrader-position-history` (en lugar del path de `mapRowWithBroker` por fila).
-- Ajustar `detectBroker` en `BROKER_MAPS` solo para el caso clásico de cTrader desktop (con Open/Close Price reales) y dejar el nuevo como variante.
+Ajustes en `:root` para reducir el contraste agresivo blanco puro / azul saturado:
 
-### 2. Mejor manejo del autodetector de cabecera
-- En `parseExcelBuffer`, las dos primeras filas son metadata (`Report`, `Name: ... / Produced At`). El scoring actual ya las salta, pero validar que `headerIdx` cae en fila 3 (índice 2) y registrar `metadata.headerRowIndex` para diagnóstico.
+| Token | Antes | Después | Motivo |
+|---|---|---|---|
+| `--background` | `210 20% 95%` | `215 18% 92%` | gris algo más profundo, menos blanco lavado |
+| `--card` | `0 0% 100%` (blanco puro) | `210 25% 98%` | off-white cálido, evita el "papel deslumbrante" |
+| `--popover` | `0 0% 100%` | `210 25% 98%` | coherencia |
+| `--sidebar-background` | `215 18% 93%` | `215 16% 90%` | más profundidad lateral |
+| `--muted` | `215 16% 89%` | `215 14% 87%` | empty states menos brillantes |
+| `--secondary` | `215 16% 91%` | `215 14% 88%` | chips/badges |
+| `--border` | `215 16% 84%` | `215 14% 80%` | bordes más visibles para compensar menor contraste de fondos |
+| `--input` | `215 16% 86%` | `215 14% 82%` | inputs distinguibles |
+| `--primary` | `197 100% 35%` | `197 85% 38%` | azul algo menos eléctrico |
+| `--accent` | `199 70% 52%` | `199 60% 48%` | acento menos saturado |
 
-### 3. Tests con el archivo real
-- Copiar `user-uploads://icmarkets_cTrader_position_history_6462681_April_2026.xlsx` a `src/features/journal/hooks/__tests__/fixtures/ctrader-position-history.xlsx`.
-- Ampliar `src/features/journal/hooks/__tests__/useImportTrades.test.ts` con:
-  - `it('parses cTrader Position History List from real fixture')`:
-    - Carga el .xlsx, llama `parseExcelBuffer`.
-    - Verifica: número de trades > 0, todos los trades tienen `entryDate < exitDate`, `direction` correctamente derivada de `Trade Buy/Trade Sell`, `pnl` total ≈ suma de columna `Profit` original.
-    - Verifica que NO hay trades duplicados (cada `Position` aparece una sola vez).
-  - `it('handles ctrader pairs with single open leg')`: pasa un buffer/CSV sintético con un único `Trade Buy` sin cierre y comprueba que no se importa como cerrado.
+`--foreground` se mantiene (`215 28% 14%`) para preservar contraste de texto.
 
-### 4. Tests de no-regresión
-Conservar los tests existentes de CSV, BOM, MT-like, etc. para asegurar que el nuevo path no rompe nada.
+Modo oscuro **no se toca**.
 
-## Archivos afectados
+---
 
-Modificados:
-- `src/features/journal/hooks/useImportTrades.ts`
-- `src/features/journal/hooks/__tests__/useImportTrades.test.ts`
-
-Creados:
-- `src/features/journal/hooks/__tests__/fixtures/ctrader-position-history.xlsx` (copia del archivo subido)
+## Archivos a modificar
+- `src/features/dashboard/Dashboard.tsx` — reorganizar columnas, mover RecentTrades a columna izquierda, mover AchievementBadges a columna derecha, ajustar paddings de la Card de Equity.
+- `src/features/dashboard/components/EquityChart.tsx` — reducir altura del chart y padding interno cuando se pasa `className` con `p-0`.
+- `src/styles/index.css` — actualizar tokens HSL del bloque `:root` (light mode) según la tabla.
 
 ## Fuera de alcance
-
-- No tocar UI (`Journal.tsx`, `ImportPreviewModal.tsx`, `ImportHistorySection.tsx`).
-- No tocar lógica de hash/duplicados ni `useImportBatches.ts` — esos ya funcionan; solo cambia lo que se interpreta.
-- No tocar exportación (`useExportTrades.ts`).
-
-## Validación
-
-Tras los cambios ejecutaré `vitest run` sobre los suites de `journal/hooks/__tests__/*` y confirmaré que:
-1. El archivo real se interpreta en N trades (uno por `Position`).
-2. P&L total coincide con la suma de la columna `Profit`.
-3. No se generan duplicados.
-4. Los tests existentes siguen pasando.
+- No se modifica lógica de negocio, hooks, ni datos.
+- No se toca el modo oscuro.
+- No se cambian textos ni traducciones.

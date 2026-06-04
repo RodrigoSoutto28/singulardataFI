@@ -94,12 +94,13 @@ export function EquityChart({ data, className }: EquityChartProps) {
   return (
     <div className={cn('p-6 pb-4 rounded-lg bg-card border border-border', className)}>
       {/* Trend indicator (sin título, el contenedor padre ya lo provee) */}
-      <div className="flex items-center justify-end mb-3">
+      <div className="flex items-center justify-end mb-1">
         <HeaderIcon className={cn('h-4 w-4', headerColor)} aria-label={t.dashboard.equityCurve} />
       </div>
 
       {/* Chart - altura adaptativa según haya datos o no */}
-      <div className={cn(data.length === 0 ? 'h-[120px] sm:h-[140px]' : 'h-[220px] sm:h-[280px]')}>
+      <div className={cn(data.length === 0 ? 'h-[120px] sm:h-[140px]' : 'h-[200px] sm:h-[240px]')}>
+
         {data.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 rounded-md bg-muted/40 border border-dashed border-border">
             <TrendingUp className="h-7 w-7 text-muted-foreground/50 mb-1.5" aria-hidden />
