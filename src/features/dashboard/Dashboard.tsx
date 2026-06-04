@@ -186,7 +186,17 @@ export default function Dashboard() {
         <div className="space-y-4 md:space-y-6 [&>*]:stagger-item">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
-          <AchievementBadges />
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Target className="h-5 w-5 text-primary" />
+                {t.dashboard.disciplineMetricsTitle ?? 'Disciplina'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <AchievementBadges variant="stack" />
+            </CardContent>
+          </Card>
         </div>
       </div>
 
