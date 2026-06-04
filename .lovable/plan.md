@@ -1,32 +1,36 @@
-# Mover Índice de Disciplina a barra horizontal full-width
+## Objetivo
 
-## Problema
-El card "Disciplina" quedó apilado en la columna derecha bajo el Taxímetro, con badges en columna única. Esto deja la columna derecha alta y crea espacio vacío visual, además de desaprovechar el ancho disponible.
+En `/psychology` (pestaña **Hoy**), la tarjeta "Check-in del Día" se ve sobredimensionada frente a la columna izquierda ("Tu Progreso" y "Logros"), y los paddings/headers están desalineados entre ambas columnas. Vamos a unificar tamaños y espacios.
 
-## Solución
+## Cambios (solo presentación, archivo `src/features/behavioral/Psychology.tsx`)
 
-### 1. `src/features/dashboard/Dashboard.tsx`
-- Quitar el card "Disciplina" (`AchievementBadges variant="stack"`) de la columna derecha.
-- Insertarlo como **barra horizontal full-width** justo debajo de la fila principal (curva + actividad / estado mental + taxímetro), antes del `AccountSetupModal`.
-- El card ocupa todo el ancho (`grid-cols-1`) y dentro renderiza `AchievementBadges variant="grid"` para que use el grid `sm:grid-cols-2 lg:grid-cols-4` original — los 4 badges se distribuyen horizontalmente y centrados.
-- Columna derecha queda con `MentalStateCard` + `TaxometerWidget` únicamente, alineando su altura con la columna izquierda (curva + actividad reciente).
+### 1. Unificar headers de todas las cards de la pestaña
+- `CardHeader` → `pb-3` en las 3 cards (Progreso, Logros, Check-in/Resumen).
+- `CardTitle` → `text-base` consistente (hoy la card de Check-in usa el tamaño por defecto `text-2xl`, lo que la hace desproporcionada).
+- `CardDescription` → `text-xs` para alinearla visualmente con el resto.
 
-### 2. Sin cambios en `AchievementBadges.tsx`
-La variante `grid` ya existe y soporta el layout horizontal de 4 columnas — se reutiliza tal cual.
+### 2. Ajustar tamaño de la tarjeta "Check-in del Día" (form)
+- `CardContent` → `space-y-5 pt-0 pb-5` (hoy `space-y-6` sin control de padding).
+- Botones de emociones: bajar `min-h-[78px]` → `min-h-[68px]`, icono `h-8 w-8` → `h-7 w-7`, padding `p-2.5` → `p-2`.
+- Labels de secciones (1, 2, 3, 4): `text-base font-semibold` → `text-sm font-semibold` para alinear con la jerarquía del resto del panel.
+- Reducir paddings internos de bloques (sliders, textarea wrappers) a escala compacta uniforme.
 
-## Estructura resultante
+### 3. Ajustar tarjeta "Check-in Completado" (resumen)
+- Mismas reglas de header (`pb-3`, `text-base`, `text-xs`).
+- Grid de 3 métricas (Disciplina/Sueño/Estrés): `p-4` → `p-3`, número `text-3xl` → `text-2xl` para que no domine la pantalla.
+- `CardContent` → `space-y-5 pt-0 pb-5`.
 
-```text
-[Hero]
-[QuickActions]
-[Stats 4 cards]
-┌──────────────────────────┬──────────────────┐
-│ Curva de Capital         │ Estado Mental    │
-│ Actividad Reciente       │ Taxómetro        │
-└──────────────────────────┴──────────────────┘
-[Índice de Disciplina — 4 badges en fila horizontal]
-```
+### 4. Unificar espaciado entre columnas y cards
+- Contenedor principal: `gap-6` → `gap-4 md:gap-6` (coincide con el resto del dashboard).
+- Columna izquierda: `space-y-4` → `space-y-4 md:gap-6` (mantener simetría con la derecha).
+- Card "Logros": añadir `pb-3` al header (hoy usa el padding por defecto y queda más alto que "Tu Progreso").
 
-## Fuera de alcance
-- No se modifica lógica, datos ni traducciones.
-- No se tocan otros componentes ni el modo oscuro.
+### 5. Sin cambios funcionales
+- No tocar hooks, validación, mutaciones, ni textos.
+- No modificar la grid responsive `lg:grid-cols-[300px_1fr]` (la proporción ya es correcta; el problema era el peso visual interno, no el layout).
+
+## Resultado esperado
+
+- "Check-in del Día" deja de verse sobredimensionado y queda alineado en altura/jerarquía con la columna de stats.
+- Padding y tamaños de tipografía consistentes entre las 3 cards.
+- Espaciado uniforme con el resto del producto (dashboard).
