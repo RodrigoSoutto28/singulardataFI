@@ -13,7 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { useTheme } from '@/shared/lib/ThemeContext';
+import { AccountSwitcher } from './AccountSwitcher';
 // LanguageSelector removed: language preference is managed in Settings + auto-detection
+
 
 interface TopBarProps {
   onMenuClick?: () => void;
