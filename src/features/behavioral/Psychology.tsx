@@ -541,7 +541,7 @@ function CheckInFormCard() {
         {/* 3. Sleep */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-base font-semibold">3. Calidad de sueño anoche</Label>
+            <Label className="text-sm font-semibold">3. Calidad de sueño anoche</Label>
             <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Moon
