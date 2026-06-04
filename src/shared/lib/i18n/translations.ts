@@ -51,6 +51,7 @@ export interface Translations {
     settings: string;
     signOut: string;
     defaultTraderName: string;
+    accountsCenter: string;
   };
 
   // Auth
@@ -483,6 +484,7 @@ const baseTranslations: Record<Language, Translations> = {
       settings: 'Configuración',
       signOut: 'Cerrar sesión',
       defaultTraderName: 'Trader',
+      accountsCenter: 'Centro de cuentas',
     },
     auth: {
       welcome: 'Bienvenido a SINGULAR dataFI',
@@ -889,6 +891,7 @@ const baseTranslations: Record<Language, Translations> = {
       settings: 'Settings',
       signOut: 'Sign out',
       defaultTraderName: 'Trader',
+      accountsCenter: 'Accounts Center',
     },
     auth: {
       welcome: 'Welcome to SINGULAR dataFI',
@@ -1295,6 +1298,7 @@ const baseTranslations: Record<Language, Translations> = {
       settings: 'Configurações',
       signOut: 'Sair',
       defaultTraderName: 'Trader',
+      accountsCenter: 'Central de contas',
     },
     auth: {
       welcome: 'Bem-vindo ao SINGULAR dataFI',

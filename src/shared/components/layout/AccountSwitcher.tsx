@@ -43,8 +43,7 @@ export function AccountSwitcher() {
 
   if (isLoading) return null;
 
-  const label = selectedAccount?.name ?? t.dashboard.accountSetup;
-  const broker = selectedAccount?.broker;
+  const label = t.topbar.accountsCenter;
   const onlyOne = accounts.length <= 1;
 
   const handleDelete = async () => {
@@ -65,18 +64,13 @@ export function AccountSwitcher() {
           <Button
             variant="ghost"
             className="h-9 gap-2 px-2 md:px-3 rounded-md hover:bg-muted/60"
-            aria-label={t.dashboard.accountSetup}
+            aria-label={t.topbar.accountsCenter}
           >
             <Wallet className="h-4 w-4 text-primary" />
-            <span className="hidden sm:flex flex-col items-start leading-tight">
-              <span className="text-xs font-medium text-foreground truncate max-w-[140px]">
+            <span className="hidden sm:flex items-center leading-tight">
+              <span className="text-xs font-medium text-foreground truncate max-w-[160px]">
                 {label}
               </span>
-              {broker && (
-                <span className="text-[10px] text-muted-foreground truncate max-w-[140px] font-mono">
-                  {broker}
-                </span>
-              )}
             </span>
             <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
