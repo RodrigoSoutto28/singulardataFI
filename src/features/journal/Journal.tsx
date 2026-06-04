@@ -1086,6 +1086,7 @@ export default function Journal() {
                 )}
 
                 {wizardStep === 2 && (
+                <>
                 <div className="grid grid-cols-2 gap-3">
                   {/* Exit Price */}
                   <div className="space-y-1.5 col-span-2">
