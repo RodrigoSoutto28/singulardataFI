@@ -1082,6 +1082,24 @@ export default function Journal() {
                     />
                     {formErrors.quantity && <p className="text-xs text-destructive">{formErrors.quantity}</p>}
                   </div>
+                </div>
+                )}
+
+                {wizardStep === 2 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Exit Price */}
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.exitPrice}</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder={t.journal.optional ?? 'opcional'}
+                      className="bg-muted/30 font-mono"
+                      value={formData.exit_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
+                      disabled={formData.status === 'open'}
+                    />
+                  </div>
 
                   {/* Status */}
                   <div className="space-y-1.5 col-span-2">
