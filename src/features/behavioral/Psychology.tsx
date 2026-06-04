@@ -318,14 +318,14 @@ function CheckInSummaryCard({ entry }: { entry: PsychologyEntry }) {
   const { t } = useLanguage();
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success" />
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-success" />
               Check-in Completado
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs">
               {new Date(entry.entry_date).toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -339,21 +339,22 @@ function CheckInSummaryCard({ entry }: { entry: PsychologyEntry }) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div className="p-4 rounded-lg bg-muted/40">
+      <CardContent className="space-y-5 pt-0 pb-5">
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Disciplina</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.discipline_score}/10</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.discipline_score}/10</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/40">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Sueño</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.sleep_quality}/5</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.sleep_quality}/5</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/40">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Estrés</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.stress_level}/5</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.stress_level}/5</p>
           </div>
         </div>
+
 
         {entry.pre_trade_emotion && (
           <div>
