@@ -220,6 +220,13 @@ export interface Translations {
     duplicateFileHint: string;
     duplicateFileUnderstood: string;
     duplicateFileUndo: string;
+    wizardStep1Title: string;
+    wizardStep2Title: string;
+    wizardStep1Subtitle: string;
+    wizardStep2Subtitle: string;
+    next: string;
+    previous: string;
+    registerTrade: string;
   };
 
   // Analytics
