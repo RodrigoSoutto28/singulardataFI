@@ -137,25 +137,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 items-start">
         <div className="lg:col-span-2 space-y-4 md:space-y-6 animate-fade-in">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="h-5 w-5 text-primary" />
                 {t.dashboard.equityCurve}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-4">
+            <CardContent className="pt-0 pb-4">
               <EquityChart data={equityCurve} className="border-0 bg-transparent p-0" />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <BookOpen className="h-5 w-5 text-primary" />
                 {t.dashboard.recentActivity}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 pb-4">
               {recentTrades.length === 0 ? (
                 <div className="rounded-md bg-muted/40 border border-dashed border-border px-4 py-6 flex flex-col items-center justify-center gap-3 text-center">
                   <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
@@ -183,9 +183,11 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="space-y-4 md:space-y-6 [&>*]:stagger-item">
-          <MentalStateCard disciplineScore={disciplineScore} />
-          <TaxometerWidget />
+        <div className="flex flex-col gap-4 md:gap-6 h-full [&>*]:stagger-item">
+          <MentalStateCard disciplineScore={disciplineScore} className="h-auto" />
+          <div className="flex-1 [&>*]:h-full">
+            <TaxometerWidget />
+          </div>
         </div>
       </div>
 
@@ -197,10 +199,11 @@ export default function Dashboard() {
             {t.dashboard.discipline}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 pb-4">
           <AchievementBadges />
         </CardContent>
       </Card>
+
 
       <AccountSetupModal open={accountModalOpen} onOpenChange={setAccountModalOpen} />
     </div>
