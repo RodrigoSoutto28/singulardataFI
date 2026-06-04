@@ -651,6 +651,13 @@ const baseTranslations: Record<Language, Translations> = {
       duplicateFileHint: 'Para volver a cargarlo, primero deshaz la importación previa.',
       duplicateFileUnderstood: 'Entendido',
       duplicateFileUndo: 'Deshacer último proceso',
+      wizardStep1Title: 'Detalles de Entrada',
+      wizardStep2Title: 'Gestión y Salida',
+      wizardStep1Subtitle: '1/2 Detalles de Entrada',
+      wizardStep2Subtitle: '2/2 Gestión y Salida',
+      next: 'Siguiente',
+      previous: 'Anterior',
+      registerTrade: 'Registrar Operación',
     },
     analytics: {
       title: 'Analítica',
