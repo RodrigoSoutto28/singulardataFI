@@ -435,11 +435,11 @@ function CheckInFormCard() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Check-in del Día</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base">Check-in del Día</CardTitle>
+            <CardDescription className="text-xs">
               {new Date().toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -454,7 +454,8 @@ function CheckInFormCard() {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5 pt-0 pb-5">
+
         {/* 1. Emotion */}
         <div className="space-y-3">
           <Label className="text-base font-semibold">1. ¿Cómo te sientes ahora?</Label>
