@@ -220,6 +220,13 @@ export interface Translations {
     duplicateFileHint: string;
     duplicateFileUnderstood: string;
     duplicateFileUndo: string;
+    wizardStep1Title: string;
+    wizardStep2Title: string;
+    wizardStep1Subtitle: string;
+    wizardStep2Subtitle: string;
+    next: string;
+    previous: string;
+    registerTrade: string;
   };
 
   // Analytics
@@ -644,6 +651,13 @@ const baseTranslations: Record<Language, Translations> = {
       duplicateFileHint: 'Para volver a cargarlo, primero deshaz la importación previa.',
       duplicateFileUnderstood: 'Entendido',
       duplicateFileUndo: 'Deshacer último proceso',
+      wizardStep1Title: 'Detalles de Entrada',
+      wizardStep2Title: 'Gestión y Salida',
+      wizardStep1Subtitle: '1/2 Detalles de Entrada',
+      wizardStep2Subtitle: '2/2 Gestión y Salida',
+      next: 'Siguiente',
+      previous: 'Anterior',
+      registerTrade: 'Registrar Operación',
     },
     analytics: {
       title: 'Analítica',
@@ -1051,6 +1065,13 @@ const baseTranslations: Record<Language, Translations> = {
       duplicateFileHint: 'To upload it again, undo the previous import first.',
       duplicateFileUnderstood: 'Understood',
       duplicateFileUndo: 'Undo last import',
+      wizardStep1Title: 'Entry Details',
+      wizardStep2Title: 'Management & Exit',
+      wizardStep1Subtitle: '1/2 Entry Details',
+      wizardStep2Subtitle: '2/2 Management & Exit',
+      next: 'Next',
+      previous: 'Previous',
+      registerTrade: 'Register Trade',
     },
     analytics: {
       title: 'Analytics',
@@ -1458,6 +1479,13 @@ const baseTranslations: Record<Language, Translations> = {
       duplicateFileHint: 'Para enviá-lo novamente, desfaça a importação anterior primeiro.',
       duplicateFileUnderstood: 'Entendido',
       duplicateFileUndo: 'Desfazer último processo',
+      wizardStep1Title: 'Detalhes de Entrada',
+      wizardStep2Title: 'Gestão e Saída',
+      wizardStep1Subtitle: '1/2 Detalhes de Entrada',
+      wizardStep2Subtitle: '2/2 Gestão e Saída',
+      next: 'Próximo',
+      previous: 'Anterior',
+      registerTrade: 'Registrar Operação',
     },
     analytics: {
       title: 'Análises',

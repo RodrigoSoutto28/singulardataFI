@@ -190,6 +190,7 @@ export default function Journal() {
     notes: '',
   };
   const [formData, setFormData] = useState(emptyForm);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile } = useImportTrades();
@@ -199,6 +200,8 @@ export default function Journal() {
   const resetForm = () => {
     setFormData(emptyForm);
     setEditingTrade(null);
+    setFormErrors({});
+    setWizardStep(1);
   };
 
   const openEditTrade = (trade: Trade) => {
@@ -222,6 +225,8 @@ export default function Journal() {
       status: (trade.status as 'open' | 'closed') ?? 'open',
       notes: trade.notes ?? '',
     });
+    setWizardStep(1);
+    setFormErrors({});
     setIsAddTradeOpen(true);
   };
 
@@ -988,14 +993,20 @@ export default function Journal() {
             </DialogTrigger>
             <DialogContent className="p-0 gap-0 max-w-[100vw] sm:max-w-md w-screen sm:w-auto h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col rounded-none sm:rounded-lg">
               <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b border-border shrink-0">
-                <DialogTitle>{editingTrade ? (t.journal.editTrade ?? 'Edit Trade') : t.journal.addNewTrade}</DialogTitle>
-                <DialogDescription>
-                  {t.journal.logNewTrade}
+                <DialogTitle>
+                  {editingTrade
+                    ? (t.journal.editTrade ?? 'Edit Trade')
+                    : wizardStep === 1
+                      ? t.journal.wizardStep1Title
+                      : t.journal.wizardStep2Title}
+                </DialogTitle>
+                <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
+                  {wizardStep === 1 ? t.journal.wizardStep1Subtitle : t.journal.wizardStep2Subtitle}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-                {/* Essentials */}
+                {wizardStep === 1 && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.symbol} *</Label>
@@ -1042,7 +1053,7 @@ export default function Journal() {
                     {formErrors.direction && <p className="text-xs text-destructive">{formErrors.direction}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.entryPrice} *</Label>
                     <Input
                       type="number"
@@ -1055,19 +1066,6 @@ export default function Journal() {
                       required
                     />
                     {formErrors.entry_price && <p className="text-xs text-destructive">{formErrors.entry_price}</p>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.exitPrice}</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
-                      className="bg-muted/30 font-mono"
-                      value={formData.exit_price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
-                      disabled={formData.status === 'open'}
-                    />
                   </div>
 
                   <div className="space-y-1.5 col-span-2">
@@ -1083,6 +1081,25 @@ export default function Journal() {
                       required
                     />
                     {formErrors.quantity && <p className="text-xs text-destructive">{formErrors.quantity}</p>}
+                  </div>
+                </div>
+                )}
+
+                {wizardStep === 2 && (
+                <>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Exit Price */}
+                  <div className="space-y-1.5 col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.exitPrice}</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder={t.journal.optional ?? 'opcional'}
+                      className="bg-muted/30 font-mono"
+                      value={formData.exit_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
+                      disabled={formData.status === 'open'}
+                    />
                   </div>
 
                   {/* Status */}
@@ -1238,29 +1255,67 @@ export default function Journal() {
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
+                </>
+                )}
 
                 </div>
                 {/* Sticky footer */}
-                <div className="shrink-0 flex justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddTradeOpen(false)}
-                  >
-                    {t.common.cancel}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={createTrade.isPending || updateTrade.isPending}
-                    className="btn-press"
-                  >
-                    {(createTrade.isPending || updateTrade.isPending) && (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    )}
-                    {editingTrade ? (t.common.save ?? 'Save') : t.journal.addTrade}
-                  </Button>
+                <div className="shrink-0 flex justify-between gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
+                  {wizardStep === 1 ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddTradeOpen(false)}
+                      >
+                        {t.common.cancel}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="btn-press"
+                        onClick={() => {
+                          const errs: Record<string, string> = {};
+                          if (!formData.symbol.trim()) errs.symbol = 'Requerido';
+                          if (!formData.direction) errs.direction = 'Requerido';
+                          if (!formData.entry_price || isNaN(parseFloat(formData.entry_price)) || parseFloat(formData.entry_price) <= 0) errs.entry_price = 'Inválido';
+                          if (!formData.quantity || isNaN(parseFloat(formData.quantity)) || parseFloat(formData.quantity) <= 0) errs.quantity = 'Inválido';
+                          if (Object.keys(errs).length > 0) {
+                            setFormErrors(errs);
+                            toast.error('Revisa los campos marcados');
+                            return;
+                          }
+                          setFormErrors({});
+                          setWizardStep(2);
+                        }}
+                      >
+                        {t.journal.next}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setWizardStep(1)}
+                      >
+                        {t.journal.previous}
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={createTrade.isPending || updateTrade.isPending}
+                        className="btn-press"
+                      >
+                        {(createTrade.isPending || updateTrade.isPending) && (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        )}
+                        {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </form>
             </DialogContent>
