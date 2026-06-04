@@ -515,9 +515,10 @@ function CheckInFormCard() {
         {/* 2. Discipline */}
         <div className="space-y-3">
           <div className="flex justify-between items-baseline">
-            <Label className="text-base font-semibold">
+            <Label className="text-sm font-semibold">
               2. ¿Qué tan disciplinado te sientes hoy?
             </Label>
+
             <span className="text-2xl font-bold font-mono text-primary">
               {disciplineScore[0]}/10
             </span>
