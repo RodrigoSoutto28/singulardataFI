@@ -11,8 +11,11 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // NOTE: No establecer X-Frame-Options aquí. El preview de Lovable se
+    // embebe en un iframe desde otro origen, y `DENY`/`SAMEORIGIN` provoca
+    // "rechazó la conexión" en el editor. Las cabeceras de seguridad reales
+    // deben aplicarse en producción mediante el hosting.
     headers: {
-      "X-Frame-Options": "DENY",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
