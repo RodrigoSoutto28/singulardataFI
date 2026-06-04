@@ -41,7 +41,11 @@ const metrics: DisciplineMetric[] = [
   },
 ];
 
-export function AchievementBadges() {
+interface AchievementBadgesProps {
+  variant?: 'grid' | 'stack';
+}
+
+export function AchievementBadges({ variant = 'grid' }: AchievementBadgesProps = {}) {
   const { t } = useLanguage();
 
   const getStatusStyles = (status: DisciplineMetric['status']) => {
@@ -79,6 +83,49 @@ export function AchievementBadges() {
     }
     return '';
   };
+
+  const renderBadge = (metric: DisciplineMetric) => {
+    const styles = getStatusStyles(metric.status);
+    const Icon = metric.icon;
+    return (
+      <div
+        key={metric.id}
+        className={cn(
+          'flex items-center gap-3 p-3 rounded-lg border transition-colors w-full min-w-0',
+          styles.container
+        )}
+      >
+        <div className={cn('p-2 rounded-lg shrink-0', styles.icon)}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={cn('text-sm font-medium truncate', styles.text)}>
+            {t.disciplineMetrics[metric.titleKey]}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {metric.status === 'in-progress' ? (
+              <span className="text-primary">{getSubtitle(metric)}</span>
+            ) : metric.status === 'completed' ? (
+              <span className="text-success">{t.common.completed}</span>
+            ) : (
+              getSubtitle(metric)
+            )}
+          </p>
+        </div>
+        {metric.status === 'completed' && (
+          <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+        )}
+      </div>
+    );
+  };
+
+  if (variant === 'stack') {
+    return (
+      <div className="flex flex-col gap-2.5 w-full min-w-0">
+        {metrics.map(renderBadge)}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -163,4 +210,5 @@ export function AchievementBadges() {
     </>
   );
 }
+
 
