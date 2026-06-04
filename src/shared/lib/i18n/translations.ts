@@ -891,6 +891,7 @@ const baseTranslations: Record<Language, Translations> = {
       settings: 'Settings',
       signOut: 'Sign out',
       defaultTraderName: 'Trader',
+      accountsCenter: 'Accounts Center',
     },
     auth: {
       welcome: 'Welcome to SINGULAR dataFI',
