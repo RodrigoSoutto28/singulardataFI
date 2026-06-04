@@ -43,8 +43,7 @@ export function AccountSwitcher() {
 
   if (isLoading) return null;
 
-  const label = selectedAccount?.name ?? t.dashboard.accountSetup;
-  const broker = selectedAccount?.broker;
+  const label = t.topbar.accountsCenter;
   const onlyOne = accounts.length <= 1;
 
   const handleDelete = async () => {
