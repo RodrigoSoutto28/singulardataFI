@@ -237,13 +237,14 @@ function TodayCheckInView() {
         </Card>
 
         <Card className="bg-gradient-to-br from-primary/10 to-[hsl(265_84%_60%/0.1)]">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-warning" />
+              <Trophy className="h-4 w-4 text-warning" />
               Logros
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 pt-0 pb-4">
+
             <AchievementBadge
               Icon={Flame}
               title="Racha de Hierro"
