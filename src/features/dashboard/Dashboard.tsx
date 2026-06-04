@@ -71,7 +71,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-6" data-tour="dashboard">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 p-6 md:p-8 animate-slide-up-fade">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 via-primary/15 to-accent/10 border border-primary/40 p-6 md:p-8 animate-slide-up-fade">
         <div className="relative z-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
             {getGreeting(t)}, {userName} 👋
@@ -82,8 +82,8 @@ export default function Dashboard() {
               : t.dashboard.completeCheckIn}
           </p>
         </div>
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
+        <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
       {/* Quick Actions Bar */}
