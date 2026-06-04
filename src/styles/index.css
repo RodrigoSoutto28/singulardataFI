@@ -15,29 +15,29 @@
        - card: blanco puro (100%) → cards flotan con contraste real
        - sidebar: gris levemente más cálido → profundidad lateral
        - muted: gris medio claro → para zonas secundarias y empty states */
-    --background: 210 20% 95%;
+    --background: 215 18% 92%;
     --foreground: 215 28% 14%;
 
-    --card: 0 0% 100%;
+    --card: 210 25% 98%;
     --card-foreground: 215 28% 14%;
 
-    --popover: 0 0% 100%;
+    --popover: 210 25% 98%;
     --popover-foreground: 215 28% 14%;
 
     /* Primary: #0779A2 - INTENSIFICADO */
-    --primary: 197 100% 35%;
+    --primary: 197 85% 38%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - gris cálido sutil para chips/badges */
-    --secondary: 215 16% 91%;
+    --secondary: 215 14% 88%;
     --secondary-foreground: 215 28% 20%;
 
     /* Muted - tono gris medio para empty states y zonas secundarias */
-    --muted: 215 16% 89%;
+    --muted: 215 14% 87%;
     --muted-foreground: 215 16% 42%;
 
     /* Accent: #40A9D3 - VIBRANTE */
-    --accent: 199 70% 52%;
+    --accent: 199 60% 48%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive - ROJO INTENSO */
@@ -57,9 +57,9 @@
     --loss: 0 80% 50%;
 
     /* Borders - sutiles pero visibles */
-    --border: 215 16% 84%;
-    --input: 215 16% 86%;
-    --ring: 197 100% 35%;
+    --border: 215 14% 80%;
+    --input: 215 14% 82%;
+    --ring: 197 85% 38%;
 
     --radius: 0.625rem;
 
@@ -73,7 +73,7 @@
     --teal: 183 100% 42%;
 
     /* Sidebar — tono propio para crear profundidad lateral */
-    --sidebar-background: 215 18% 93%;
+    --sidebar-background: 215 16% 90%;
     --sidebar-foreground: 215 20% 32%;
     --sidebar-primary: 197 100% 35%;
     --sidebar-primary-foreground: 0 0% 100%;

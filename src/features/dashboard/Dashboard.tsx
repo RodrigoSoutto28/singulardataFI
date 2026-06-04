@@ -89,9 +89,6 @@ export default function Dashboard() {
       {/* Quick Actions Bar */}
       <QuickActionsCard />
 
-      {/* Achievement Badges */}
-      <AchievementBadges />
-
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 [&>*]:stagger-item">
         <div className="relative group">
@@ -137,17 +134,51 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        <div className="lg:col-span-2 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 items-start">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6 animate-fade-in">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
                 {t.dashboard.equityCurve}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-2">
+            <CardContent className="pb-4">
               <EquityChart data={equityCurve} className="border-0 bg-transparent p-0" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                {t.dashboard.recentActivity}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {recentTrades.length === 0 ? (
+                <div className="rounded-md bg-muted/40 border border-dashed border-border px-4 py-6 flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <BookOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">
+                      {t.dashboard.noTrades}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.dashboard.completeCheckIn}
+                    </p>
+                  </div>
+                  <Button asChild size="sm" variant="outline" className="gap-1.5 mt-1">
+                    <Link to="/journal">
+                      <Plus className="h-3.5 w-3.5" />
+                      {t.dashboard.quickActionNewTrade}
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <RecentTrades trades={recentTrades} className="border-0 bg-transparent p-0" />
+              )}
             </CardContent>
           </Card>
         </div>
@@ -155,43 +186,9 @@ export default function Dashboard() {
         <div className="space-y-4 md:space-y-6 [&>*]:stagger-item">
           <MentalStateCard disciplineScore={disciplineScore} />
           <TaxometerWidget />
+          <AchievementBadges />
         </div>
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            {t.dashboard.recentActivity}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {recentTrades.length === 0 ? (
-            <div className="rounded-md bg-muted/40 border border-dashed border-border px-4 py-6 flex flex-col items-center justify-center gap-3 text-center">
-              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden />
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium text-foreground">
-                  {t.dashboard.noTrades}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.dashboard.completeCheckIn}
-                </p>
-              </div>
-              <Button asChild size="sm" variant="outline" className="gap-1.5 mt-1">
-                <Link to="/journal">
-                  <Plus className="h-3.5 w-3.5" />
-                  {t.dashboard.quickActionNewTrade}
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <RecentTrades trades={recentTrades} className="border-0 bg-transparent p-0" />
-          )}
-        </CardContent>
-      </Card>
 
       <AccountSetupModal open={accountModalOpen} onOpenChange={setAccountModalOpen} />
     </div>
