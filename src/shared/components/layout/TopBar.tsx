@@ -13,7 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { useTheme } from '@/shared/lib/ThemeContext';
+import { AccountSwitcher } from './AccountSwitcher';
 // LanguageSelector removed: language preference is managed in Settings + auto-detection
+
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -75,6 +77,8 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
 
         {/* Right */}
         <div className="flex items-center gap-1.5 md:gap-2 justify-self-end">
+          <AccountSwitcher />
+
           <Button
             variant="ghost"
             size="icon"

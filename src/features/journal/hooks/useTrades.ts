@@ -4,38 +4,44 @@ import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { Tables, TablesInsert, TablesUpdate } from '@/shared/types/database';
 import { toast } from 'sonner';
 import { getUserErrorMessage } from '@/shared/lib/errors';
+import { useSelectedAccountId } from '@/features/dashboard/hooks/useTradingAccounts';
 
 export type Trade = Tables<'trades'>;
 export type TradeInsert = TablesInsert<'trades'>;
 export type TradeUpdate = TablesUpdate<'trades'>;
 
-// Helper function to sync account balance based on closed trades P&L
-async function syncAccountBalance(userId: string) {
-  // Get the active trading account
-  const { data: account, error: accountError } = await supabase
+// Helper: sync the active account balance based on P&L of closed trades in THAT account
+async function syncAccountBalance(userId: string, accountId: string | null) {
+  let accountQuery = supabase
     .from('trading_accounts')
     .select('id, initial_balance')
     .eq('user_id', userId)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .eq('is_active', true);
 
+  if (accountId) {
+    accountQuery = accountQuery.eq('id', accountId);
+  } else {
+    accountQuery = accountQuery.order('created_at', { ascending: false }).limit(1);
+  }
+
+  const { data: account, error: accountError } = await accountQuery.maybeSingle();
   if (accountError || !account) return;
 
-  // Calculate total P&L from closed trades
-  const { data: trades, error: tradesError } = await supabase
+  let tradesQuery = supabase
     .from('trades')
-    .select('pnl')
+    .select('pnl, account_id')
     .eq('user_id', userId)
     .eq('status', 'closed');
 
+  // Trades attributable to this account: explicit account_id match OR legacy null
+  tradesQuery = tradesQuery.or(`account_id.eq.${account.id},account_id.is.null`);
+
+  const { data: trades, error: tradesError } = await tradesQuery;
   if (tradesError) return;
 
   const totalPnl = trades?.reduce((sum, t) => sum + (t.pnl ?? 0), 0) ?? 0;
   const newBalance = (account.initial_balance ?? 0) + totalPnl;
 
-  // Update the account balance
   await supabase
     .from('trading_accounts')
     .update({ current_balance: newBalance })
@@ -45,18 +51,24 @@ async function syncAccountBalance(userId: string) {
 export function useTrades() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { selectedAccountId } = useSelectedAccountId();
 
   const tradesQuery = useQuery({
-    queryKey: ['trades', user?.id],
+    queryKey: ['trades', user?.id, selectedAccountId],
     queryFn: async () => {
       if (!user?.id) return [];
-      
-      const { data, error } = await supabase
+
+      let query = supabase
         .from('trades')
         .select('*')
-        .eq('user_id', user.id)
-        .order('entry_date', { ascending: false });
+        .eq('user_id', user.id);
 
+      // If an account is selected, show its trades + legacy trades without account_id
+      if (selectedAccountId) {
+        query = query.or(`account_id.eq.${selectedAccountId},account_id.is.null`);
+      }
+
+      const { data, error } = await query.order('entry_date', { ascending: false });
       if (error) throw error;
       return data as Trade[];
     },
@@ -66,7 +78,8 @@ export function useTrades() {
   const invalidateAndSyncBalance = async () => {
     await queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
     if (user?.id) {
-      await syncAccountBalance(user.id);
+      await syncAccountBalance(user.id, selectedAccountId);
+      await queryClient.invalidateQueries({ queryKey: ['trading_accounts', user?.id] });
       await queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
     }
   };
@@ -74,10 +87,16 @@ export function useTrades() {
   const createTrade = useMutation({
     mutationFn: async (trade: Omit<TradeInsert, 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
+
+      const payload: TradeInsert = {
+        ...trade,
+        user_id: user.id,
+        account_id: trade.account_id ?? selectedAccountId ?? null,
+      } as TradeInsert;
+
       const { data, error } = await supabase
         .from('trades')
-        .insert({ ...trade, user_id: user.id } as TradeInsert)
+        .insert(payload)
         .select()
         .single();
 
@@ -101,7 +120,6 @@ export function useTrades() {
         .eq('id', id)
         .select()
         .single();
-
       if (error) throw error;
       return data;
     },
@@ -110,17 +128,13 @@ export function useTrades() {
       toast.success('Operación actualizada');
     },
     onError: (error) => {
-      toast.error(getUserErrorMessage(error, "No se pudo actualizar."));
+      toast.error(getUserErrorMessage(error, 'No se pudo actualizar.'));
     },
   });
 
   const deleteTrade = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('trades')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('trades').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -128,7 +142,7 @@ export function useTrades() {
       toast.success('Operación eliminada');
     },
     onError: (error) => {
-      toast.error(getUserErrorMessage(error, "No se pudo eliminar."));
+      toast.error(getUserErrorMessage(error, 'No se pudo eliminar.'));
     },
   });
 
@@ -136,13 +150,12 @@ export function useTrades() {
     mutationFn: async (trades: Omit<TradeInsert, 'user_id'>[]) => {
       if (!user?.id) throw new Error('User not authenticated');
 
-      const tradesWithUser = trades.map(trade => ({
+      const tradesWithUser = trades.map((trade) => ({
         ...trade,
         user_id: user.id,
+        account_id: trade.account_id ?? selectedAccountId ?? null,
       }));
 
-      // upsert with ignoreDuplicates so the unique (user_id, import_row_hash)
-      // index silently skips clones at the database level.
       const { data, error } = await supabase
         .from('trades')
         .upsert(tradesWithUser as TradeInsert[], {
@@ -171,8 +184,7 @@ export function useTrades() {
     deleteTrade,
     importTrades,
     refetch: tradesQuery.refetch,
-    syncBalance: () => user?.id ? syncAccountBalance(user.id) : Promise.resolve(),
+    syncBalance: () => (user?.id ? syncAccountBalance(user.id, selectedAccountId) : Promise.resolve()),
     invalidateAndSyncBalance,
   };
 }
-

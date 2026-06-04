@@ -10,37 +10,42 @@ import { toast } from 'sonner';
 interface AccountSetupModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /**
+   * 'auto'   — edit current account if exists, otherwise create (legacy behavior)
+   * 'create' — always create a new account, ignoring the currently selected one
+   */
+  mode?: 'auto' | 'create';
 }
 
-export function AccountSetupModal({ open, onOpenChange }: AccountSetupModalProps) {
+export function AccountSetupModal({ open, onOpenChange, mode = 'auto' }: AccountSetupModalProps) {
   const { t } = useLanguage();
   const { account, createAccount, updateAccount, isCreating, isUpdating } = useTradingAccount();
-  
+
   const [name, setName] = useState('');
   const [broker, setBroker] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
   const [currentBalance, setCurrentBalance] = useState('');
 
-  const isEditing = !!account;
+  const isEditing = mode === 'auto' && !!account;
   const isLoading = isCreating || isUpdating;
 
   useEffect(() => {
-    if (account && open) {
+    if (isEditing && account && open) {
       setName(account.name || '');
       setBroker(account.broker || '');
       setInitialBalance(String(account.initial_balance || 0));
       setCurrentBalance(String(account.current_balance || 0));
-    } else if (!account && open) {
+    } else if (open) {
       setName('');
       setBroker('');
       setInitialBalance('');
       setCurrentBalance('');
     }
-  }, [account, open]);
+  }, [account, open, isEditing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const parsedInitial = parseFloat(initialBalance) || 0;
     const parsedCurrent = parseFloat(currentBalance) || 0;
 
@@ -80,6 +85,7 @@ export function AccountSetupModal({ open, onOpenChange }: AccountSetupModalProps
       toast.error('Error al guardar la cuenta');
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
