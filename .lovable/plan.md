@@ -1,20 +1,32 @@
-# Reparar overflow de Logros bajo el Taxímetro
+# Mover Índice de Disciplina a barra horizontal full-width
 
 ## Problema
-`AchievementBadges` se reubicó dentro de la columna derecha (estrecha) del dashboard, pero su grid de escritorio sigue siendo `sm:grid-cols-2 lg:grid-cols-4`. En ese contenedor angosto las 4 columnas no caben, por lo que los íconos/textos quedan apretados y fuera de su caja, y el carrusel móvil (`sm:hidden`) ya no aplica porque en desktop se pinta el grid.
+El card "Disciplina" quedó apilado en la columna derecha bajo el Taxímetro, con badges en columna única. Esto deja la columna derecha alta y crea espacio vacío visual, además de desaprovechar el ancho disponible.
 
 ## Solución
 
-### 1. `src/features/dashboard/components/AchievementBadges.tsx`
-Agregar prop opcional `variant?: 'grid' | 'stack'` (por defecto `grid` para no romper otros usos).
+### 1. `src/features/dashboard/Dashboard.tsx`
+- Quitar el card "Disciplina" (`AchievementBadges variant="stack"`) de la columna derecha.
+- Insertarlo como **barra horizontal full-width** justo debajo de la fila principal (curva + actividad / estado mental + taxímetro), antes del `AccountSetupModal`.
+- El card ocupa todo el ancho (`grid-cols-1`) y dentro renderiza `AchievementBadges variant="grid"` para que use el grid `sm:grid-cols-2 lg:grid-cols-4` original — los 4 badges se distribuyen horizontalmente y centrados.
+- Columna derecha queda con `MentalStateCard` + `TaxometerWidget` únicamente, alineando su altura con la columna izquierda (curva + actividad reciente).
 
-- `variant="grid"` (actual): conserva `sm:grid-cols-2 lg:grid-cols-4` para vistas full-width.
-- `variant="stack"`: render en columna única `flex flex-col gap-3` tanto en mobile como desktop, sin carrusel horizontal. Cada badge ocupa el ancho completo del card y se centra verticalmente, con `min-w-0` y `truncate` ya presentes para evitar overflow.
+### 2. Sin cambios en `AchievementBadges.tsx`
+La variante `grid` ya existe y soporta el layout horizontal de 4 columnas — se reutiliza tal cual.
 
-### 2. `src/features/dashboard/Dashboard.tsx`
-Envolver `AchievementBadges` en una `Card` con header propio ("Logros / Disciplina") para mantener consistencia visual con `MentalStateCard` y `TaxometerWidget`, y pasar `variant="stack"`.
+## Estructura resultante
+
+```text
+[Hero]
+[QuickActions]
+[Stats 4 cards]
+┌──────────────────────────┬──────────────────┐
+│ Curva de Capital         │ Estado Mental    │
+│ Actividad Reciente       │ Taxómetro        │
+└──────────────────────────┴──────────────────┘
+[Índice de Disciplina — 4 badges en fila horizontal]
+```
 
 ## Fuera de alcance
-- No se cambia el comportamiento de `AchievementBadges` cuando se use en otra vista.
-- No se tocan datos, hooks ni traducciones existentes (se reutiliza `t.disciplineMetrics`).
-- No se modifican `MentalStateCard` ni `TaxometerWidget`.
+- No se modifica lógica, datos ni traducciones.
+- No se tocan otros componentes ni el modo oscuro.
