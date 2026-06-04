@@ -77,6 +77,8 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
 
         {/* Right */}
         <div className="flex items-center gap-1.5 md:gap-2 justify-self-end">
+          <AccountSwitcher />
+
           <Button
             variant="ghost"
             size="icon"
