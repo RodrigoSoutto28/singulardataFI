@@ -164,9 +164,10 @@ function TodayCheckInView() {
   }, [entries]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
       {/* Left - Stats */}
-      <div className="space-y-4">
+      <div className="space-y-4 md:space-y-6">
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -236,13 +237,14 @@ function TodayCheckInView() {
         </Card>
 
         <Card className="bg-gradient-to-br from-primary/10 to-[hsl(265_84%_60%/0.1)]">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-warning" />
+              <Trophy className="h-4 w-4 text-warning" />
               Logros
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 pt-0 pb-4">
+
             <AchievementBadge
               Icon={Flame}
               title="Racha de Hierro"
@@ -316,14 +318,14 @@ function CheckInSummaryCard({ entry }: { entry: PsychologyEntry }) {
   const { t } = useLanguage();
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success" />
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-success" />
               Check-in Completado
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs">
               {new Date(entry.entry_date).toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -337,21 +339,22 @@ function CheckInSummaryCard({ entry }: { entry: PsychologyEntry }) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div className="p-4 rounded-lg bg-muted/40">
+      <CardContent className="space-y-5 pt-0 pb-5">
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Disciplina</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.discipline_score}/10</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.discipline_score}/10</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/40">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Sueño</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.sleep_quality}/5</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.sleep_quality}/5</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/40">
+          <div className="p-3 rounded-lg bg-muted/40">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Estrés</p>
-            <p className="text-3xl font-bold font-mono mt-1">{entry.stress_level}/5</p>
+            <p className="text-2xl font-bold font-mono mt-1">{entry.stress_level}/5</p>
           </div>
         </div>
+
 
         {entry.pre_trade_emotion && (
           <div>
@@ -432,11 +435,11 @@ function CheckInFormCard() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Check-in del Día</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base">Check-in del Día</CardTitle>
+            <CardDescription className="text-xs">
               {new Date().toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -451,10 +454,11 @@ function CheckInFormCard() {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5 pt-0 pb-5">
+
         {/* 1. Emotion */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">1. ¿Cómo te sientes ahora?</Label>
+          <Label className="text-sm font-semibold">1. ¿Cómo te sientes ahora?</Label>
           <div className="grid grid-cols-4 gap-2">
             {emotions.map((emotion) => {
               const isSelected = selectedEmotion === emotion.value;
@@ -465,8 +469,8 @@ function CheckInFormCard() {
                   type="button"
                   onClick={() => setSelectedEmotion(emotion.value)}
                   className={cn(
-                    'group p-2.5 rounded-lg border transition-all text-center',
-                    'flex flex-col items-center justify-center gap-1.5 min-h-[78px]',
+                    'group p-2 rounded-lg border transition-all text-center',
+                    'flex flex-col items-center justify-center gap-1.5 min-h-[68px]',
                     isSelected
                       ? isNegative
                         ? 'border-destructive bg-destructive/10 ring-1 ring-destructive/30'
@@ -478,7 +482,7 @@ function CheckInFormCard() {
                 >
                   <div
                     className={cn(
-                      'flex items-center justify-center h-8 w-8 rounded-md transition-colors',
+                      'flex items-center justify-center h-7 w-7 rounded-md transition-colors',
                       isSelected
                         ? isNegative
                           ? 'bg-destructive/15 text-destructive'
@@ -497,6 +501,7 @@ function CheckInFormCard() {
               );
             })}
           </div>
+
           {selectedEmotion && negativeSelected && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -510,9 +515,10 @@ function CheckInFormCard() {
         {/* 2. Discipline */}
         <div className="space-y-3">
           <div className="flex justify-between items-baseline">
-            <Label className="text-base font-semibold">
+            <Label className="text-sm font-semibold">
               2. ¿Qué tan disciplinado te sientes hoy?
             </Label>
+
             <span className="text-2xl font-bold font-mono text-primary">
               {disciplineScore[0]}/10
             </span>
@@ -535,7 +541,7 @@ function CheckInFormCard() {
         {/* 3. Sleep */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-base font-semibold">3. Calidad de sueño anoche</Label>
+            <Label className="text-sm font-semibold">3. Calidad de sueño anoche</Label>
             <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Moon
@@ -561,7 +567,7 @@ function CheckInFormCard() {
         {/* 4. Stress */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-base font-semibold">4. Nivel de estrés</Label>
+            <Label className="text-sm font-semibold">4. Nivel de estrés</Label>
             <Badge variant={stressVariant}>{stressBadge}</Badge>
           </div>
           <Slider
@@ -576,9 +582,10 @@ function CheckInFormCard() {
 
         {/* 5. Notes */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">
+          <Label className="text-sm font-semibold">
             5. Lecciones de ayer o metas para hoy (opcional)
           </Label>
+
           <Textarea
             placeholder="Ej: Ayer operé con mucha emoción. Hoy seré más paciente y esperaré mi setup perfecto..."
             className="min-h-[100px] resize-none"
