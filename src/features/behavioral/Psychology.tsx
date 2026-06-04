@@ -458,7 +458,7 @@ function CheckInFormCard() {
 
         {/* 1. Emotion */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">1. ¿Cómo te sientes ahora?</Label>
+          <Label className="text-sm font-semibold">1. ¿Cómo te sientes ahora?</Label>
           <div className="grid grid-cols-4 gap-2">
             {emotions.map((emotion) => {
               const isSelected = selectedEmotion === emotion.value;
@@ -469,8 +469,8 @@ function CheckInFormCard() {
                   type="button"
                   onClick={() => setSelectedEmotion(emotion.value)}
                   className={cn(
-                    'group p-2.5 rounded-lg border transition-all text-center',
-                    'flex flex-col items-center justify-center gap-1.5 min-h-[78px]',
+                    'group p-2 rounded-lg border transition-all text-center',
+                    'flex flex-col items-center justify-center gap-1.5 min-h-[68px]',
                     isSelected
                       ? isNegative
                         ? 'border-destructive bg-destructive/10 ring-1 ring-destructive/30'
@@ -482,7 +482,7 @@ function CheckInFormCard() {
                 >
                   <div
                     className={cn(
-                      'flex items-center justify-center h-8 w-8 rounded-md transition-colors',
+                      'flex items-center justify-center h-7 w-7 rounded-md transition-colors',
                       isSelected
                         ? isNegative
                           ? 'bg-destructive/15 text-destructive'
@@ -501,6 +501,7 @@ function CheckInFormCard() {
               );
             })}
           </div>
+
           {selectedEmotion && negativeSelected && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
