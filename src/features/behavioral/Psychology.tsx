@@ -164,9 +164,10 @@ function TodayCheckInView() {
   }, [entries]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
       {/* Left - Stats */}
-      <div className="space-y-4">
+      <div className="space-y-4 md:space-y-6">
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
