@@ -993,14 +993,20 @@ export default function Journal() {
             </DialogTrigger>
             <DialogContent className="p-0 gap-0 max-w-[100vw] sm:max-w-md w-screen sm:w-auto h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col rounded-none sm:rounded-lg">
               <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b border-border shrink-0">
-                <DialogTitle>{editingTrade ? (t.journal.editTrade ?? 'Edit Trade') : t.journal.addNewTrade}</DialogTitle>
-                <DialogDescription>
-                  {t.journal.logNewTrade}
+                <DialogTitle>
+                  {editingTrade
+                    ? (t.journal.editTrade ?? 'Edit Trade')
+                    : wizardStep === 1
+                      ? t.journal.wizardStep1Title
+                      : t.journal.wizardStep2Title}
+                </DialogTitle>
+                <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
+                  {wizardStep === 1 ? t.journal.wizardStep1Subtitle : t.journal.wizardStep2Subtitle}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-                {/* Essentials */}
+                {wizardStep === 1 && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.symbol} *</Label>
