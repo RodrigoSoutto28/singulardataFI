@@ -1053,7 +1053,7 @@ export default function Journal() {
                     {formErrors.direction && <p className="text-xs text-destructive">{formErrors.direction}</p>}
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.entryPrice} *</Label>
                     <Input
                       type="number"
@@ -1066,19 +1066,6 @@ export default function Journal() {
                       required
                     />
                     {formErrors.entry_price && <p className="text-xs text-destructive">{formErrors.entry_price}</p>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.exitPrice}</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
-                      className="bg-muted/30 font-mono"
-                      value={formData.exit_price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
-                      disabled={formData.status === 'open'}
-                    />
                   </div>
 
                   <div className="space-y-1.5 col-span-2">
