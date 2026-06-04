@@ -137,11 +137,15 @@ export function Sidebar({
       <aside
         data-tour="sidebar"
         aria-label="Navegación principal"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={cn(
-          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200',
-          collapsed ? 'w-[64px]' : 'w-[230px]'
+          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200 z-30',
+          collapsed ? 'w-[64px]' : 'w-[230px]',
+          collapsedProp && isHovering && 'shadow-xl shadow-black/20'
         )}
       >
+
         {/* Brand */}
         <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-5')}>
           <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
