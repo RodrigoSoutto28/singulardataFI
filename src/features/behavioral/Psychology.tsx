@@ -567,7 +567,7 @@ function CheckInFormCard() {
         {/* 4. Stress */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-base font-semibold">4. Nivel de estrés</Label>
+            <Label className="text-sm font-semibold">4. Nivel de estrés</Label>
             <Badge variant={stressVariant}>{stressBadge}</Badge>
           </div>
           <Slider
