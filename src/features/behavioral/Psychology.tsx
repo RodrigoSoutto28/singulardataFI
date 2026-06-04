@@ -582,9 +582,10 @@ function CheckInFormCard() {
 
         {/* 5. Notes */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">
+          <Label className="text-sm font-semibold">
             5. Lecciones de ayer o metas para hoy (opcional)
           </Label>
+
           <Textarea
             placeholder="Ej: Ayer operé con mucha emoción. Hoy seré más paciente y esperaré mi setup perfecto..."
             className="min-h-[100px] resize-none"
