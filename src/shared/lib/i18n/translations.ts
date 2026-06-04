@@ -51,6 +51,7 @@ export interface Translations {
     settings: string;
     signOut: string;
     defaultTraderName: string;
+    accountsCenter: string;
   };
 
   // Auth
