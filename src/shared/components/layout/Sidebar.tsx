@@ -1,4 +1,6 @@
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
 import { cn } from '@/shared/lib/utils';
 import {
   LayoutDashboard,
@@ -45,7 +47,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-  collapsed = false,
+  collapsed: collapsedProp = false,
   onToggleCollapsed,
   onItemClick,
   showQuickToggles = false,
@@ -54,6 +56,27 @@ export function Sidebar({
   const { signOut, profile } = useAuth();
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+
+  // Hover-to-expand: when the parent has collapsed the sidebar, expanding on hover
+  // gives instant access to labels without changing the persisted collapsed state.
+  const [isHovering, setIsHovering] = useState(false);
+  const leaveTimer = useRef<number | null>(null);
+
+  const handleMouseEnter = () => {
+    if (leaveTimer.current) {
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+    if (collapsedProp) setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(() => setIsHovering(false), 180);
+  };
+
+  const collapsed = collapsedProp && !isHovering;
+
 
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
@@ -114,11 +137,15 @@ export function Sidebar({
       <aside
         data-tour="sidebar"
         aria-label="Navegación principal"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={cn(
-          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200',
-          collapsed ? 'w-[64px]' : 'w-[230px]'
+          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200 z-30',
+          collapsed ? 'w-[64px]' : 'w-[230px]',
+          collapsedProp && isHovering && 'shadow-xl shadow-black/20'
         )}
       >
+
         {/* Brand */}
         <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-5')}>
           <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
