@@ -1,26 +1,28 @@
-## Editar y eliminar cuentas desde el AccountSwitcher
+## Plan de corrección
 
-### Cambios
+1. **Restaurar la carga del preview**
+   - Revisar la configuración que puede provocar “rechazó la conexión” en el iframe/preview.
+   - Quitar o ajustar cabeceras locales que bloquean el render dentro del entorno de Lovable si están impidiendo la vista embebida.
 
-**1. `src/shared/components/layout/AccountSwitcher.tsx`**
-- En cada item de cuenta del dropdown, añadir dos acciones inline a la derecha (visibles en hover/siempre en móvil):
-  - ✏️ Editar (icono `Pencil`) → abre `AccountSetupModal` en modo `edit` con la cuenta seleccionada.
-  - 🗑 Eliminar (icono `Trash2`) → abre un `AlertDialog` de confirmación; al confirmar llama `deactivateAccount(id)`.
-- Si la cuenta eliminada era la activa, auto-seleccionar la primera restante (ya cubierto por `useTradingAccounts`).
-- Bloquear eliminación si sólo queda 1 cuenta (mostrar item deshabilitado con tooltip "Debe existir al menos una cuenta").
+2. **Corregir puntos frágiles de las cuentas múltiples**
+   - Proteger el selector de cuentas contra estados vacíos, IDs guardados obsoletos y respuestas fallidas del backend.
+   - Evitar duplicación de toasts al crear/editar cuentas.
+   - Asegurar que eliminar una cuenta seleccionada cambie automáticamente a otra cuenta activa.
 
-**2. `src/features/dashboard/components/AccountSetupModal.tsx`**
-- Añadir nueva prop opcional `editingAccount?: TradingAccount | null`.
-- Nuevo `mode`: `'edit-specific'` que edita la cuenta pasada en `editingAccount` en vez de la activa.
-- Mantiene `'auto'` y `'create'` sin cambios.
+3. **Revisar la barra lateral agregada recientemente**
+   - Mantener el auto-despliegue al pasar el cursor y el colapso al salir.
+   - Limpiar el temporizador al desmontar para evitar actualizaciones de estado tardías.
 
-**3. Eliminación lógica (no física)**
-- Usar `deactivateAccount` existente en `useTradingAccounts` (marca `is_active = false`).
-- Ventajas: preserva trades históricos vinculados (`trades.account_id` FK queda intacto) y permite restaurar si fuera necesario.
-- No se borran trades — siguen accesibles si el usuario reactiva o consulta histórico.
+4. **Validación**
+   - Verificar que el preview vuelva a responder.
+   - Revisar consola y red para confirmar que no queden errores críticos de carga.
+   - Probar navegación básica: login/auth, dashboard y layout principal.
 
-### Archivos tocados
-- editado: `src/shared/components/layout/AccountSwitcher.tsx`
-- editado: `src/features/dashboard/components/AccountSetupModal.tsx`
+## Detalles técnicos
 
-Sin migraciones, sin cambios de schema.
+- Archivos probables a tocar:
+  - `vite.config.ts`
+  - `src/features/dashboard/hooks/useTradingAccounts.ts`
+  - `src/features/dashboard/components/AccountSetupModal.tsx`
+  - `src/shared/components/layout/Sidebar.tsx`
+- No se tocará la lógica de trading ni se agregarán funciones nuevas fuera de la corrección de carga/estabilidad.
