@@ -5,43 +5,54 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTradingAccount } from '@/features/dashboard/hooks/useTradingAccount';
+import { useTradingAccounts, type TradingAccount } from '@/features/dashboard/hooks/useTradingAccounts';
 import { toast } from 'sonner';
 
 interface AccountSetupModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /**
-   * 'auto'   — edit current account if exists, otherwise create (legacy behavior)
-   * 'create' — always create a new account, ignoring the currently selected one
+   * 'auto'          — edit current active account if exists, otherwise create (legacy)
+   * 'create'        — always create a new account
+   * 'edit-specific' — edit the account provided in `editingAccount`
    */
-  mode?: 'auto' | 'create';
+  mode?: 'auto' | 'create' | 'edit-specific';
+  editingAccount?: TradingAccount | null;
 }
 
-export function AccountSetupModal({ open, onOpenChange, mode = 'auto' }: AccountSetupModalProps) {
+export function AccountSetupModal({
+  open,
+  onOpenChange,
+  mode = 'auto',
+  editingAccount = null,
+}: AccountSetupModalProps) {
   const { t } = useLanguage();
-  const { account, createAccount, updateAccount, isCreating, isUpdating } = useTradingAccount();
+  const { account, createAccount, isCreating, isUpdating } = useTradingAccount();
+  const { updateAccount: updateAnyAccount } = useTradingAccounts();
 
   const [name, setName] = useState('');
   const [broker, setBroker] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
   const [currentBalance, setCurrentBalance] = useState('');
 
-  const isEditing = mode === 'auto' && !!account;
+  const targetAccount: TradingAccount | null =
+    mode === 'edit-specific' ? editingAccount : mode === 'auto' ? account : null;
+  const isEditing = (mode === 'auto' && !!account) || (mode === 'edit-specific' && !!editingAccount);
   const isLoading = isCreating || isUpdating;
 
   useEffect(() => {
-    if (isEditing && account && open) {
-      setName(account.name || '');
-      setBroker(account.broker || '');
-      setInitialBalance(String(account.initial_balance || 0));
-      setCurrentBalance(String(account.current_balance || 0));
+    if (isEditing && targetAccount && open) {
+      setName(targetAccount.name || '');
+      setBroker(targetAccount.broker || '');
+      setInitialBalance(String(targetAccount.initial_balance || 0));
+      setCurrentBalance(String(targetAccount.current_balance || 0));
     } else if (open) {
       setName('');
       setBroker('');
       setInitialBalance('');
       setCurrentBalance('');
     }
-  }, [account, open, isEditing]);
+  }, [targetAccount, open, isEditing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,9 +71,9 @@ export function AccountSetupModal({ open, onOpenChange, mode = 'auto' }: Account
     }
 
     try {
-      if (isEditing && account) {
-        await updateAccount({
-          id: account.id,
+      if (isEditing && targetAccount) {
+        await updateAnyAccount({
+          id: targetAccount.id,
           name: name.trim(),
           broker: broker.trim() || null,
           initial_balance: parsedInitial,
@@ -85,6 +96,8 @@ export function AccountSetupModal({ open, onOpenChange, mode = 'auto' }: Account
       toast.error('Error al guardar la cuenta');
     }
   };
+
+
 
 
   return (
