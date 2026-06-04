@@ -47,7 +47,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-  collapsed = false,
+  collapsed: collapsedProp = false,
   onToggleCollapsed,
   onItemClick,
   showQuickToggles = false,
@@ -56,6 +56,27 @@ export function Sidebar({
   const { signOut, profile } = useAuth();
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+
+  // Hover-to-expand: when the parent has collapsed the sidebar, expanding on hover
+  // gives instant access to labels without changing the persisted collapsed state.
+  const [isHovering, setIsHovering] = useState(false);
+  const leaveTimer = useRef<number | null>(null);
+
+  const handleMouseEnter = () => {
+    if (leaveTimer.current) {
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+    if (collapsedProp) setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(() => setIsHovering(false), 180);
+  };
+
+  const collapsed = collapsedProp && !isHovering;
+
 
   const NavRow = ({ item }: { item: NavItem }) => {
     const isActive = location.pathname === item.href;
