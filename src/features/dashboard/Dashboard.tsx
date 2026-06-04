@@ -183,9 +183,9 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="flex flex-col gap-4 md:gap-6 h-full [&>*]:stagger-item">
+        <div className="flex flex-col gap-4 md:gap-6 lg:h-full [&>*]:stagger-item">
           <MentalStateCard disciplineScore={disciplineScore} className="h-auto" />
-          <div className="flex-1 [&>*]:h-full">
+          <div className="lg:flex-1 lg:[&>*]:h-full">
             <TaxometerWidget />
           </div>
         </div>
