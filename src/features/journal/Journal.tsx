@@ -1254,29 +1254,67 @@ export default function Journal() {
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
+                </>
+                )}
 
                 </div>
                 {/* Sticky footer */}
-                <div className="shrink-0 flex justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddTradeOpen(false)}
-                  >
-                    {t.common.cancel}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={createTrade.isPending || updateTrade.isPending}
-                    className="btn-press"
-                  >
-                    {(createTrade.isPending || updateTrade.isPending) && (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    )}
-                    {editingTrade ? (t.common.save ?? 'Save') : t.journal.addTrade}
-                  </Button>
+                <div className="shrink-0 flex justify-between gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
+                  {wizardStep === 1 ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddTradeOpen(false)}
+                      >
+                        {t.common.cancel}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="btn-press"
+                        onClick={() => {
+                          const errs: Record<string, string> = {};
+                          if (!formData.symbol.trim()) errs.symbol = 'Requerido';
+                          if (!formData.direction) errs.direction = 'Requerido';
+                          if (!formData.entry_price || isNaN(parseFloat(formData.entry_price)) || parseFloat(formData.entry_price) <= 0) errs.entry_price = 'Inválido';
+                          if (!formData.quantity || isNaN(parseFloat(formData.quantity)) || parseFloat(formData.quantity) <= 0) errs.quantity = 'Inválido';
+                          if (Object.keys(errs).length > 0) {
+                            setFormErrors(errs);
+                            toast.error('Revisa los campos marcados');
+                            return;
+                          }
+                          setFormErrors({});
+                          setWizardStep(2);
+                        }}
+                      >
+                        {t.journal.next}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setWizardStep(1)}
+                      >
+                        {t.journal.previous}
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={createTrade.isPending || updateTrade.isPending}
+                        className="btn-press"
+                      >
+                        {(createTrade.isPending || updateTrade.isPending) && (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        )}
+                        {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </form>
             </DialogContent>
