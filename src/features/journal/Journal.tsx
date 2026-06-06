@@ -835,7 +835,7 @@ export default function Journal() {
                 <Eye className="h-4 w-4" />
                 {t.journal.viewDetails}
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2" onClick={() => openEditTrade(trade)}>
+              <DropdownMenuItem className="gap-2" onSelect={(e) => { e.preventDefault(); openEditTrade(trade); }}>
                 <Pencil className="h-4 w-4" />
                 {t.journal.editTrade}
               </DropdownMenuItem>
