@@ -17,13 +17,13 @@ interface TaxometerAlertProps {
 }
 
 export function TaxometerAlert({ open, errors, onContinue, onCancel }: TaxometerAlertProps) {
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(20);
   const high = errors.filter((e) => e.confidence === 'high');
   const totalCost = errors.reduce((s, e) => s + (e.costEstimate || 0), 0);
 
   useEffect(() => {
     if (!open) {
-      setCountdown(60);
+      setCountdown(20);
       return;
     }
     const t = setInterval(() => {
@@ -84,7 +84,7 @@ export function TaxometerAlert({ open, errors, onContinue, onCancel }: Taxometer
               </span>
               <span className="font-mono font-semibold">{countdown}s</span>
             </div>
-            <Progress value={((60 - countdown) / 60) * 100} />
+            <Progress value={((20 - countdown) / 20) * 100} />
             <p className="text-xs text-muted-foreground text-center">
               Tómate este tiempo para reconsiderar tu decisión
             </p>
