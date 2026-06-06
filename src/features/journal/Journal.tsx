@@ -550,6 +550,8 @@ export default function Journal() {
 
   const handleAddTrade = async (e: React.FormEvent) => {
     e.preventDefault();
+    // La alerta y la persistencia sólo deben ocurrir al final del wizard (paso 2)
+    if (wizardStep !== 2) return;
     setFormErrors({});
 
     const parsed = tradeFormSchema.safeParse(formData);
