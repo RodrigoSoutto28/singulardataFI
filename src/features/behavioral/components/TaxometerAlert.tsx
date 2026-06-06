@@ -23,7 +23,7 @@ export function TaxometerAlert({ open, errors, onContinue, onCancel }: Taxometer
 
   useEffect(() => {
     if (!open) {
-      setCountdown(60);
+      setCountdown(20);
       return;
     }
     const t = setInterval(() => {
