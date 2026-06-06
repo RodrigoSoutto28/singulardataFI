@@ -1,27 +1,23 @@
-## Diagnóstico
+## Problema
 
-El error `there is no unique or exclusion constraint matching the ON CONFLICT specification` ocurre al importar operaciones de ejemplo porque el código en `src/features/journal/hooks/useTrades.ts` (línea 162) hace un `upsert` sobre `trades` usando:
+La "Alerta de Error Psicológico" (TaxometerAlert) aparece superpuesta sobre el modal del wizard de Agregar Operación (Paso 2 "Gestión y Salida" sigue visible detrás). Esto genera confusión visual y rompe el flujo guiado de los 2 pasos.
 
-```ts
-onConflict: 'user_id,import_row_hash'
-```
+La detección sí se dispara en el momento correcto (al pulsar "Registrar Operación" en el paso 2), pero el modal del wizard no se cierra antes de mostrar la alerta.
 
-Pero la tabla `public.trades` **no tiene** ningún índice único sobre `(user_id, import_row_hash)`. Las únicas constraints existentes son la PK (`id`), FKs y un CHECK de rating.
+## Cambio
 
-## Corrección
+Archivo único: `src/features/journal/Journal.tsx` (función `handleSubmit`, bloque ~líneas 629-635 donde se detectan los `highErrors`).
 
-Crear un índice único parcial en la tabla `trades` que respalde el `ON CONFLICT`:
+Cuando se detecten errores de alta confianza tras completar los 2 pasos:
 
-```sql
-CREATE UNIQUE INDEX IF NOT EXISTS trades_user_import_row_hash_key
-  ON public.trades (user_id, import_row_hash)
-  WHERE import_row_hash IS NOT NULL;
-```
+1. Cerrar el modal del wizard primero (`setIsAddTradeOpen(false)`).
+2. Volver el wizard al paso 1 para próximos usos (`setWizardStep(1)`).
+3. Recién entonces abrir `TaxometerAlert` con los errores detectados (`setTaxometerOpen(true)`).
 
-Se usa índice **parcial** (`WHERE import_row_hash IS NOT NULL`) para no romper inserciones manuales de operaciones que no tienen hash de importación (múltiples NULL permitidos).
+Adicionalmente, en `handleTaxometerContinue` (cuando el usuario decide continuar pese a la alerta) y en `handleTaxometerCancel`, no es necesario reabrir el wizard — el payload ya está guardado en `pendingPayload` y se persiste con `commitTrade`, igual que hoy.
 
-## Validación
+## Resultado
 
-Tras aplicar la migración, el botón "Cargar operaciones de ejemplo" ejecutará el upsert sin error, deduplicando por `(user_id, import_row_hash)` y permitiendo seguir creando trades manuales sin hash.
-
-No se modifica código de la app — solo schema de BD.
+- Los 2 pasos del wizard se completan sin interrupciones visuales.
+- La alerta de "Sin Stop Loss" (u otros errores de alta confianza) aparece limpia, sola, recién después de pulsar "Registrar Operación".
+- No se modifica la lógica de detección, ni los textos, ni el componente `TaxometerAlert`.
