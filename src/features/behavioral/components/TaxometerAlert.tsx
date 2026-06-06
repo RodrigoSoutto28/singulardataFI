@@ -17,7 +17,7 @@ interface TaxometerAlertProps {
 }
 
 export function TaxometerAlert({ open, errors, onContinue, onCancel }: TaxometerAlertProps) {
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(20);
   const high = errors.filter((e) => e.confidence === 'high');
   const totalCost = errors.reduce((s, e) => s + (e.costEstimate || 0), 0);
 
