@@ -84,7 +84,7 @@ export function TaxometerAlert({ open, errors, onContinue, onCancel }: Taxometer
               </span>
               <span className="font-mono font-semibold">{countdown}s</span>
             </div>
-            <Progress value={((60 - countdown) / 60) * 100} />
+            <Progress value={((20 - countdown) / 20) * 100} />
             <p className="text-xs text-muted-foreground text-center">
               Tómate este tiempo para reconsiderar tu decisión
             </p>
