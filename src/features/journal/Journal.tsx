@@ -227,7 +227,8 @@ export default function Journal() {
     });
     setWizardStep(1);
     setFormErrors({});
-    setIsAddTradeOpen(true);
+    // Defer para que el DropdownMenu termine de cerrarse y restaurar foco antes de abrir el Dialog
+    setTimeout(() => setIsAddTradeOpen(true), 0);
   };
 
   const filteredTrades = trades.filter((trade) => {
