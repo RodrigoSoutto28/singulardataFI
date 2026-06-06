@@ -140,7 +140,7 @@ export function Sidebar({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-200 z-30',
+          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-500 ease-in-out z-30',
           collapsed ? 'w-[64px]' : 'w-[230px]',
           collapsedProp && isHovering && 'shadow-xl shadow-black/20'
         )}
