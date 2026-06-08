@@ -653,8 +653,9 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
   const entryDate = parseDate(get('entryDate') as string) ?? new Date().toISOString();
   const exitDate = parseDate(get('exitDate') as string) ?? undefined;
 
+  const { symbol: normSym, suffix } = normalizeSymbol(symbol);
   return {
-    symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+    symbol: normSym,
     direction: finalDirection,
     entryPrice,
     exitPrice: parseNumber(get('exitPrice')),
@@ -664,10 +665,12 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     entryDate,
     exitDate,
     strategy: (get('strategy') as string) || undefined,
-    notes: (get('notes') as string) || undefined,
+    notes: [suffix ? `Símbolo original: ${symbol.toUpperCase()}` : null, (get('notes') as string) || null].filter(Boolean).join(' · ') || undefined,
     stopLoss: parseNumber(get('stopLoss')),
     takeProfit: parseNumber(get('takeProfit')),
-    assetClass: detectAssetClass(symbol),
+    commission: parseNumber(get('commission')),
+    swap: parseNumber(get('swap')),
+    assetClass: detectAssetClass(normSym),
   };
 }
 
