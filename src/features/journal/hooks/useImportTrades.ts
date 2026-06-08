@@ -308,7 +308,7 @@ function buildRowGetter(headers: string[], values: unknown[]) {
 
 // ─── Broker-specific exact mappings ─────────────────────────────────────────
 
-type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'generic';
+type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'binance' | 'bybit' | 'ibkr' | 'ninjatrader' | 'generic';
 
 interface BrokerMap {
   format: BrokerFormat;
@@ -331,6 +331,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       stopLoss: ['stop loss', 'sl'],
       takeProfit: ['take profit', 'tp'],
       strategy: ['comment', 'label'],
+      commission: ['commission', 'commissions'],
+      swap: ['swap'],
     },
   },
   mt5: {
@@ -346,6 +348,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       exitDate: ['time.1', 'close time'],
       stopLoss: ['s / l', 's/l'],
       takeProfit: ['t / p', 't/p'],
+      commission: ['commission'],
+      swap: ['swap'],
     },
   },
   mt4: {
@@ -361,6 +365,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       exitDate: ['close time'],
       stopLoss: ['s / l'],
       takeProfit: ['t / p'],
+      commission: ['commission'],
+      swap: ['swap'],
     },
   },
   tradingview: {
@@ -374,6 +380,59 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       pnl: ['p&l', 'profit', 'net p&l'],
       entryDate: ['date/time', 'entry time'],
       exitDate: ['exit time'],
+    },
+  },
+  binance: {
+    format: 'binance',
+    fields: {
+      symbol: ['pair', 'symbol'],
+      direction: ['side'],
+      entryPrice: ['price'],
+      quantity: ['executed', 'amount', 'filled', 'quantity'],
+      pnl: ['realized profit', 'realized pnl', 'realized p&l'],
+      entryDate: ['date(utc)', 'date', 'time'],
+      commission: ['fee'],
+    },
+  },
+  bybit: {
+    format: 'bybit',
+    fields: {
+      symbol: ['contracts', 'symbol'],
+      direction: ['side'],
+      entryPrice: ['entry price', 'avg entry price'],
+      exitPrice: ['exit price', 'avg exit price'],
+      quantity: ['qty', 'closed qty'],
+      pnl: ['closed p&l', 'closed pnl', 'realized p&l'],
+      entryDate: ['create time', 'open time', 'time'],
+      exitDate: ['close time'],
+      commission: ['fee', 'trading fee'],
+    },
+  },
+  ibkr: {
+    format: 'ibkr',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['buy/sell', 'side'],
+      entryPrice: ['t. price', 'trade price', 'price'],
+      quantity: ['quantity'],
+      pnl: ['realized p/l', 'realized pnl'],
+      entryDate: ['date/time', 'datetime', 'trade date'],
+      commission: ['comm/fee', 'commission'],
+    },
+  },
+  ninjatrader: {
+    format: 'ninjatrader',
+    fields: {
+      symbol: ['instrument'],
+      direction: ['market pos.', 'market pos', 'side'],
+      entryPrice: ['entry price'],
+      exitPrice: ['exit price'],
+      quantity: ['qty', 'quantity'],
+      pnl: ['profit', 'p&l'],
+      entryDate: ['entry time'],
+      exitDate: ['exit time'],
+      strategy: ['strategy'],
+      commission: ['commission'],
     },
   },
 };
@@ -390,6 +449,10 @@ function detectBroker(headers: string[]): BrokerFormat | 'ctrader-position-histo
   if (has('ticket') && (has('open time') || has('s / l') || has('symbol'))) {
     return norm.includes('time.1') || norm.includes('price.1') ? 'mt5' : 'mt4';
   }
+  if (has('instrument') && (has('market pos.') || has('market pos')) && has('entry price')) return 'ninjatrader';
+  if ((has('date(utc)') || (has('pair') && has('side'))) && (has('executed') || has('price'))) return 'binance';
+  if ((has('contracts') || has('symbol')) && (has('closed p&l') || has('closed pnl'))) return 'bybit';
+  if ((has('t. price') || has('trade price')) && has('symbol') && (has('quantity') || has('comm/fee'))) return 'ibkr';
   if ((has('trade #') || has('trade')) && has('entry price')) return 'tradingview';
   return 'generic';
 }
