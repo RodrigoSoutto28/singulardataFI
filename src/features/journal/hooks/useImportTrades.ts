@@ -1032,6 +1032,42 @@ export function useImportTrades() {
     }
   }, []);
 
-  return { importFromFile };
+  const importFromFiles = useCallback(async (files: File[]): Promise<MultiParseResult> => {
+    const results = await Promise.all(
+      files.map(async (file): Promise<FileParseResult> => {
+        const res = await importFromFile(file);
+        return {
+          ...res,
+          trades: res.trades.map((t) => ({ ...t, sourceFile: file.name })),
+          fileName: file.name,
+          fileSize: file.size,
+        };
+      })
+    );
+
+    // Cross-file deduplication
+    const seen = new Set<string>();
+    const merged: ImportedTrade[] = [];
+    let dupCount = 0;
+    for (const r of results) {
+      for (const t of r.trades) {
+        const key = `${t.symbol}|${t.direction}|${t.entryDate}|${t.exitDate ?? ''}|${t.entryPrice}|${t.quantity}`;
+        if (seen.has(key)) { dupCount++; continue; }
+        seen.add(key);
+        merged.push(t);
+      }
+    }
+
+    const totalErrors = results.flatMap((r) =>
+      r.errors.map((e) => (results.length > 1 ? `[${r.fileName}] ${e}` : e))
+    );
+    if (dupCount > 0 && results.length > 1) {
+      totalErrors.unshift(`Se omitieron ${dupCount} operación(es) duplicada(s) entre archivos.`);
+    }
+
+    return { files: results, trades: merged, errors: totalErrors, crossFileDuplicates: dupCount };
+  }, [importFromFile]);
+
+  return { importFromFile, importFromFiles };
 }
 
