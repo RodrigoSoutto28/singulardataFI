@@ -86,6 +86,7 @@ export function ImportPreviewModal({
   fileName,
   fileHash,
   duplicatePositionIds = [],
+  perFileReports,
   onConfirm,
   isImporting,
 }: ImportPreviewModalProps) {
