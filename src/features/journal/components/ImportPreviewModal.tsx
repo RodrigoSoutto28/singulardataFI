@@ -581,6 +581,15 @@ export function ImportPreviewModal({
                           <TableCell className="text-xs text-slate-500 font-mono">
                             {new Date(trade.entryDate).toLocaleDateString()}
                           </TableCell>
+                          {perFileReports && perFileReports.length > 1 && (
+                            <TableCell className="text-[10px] font-mono text-slate-400 truncate max-w-[140px]" title={trade.sourceFile}>
+                              {trade.sourceFile ? (
+                                <Badge variant="outline" className="border-slate-700 bg-slate-800/60 text-slate-300 font-mono text-[9px]">
+                                  {trade.sourceFile}
+                                </Badge>
+                              ) : <span className="text-slate-600">—</span>}
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })}
