@@ -1017,8 +1017,8 @@ export default function Journal() {
                     ? (t.journal.editTrade ?? 'Edit Trade')
                     : (t.journal.registerTrade ?? 'Nueva operación')}
                 </DialogTitle>
-                <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
-                  {t.journal.addNotesPlaceholder ? '' : ''}
+                <DialogDescription className="sr-only">
+                  {editingTrade ? 'Edit Trade' : 'Nueva operación'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
