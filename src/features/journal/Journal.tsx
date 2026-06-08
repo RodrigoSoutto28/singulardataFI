@@ -1015,17 +1015,15 @@ export default function Journal() {
                 <DialogTitle>
                   {editingTrade
                     ? (t.journal.editTrade ?? 'Edit Trade')
-                    : wizardStep === 1
-                      ? t.journal.wizardStep1Title
-                      : t.journal.wizardStep2Title}
+                    : (t.journal.wizardStep1Title ?? 'Nueva operación')}
                 </DialogTitle>
                 <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
-                  {wizardStep === 1 ? t.journal.wizardStep1Subtitle : t.journal.wizardStep2Subtitle}
+                  {t.journal.wizardStep1Subtitle ?? 'Completá todos los datos en un solo paso'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-                {wizardStep === 1 && (
+                {(
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.symbol} *</Label>
