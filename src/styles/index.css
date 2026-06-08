@@ -4,8 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SINGULAR dataFI — Minimal Light Professional */
-/* Palette: #42718C  #318194  #0779A2  #B0C7E1  #40A9D3  #2E6CC0  #0EC4CC  #8AD1CC */
+/* MindOn — Trading Software · Warm Beige on Dark Carbon */
+/* Palette: #1A2230 (carbon)  #C9A88A (beige primary)  #D9BE9F (beige accent)  #A6845F (beige deep) */
 
 @layer base {
   :root {
