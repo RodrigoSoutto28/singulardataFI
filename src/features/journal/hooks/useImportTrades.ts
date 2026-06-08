@@ -246,7 +246,6 @@ function splitCSVLine(line: string, delim: string): string[] {
 
 // ─── Field mapping ──────────────────────────────────────────────────────────
 
-const MANDATORY_FIELDS: (keyof typeof FIELD_ALIASES)[] = ['symbol', 'direction', 'entryPrice', 'exitPrice', 'quantity', 'entryDate'];
 
 const FIELD_LABELS: Record<keyof typeof FIELD_ALIASES, string> = {
   symbol: 'Activo',
