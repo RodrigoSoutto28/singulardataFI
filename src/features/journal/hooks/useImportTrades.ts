@@ -15,7 +15,10 @@ export interface ImportedTrade {
   notes?: string;
   stopLoss?: number;
   takeProfit?: number;
+  commission?: number;
+  swap?: number;
   assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+  sourceFile?: string;
 }
 
 export interface ParseMetadata {
