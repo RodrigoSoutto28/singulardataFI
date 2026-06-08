@@ -156,6 +156,7 @@ export default function Journal() {
   const [previewRawRows, setPreviewRawRows] = useState<string[][]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
+  const [previewPerFileReports, setPreviewPerFileReports] = useState<any[] | undefined>(undefined);
   const [isUndoing, setIsUndoing] = useState(false);
   const [duplicatePositionIds, setDuplicatePositionIds] = useState<string[]>([]);
   const [duplicateInfo, setDuplicateInfo] = useState<{
@@ -367,6 +368,7 @@ export default function Journal() {
         );
         setPreviewFileName(file.name);
         setPreviewFileHash(fileHash);
+        setPreviewPerFileReports(undefined);
         setPreviewOpen(true);
       } else {
         // Multi-file flow
@@ -376,16 +378,13 @@ export default function Journal() {
         setPreviewMetadata(multi.files[0]?.metadata);
         setPreviewRawRows([]);
         const errs = [...multi.errors];
-        const summary = multi.files
-          .map((f) => `${f.fileName}: ${f.trades.length} op. — ${f.metadata?.brokerDetected ?? 'generic'}`)
-          .join(' | ');
-        errs.unshift(`Multi-archivo (${multi.files.length}): ${summary}`);
         if (multi.trades.length === 0) {
           errs.push('No se reconocieron operaciones en ninguno de los archivos.');
         }
         setPreviewErrors(errs);
         setPreviewFileName(`${multi.files.length} archivos`);
-        setPreviewFileHash(undefined);
+        setPreviewFileHash('');
+        setPreviewPerFileReports(multi.files);
         setPreviewOpen(true);
       }
     } catch (error) {
@@ -1366,6 +1365,7 @@ export default function Journal() {
         fileName={previewFileName}
         fileHash={previewFileHash}
         duplicatePositionIds={duplicatePositionIds}
+        perFileReports={previewPerFileReports}
         onConfirm={handleConfirmImport}
         isImporting={isImporting}
       />
