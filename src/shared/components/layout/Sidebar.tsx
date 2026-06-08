@@ -9,7 +9,7 @@ import {
   Brain,
   Settings,
   LogOut,
-  TrendingUp,
+  Power,
   Shield,
   ChevronsLeft,
   ChevronsRight,
