@@ -497,6 +497,9 @@ export function ImportPreviewModal({
                       <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-400 bg-slate-900 text-right">Volumen</TableHead>
                       <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-400 bg-slate-900 text-right">P&L</TableHead>
                       <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-400 bg-slate-900">Fecha</TableHead>
+                      {perFileReports && perFileReports.length > 1 && (
+                        <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-400 bg-slate-900">Origen</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-slate-900/50">
