@@ -1,4 +1,4 @@
-import { Sun, Moon, Menu, TrendingUp, User as UserIcon, Settings as SettingsIcon, CreditCard, LogOut } from 'lucide-react';
+import { Sun, Moon, Menu, Power, User as UserIcon, Settings as SettingsIcon, CreditCard, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
