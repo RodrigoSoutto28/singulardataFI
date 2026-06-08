@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { LineChart, ArrowLeft } from 'lucide-react';
+import { Power, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
