@@ -26,7 +26,9 @@ export interface ParseMetadata {
   ignoredRows: number;
   missingColumns: string[];
   columnMapping: Record<string, string>; // internal field -> CSV header
+  unmappedHeaders?: string[];
   ignoredDetails: { row: number; reason: string; data?: string[] }[];
+  brokerDetected?: string;
 }
 
 export interface ParseResult {
@@ -34,6 +36,18 @@ export interface ParseResult {
   errors: string[];
   metadata?: ParseMetadata;
   rawRows?: string[][];
+}
+
+export interface FileParseResult extends ParseResult {
+  fileName: string;
+  fileSize: number;
+}
+
+export interface MultiParseResult {
+  files: FileParseResult[];
+  trades: ImportedTrade[];
+  errors: string[];
+  crossFileDuplicates: number;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
