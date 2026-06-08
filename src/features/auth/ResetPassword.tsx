@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { supabase } from '@/config/supabase';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -60,7 +60,7 @@ export default function ResetPassword() {
           <CardHeader className="text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
-                <LineChart className="h-7 w-7 text-primary-foreground" />
+                <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
               </div>
             </div>
             <CardTitle>{c.title}</CardTitle>
