@@ -1,59 +1,44 @@
-## Goal
+## Problema
 
-Make the Import Preview Modal a clear pre-save audit report so the user can verify, before confirming, exactly **what was detected, what was mapped, what was ignored, and per file**.
+En `src/features/journal/Journal.tsx`, el alta de una nueva operación usa un **wizard de 2 pasos**:
 
-## What changes (UI only — parser engine stays as-is)
+- **Paso 1**: símbolo, dirección, precio de entrada, cantidad.
+- **Paso 2**: estado, fechas, exit price, **stop loss**, take profit, comisión, estrategia, notas.
 
-### 1. New "Detection Report" header section in `ImportPreviewModal.tsx`
-A grid of three cards, replacing the small inline summary, shown above the stats:
+Esto provoca dos problemas:
 
-- **Broker / Source detected** — large pill with `metadata.brokerDetected` (cTrader, MT5, Binance, IBKR, …) and "Generic" fallback styling.
-- **Delimiter / Header row / Quality** — same data already shown, regrouped.
-- **File hash** — moved here for compactness.
+1. La detección psicológica (`detectPsychologicalErrors`) corre en el submit del Paso 2 y dispara la alerta "Sin Stop Loss" aunque el usuario aún esté completando datos, porque el SL vive en el Paso 2 y se evalúa antes de que el usuario tenga claro qué campos son obligatorios vs. opcionales.
+2. La UX del wizard hace sentir que "la app detecta falta de stop antes de terminar de cargar los datos".
 
-### 2. New "Field Mapping" panel (collapsible, open by default)
-A two-column table built from `metadata.columnMapping`:
+## Cambios (solo `src/features/journal/Journal.tsx`)
 
-```text
-Internal field        ←  Detected header
-─────────────────────────────────────────
-symbol                ←  "Symbol"
-direction             ←  "Side"
-entryPrice            ←  "Open Price"
-…
-```
+### 1. Unificar a un único paso
+- Eliminar el estado `wizardStep` y los botones "Siguiente / Anterior".
+- Renderizar todos los campos del Paso 1 + Paso 2 en un **único formulario scrollable** dentro del `Dialog` existente.
+- Mantener el orden lógico: Identificación (símbolo, dirección) → Precios y cantidad (entry, exit, qty) → Estado y fechas → Gestión de riesgo (SL, TP, comisión) → Estrategia y notas → Preview P&L/RR.
+- Marcar visualmente como opcionales: `stop_loss`, `take_profit`, `exit_price`, `exit_date` (cuando estado = open), comisión, estrategia, notas.
+- Botones del footer: **Cancelar** (izq) y **Registrar operación / Guardar** (der). Eliminar lógica `wizardStep !== 2` del guard en `handleAddTrade`.
 
-- Green check for mapped fields, amber warning for items in `metadata.missingColumns` ("not found in file").
-- Uses `FIELD_LABELS` so labels are human-readable (already exported, will be re-exposed from the hook if needed).
+### 2. Corregir la detección prematura
+- En `handleAddTrade`, mantener `detectPsychologicalErrors`, pero asegurar que se invoca **solo** tras la validación zod exitosa (ya ocurre) y con el payload **completo** del formulario unificado. Sin wizard, ya no hay riesgo de evaluar con datos parciales.
+- Conservar el flujo actual: si hay errores de alta confianza y no se está editando, abrir el `TaxometerAlert` (`setTaxometerOpen(true)`) con `pendingPayload`/`pendingErrors` para confirmación explícita del usuario.
+- En el reset del Dialog (`onOpenChange` cuando `!open`), eliminar la línea `setWizardStep(1)` y demás referencias.
 
-### 3. New "Unmapped headers" panel
-List `metadata.unmappedHeaders` as badges. Empty-state: "All headers were recognized." Helps the user spot data the engine ignored (e.g. swap, commission, tags).
+### 3. Limpieza
+- Eliminar las traducciones de wizard ya no usadas en este archivo: `wizardStep1Title`, `wizardStep1Subtitle`, `wizardStep2Title`, `wizardStep2Subtitle`, `next`, `previous` (solo el consumo aquí; las claves se dejan en `translations.ts` por si se usan en otro lado).
+- Conservar la lógica de auto-cálculo de P&L y R:R (bloque 1229-1271) tal cual.
 
-### 4. New "Per-file report" panel (only in multi-file mode)
-Replace the current single-line summary built in `Journal.tsx` (lines 379-382) with a real per-file table inside the modal:
+## Prueba post-cambio
 
-| File | Broker | Rows valid / total | Ignored | Missing fields | Unmapped headers |
-|---|---|---|---|---|---|
-| trades-mt5.csv | MT5 | 42 / 48 | 6 | — | Swap, Comment |
-| binance.csv | Binance | 17 / 17 | 0 | takeProfit | Fee Coin |
+Agregar un test ligero `src/features/journal/__tests__/Journal.addTrade.test.tsx` que monte el `Journal` con un wrapper mínimo (mocks de `useAuth`, `useTrades`, `usePreMarketCheckIn`, `useErrorLog`) y verifique:
 
-Powered by passing `multi.files: FileParseResult[]` into the modal as a new optional prop `perFileReports`. Single-file imports omit this section.
+1. Click en "Añadir operación" abre el diálogo y muestra **todos los campos en una sola pantalla** (assert: `stop_loss` y `entry_price` son visibles simultáneamente).
+2. Rellenar símbolo, dirección, entry, qty, **estado=open**, SL con valor → click "Registrar" → se llama a `createTrade.mutateAsync` con `stop_loss` correcto y **no** se abre `TaxometerAlert`.
+3. Rellenar lo mínimo sin SL → click "Registrar" → se abre `TaxometerAlert` (confirmación esperada) y `createTrade` aún no se llama hasta confirmar.
 
-### 5. Add "Trade Origin" column in the trades table when multi-file
-Show `trade.sourceFile` (already populated) as a compact badge in a new column, hidden in single-file mode.
+Ejecutar con `bunx vitest run src/features/journal/__tests__/Journal.addTrade.test.tsx`.
 
-### 6. Wiring in `Journal.tsx`
-- Pass `multi.files` to the modal as `perFileReports`.
-- Stop stuffing the multi-file summary into `previewErrors` (lines 378-386) — the new panel replaces it. Only real errors remain.
-- For single-file flow, no behavior change.
+## Fuera de alcance
 
-## Files to touch
-
-- `src/features/journal/components/ImportPreviewModal.tsx` — new sections + Origin column + props.
-- `src/features/journal/Journal.tsx` — pass `perFileReports`, drop summary-as-error injection.
-- `src/features/journal/hooks/useImportTrades.ts` — export `FIELD_LABELS` (one-line export, no logic change).
-
-## Out of scope
-
-- No parser changes, no new broker support, no DB changes.
-- i18n keys are added inline in Spanish to match the rest of the modal (already partially hard-coded ES).
+- Sin cambios en `useTrades`, `error-detection.ts`, `validation.ts`, parser de imports, ni en el `TaxometerAlert`.
+- Sin cambios de schema en la BD.

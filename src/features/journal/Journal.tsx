@@ -191,7 +191,6 @@ export default function Journal() {
     notes: '',
   };
   const [formData, setFormData] = useState(emptyForm);
-  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
@@ -202,7 +201,6 @@ export default function Journal() {
     setFormData(emptyForm);
     setEditingTrade(null);
     setFormErrors({});
-    setWizardStep(1);
   };
 
   const openEditTrade = (trade: Trade) => {
@@ -226,7 +224,6 @@ export default function Journal() {
       status: (trade.status as 'open' | 'closed') ?? 'open',
       notes: trade.notes ?? '',
     });
-    setWizardStep(1);
     setFormErrors({});
     // Defer para que el DropdownMenu termine de cerrarse y restaurar foco antes de abrir el Dialog
     setTimeout(() => setIsAddTradeOpen(true), 0);
@@ -568,8 +565,6 @@ export default function Journal() {
 
   const handleAddTrade = async (e: React.FormEvent) => {
     e.preventDefault();
-    // La alerta y la persistencia sólo deben ocurrir al final del wizard (paso 2)
-    if (wizardStep !== 2) return;
     setFormErrors({});
 
     const parsed = tradeFormSchema.safeParse(formData);
@@ -651,9 +646,8 @@ export default function Journal() {
     if (highErrors.length > 0 && !editingTrade) {
       setPendingErrors(detected);
       setPendingPayload(payload);
-      // Cerrar el wizard primero para que la alerta se vea limpia tras completar los 2 pasos
+      // Cerrar el diálogo primero para que la alerta se vea limpia
       setIsAddTradeOpen(false);
-      setWizardStep(1);
       setTaxometerOpen(true);
       return;
     }
@@ -1021,17 +1015,15 @@ export default function Journal() {
                 <DialogTitle>
                   {editingTrade
                     ? (t.journal.editTrade ?? 'Edit Trade')
-                    : wizardStep === 1
-                      ? t.journal.wizardStep1Title
-                      : t.journal.wizardStep2Title}
+                    : (t.journal.registerTrade ?? 'Nueva operación')}
                 </DialogTitle>
-                <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
-                  {wizardStep === 1 ? t.journal.wizardStep1Subtitle : t.journal.wizardStep2Subtitle}
+                <DialogDescription className="sr-only">
+                  {editingTrade ? 'Edit Trade' : 'Nueva operación'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-                {wizardStep === 1 && (
+                {(
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 col-span-2">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.symbol} *</Label>
@@ -1110,7 +1102,7 @@ export default function Journal() {
                 </div>
                 )}
 
-                {wizardStep === 2 && (
+                {(
                 <>
                 <div className="grid grid-cols-2 gap-3">
                   {/* Exit Price */}
@@ -1286,61 +1278,25 @@ export default function Journal() {
                 </div>
                 {/* Sticky footer */}
                 <div className="shrink-0 flex justify-between gap-2 px-4 sm:px-6 py-3 border-t border-border bg-background/95 backdrop-blur-sm">
-                  {wizardStep === 1 ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsAddTradeOpen(false)}
-                      >
-                        {t.common.cancel}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="btn-press"
-                        onClick={() => {
-                          const errs: Record<string, string> = {};
-                          if (!formData.symbol.trim()) errs.symbol = 'Requerido';
-                          if (!formData.direction) errs.direction = 'Requerido';
-                          if (!formData.entry_price || isNaN(parseFloat(formData.entry_price)) || parseFloat(formData.entry_price) <= 0) errs.entry_price = 'Inválido';
-                          if (!formData.quantity || isNaN(parseFloat(formData.quantity)) || parseFloat(formData.quantity) <= 0) errs.quantity = 'Inválido';
-                          if (Object.keys(errs).length > 0) {
-                            setFormErrors(errs);
-                            toast.error('Revisa los campos marcados');
-                            return;
-                          }
-                          setFormErrors({});
-                          setWizardStep(2);
-                        }}
-                      >
-                        {t.journal.next}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setWizardStep(1)}
-                      >
-                        {t.journal.previous}
-                      </Button>
-                      <Button
-                        type="submit"
-                        size="sm"
-                        disabled={createTrade.isPending || updateTrade.isPending}
-                        className="btn-press"
-                      >
-                        {(createTrade.isPending || updateTrade.isPending) && (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        )}
-                        {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddTradeOpen(false)}
+                  >
+                    {t.common.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={createTrade.isPending || updateTrade.isPending}
+                    className="btn-press"
+                  >
+                    {(createTrade.isPending || updateTrade.isPending) && (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    )}
+                    {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
