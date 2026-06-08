@@ -53,10 +53,10 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
           {/* Mobile brand monogram */}
           <div className="flex md:hidden items-center gap-1.5">
             <div className="flex items-center justify-center h-7 w-7 rounded-md bg-primary">
-              <TrendingUp className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
+              <Power className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <span className="text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase">
-              Singular
+              MindOn
             </span>
           </div>
 
