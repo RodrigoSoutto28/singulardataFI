@@ -230,10 +230,10 @@ export default function Auth() {
 
           <div className="flex items-center gap-3 relative z-10">
             <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
-              <LineChart className="h-7 w-7 text-primary-foreground" />
+              <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">SINGULAR dataFI</h1>
+              <h1 className="text-2xl font-bold">MindOn</h1>
               <p className="text-sm text-muted-foreground">{localized.tagline}</p>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function Auth() {
             <CardHeader className="text-center pb-2">
               <div className="flex items-center justify-center mb-4 lg:hidden">
                 <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
-                  <LineChart className="h-7 w-7 text-primary-foreground" />
+                  <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
                 </div>
               </div>
               <CardTitle className="text-2xl">{t.auth.welcome}</CardTitle>
