@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
 
