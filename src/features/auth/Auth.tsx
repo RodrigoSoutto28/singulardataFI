@@ -9,7 +9,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
+import { Power, Brain, Shield, BarChart3, LineChart } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/shared/lib/validation';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
