@@ -726,6 +726,12 @@ function processRows(
     }
   });
 
+  // Track unmapped headers for diagnostics
+  const mappedHeaderNames = new Set(Object.values(metadata.columnMapping).map(h => String(h).toLowerCase().trim()));
+  metadata.unmappedHeaders = headers
+    .filter(h => h && !mappedHeaderNames.has(String(h).toLowerCase().trim()))
+    .map(h => String(h));
+
   // Surface a clear error when cabeceras don't map any mandatory field
   if (Object.keys(metadata.columnMapping).length === 0) {
     errors.push(`No se reconocieron columnas de operaciones en ${ctx.source}. Cabeceras encontradas: ${headers.filter(Boolean).join(', ') || '(ninguna)'}.`);
