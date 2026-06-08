@@ -85,28 +85,28 @@
 
   /* Dark mode — Negro profesional con apenas un toque de carácter */
   .dark {
-    /* Fondos: casi negro neutro (saturación 8-12%) */
-    --background: 220 10% 5%;
-    --foreground: 220 15% 96%;
+    /* Fondos: navy carbón del logo (220 18% 11%) */
+    --background: 220 18% 11%;
+    --foreground: 30 15% 95%;
 
-    --card: 220 11% 8%;
-    --card-foreground: 220 15% 97%;
+    --card: 220 16% 14%;
+    --card-foreground: 30 15% 96%;
 
-    --popover: 220 11% 9%;
-    --popover-foreground: 220 15% 97%;
+    --popover: 220 16% 15%;
+    --popover-foreground: 30 15% 96%;
 
-    /* Primary mantiene vibrancia (ahí queremos color) */
-    --primary: 199 80% 60%;
-    --primary-foreground: 220 10% 5%;
+    /* Primary mantiene vibrancia del beige cálido */
+    --primary: 32 40% 68%;
+    --primary-foreground: 220 18% 11%;
 
-    --secondary: 220 10% 13%;
-    --secondary-foreground: 220 15% 92%;
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 30 15% 92%;
 
-    --muted: 220 9% 15%;
-    --muted-foreground: 220 10% 62%;
+    --muted: 220 12% 20%;
+    --muted-foreground: 30 10% 70%;
 
-    --accent: 197 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 30 50% 75%;
+    --accent-foreground: 220 18% 11%;
 
     /* Semantic colors — vibrantes sobre fondo neutro */
     --destructive: 0 78% 62%;
@@ -114,33 +114,33 @@
     --success: 165 65% 52%;
     --success-foreground: 0 0% 100%;
     --warning: 32 95% 60%;
-    --warning-foreground: 220 10% 5%;
+    --warning-foreground: 220 18% 11%;
     --profit: 165 68% 50%;
     --loss: 0 78% 62%;
 
     /* Borders sutiles, casi imperceptibles */
-    --border: 220 9% 17%;
-    --input: 220 9% 14%;
-    --ring: 199 80% 60%;
+    --border: 220 12% 22%;
+    --input: 220 12% 18%;
+    --ring: 32 40% 68%;
 
-    /* Charts — luminosos */
-    --chart-1: 199 80% 60%;
-    --chart-2: 197 100% 50%;
-    --chart-3: 217 75% 62%;
-    --chart-4: 183 92% 56%;
-    --chart-5: 167 58% 66%;
+    /* Charts — cálidos sobre fondo carbon */
+    --chart-1: 32 40% 68%;
+    --chart-2: 30 50% 75%;
+    --chart-3: 28 35% 55%;
+    --chart-4: 220 10% 55%;
+    --chart-5: 35 30% 82%;
 
-    --teal: 183 92% 56%;
+    --teal: 30 50% 75%;
 
     /* Sidebar más oscura que el background — efecto de profundidad */
-    --sidebar-background: 220 11% 4%;
-    --sidebar-foreground: 220 10% 64%;
-    --sidebar-primary: 199 80% 60%;
-    --sidebar-primary-foreground: 220 10% 5%;
-    --sidebar-accent: 220 10% 13%;
-    --sidebar-accent-foreground: 220 15% 92%;
-    --sidebar-border: 220 9% 14%;
-    --sidebar-ring: 199 80% 60%;
+    --sidebar-background: 220 18% 8%;
+    --sidebar-foreground: 30 10% 72%;
+    --sidebar-primary: 32 40% 68%;
+    --sidebar-primary-foreground: 220 18% 11%;
+    --sidebar-accent: 220 14% 18%;
+    --sidebar-accent-foreground: 30 15% 92%;
+    --sidebar-border: 220 12% 18%;
+    --sidebar-ring: 32 40% 68%;
   }
 }
 
