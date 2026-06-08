@@ -262,30 +262,46 @@ const FIELD_LABELS: Record<keyof typeof FIELD_ALIASES, string> = {
   notes: 'Notas',
   stopLoss: 'Stop Loss',
   takeProfit: 'Take Profit',
+  commission: 'Comisión',
+  swap: 'Swap',
 };
 
 const FIELD_ALIASES = {
-  symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product'],
-  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando', 'trade side'],
-  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'fill price', 'exec price', 'avg price', 'average price', 'price of open', 'opening price', 'entry @', 'open @'],
-  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close', 'exit @', 'close @'],
-  quantity: ['quantity', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'volume (lots)', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size', 'lot size'],
-  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'gross pnl', 'net usd', 'net p/l', 'net', 'gross profit', 'profit (usd)', 'profit usd'],
-  pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %'],
-  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'trade date', 'execution date', 'opened', 'start date', 'time of open', 'opening time', 'open time', 'entry time'],
-  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close', 'closing time', 'close time', 'exit time'],
-  strategy: ['strategy', 'estrategia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern'],
-  notes: ['notes', 'notas', 'comment', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo', 'label', 'etiqueta'],
-  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l', 's/l'],
-  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p', 't/p'],
+  symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'instrumento financiero', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product', 'produto', 'produit', 'contract', 'underlying'],
+  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando', 'trade side', 'market pos.', 'market pos', 'sentido', 'sens', 'lado'],
+  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'prezzo', 'prix', 'preco', 'preço', 'fill price', 'exec price', 'avg price', 'average price', 'price of open', 'opening price', 'entry @', 'open @', 't. price', 'trade price', 'executed price'],
+  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close', 'exit @', 'close @', 'prix sortie', 'preco saida'],
+  quantity: ['quantity', 'quantidade', 'quantité', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'volume (lots)', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size', 'lot size', 'executed', 'filled', 'trade volume lots'],
+  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'realized profit', 'gross pnl', 'net usd', 'net p/l', 'net', 'gross profit', 'profit (usd)', 'profit usd', 'closed p&l', 'closed p/l', 'closed pnl', 'realized p&l', 'lucro', 'beneficio neto'],
+  pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %', 'rendement %'],
+  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'data', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'date time', 'date/time', 'trade date', 'execution date', 'opened', 'start date', 'time of open', 'opening time', 'open time', 'entry time', 'date(utc)', 'transact time', 'hora apertura'],
+  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close', 'closing time', 'close time', 'exit time', 'hora cierre'],
+  strategy: ['strategy', 'estrategia', 'estratégia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern', 'stratégie'],
+  notes: ['notes', 'notas', 'comment', 'comments', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo', 'label', 'etiqueta', 'tag', 'tags'],
+  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l', 's/l', 'sl price'],
+  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p', 't/p', 'tp price'],
+  commission: ['commission', 'comisión', 'comision', 'comissao', 'comissão', 'commissione', 'fee', 'fees', 'comm/fee', 'comm', 'cost', 'broker fee', 'trading fee', 'commission usd'],
+  swap: ['swap', 'rollover', 'financing', 'overnight', 'interest', 'swap usd'],
 };
+
+const MANDATORY_FIELDS: (keyof typeof FIELD_ALIASES)[] = ['symbol', 'direction', 'entryPrice', 'exitPrice', 'quantity', 'entryDate'];
 
 function buildRowGetter(headers: string[], values: unknown[]) {
   const norm = headers.map(h => String(h ?? '').toLowerCase().trim().replace(/\s+/g, ' '));
   return (key: keyof typeof FIELD_ALIASES): unknown => {
-    for (const alias of FIELD_ALIASES[key]) {
-      const idx = norm.findIndex(h => h === alias || h.includes(alias) || alias.includes(h) && h.length > 2);
+    const aliases = FIELD_ALIASES[key];
+    // Pass 1: exact / substring match
+    for (const alias of aliases) {
+      const idx = norm.findIndex(h => h === alias || h.includes(alias) || (alias.includes(h) && h.length > 2));
       if (idx !== -1 && values[idx] !== undefined && values[idx] !== '') return values[idx];
+    }
+    // Pass 2: fuzzy (Levenshtein) for short headers, tolerate typos / accents
+    for (let i = 0; i < norm.length; i++) {
+      const h = norm[i];
+      if (h.length < 3 || h.length > 30) continue;
+      if (aliases.some(a => a.length >= 3 && Math.abs(a.length - h.length) <= 2 && levenshtein(a, h) <= 2)) {
+        if (values[i] !== undefined && values[i] !== '') return values[i];
+      }
     }
     return '';
   };
