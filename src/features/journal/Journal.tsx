@@ -1365,6 +1365,7 @@ export default function Journal() {
         fileName={previewFileName}
         fileHash={previewFileHash}
         duplicatePositionIds={duplicatePositionIds}
+        perFileReports={previewPerFileReports}
         onConfirm={handleConfirmImport}
         isImporting={isImporting}
       />
