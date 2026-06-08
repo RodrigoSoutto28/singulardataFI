@@ -156,6 +156,7 @@ export default function Journal() {
   const [previewRawRows, setPreviewRawRows] = useState<string[][]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
+  const [previewPerFileReports, setPreviewPerFileReports] = useState<any[] | undefined>(undefined);
   const [isUndoing, setIsUndoing] = useState(false);
   const [duplicatePositionIds, setDuplicatePositionIds] = useState<string[]>([]);
   const [duplicateInfo, setDuplicateInfo] = useState<{
