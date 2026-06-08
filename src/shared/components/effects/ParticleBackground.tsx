@@ -32,7 +32,7 @@ const ParticleBackground = ({ className }: ParticleBackgroundProps) => {
     const baseW = 2800;
     const baseH = 1200;
     const basePerimeter = baseW + baseH;
-    const rgb = options.lineColor.match(/\d+/g) ?? ['66', '158', '189'];
+    const rgb = options.lineColor.match(/\d+/g) ?? ['201', '168', '138'];
 
     const resizeReset = () => {
       w = canvas.width = window.innerWidth;
