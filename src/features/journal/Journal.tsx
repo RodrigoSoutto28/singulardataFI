@@ -193,7 +193,7 @@ export default function Journal() {
   const [wizardStep, setWizardStep] = useState<1 | 2>(1);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
-  const { importFromFile } = useImportTrades();
+  const { importFromFile, importFromFiles } = useImportTrades();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -319,56 +319,75 @@ export default function Journal() {
 
   // Handle file selection - opens preview modal
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) return;
 
     try {
-      // 1. Hash the file and check if it was already imported
-      const fileHash = await hashFile(file);
-      if (user?.id) {
-        const existing = await findActiveBatchByFileHash(user.id, fileHash);
-        if (existing) {
-          setDuplicateInfo({
-            fileName: file.name,
-            previousName: existing.file_name,
-            date: new Date(existing.created_at).toLocaleString(),
-            count: existing.imported_count ?? 0,
-            fileHash,
-          });
-          return;
+      // Single-file flow keeps duplicate-batch detection
+      if (files.length === 1) {
+        const file = files[0];
+        const fileHash = await hashFile(file);
+        if (user?.id) {
+          const existing = await findActiveBatchByFileHash(user.id, fileHash);
+          if (existing) {
+            setDuplicateInfo({
+              fileName: file.name,
+              previousName: existing.file_name,
+              date: new Date(existing.created_at).toLocaleString(),
+              count: existing.imported_count ?? 0,
+              fileHash,
+            });
+            return;
+          }
         }
-      }
 
-      const result = await importFromFile(file);
-
-      // 2. Cross-check Position IDs already in DB (cTrader exports)
-      let dupIds: string[] = [];
-      if (user?.id && result.trades.length > 0) {
-        try {
-          const existingIds = await findExistingPositionIds(user.id);
-          dupIds = result.trades
-            .map((t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1])
-            .filter((id): id is string => !!id && existingIds.has(id));
-        } catch (e) {
-          console.warn('[ImportTrades] Position ID validation skipped:', e);
+        const result = await importFromFile(file);
+        let dupIds: string[] = [];
+        if (user?.id && result.trades.length > 0) {
+          try {
+            const existingIds = await findExistingPositionIds(user.id);
+            dupIds = result.trades
+              .map((t) => t.notes?.match(/cTrader Position #(\d+)/)?.[1])
+              .filter((id): id is string => !!id && existingIds.has(id));
+          } catch (e) {
+            console.warn('[ImportTrades] Position ID validation skipped:', e);
+          }
         }
-      }
-      setDuplicatePositionIds(dupIds);
+        setDuplicatePositionIds(dupIds);
 
-      // Always open the preview so the user can see errors when no trades parsed
-      setPreviewTrades(result.trades);
-      setPreviewMetadata(result.metadata);
-      setPreviewRawRows(result.rawRows || []);
-      setPreviewErrors(
-        result.errors.length > 0
-          ? result.errors
-          : result.trades.length === 0
-            ? ['No se reconocieron operaciones en el archivo. Verifica que las columnas incluyan al menos: símbolo, dirección, precio de entrada y cantidad.']
-            : []
-      );
-      setPreviewFileName(file.name);
-      setPreviewFileHash(fileHash);
-      setPreviewOpen(true);
+        setPreviewTrades(result.trades);
+        setPreviewMetadata(result.metadata);
+        setPreviewRawRows(result.rawRows || []);
+        setPreviewErrors(
+          result.errors.length > 0
+            ? result.errors
+            : result.trades.length === 0
+              ? ['No se reconocieron operaciones en el archivo. Verifica que las columnas incluyan al menos: símbolo, dirección, precio de entrada y cantidad.']
+              : []
+        );
+        setPreviewFileName(file.name);
+        setPreviewFileHash(fileHash);
+        setPreviewOpen(true);
+      } else {
+        // Multi-file flow
+        const multi = await importFromFiles(files);
+        setDuplicatePositionIds([]);
+        setPreviewTrades(multi.trades);
+        setPreviewMetadata(multi.files[0]?.metadata);
+        setPreviewRawRows([]);
+        const errs = [...multi.errors];
+        const summary = multi.files
+          .map((f) => `${f.fileName}: ${f.trades.length} op. — ${f.metadata?.brokerDetected ?? 'generic'}`)
+          .join(' | ');
+        errs.unshift(`Multi-archivo (${multi.files.length}): ${summary}`);
+        if (multi.trades.length === 0) {
+          errs.push('No se reconocieron operaciones en ninguno de los archivos.');
+        }
+        setPreviewErrors(errs);
+        setPreviewFileName(`${multi.files.length} archivos`);
+        setPreviewFileHash(undefined);
+        setPreviewOpen(true);
+      }
     } catch (error) {
       console.error('[ImportTrades] Unexpected error:', error);
       toast.error(t.journal.importError ?? 'No se pudo importar el archivo. Verifica el formato e inténtalo de nuevo.');
@@ -874,6 +893,7 @@ export default function Journal() {
             ref={fileInputRef}
             onChange={handleFileSelect}
             accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.ods,.json,.html,.htm,.xml,.pdf"
+            multiple
             className="hidden"
           />
           <Button

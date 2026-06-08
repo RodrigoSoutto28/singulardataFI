@@ -1,54 +1,90 @@
-# Rebrand a "MindOn Trading Software"
 
-## 1. Nuevo identitario visual
-- **Nombre**: `SINGULAR dataFI` → `MindOn`
-- **Tagline**: `Trading Intelligence Platform` → `Trading Software`
-- **Logo símbolo**: ícono "power" (círculo abierto con barra vertical) en tono beige, reemplazando el `LineChart` actual. Se crea un componente `MindOnLogo` (SVG inline) reutilizable, para que el ícono se vea idéntico en sidebar, auth, splash, footer, topbar, onboarding, etc.
-- **Imagen subida**: se guarda como asset CDN (`src/assets/mindon-logo.jpeg.asset.json`) para uso en metadatos OG / about / login hero opcional.
+# Plan: Motor de importación de operaciones potenciado
 
-## 2. Nueva paleta (reemplaza el celeste)
-Tomada del logo (fondo navy carbón + tipografía blanca + ícono beige cálido):
+## Objetivo
+Mejorar `useImportTrades` para que detecte e interprete con mayor precisión datos de brokers reales (cTrader, MT4, MT5, TradingView, Binance, Bybit, IBKR, NinjaTrader, ThinkorSwim) y permita importar varios archivos a la vez con resultados unificados.
 
-| Token | Antes (celeste) | Ahora (beige cálido) |
-|---|---|---|
-| `--primary` | `197 85% 38%` | `32 35% 62%` (beige tan) |
-| `--accent` | `199 60% 48%` | `30 45% 72%` (beige claro) |
-| `--sidebar-primary` | `197 100% 35%` | `32 35% 62%` |
-| Dark mode `--primary` | `199 80% 60%` | `32 40% 68%` |
-| Dark mode `--accent` | `197 100% 50%` | `30 50% 75%` |
-| `--background` dark | (actual) | navy carbón `220 18% 11%` (alineado al logo) |
-| `theme-color` HTML | `#0779A2` | `#C9A88A` |
+## Alcance funcional
 
-Equivalentes hex aprox para usos hardcoded: primario `#C9A88A`, hover/accent `#D9BE9F`, profundo `#A6845F`.
+### 1. Multi-archivo
+- `useImportTrades` expone una nueva función `importFromFiles(files: File[])` que procesa N archivos en paralelo (Promise.all) y devuelve un `ParseResult` consolidado (trades + errores etiquetados por archivo + metadata por archivo).
+- `Journal.tsx`: el `<input type="file" />` cambia a `multiple`. Si se sube 1 archivo se comporta igual que antes; si son varios, el `ImportPreviewModal` recibe los trades fusionados y muestra una columna "Origen" con el nombre del archivo.
+- Deduplicación cruzada entre archivos por `(symbol, entryDate, exitDate, entryPrice, quantity)`.
 
-## 3. Reemplazos puntuales de hex celeste
-- `src/features/journal/hooks/useExportTrades.ts`: `#5FE2F5`/`#429EBD` → `#D9BE9F`/`#C9A88A` (HTML/PDF export styles).
-- `src/shared/components/effects/NeuronParticles.tsx`: cambiar `primaryColor`/`accentColor` RGB a `(201,168,138)` y `(217,190,159)` + comentarios.
-- `src/shared/components/effects/ParticleBackground.tsx`: `rgba(66,158,189)` → `rgba(201,168,138)`.
-- `index.html`: `theme-color`, `.sdf-logo` background y `box-shadow` a tonos beige; `.sdf-name` "MindOn"; `.sdf-tag` "Trading Software"; `<title>` y meta `description/author/og:title/twitter:title/twitter:site` actualizados; canonical igual.
+### 2. Detección de broker reforzada
+Ampliar `detectBroker` y `BROKER_MAPS` para:
+- **MT5 Detailed (HTML)**: cabeceras "Position", "S/L", "T/P", "Commission", "Swap".
+- **MT4 statement (HTML)**: secciones "Closed Transactions".
+- **Binance Spot/Futures CSV**: `Date(UTC), Pair, Side, Price, Executed, Amount, Fee, Realized Profit`.
+- **Bybit**: `Contracts, Closed P&L`.
+- **IBKR Flex/Activity**: `Symbol, DateTime, Quantity, T. Price, Proceeds, Comm/Fee, Realized P/L`.
+- **NinjaTrader**: `Instrument, Account, Strategy, Market pos., Qty, Entry price, Exit price, Entry time, Exit time, Profit`.
+- **TradingView Strategy Tester**: filas pareadas Entry/Exit por `Trade #`.
+- **DXTrade / Match-Trader / TradeLocker**: aliases adicionales.
 
-## 4. Archivos que mencionan el nombre
-Cambiar todas las apariciones literales de `SINGULAR dataFI` / `SINGULAR` / `dataFI` por `MindOn`:
-- `src/features/auth/Auth.tsx` (hero branding + ícono)
-- `src/shared/components/layout/Sidebar.tsx` (logo + nombre lateral)
-- `src/shared/components/layout/TopBar.tsx`
-- `src/shared/components/layout/PublicFooter.tsx`
-- `src/features/auth/components/onboarding/WelcomeModal.tsx`, `WelcomeScreen.tsx`, `TourStep.tsx`
-- `src/features/settings/Settings.tsx`
-- `src/app/Privacy.tsx`, `src/app/Terms.tsx`
-- `src/shared/lib/i18n/translations.ts` (claves con el nombre)
-- `index.html` (splash, title, meta tags)
+### 3. Parsers nuevos / mejorados
+- **PDF**: integrar `pdfjs-dist` (ya disponible vía Vite) para extraer texto y, si se detecta una tabla tipo statement, derivar filas; si no, devolver error claro con recomendación de exportar CSV.
+- **HTML/MHTML real**: mejorar `parseHTML` para iterar TODAS las tablas, detectar la que tiene más cabeceras reconocidas, soportar reportes MT4/MT5 multi-tabla (Closed Transactions, Open Trades, Working Orders), y descartar tablas resumen.
+- **XML**: detectar y soportar reportes XML genéricos (MT5 `<order>` / FIX-like) usando `DOMParser`.
+- **TSV/PRN**: ya cubierto por detector de delimitador; añadir delimitador de ancho fijo cuando todas las líneas tienen `\s{2,}` consistente.
 
-Tagline traducido por idioma se queda como "Trading Software" (EN/ES/PT/FR) en `Auth.tsx` localized strings.
+### 4. Mejoras del motor de identificación
+- **Fuzzy header matching**: usar distancia Levenshtein ≤ 2 contra aliases cuando no hay match exacto/substring, para tolerar typos y variaciones de idioma (ej. "Quantidade", "Quantité").
+- **Detección de cabecera multi-fila**: cuando una cabecera ocupa 2 filas (común en MT5), fusionar texto antes de scoring.
+- **Inferencia de dirección**: si falta columna, deducirla por `exitPrice vs entryPrice + pnl` (ya parcial) y por símbolo del lote (negativo = sell en algunos brokers).
+- **Normalización de símbolos**: stripear sufijos `.a`, `.r`, `-PRO`, `_ECN`, etc., manteniendo el ticker base + guardar el sufijo en `notes`.
+- **Fechas**: añadir formatos `YYYY.MM.DD HH:mm:ss` (MT4/MT5), `DD-MMM-YYYY`, `MMM DD, YYYY`, epoch ms.
+- **Moneda**: detectar columna `Currency` o símbolos $/€/£ en P&L y guardar en metadata.
+- **Comisión + swap**: capturar como campos separados y restar/sumar al pnl bruto cuando solo viene "Gross Profit".
 
-## 5. Memoria del proyecto
-Actualizar `mem://index.md` Core: brand `SINGULAR dataFI` → `MindOn`, ícono `LineChart` → `MindOnLogo` (power icon), paleta `#429EBD/#5FE2F5` → `#C9A88A/#D9BE9F`.
+### 5. Validaciones y diagnóstico (preview)
+- El `ImportPreviewModal` ya muestra metadata; añadir:
+  - Resumen por archivo (cuando es multi-archivo).
+  - Conteo de operaciones duplicadas entre archivos.
+  - Aviso cuando >30% de filas fueron ignoradas (probable formato no reconocido).
+  - Lista de cabeceras NO mapeadas para que el usuario detecte gaps.
 
-## 6. Fuera de alcance
-- No se tocan iconos de Lucide en gráficos/indicadores (sólo el branding).
-- No se renombra el dominio publicado ni proyecto Lovable.
-- No se cambia layout/estructura de páginas, sólo color y branding.
+### 6. Tests
+Ampliar `useImportTrades.test.ts` con fixtures:
+- Binance Spot CSV.
+- MT4 HTML statement (mini).
+- IBKR CSV.
+- Multi-archivo (2 CSVs con duplicados cruzados).
+- Cabecera multi-fila MT5.
 
-## Validación
-- Recorrer `/auth`, `/dashboard`, sidebar, topbar, footer y splash en preview para confirmar que ya no aparece celeste ni "SINGULAR dataFI".
-- `rg -i "singular|datafi|429ebd|5fe2f5"` debe devolver vacío (excepto memoria histórica).
+## Detalles técnicos
+
+### Archivos a tocar
+- `src/features/journal/hooks/useImportTrades.ts` — núcleo de cambios.
+- `src/features/journal/Journal.tsx` — input `multiple`, llamada a `importFromFiles`.
+- `src/features/journal/components/ImportPreviewModal.tsx` — columna origen + resumen multi-archivo + cabeceras no mapeadas.
+- `src/features/journal/hooks/__tests__/useImportTrades.test.ts` — tests nuevos + fixtures en `__tests__/fixtures/`.
+- (Opcional) `package.json` — añadir `pdfjs-dist` si se confirma soporte PDF.
+
+### Estructuras nuevas
+```ts
+interface FileParseResult extends ParseResult {
+  fileName: string;
+  fileSize: number;
+  brokerDetected: BrokerFormat | 'unknown';
+}
+interface MultiParseResult {
+  files: FileParseResult[];
+  mergedTrades: ImportedTrade[];
+  crossFileDuplicates: number;
+  totalErrors: string[];
+}
+```
+
+### Estrategia de fuzzy matching
+Helper local `levenshtein(a, b)` (≤30 líneas, sin deps). Solo se invoca para headers no resueltos por match exacto/substring.
+
+## Fuera de alcance
+- OCR de PDFs escaneados.
+- Conexión directa a APIs de brokers.
+- Reescritura del flujo de batches/duplicados ya existente (`useImportBatches`).
+- Cambios visuales fuera del modal de import.
+
+## Preguntas abiertas
+1. ¿Querés soporte real de PDF (añade `pdfjs-dist` ~2 MB) o mantenemos el mensaje actual de "exportá como CSV"?
+2. ¿Confirmás importación multi-archivo simultánea desde el botón "Importar"?

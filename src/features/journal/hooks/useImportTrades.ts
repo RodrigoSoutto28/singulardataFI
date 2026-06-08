@@ -15,7 +15,10 @@ export interface ImportedTrade {
   notes?: string;
   stopLoss?: number;
   takeProfit?: number;
+  commission?: number;
+  swap?: number;
   assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+  sourceFile?: string;
 }
 
 export interface ParseMetadata {
@@ -26,7 +29,9 @@ export interface ParseMetadata {
   ignoredRows: number;
   missingColumns: string[];
   columnMapping: Record<string, string>; // internal field -> CSV header
+  unmappedHeaders?: string[];
   ignoredDetails: { row: number; reason: string; data?: string[] }[];
+  brokerDetected?: string;
 }
 
 export interface ParseResult {
@@ -34,6 +39,18 @@ export interface ParseResult {
   errors: string[];
   metadata?: ParseMetadata;
   rawRows?: string[][];
+}
+
+export interface FileParseResult extends ParseResult {
+  fileName: string;
+  fileSize: number;
+}
+
+export interface MultiParseResult {
+  files: FileParseResult[];
+  trades: ImportedTrade[];
+  errors: string[];
+  crossFileDuplicates: number;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -48,9 +65,22 @@ function detectAssetClass(symbol: string): ImportedTrade['assetClass'] {
   return 'stocks';
 }
 
+const MONTH_MAP: Record<string, number> = {
+  jan: 1, ene: 1, feb: 2, mar: 3, apr: 4, abr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, ago: 8, sep: 9, set: 9, oct: 10, nov: 11, dec: 12, dic: 12,
+};
+
 function parseDate(dateStr: string | number | Date | null | undefined, dayFirstHint = true): string | null {
   if (dateStr === null || dateStr === undefined || dateStr === '') return null;
   if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr.toISOString();
+
+  if (typeof dateStr === 'number') {
+    const ms = dateStr > 1e12 ? dateStr : dateStr > 1e9 ? dateStr * 1000 : NaN;
+    if (!isNaN(ms)) {
+      const d = new Date(ms);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+  }
 
   const str = String(dateStr).trim();
   if (!str) return null;
@@ -60,18 +90,32 @@ function parseDate(dateStr: string | number | Date | null | undefined, dayFirstH
     if (!isNaN(d.getTime())) return d.toISOString();
   }
 
+  if (/^\d{10,13}$/.test(str)) {
+    const n = parseInt(str, 10);
+    const ms = str.length === 13 ? n : n * 1000;
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+
   const numDate = parseFloat(str);
   if (!isNaN(numDate) && numDate > 25569 && numDate < 60000 && /^\d+(\.\d+)?$/.test(str)) {
     const excelEpoch = new Date(1899, 11, 30);
     return new Date(excelEpoch.getTime() + numDate * 86400000).toISOString();
   }
 
+  // YYYY.MM.DD or YYYY-MM-DD or YYYY/MM/DD with optional time (MT4/MT5)
+  let m = str.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, y, mo, da, h = '0', mi = '0', s = '0'] = m;
+    const d = new Date(Date.UTC(+y, +mo - 1, +da, +h, +mi, +s));
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+
   // DD/MM/YYYY HH:MM[:SS] or MM/DD/YYYY HH:MM[:SS]
-  const m = str.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  m = str.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
     const year = y.length === 2 ? 2000 + +y : +y;
-    // If first part > 12 it MUST be day. Otherwise rely on hint.
     let day: number, month: number;
     if (+a > 12) { day = +a; month = +b; }
     else if (+b > 12) { day = +b; month = +a; }
@@ -80,6 +124,30 @@ function parseDate(dateStr: string | number | Date | null | undefined, dayFirstH
     const d = new Date(Date.UTC(year, month - 1, day, +h, +mi, +s));
     if (!isNaN(d.getTime()) && d.getUTCDate() === day && d.getUTCMonth() === month - 1) {
       return d.toISOString();
+    }
+  }
+
+  // DD-MMM-YYYY [HH:MM[:SS]]
+  m = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3,})[-\s](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, da, monStr, y, h = '0', mi = '0', s = '0'] = m;
+    const month = MONTH_MAP[monStr.slice(0, 3).toLowerCase()];
+    if (month) {
+      const year = y.length === 2 ? 2000 + +y : +y;
+      const d = new Date(Date.UTC(year, month - 1, +da, +h, +mi, +s));
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+  }
+
+  // MMM DD, YYYY
+  m = str.match(/^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, monStr, da, y, h = '0', mi = '0', s = '0'] = m;
+    const month = MONTH_MAP[monStr.slice(0, 3).toLowerCase()];
+    if (month) {
+      const year = y.length === 2 ? 2000 + +y : +y;
+      const d = new Date(Date.UTC(year, month - 1, +da, +h, +mi, +s));
+      if (!isNaN(d.getTime())) return d.toISOString();
     }
   }
 
@@ -98,6 +166,34 @@ function parseNumber(value: unknown): number | undefined {
     .replace(/\(([^)]+)\)/, '-$1');
   const num = parseFloat(cleaned);
   return isNaN(num) ? undefined : num;
+}
+
+// Normalize symbol: strip broker suffixes (.a, .r, -PRO, _ECN, .m, .pro, #), keep base ticker.
+function normalizeSymbol(raw: string): { symbol: string; suffix?: string } {
+  const cleaned = String(raw).trim().toUpperCase().replace(/\s+/g, '');
+  const m = cleaned.match(/^([A-Z0-9/]+?)([.\-_#][A-Z0-9]{1,5})$/);
+  if (m && m[1].length >= 3) return { symbol: m[1], suffix: m[2] };
+  return { symbol: cleaned };
+}
+
+// Cheap Levenshtein for fuzzy header matching on short strings.
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const m = a.length, n = b.length;
+  if (Math.abs(m - n) > 3) return 99;
+  let prev = new Array(n + 1).fill(0).map((_, i) => i);
+  let cur = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
 }
 
 // Detect delimiter for CSV-like content. Picks the candidate that yields the
@@ -150,7 +246,6 @@ function splitCSVLine(line: string, delim: string): string[] {
 
 // ─── Field mapping ──────────────────────────────────────────────────────────
 
-const MANDATORY_FIELDS: (keyof typeof FIELD_ALIASES)[] = ['symbol', 'direction', 'entryPrice', 'exitPrice', 'quantity', 'entryDate'];
 
 const FIELD_LABELS: Record<keyof typeof FIELD_ALIASES, string> = {
   symbol: 'Activo',
@@ -166,30 +261,46 @@ const FIELD_LABELS: Record<keyof typeof FIELD_ALIASES, string> = {
   notes: 'Notas',
   stopLoss: 'Stop Loss',
   takeProfit: 'Take Profit',
+  commission: 'Comisión',
+  swap: 'Swap',
 };
 
 const FIELD_ALIASES = {
-  symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product'],
-  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando', 'trade side'],
-  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'fill price', 'exec price', 'avg price', 'average price', 'price of open', 'opening price', 'entry @', 'open @'],
-  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close', 'exit @', 'close @'],
-  quantity: ['quantity', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'volume (lots)', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size', 'lot size'],
-  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'gross pnl', 'net usd', 'net p/l', 'net', 'gross profit', 'profit (usd)', 'profit usd'],
-  pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %'],
-  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'trade date', 'execution date', 'opened', 'start date', 'time of open', 'opening time', 'open time', 'entry time'],
-  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close', 'closing time', 'close time', 'exit time'],
-  strategy: ['strategy', 'estrategia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern'],
-  notes: ['notes', 'notas', 'comment', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo', 'label', 'etiqueta'],
-  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l', 's/l'],
-  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p', 't/p'],
+  symbol: ['symbol', 'símbolo', 'simbolo', 'par', 'pair', 'asset', 'activo', 'ticker', 'instrument', 'instrumento', 'instrumento financiero', 'security', 'item', 'market', 'mercado', 'currency pair', 'forex pair', 'stock', 'crypto', 'product', 'produto', 'produit', 'contract', 'underlying'],
+  direction: ['direction', 'dirección', 'direccion', 'tipo', 'type', 'side', 'action', 'acción', 'accion', 'buy/sell', 'compra/venta', 'order type', 'trade type', 'position', 'b/s', 'long/short', 'cmd', 'comando', 'trade side', 'market pos.', 'market pos', 'sentido', 'sens', 'lado'],
+  entryPrice: ['entry price', 'entry_price', 'entry', 'entrada', 'precio_entrada', 'precio entrada', 'open price', 'open', 'apertura', 'precio apertura', 'price', 'precio', 'prezzo', 'prix', 'preco', 'preço', 'fill price', 'exec price', 'avg price', 'average price', 'price of open', 'opening price', 'entry @', 'open @', 't. price', 'trade price', 'executed price'],
+  exitPrice: ['exit price', 'exit_price', 'exit', 'salida', 'precio_salida', 'precio salida', 'close price', 'close', 'cierre', 'precio cierre', 'closing price', 'price of close', 'exit @', 'close @', 'prix sortie', 'preco saida'],
+  quantity: ['quantity', 'quantidade', 'quantité', 'cantidad', 'size', 'tamaño', 'tamano', 'lots', 'lotes', 'volume', 'volumen', 'volume (lots)', 'shares', 'acciones', 'units', 'unidades', 'contracts', 'contratos', 'amount', 'qty', 'position size', 'lot size', 'executed', 'filled', 'trade volume lots'],
+  pnl: ['pnl', 'p&l', 'p/l', 'profit', 'ganancia', 'resultado', 'result', 'profit_loss', 'profit/loss', 'net profit', 'beneficio', 'realized pnl', 'realized p/l', 'realized profit', 'gross pnl', 'net usd', 'net p/l', 'net', 'gross profit', 'profit (usd)', 'profit usd', 'closed p&l', 'closed p/l', 'closed pnl', 'realized p&l', 'lucro', 'beneficio neto'],
+  pnlPercentage: ['pnl%', 'pnl_percentage', 'pnl percentage', 'porcentaje', 'return', 'retorno', '% return', 'return %', 'percentage', 'roi', '% profit', 'profit %', 'rendement %'],
+  entryDate: ['entry date', 'entry_date', 'fecha_entrada', 'fecha entrada', 'date', 'fecha', 'data', 'open date', 'open_date', 'fecha_apertura', 'fecha apertura', 'time', 'datetime', 'date time', 'date/time', 'trade date', 'execution date', 'opened', 'start date', 'time of open', 'opening time', 'open time', 'entry time', 'date(utc)', 'transact time', 'hora apertura'],
+  exitDate: ['exit date', 'exit_date', 'fecha_salida', 'fecha salida', 'close date', 'close_date', 'fecha_cierre', 'fecha cierre', 'closed', 'end date', 'closing date', 'time of close', 'closing time', 'close time', 'exit time', 'hora cierre'],
+  strategy: ['strategy', 'estrategia', 'estratégia', 'setup', 'system', 'sistema', 'method', 'trading system', 'approach', 'pattern', 'stratégie'],
+  notes: ['notes', 'notas', 'comment', 'comments', 'comentario', 'observation', 'observación', 'observacion', 'remarks', 'description', 'descripción', 'descripcion', 'details', 'memo', 'label', 'etiqueta', 'tag', 'tags'],
+  stopLoss: ['stop loss', 'stop_loss', 'sl', 'stop', 'stoploss', 'stop price', 'stop level', 'protective stop', 's / l', 's/l', 'sl price'],
+  takeProfit: ['take profit', 'take_profit', 'tp', 'target', 'objetivo', 'profit target', 'target price', 'limit', 'take_profit_price', 't / p', 't/p', 'tp price'],
+  commission: ['commission', 'comisión', 'comision', 'comissao', 'comissão', 'commissione', 'fee', 'fees', 'comm/fee', 'comm', 'cost', 'broker fee', 'trading fee', 'commission usd'],
+  swap: ['swap', 'rollover', 'financing', 'overnight', 'interest', 'swap usd'],
 };
+
+const MANDATORY_FIELDS: (keyof typeof FIELD_ALIASES)[] = ['symbol', 'direction', 'entryPrice', 'exitPrice', 'quantity', 'entryDate'];
 
 function buildRowGetter(headers: string[], values: unknown[]) {
   const norm = headers.map(h => String(h ?? '').toLowerCase().trim().replace(/\s+/g, ' '));
   return (key: keyof typeof FIELD_ALIASES): unknown => {
-    for (const alias of FIELD_ALIASES[key]) {
-      const idx = norm.findIndex(h => h === alias || h.includes(alias) || alias.includes(h) && h.length > 2);
+    const aliases = FIELD_ALIASES[key];
+    // Pass 1: exact / substring match
+    for (const alias of aliases) {
+      const idx = norm.findIndex(h => h === alias || h.includes(alias) || (alias.includes(h) && h.length > 2));
       if (idx !== -1 && values[idx] !== undefined && values[idx] !== '') return values[idx];
+    }
+    // Pass 2: fuzzy (Levenshtein) for short headers, tolerate typos / accents
+    for (let i = 0; i < norm.length; i++) {
+      const h = norm[i];
+      if (h.length < 3 || h.length > 30) continue;
+      if (aliases.some(a => a.length >= 3 && Math.abs(a.length - h.length) <= 2 && levenshtein(a, h) <= 2)) {
+        if (values[i] !== undefined && values[i] !== '') return values[i];
+      }
     }
     return '';
   };
@@ -197,7 +308,7 @@ function buildRowGetter(headers: string[], values: unknown[]) {
 
 // ─── Broker-specific exact mappings ─────────────────────────────────────────
 
-type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'generic';
+type BrokerFormat = 'ctrader' | 'mt4' | 'mt5' | 'tradingview' | 'binance' | 'bybit' | 'ibkr' | 'ninjatrader' | 'generic';
 
 interface BrokerMap {
   format: BrokerFormat;
@@ -220,6 +331,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       stopLoss: ['stop loss', 'sl'],
       takeProfit: ['take profit', 'tp'],
       strategy: ['comment', 'label'],
+      commission: ['commission', 'commissions'],
+      swap: ['swap'],
     },
   },
   mt5: {
@@ -235,6 +348,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       exitDate: ['time.1', 'close time'],
       stopLoss: ['s / l', 's/l'],
       takeProfit: ['t / p', 't/p'],
+      commission: ['commission'],
+      swap: ['swap'],
     },
   },
   mt4: {
@@ -250,6 +365,8 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       exitDate: ['close time'],
       stopLoss: ['s / l'],
       takeProfit: ['t / p'],
+      commission: ['commission'],
+      swap: ['swap'],
     },
   },
   tradingview: {
@@ -263,6 +380,59 @@ const BROKER_MAPS: Record<Exclude<BrokerFormat, 'generic'>, BrokerMap> = {
       pnl: ['p&l', 'profit', 'net p&l'],
       entryDate: ['date/time', 'entry time'],
       exitDate: ['exit time'],
+    },
+  },
+  binance: {
+    format: 'binance',
+    fields: {
+      symbol: ['pair', 'symbol'],
+      direction: ['side'],
+      entryPrice: ['price'],
+      quantity: ['executed', 'amount', 'filled', 'quantity'],
+      pnl: ['realized profit', 'realized pnl', 'realized p&l'],
+      entryDate: ['date(utc)', 'date', 'time'],
+      commission: ['fee'],
+    },
+  },
+  bybit: {
+    format: 'bybit',
+    fields: {
+      symbol: ['contracts', 'symbol'],
+      direction: ['side'],
+      entryPrice: ['entry price', 'avg entry price'],
+      exitPrice: ['exit price', 'avg exit price'],
+      quantity: ['qty', 'closed qty'],
+      pnl: ['closed p&l', 'closed pnl', 'realized p&l'],
+      entryDate: ['create time', 'open time', 'time'],
+      exitDate: ['close time'],
+      commission: ['fee', 'trading fee'],
+    },
+  },
+  ibkr: {
+    format: 'ibkr',
+    fields: {
+      symbol: ['symbol'],
+      direction: ['buy/sell', 'side'],
+      entryPrice: ['t. price', 'trade price', 'price'],
+      quantity: ['quantity'],
+      pnl: ['realized p/l', 'realized pnl'],
+      entryDate: ['date/time', 'datetime', 'trade date'],
+      commission: ['comm/fee', 'commission'],
+    },
+  },
+  ninjatrader: {
+    format: 'ninjatrader',
+    fields: {
+      symbol: ['instrument'],
+      direction: ['market pos.', 'market pos', 'side'],
+      entryPrice: ['entry price'],
+      exitPrice: ['exit price'],
+      quantity: ['qty', 'quantity'],
+      pnl: ['profit', 'p&l'],
+      entryDate: ['entry time'],
+      exitDate: ['exit time'],
+      strategy: ['strategy'],
+      commission: ['commission'],
     },
   },
 };
@@ -279,6 +449,10 @@ function detectBroker(headers: string[]): BrokerFormat | 'ctrader-position-histo
   if (has('ticket') && (has('open time') || has('s / l') || has('symbol'))) {
     return norm.includes('time.1') || norm.includes('price.1') ? 'mt5' : 'mt4';
   }
+  if (has('instrument') && (has('market pos.') || has('market pos')) && has('entry price')) return 'ninjatrader';
+  if ((has('date(utc)') || (has('pair') && has('side'))) && (has('executed') || has('price'))) return 'binance';
+  if ((has('contracts') || has('symbol')) && (has('closed p&l') || has('closed pnl'))) return 'bybit';
+  if ((has('t. price') || has('trade price')) && has('symbol') && (has('quantity') || has('comm/fee'))) return 'ibkr';
   if ((has('trade #') || has('trade')) && has('entry price')) return 'tradingview';
   return 'generic';
 }
@@ -431,9 +605,10 @@ function mapRowWithBroker(
   }
   const exitDate = parseDate(get('exitDate') as string, true) ?? undefined;
 
+  const { symbol: normSym, suffix } = normalizeSymbol(symbol);
   return {
     trade: {
-      symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+      symbol: normSym,
       direction,
       entryPrice,
       exitPrice,
@@ -443,10 +618,12 @@ function mapRowWithBroker(
       entryDate,
       exitDate,
       strategy: (get('strategy') as string) || undefined,
-      notes: (get('notes') as string) || undefined,
+      notes: [suffix ? `Símbolo original: ${symbol.toUpperCase()}` : null, (get('notes') as string) || null].filter(Boolean).join(' · ') || undefined,
       stopLoss: parseNumber(get('stopLoss')),
       takeProfit: parseNumber(get('takeProfit')),
-      assetClass: detectAssetClass(symbol),
+      commission: parseNumber(get('commission')),
+      swap: parseNumber(get('swap')),
+      assetClass: detectAssetClass(normSym),
     },
   };
 }
@@ -476,8 +653,9 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
   const entryDate = parseDate(get('entryDate') as string) ?? new Date().toISOString();
   const exitDate = parseDate(get('exitDate') as string) ?? undefined;
 
+  const { symbol: normSym, suffix } = normalizeSymbol(symbol);
   return {
-    symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+    symbol: normSym,
     direction: finalDirection,
     entryPrice,
     exitPrice: parseNumber(get('exitPrice')),
@@ -487,10 +665,12 @@ function mapRowToTrade(headers: string[], values: unknown[]): ImportedTrade | nu
     entryDate,
     exitDate,
     strategy: (get('strategy') as string) || undefined,
-    notes: (get('notes') as string) || undefined,
+    notes: [suffix ? `Símbolo original: ${symbol.toUpperCase()}` : null, (get('notes') as string) || null].filter(Boolean).join(' · ') || undefined,
     stopLoss: parseNumber(get('stopLoss')),
     takeProfit: parseNumber(get('takeProfit')),
-    assetClass: detectAssetClass(symbol),
+    commission: parseNumber(get('commission')),
+    swap: parseNumber(get('swap')),
+    assetClass: detectAssetClass(normSym),
   };
 }
 
@@ -512,7 +692,9 @@ function processRows(
     ignoredRows: 0,
     missingColumns: [],
     columnMapping: {},
+    unmappedHeaders: [],
     ignoredDetails: [],
+    brokerDetected: broker,
     ...ctx.metadata,
   };
 
@@ -543,6 +725,12 @@ function processRows(
       metadata.missingColumns.push(FIELD_LABELS[field]);
     }
   });
+
+  // Track unmapped headers for diagnostics
+  const mappedHeaderNames = new Set(Object.values(metadata.columnMapping).map(h => String(h).toLowerCase().trim()));
+  metadata.unmappedHeaders = headers
+    .filter(h => h && !mappedHeaderNames.has(String(h).toLowerCase().trim()))
+    .map(h => String(h));
 
   // Surface a clear error when cabeceras don't map any mandatory field
   if (Object.keys(metadata.columnMapping).length === 0) {
@@ -844,6 +1032,42 @@ export function useImportTrades() {
     }
   }, []);
 
-  return { importFromFile };
+  const importFromFiles = useCallback(async (files: File[]): Promise<MultiParseResult> => {
+    const results = await Promise.all(
+      files.map(async (file): Promise<FileParseResult> => {
+        const res = await importFromFile(file);
+        return {
+          ...res,
+          trades: res.trades.map((t) => ({ ...t, sourceFile: file.name })),
+          fileName: file.name,
+          fileSize: file.size,
+        };
+      })
+    );
+
+    // Cross-file deduplication
+    const seen = new Set<string>();
+    const merged: ImportedTrade[] = [];
+    let dupCount = 0;
+    for (const r of results) {
+      for (const t of r.trades) {
+        const key = `${t.symbol}|${t.direction}|${t.entryDate}|${t.exitDate ?? ''}|${t.entryPrice}|${t.quantity}`;
+        if (seen.has(key)) { dupCount++; continue; }
+        seen.add(key);
+        merged.push(t);
+      }
+    }
+
+    const totalErrors = results.flatMap((r) =>
+      r.errors.map((e) => (results.length > 1 ? `[${r.fileName}] ${e}` : e))
+    );
+    if (dupCount > 0 && results.length > 1) {
+      totalErrors.unshift(`Se omitieron ${dupCount} operación(es) duplicada(s) entre archivos.`);
+    }
+
+    return { files: results, trades: merged, errors: totalErrors, crossFileDuplicates: dupCount };
+  }, [importFromFile]);
+
+  return { importFromFile, importFromFiles };
 }
 
