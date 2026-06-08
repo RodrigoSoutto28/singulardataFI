@@ -9,7 +9,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { LineChart, Brain, Shield, BarChart3 } from 'lucide-react';
+import { Power, Brain, Shield, BarChart3, LineChart } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/shared/lib/validation';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
@@ -42,7 +42,7 @@ export default function Auth() {
 
   const localized = {
     ES: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmar contraseña',
       confirmMismatch: 'Las contraseñas no coinciden',
       acceptTerms: 'Acepto los',
@@ -56,7 +56,7 @@ export default function Auth() {
       oauthError: 'No pudimos iniciar sesión con Google. Intentá nuevamente.',
     },
     EN: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirm password',
       confirmMismatch: 'Passwords do not match',
       acceptTerms: 'I agree to the',
@@ -70,7 +70,7 @@ export default function Auth() {
       oauthError: 'Could not sign in with Google. Please try again.',
     },
     PT: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmar senha',
       confirmMismatch: 'As senhas não coincidem',
       acceptTerms: 'Aceito os',
@@ -84,7 +84,7 @@ export default function Auth() {
       oauthError: 'Não foi possível entrar com Google. Tente novamente.',
     },
     FR: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmer le mot de passe',
       confirmMismatch: 'Les mots de passe ne correspondent pas',
       acceptTerms: 'J’accepte les',
@@ -98,7 +98,7 @@ export default function Auth() {
       oauthError: 'Impossible de se connecter avec Google. Veuillez réessayer.',
     },
   }[language] ?? {
-    tagline: 'Trading Intelligence Platform',
+    tagline: 'Trading Software',
     confirmPassword: 'Confirm password',
     confirmMismatch: 'Passwords do not match',
     acceptTerms: 'I agree to the',
@@ -230,10 +230,10 @@ export default function Auth() {
 
           <div className="flex items-center gap-3 relative z-10">
             <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
-              <LineChart className="h-7 w-7 text-primary-foreground" />
+              <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">SINGULAR dataFI</h1>
+              <h1 className="text-2xl font-bold">MindOn</h1>
               <p className="text-sm text-muted-foreground">{localized.tagline}</p>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function Auth() {
             <CardHeader className="text-center pb-2">
               <div className="flex items-center justify-center mb-4 lg:hidden">
                 <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">
-                  <LineChart className="h-7 w-7 text-primary-foreground" />
+                  <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
                 </div>
               </div>
               <CardTitle className="text-2xl">{t.auth.welcome}</CardTitle>

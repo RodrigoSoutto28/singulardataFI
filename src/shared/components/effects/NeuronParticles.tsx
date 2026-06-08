@@ -41,9 +41,9 @@ export function NeuronParticles() {
     }));
 
     const connectionDistance = 150;
-    // Cave Zaid palette: primary #429EBD, accent #5FE2F5
-    const primaryColor = { r: 66, g: 158, b: 189 }; // #429EBD
-    const accentColor = { r: 95, g: 226, b: 245 }; // #5FE2F5
+    // MindOn palette: primary #C9A88A, accent #D9BE9F
+    const primaryColor = { r: 201, g: 168, b: 138 }; // #C9A88A
+    const accentColor = { r: 217, g: 190, b: 159 }; // #D9BE9F
 
     const animate = () => {
       if (!ctx || !canvas) return;
@@ -98,7 +98,7 @@ export function NeuronParticles() {
           particle.x, particle.y, particle.size * 3
         );
         gradient.addColorStop(0, `rgba(${accentColor.r}, ${accentColor.g}, ${accentColor.b}, ${particle.opacity * 0.3})`);
-        gradient.addColorStop(1, 'rgba(95, 226, 245, 0)');
+        gradient.addColorStop(1, 'rgba(217, 190, 159, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
       });

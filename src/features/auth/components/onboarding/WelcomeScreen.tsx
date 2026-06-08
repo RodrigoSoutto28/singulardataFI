@@ -19,7 +19,7 @@ export function WelcomeScreen() {
           <Sparkles className="h-3 w-3" />
           El primer journal que mejora tu psicología
         </Badge>
-        <h2 className="text-3xl font-bold">Bienvenido a SINGULAR dataFI</h2>
+        <h2 className="text-3xl font-bold">Bienvenido a MindOn</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           No somos otro journal genérico. Usamos <span className="font-semibold text-foreground">behavioral economics</span> para que realmente sigas tu plan.
         </p>

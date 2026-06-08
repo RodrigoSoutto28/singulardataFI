@@ -9,7 +9,7 @@ import {
   Brain,
   Settings,
   LogOut,
-  TrendingUp,
+  Power,
   Shield,
   ChevronsLeft,
   ChevronsRight,
@@ -149,11 +149,11 @@ export function Sidebar({
         {/* Brand */}
         <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-5')}>
           <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
-            <TrendingUp className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
+            <Power className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
           </div>
           {!collapsed && (
             <span className="text-[13px] font-semibold tracking-[0.18em] text-foreground uppercase truncate">
-              Singular
+              MindOn
             </span>
           )}
         </div>

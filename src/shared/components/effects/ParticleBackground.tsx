@@ -20,7 +20,7 @@ const ParticleBackground = ({ className }: ParticleBackgroundProps) => {
 
     const options = {
       particleColor: 'rgba(255,255,255,0.85)',
-      lineColor: 'rgba(66,158,189)', // brand primary #429EBD
+      lineColor: 'rgba(201,168,138)', // brand primary #C9A88A
       particleAmount: 40,
       defaultRadius: 1.5,
       variantRadius: 1.5,
@@ -32,7 +32,7 @@ const ParticleBackground = ({ className }: ParticleBackgroundProps) => {
     const baseW = 2800;
     const baseH = 1200;
     const basePerimeter = baseW + baseH;
-    const rgb = options.lineColor.match(/\d+/g) ?? ['66', '158', '189'];
+    const rgb = options.lineColor.match(/\d+/g) ?? ['201', '168', '138'];
 
     const resizeReset = () => {
       w = canvas.width = window.innerWidth;
