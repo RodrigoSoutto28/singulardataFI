@@ -65,9 +65,22 @@ function detectAssetClass(symbol: string): ImportedTrade['assetClass'] {
   return 'stocks';
 }
 
+const MONTH_MAP: Record<string, number> = {
+  jan: 1, ene: 1, feb: 2, mar: 3, apr: 4, abr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, ago: 8, sep: 9, set: 9, oct: 10, nov: 11, dec: 12, dic: 12,
+};
+
 function parseDate(dateStr: string | number | Date | null | undefined, dayFirstHint = true): string | null {
   if (dateStr === null || dateStr === undefined || dateStr === '') return null;
   if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr.toISOString();
+
+  if (typeof dateStr === 'number') {
+    const ms = dateStr > 1e12 ? dateStr : dateStr > 1e9 ? dateStr * 1000 : NaN;
+    if (!isNaN(ms)) {
+      const d = new Date(ms);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+  }
 
   const str = String(dateStr).trim();
   if (!str) return null;
@@ -77,18 +90,32 @@ function parseDate(dateStr: string | number | Date | null | undefined, dayFirstH
     if (!isNaN(d.getTime())) return d.toISOString();
   }
 
+  if (/^\d{10,13}$/.test(str)) {
+    const n = parseInt(str, 10);
+    const ms = str.length === 13 ? n : n * 1000;
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+
   const numDate = parseFloat(str);
   if (!isNaN(numDate) && numDate > 25569 && numDate < 60000 && /^\d+(\.\d+)?$/.test(str)) {
     const excelEpoch = new Date(1899, 11, 30);
     return new Date(excelEpoch.getTime() + numDate * 86400000).toISOString();
   }
 
+  // YYYY.MM.DD or YYYY-MM-DD or YYYY/MM/DD with optional time (MT4/MT5)
+  let m = str.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, y, mo, da, h = '0', mi = '0', s = '0'] = m;
+    const d = new Date(Date.UTC(+y, +mo - 1, +da, +h, +mi, +s));
+    if (!isNaN(d.getTime())) return d.toISOString();
+  }
+
   // DD/MM/YYYY HH:MM[:SS] or MM/DD/YYYY HH:MM[:SS]
-  const m = str.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  m = str.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, a, b, y, h = '0', mi = '0', s = '0'] = m;
     const year = y.length === 2 ? 2000 + +y : +y;
-    // If first part > 12 it MUST be day. Otherwise rely on hint.
     let day: number, month: number;
     if (+a > 12) { day = +a; month = +b; }
     else if (+b > 12) { day = +b; month = +a; }
@@ -97,6 +124,30 @@ function parseDate(dateStr: string | number | Date | null | undefined, dayFirstH
     const d = new Date(Date.UTC(year, month - 1, day, +h, +mi, +s));
     if (!isNaN(d.getTime()) && d.getUTCDate() === day && d.getUTCMonth() === month - 1) {
       return d.toISOString();
+    }
+  }
+
+  // DD-MMM-YYYY [HH:MM[:SS]]
+  m = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3,})[-\s](\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, da, monStr, y, h = '0', mi = '0', s = '0'] = m;
+    const month = MONTH_MAP[monStr.slice(0, 3).toLowerCase()];
+    if (month) {
+      const year = y.length === 2 ? 2000 + +y : +y;
+      const d = new Date(Date.UTC(year, month - 1, +da, +h, +mi, +s));
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+  }
+
+  // MMM DD, YYYY
+  m = str.match(/^([A-Za-z]{3,})\s+(\d{1,2}),?\s+(\d{2,4})(?:[\sT]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (m) {
+    const [, monStr, da, y, h = '0', mi = '0', s = '0'] = m;
+    const month = MONTH_MAP[monStr.slice(0, 3).toLowerCase()];
+    if (month) {
+      const year = y.length === 2 ? 2000 + +y : +y;
+      const d = new Date(Date.UTC(year, month - 1, +da, +h, +mi, +s));
+      if (!isNaN(d.getTime())) return d.toISOString();
     }
   }
 
@@ -115,6 +166,34 @@ function parseNumber(value: unknown): number | undefined {
     .replace(/\(([^)]+)\)/, '-$1');
   const num = parseFloat(cleaned);
   return isNaN(num) ? undefined : num;
+}
+
+// Normalize symbol: strip broker suffixes (.a, .r, -PRO, _ECN, .m, .pro, #), keep base ticker.
+function normalizeSymbol(raw: string): { symbol: string; suffix?: string } {
+  const cleaned = String(raw).trim().toUpperCase().replace(/\s+/g, '');
+  const m = cleaned.match(/^([A-Z0-9/]+?)([.\-_#][A-Z0-9]{1,5})$/);
+  if (m && m[1].length >= 3) return { symbol: m[1], suffix: m[2] };
+  return { symbol: cleaned };
+}
+
+// Cheap Levenshtein for fuzzy header matching on short strings.
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const m = a.length, n = b.length;
+  if (Math.abs(m - n) > 3) return 99;
+  let prev = new Array(n + 1).fill(0).map((_, i) => i);
+  let cur = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
 }
 
 // Detect delimiter for CSV-like content. Picks the candidate that yields the
