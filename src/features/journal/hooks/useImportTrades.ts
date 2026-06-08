@@ -692,7 +692,9 @@ function processRows(
     ignoredRows: 0,
     missingColumns: [],
     columnMapping: {},
+    unmappedHeaders: [],
     ignoredDetails: [],
+    brokerDetected: broker,
     ...ctx.metadata,
   };
 
