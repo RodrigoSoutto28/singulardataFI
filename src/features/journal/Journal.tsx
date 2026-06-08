@@ -224,7 +224,6 @@ export default function Journal() {
       status: (trade.status as 'open' | 'closed') ?? 'open',
       notes: trade.notes ?? '',
     });
-    setWizardStep(1);
     setFormErrors({});
     // Defer para que el DropdownMenu termine de cerrarse y restaurar foco antes de abrir el Dialog
     setTimeout(() => setIsAddTradeOpen(true), 0);
