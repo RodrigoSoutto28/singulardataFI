@@ -81,7 +81,7 @@ export default function Settings() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `singular-datafi-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `mindon-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Datos exportados correctamente');
@@ -105,7 +105,7 @@ export default function Settings() {
       toast.success('Tu cuenta y datos fueron eliminados.');
       await signOut();
     } catch {
-      toast.error('No pudimos eliminar la cuenta. Contactanos a privacy@singulardatafi.com');
+      toast.error('No pudimos eliminar la cuenta. Contactanos a privacy@mindon-trading.com');
     } finally {
       setDeleting(false);
     }
