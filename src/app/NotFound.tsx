@@ -26,7 +26,7 @@ const NotFound = () => {
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="mx-auto h-14 w-14 rounded-lg bg-primary flex items-center justify-center mb-6">
-            <LineChart className="h-8 w-8 text-primary-foreground" />
+            <Power className="h-8 w-8 text-primary-foreground" strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">{copy.title}</h1>
           <p className="text-muted-foreground mb-6">{copy.sub}</p>
