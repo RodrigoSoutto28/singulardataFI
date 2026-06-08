@@ -605,9 +605,10 @@ function mapRowWithBroker(
   }
   const exitDate = parseDate(get('exitDate') as string, true) ?? undefined;
 
+  const { symbol: normSym, suffix } = normalizeSymbol(symbol);
   return {
     trade: {
-      symbol: symbol.toUpperCase().replace(/\s+/g, ''),
+      symbol: normSym,
       direction,
       entryPrice,
       exitPrice,
@@ -617,10 +618,12 @@ function mapRowWithBroker(
       entryDate,
       exitDate,
       strategy: (get('strategy') as string) || undefined,
-      notes: (get('notes') as string) || undefined,
+      notes: [suffix ? `Símbolo original: ${symbol.toUpperCase()}` : null, (get('notes') as string) || null].filter(Boolean).join(' · ') || undefined,
       stopLoss: parseNumber(get('stopLoss')),
       takeProfit: parseNumber(get('takeProfit')),
-      assetClass: detectAssetClass(symbol),
+      commission: parseNumber(get('commission')),
+      swap: parseNumber(get('swap')),
+      assetClass: detectAssetClass(normSym),
     },
   };
 }
