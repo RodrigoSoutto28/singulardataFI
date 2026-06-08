@@ -191,7 +191,6 @@ export default function Journal() {
     notes: '',
   };
   const [formData, setFormData] = useState(emptyForm);
-  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
@@ -202,7 +201,6 @@ export default function Journal() {
     setFormData(emptyForm);
     setEditingTrade(null);
     setFormErrors({});
-    setWizardStep(1);
   };
 
   const openEditTrade = (trade: Trade) => {
