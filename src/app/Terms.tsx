@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
 
@@ -54,7 +54,7 @@ export default function Terms() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <LineChart className="h-6 w-6 text-primary-foreground" />
+              <Power strokeWidth={2.5} className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
               <p className="font-bold leading-tight">MindOn</p>
