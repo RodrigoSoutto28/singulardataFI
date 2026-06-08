@@ -98,7 +98,7 @@ export function NeuronParticles() {
           particle.x, particle.y, particle.size * 3
         );
         gradient.addColorStop(0, `rgba(${accentColor.r}, ${accentColor.g}, ${accentColor.b}, ${particle.opacity * 0.3})`);
-        gradient.addColorStop(1, 'rgba(95, 226, 245, 0)');
+        gradient.addColorStop(1, 'rgba(217, 190, 159, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
       });
