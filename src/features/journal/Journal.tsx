@@ -193,7 +193,7 @@ export default function Journal() {
   const [wizardStep, setWizardStep] = useState<1 | 2>(1);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
-  const { importFromFile } = useImportTrades();
+  const { importFromFile, importFromFiles } = useImportTrades();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
