@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { supabase } from '@/config/supabase';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
