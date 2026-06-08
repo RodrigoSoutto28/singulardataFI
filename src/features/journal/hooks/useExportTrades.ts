@@ -185,12 +185,12 @@ export function useExportTrades() {
     }
     .container { max-width: 1200px; margin: 0 auto; }
     h1 {
-      color: #5FE2F5;
+      color: #D9BE9F;
       font-size: 2rem;
       margin-bottom: 0.5rem;
     }
     .subtitle {
-      color: #429EBD;
+      color: #C9A88A;
       margin-bottom: 2rem;
     }
     .summary-grid {
@@ -228,7 +228,7 @@ export function useExportTrades() {
       overflow: hidden;
     }
     th {
-      background: #429EBD;
+      background: #C9A88A;
       color: white;
       padding: 1rem;
       text-align: left;
@@ -243,7 +243,7 @@ export function useExportTrades() {
     .tag {
       display: inline-block;
       background: rgba(95, 226, 245, 0.2);
-      color: #5FE2F5;
+      color: #D9BE9F;
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -255,7 +255,7 @@ export function useExportTrades() {
       body { background: white; color: #1a1a1a; }
       .summary-card { border: 1px solid #e5e7eb; }
       table { background: white; }
-      th { background: #429EBD; }
+      th { background: #C9A88A; }
     }
   </style>
 </head>
@@ -298,7 +298,7 @@ export function useExportTrades() {
       </div>
     </div>
     
-    <h2 style="color: #5FE2F5; margin: 2rem 0 1rem;">Trade History</h2>
+    <h2 style="color: #D9BE9F; margin: 2rem 0 1rem;">Trade History</h2>
     <table>
       <thead>
         <tr>
