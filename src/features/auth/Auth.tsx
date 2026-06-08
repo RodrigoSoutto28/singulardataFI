@@ -42,7 +42,7 @@ export default function Auth() {
 
   const localized = {
     ES: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmar contraseña',
       confirmMismatch: 'Las contraseñas no coinciden',
       acceptTerms: 'Acepto los',
@@ -56,7 +56,7 @@ export default function Auth() {
       oauthError: 'No pudimos iniciar sesión con Google. Intentá nuevamente.',
     },
     EN: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirm password',
       confirmMismatch: 'Passwords do not match',
       acceptTerms: 'I agree to the',
@@ -70,7 +70,7 @@ export default function Auth() {
       oauthError: 'Could not sign in with Google. Please try again.',
     },
     PT: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmar senha',
       confirmMismatch: 'As senhas não coincidem',
       acceptTerms: 'Aceito os',
@@ -84,7 +84,7 @@ export default function Auth() {
       oauthError: 'Não foi possível entrar com Google. Tente novamente.',
     },
     FR: {
-      tagline: 'Trading Intelligence Platform',
+      tagline: 'Trading Software',
       confirmPassword: 'Confirmer le mot de passe',
       confirmMismatch: 'Les mots de passe ne correspondent pas',
       acceptTerms: 'J’accepte les',
@@ -98,7 +98,7 @@ export default function Auth() {
       oauthError: 'Impossible de se connecter avec Google. Veuillez réessayer.',
     },
   }[language] ?? {
-    tagline: 'Trading Intelligence Platform',
+    tagline: 'Trading Software',
     confirmPassword: 'Confirm password',
     confirmMismatch: 'Passwords do not match',
     acceptTerms: 'I agree to the',
