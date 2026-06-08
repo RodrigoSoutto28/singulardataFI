@@ -24,9 +24,9 @@
     --popover: 210 25% 98%;
     --popover-foreground: 215 28% 14%;
 
-    /* Primary: #0779A2 - INTENSIFICADO */
-    --primary: 197 85% 38%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: #C9A88A - beige cálido del logo MindOn */
+    --primary: 32 35% 62%;
+    --primary-foreground: 220 18% 11%;
 
     /* Secondary - gris cálido sutil para chips/badges */
     --secondary: 215 14% 88%;
@@ -36,9 +36,9 @@
     --muted: 215 14% 87%;
     --muted-foreground: 215 16% 42%;
 
-    /* Accent: #40A9D3 - VIBRANTE */
-    --accent: 199 60% 48%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: #D9BE9F - beige claro */
+    --accent: 30 45% 72%;
+    --accent-foreground: 220 18% 11%;
 
     /* Destructive - ROJO INTENSO */
     --destructive: 0 75% 52%;
@@ -59,28 +59,28 @@
     /* Borders - sutiles pero visibles */
     --border: 215 14% 80%;
     --input: 215 14% 82%;
-    --ring: 197 85% 38%;
+    --ring: 32 35% 62%;
 
     --radius: 0.625rem;
 
-    /* Charts - PALETA VIBRANTE */
-    --chart-1: 197 100% 35%;
-    --chart-2: 199 70% 52%;
-    --chart-3: 217 75% 45%;
-    --chart-4: 183 100% 42%;
-    --chart-5: 167 50% 65%;
+    /* Charts - paleta cálida + neutros */
+    --chart-1: 32 35% 55%;
+    --chart-2: 30 45% 68%;
+    --chart-3: 28 30% 45%;
+    --chart-4: 220 14% 40%;
+    --chart-5: 35 25% 75%;
 
-    --teal: 183 100% 42%;
+    --teal: 30 45% 72%;
 
     /* Sidebar — tono propio para crear profundidad lateral */
     --sidebar-background: 215 16% 90%;
     --sidebar-foreground: 215 20% 32%;
-    --sidebar-primary: 197 100% 35%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 32 35% 62%;
+    --sidebar-primary-foreground: 220 18% 11%;
     --sidebar-accent: 215 16% 88%;
     --sidebar-accent-foreground: 215 28% 14%;
     --sidebar-border: 215 16% 82%;
-    --sidebar-ring: 197 100% 35%;
+    --sidebar-ring: 32 35% 62%;
   }
 
   /* Dark mode — Negro profesional con apenas un toque de carácter */
