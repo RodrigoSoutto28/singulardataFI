@@ -31,7 +31,7 @@
       #sdf-splash {
         position: fixed;
         inset: 0;
-        background: #080b13;
+        background: #161e2c;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -39,29 +39,30 @@
         gap: 16px;
         z-index: 9999;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-        color: #e6eef5;
+        color: #f1e8dc;
         transition: opacity 0.3s ease;
       }
       #sdf-splash.sdf-hide { opacity: 0; pointer-events: none; }
       .sdf-logo {
         width: 56px; height: 56px; border-radius: 12px;
-        background: #0779A2;
+        background: #C9A88A;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 8px 24px rgba(7,121,162,0.35);
+        box-shadow: 0 8px 24px rgba(201,168,138,0.35);
       }
-      .sdf-logo svg { width: 32px; height: 32px; color: #fff; }
+      .sdf-logo svg { width: 32px; height: 32px; color: #161e2c; }
       .sdf-name { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
-      .sdf-tag { font-size: 12px; opacity: 0.7; }
+      .sdf-tag { font-size: 12px; opacity: 0.7; letter-spacing: 0.18em; text-transform: uppercase; }
       .sdf-spinner {
         width: 22px; height: 22px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.15);
-        border-top-color: #4d6670;
+        border: 2px solid rgba(217,190,159,0.2);
+        border-top-color: #D9BE9F;
         animation: sdf-spin 0.8s linear infinite;
         margin-top: 6px;
       }
       @keyframes sdf-spin { to { transform: rotate(360deg); } }
       @media (prefers-color-scheme: light) {
-        #sdf-splash { background: #f6f9fb; color: #0b1220; }
+        #sdf-splash { background: #f4eee5; color: #1a2230; }
+        .sdf-logo svg { color: #fff; }
       }
     </style>
     
