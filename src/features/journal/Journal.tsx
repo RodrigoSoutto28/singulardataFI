@@ -1015,10 +1015,10 @@ export default function Journal() {
                 <DialogTitle>
                   {editingTrade
                     ? (t.journal.editTrade ?? 'Edit Trade')
-                    : (t.journal.wizardStep1Title ?? 'Nueva operación')}
+                    : (t.journal.registerTrade ?? 'Nueva operación')}
                 </DialogTitle>
                 <DialogDescription className="font-mono text-xs uppercase tracking-wide text-primary">
-                  {t.journal.wizardStep1Subtitle ?? 'Completá todos los datos en un solo paso'}
+                  {t.journal.addNotesPlaceholder ? '' : ''}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
