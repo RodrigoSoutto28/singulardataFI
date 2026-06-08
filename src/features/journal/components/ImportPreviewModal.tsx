@@ -161,97 +161,222 @@ export function ImportPreviewModal({
               </div>
             </div>
 
-            {/* Header Metadata Summary */}
-            {metadata && (
-              <div className="flex items-center gap-4 bg-slate-800/40 p-2 rounded-lg border border-slate-700/50">
-                <div className="flex flex-col px-3 border-r border-slate-700">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Delimitador</span>
-                  <span className="text-sm font-mono text-emerald-400">"{metadata.delimiter || ','}"</span>
-                </div>
-                <div className="flex flex-col px-3 border-r border-slate-700">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Fila Encabezado</span>
-                  <span className="text-sm font-mono text-emerald-400">#{metadata.headerRowIndex !== undefined ? metadata.headerRowIndex + 1 : 1}</span>
-                </div>
-                <div className="flex flex-col px-3">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Calidad</span>
-                  <span className="text-sm font-mono text-emerald-400">{metadata.validRows}/{metadata.totalRows} filas</span>
+            {metadata?.brokerDetected && (
+              <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 px-3 py-2 rounded-lg">
+                <Building2 className="h-4 w-4 text-primary" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Broker detectado</span>
+                  <span className="text-sm font-bold text-primary uppercase tracking-wide">
+                    {metadata.brokerDetected === 'generic' ? 'Genérico' : metadata.brokerDetected}
+                  </span>
                 </div>
               </div>
             )}
           </div>
         </DialogHeader>
 
-        {/* Anti-duplicate validation panel — file hash + Position ID cross-check */}
-        {(fileHash || duplicatePositionIds.length > 0) && (
-          <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/40">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              {fileHash && (
-                <div className="flex items-center gap-2 min-w-0">
-                  <Hash className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
-                      Hash SHA-256 del archivo (verificado)
-                    </p>
-                    <p className="text-[11px] font-mono text-emerald-300 truncate" title={fileHash}>
-                      {fileHash.slice(0, 16)}…{fileHash.slice(-8)}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div
-                className={cn(
-                  'flex items-center gap-2 rounded-lg border px-3 py-1.5',
-                  duplicatePositionIds.length > 0
-                    ? 'border-amber-500/40 bg-amber-500/10'
-                    : 'border-emerald-500/30 bg-emerald-500/5'
-                )}
-              >
-                {duplicatePositionIds.length > 0 ? (
-                  <AlertTriangle className="h-4 w-4 text-amber-400" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                )}
-                <span
-                  className={cn(
-                    'text-xs font-semibold',
-                    duplicatePositionIds.length > 0 ? 'text-amber-300' : 'text-emerald-300'
-                  )}
-                >
-                  {duplicatePositionIds.length > 0
-                    ? `${duplicatePositionIds.length} Position ID ya existen — desmarcados`
-                    : 'Position IDs verificados sin duplicados'}
-                </span>
+        {/* ───── Detection Report ───── */}
+        {metadata && (
+          <div className="px-4 sm:px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="h-4 w-4 text-primary" />
+              <h3 className="text-[11px] uppercase tracking-wider font-bold text-slate-300">
+                Reporte de Detección
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Delimitador</p>
+                <p className="text-sm font-mono text-emerald-400 mt-0.5">"{metadata.delimiter || ','}"</p>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Fila Encabezado</p>
+                <p className="text-sm font-mono text-emerald-400 mt-0.5">#{metadata.headerRowIndex !== undefined ? metadata.headerRowIndex + 1 : 1}</p>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Filas Válidas</p>
+                <p className="text-sm font-mono text-emerald-400 mt-0.5">{metadata.validRows}/{metadata.totalRows}</p>
+              </div>
+              <div className={cn(
+                "border rounded-lg p-2.5",
+                duplicatePositionIds.length > 0
+                  ? 'border-amber-500/40 bg-amber-500/10'
+                  : 'border-emerald-500/30 bg-emerald-500/5'
+              )}>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Duplicados</p>
+                <p className={cn(
+                  "text-sm font-mono mt-0.5",
+                  duplicatePositionIds.length > 0 ? 'text-amber-300' : 'text-emerald-300'
+                )}>
+                  {duplicatePositionIds.length > 0 ? `${duplicatePositionIds.length} encontrados` : 'Ninguno'}
+                </p>
               </div>
             </div>
+            {fileHash && (
+              <div className="flex items-center gap-2 mt-3 text-[11px]">
+                <Hash className="h-3 w-3 text-emerald-400 shrink-0" />
+                <span className="text-slate-500 font-bold uppercase tracking-wider">SHA-256:</span>
+                <span className="font-mono text-emerald-300 truncate" title={fileHash}>
+                  {fileHash.slice(0, 16)}…{fileHash.slice(-8)}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Missing Columns Warning */}
-        {metadata && metadata.missingColumns.length > 0 && (
-          <div className="px-6 py-4 bg-amber-500/10 border-b border-amber-500/30">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 p-1.5 bg-amber-500/20 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+        {/* ───── Field Mapping ───── */}
+        {metadata && (Object.keys(metadata.columnMapping).length > 0 || metadata.missingColumns.length > 0) && (
+          <Collapsible defaultOpen className="border-b border-slate-800">
+            <CollapsibleTrigger className="w-full px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-primary" />
+                <h3 className="text-[11px] uppercase tracking-wider font-bold text-slate-300">
+                  Mapeo de Campos
+                </h3>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  ({Object.keys(metadata.columnMapping).length} mapeados
+                  {metadata.missingColumns.length > 0 && `, ${metadata.missingColumns.length} faltantes`})
+                </span>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-amber-500 uppercase tracking-wide">
-                  Columnas Faltantes Detectadas
-                </p>
-                <p className="text-xs text-amber-500/90 leading-relaxed">
-                  Para un análisis completo, se recomienda incluir: <span className="font-bold">{metadata.missingColumns.join(', ')}</span>. 
-                </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+              <ChevronDown className="h-4 w-4 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-4 sm:px-6 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {Object.entries(metadata.columnMapping).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-1 text-[10px] text-amber-600 font-bold bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
-                      <CheckCircle2 className="h-2.5 w-2.5" />
-                      {key}: <span className="text-amber-700">{value}</span>
+                    <div key={key} className="flex items-center gap-2 bg-emerald-500/5 border border-emerald-500/20 rounded-md px-2.5 py-1.5">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+                      <span className="text-[11px] text-slate-300 font-medium">
+                        {FIELD_LABELS[key as keyof typeof FIELD_LABELS] ?? key}
+                      </span>
+                      <span className="text-slate-600 text-[10px]">←</span>
+                      <span className="text-[11px] font-mono text-emerald-300 truncate" title={value}>
+                        "{value}"
+                      </span>
+                    </div>
+                  ))}
+                  {metadata.missingColumns.map((field) => (
+                    <div key={field} className="flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 rounded-md px-2.5 py-1.5">
+                      <XCircle className="h-3 w-3 text-amber-400 shrink-0" />
+                      <span className="text-[11px] text-amber-200 font-medium">{field}</span>
+                      <span className="text-[10px] text-amber-500/70 italic ml-auto">no encontrado</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
+
+        {/* ───── Unmapped Headers ───── */}
+        {metadata && (
+          <Collapsible className="border-b border-slate-800">
+            <CollapsibleTrigger className="w-full px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-slate-400" />
+                <h3 className="text-[11px] uppercase tracking-wider font-bold text-slate-300">
+                  Encabezados Sin Mapear
+                </h3>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  ({metadata.unmappedHeaders?.length ?? 0})
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-4 sm:px-6 pb-4">
+                {metadata.unmappedHeaders && metadata.unmappedHeaders.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {metadata.unmappedHeaders.map((h) => (
+                      <Badge key={h} variant="outline" className="border-slate-700 bg-slate-800/60 text-slate-400 font-mono text-[10px]">
+                        {h}
+                      </Badge>
+                    ))}
+                    <p className="w-full text-[10px] text-slate-500 italic mt-2">
+                      Estas columnas existen en el archivo pero no se importaron al diario.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-emerald-400/80">Todos los encabezados fueron reconocidos.</p>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* ───── Per-File Report (multi-file mode) ───── */}
+        {perFileReports && perFileReports.length > 1 && (
+          <Collapsible defaultOpen className="border-b border-slate-800">
+            <CollapsibleTrigger className="w-full px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
+              <div className="flex items-center gap-2">
+                <Files className="h-4 w-4 text-primary" />
+                <h3 className="text-[11px] uppercase tracking-wider font-bold text-slate-300">
+                  Reporte por Archivo
+                </h3>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  ({perFileReports.length} archivos)
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-slate-500 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-4 sm:px-6 pb-4 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-slate-800 hover:bg-transparent">
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Archivo</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Broker</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500 text-right">Trades</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500 text-right">Válidas/Total</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500 text-right">Ignoradas</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Faltantes</TableHead>
+                      <TableHead className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Sin mapear</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {perFileReports.map((f) => {
+                      const m = f.metadata;
+                      const broker = m?.brokerDetected ?? 'generic';
+                      const missing = m?.missingColumns ?? [];
+                      const unmapped = m?.unmappedHeaders ?? [];
+                      const hasErrors = f.errors.length > 0;
+                      return (
+                        <TableRow key={f.fileName} className="border-slate-800/50 hover:bg-slate-800/40">
+                          <TableCell className="font-medium text-slate-200 text-xs truncate max-w-[180px]" title={f.fileName}>
+                            {hasErrors && <AlertCircle className="h-3 w-3 text-rose-400 inline mr-1" />}
+                            {f.fileName}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary font-mono text-[10px] uppercase">
+                              {broker === 'generic' ? 'Genérico' : broker}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs text-white">{f.trades.length}</TableCell>
+                          <TableCell className="text-right font-mono text-xs text-emerald-400">
+                            {m ? `${m.validRows}/${m.totalRows}` : '—'}
+                          </TableCell>
+                          <TableCell className={cn(
+                            "text-right font-mono text-xs",
+                            (m?.ignoredRows ?? 0) > 0 ? 'text-amber-400' : 'text-slate-500'
+                          )}>
+                            {m?.ignoredRows ?? 0}
+                          </TableCell>
+                          <TableCell className="text-[10px] text-amber-300/90">
+                            {missing.length > 0 ? missing.join(', ') : <span className="text-slate-600">—</span>}
+                          </TableCell>
+                          <TableCell className="text-[10px] text-slate-400 font-mono max-w-[160px] truncate" title={unmapped.join(', ')}>
+                            {unmapped.length > 0 ? unmapped.slice(0, 3).join(', ') + (unmapped.length > 3 ? ` +${unmapped.length - 3}` : '') : <span className="text-slate-600">—</span>}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
 
         {/* Summary Stats */}
         <div className="px-4 sm:px-6 py-4 border-b border-slate-800 bg-slate-900/30">
