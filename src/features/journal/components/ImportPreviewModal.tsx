@@ -33,8 +33,15 @@ import {
   Rows,
   AlertTriangle,
   Info,
+  Building2,
+  Link2,
+  XCircle,
+  Files,
+  ChevronDown,
 } from 'lucide-react';
-import type { ParseMetadata } from '../hooks/useImportTrades';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
+import type { ParseMetadata, FileParseResult } from '../hooks/useImportTrades';
+import { FIELD_LABELS } from '../hooks/useImportTrades';
 
 interface ImportedTrade {
   symbol: string;
@@ -51,6 +58,7 @@ interface ImportedTrade {
   stopLoss?: number;
   takeProfit?: number;
   assetClass?: 'forex' | 'stocks' | 'crypto' | 'futures' | 'options' | 'commodities';
+  sourceFile?: string;
 }
 
 interface ImportPreviewModalProps {
@@ -63,6 +71,7 @@ interface ImportPreviewModalProps {
   fileName: string;
   fileHash?: string;
   duplicatePositionIds?: string[];
+  perFileReports?: FileParseResult[];
   onConfirm: (selectedTrades: ImportedTrade[]) => void;
   isImporting: boolean;
 }
