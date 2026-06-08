@@ -646,9 +646,8 @@ export default function Journal() {
     if (highErrors.length > 0 && !editingTrade) {
       setPendingErrors(detected);
       setPendingPayload(payload);
-      // Cerrar el wizard primero para que la alerta se vea limpia tras completar los 2 pasos
+      // Cerrar el diálogo primero para que la alerta se vea limpia
       setIsAddTradeOpen(false);
-      setWizardStep(1);
       setTaxometerOpen(true);
       return;
     }
