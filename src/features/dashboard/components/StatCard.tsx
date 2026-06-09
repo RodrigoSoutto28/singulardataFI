@@ -60,21 +60,17 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden group cursor-default',
+        'relative overflow-hidden group cursor-default min-h-[120px]',
         'transition-all duration-300',
         v.glow,
         className,
       )}
     >
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between mb-4">
-          {/* Icon showing directly emerging from card background with 3D fusion */}
-          <Icon
-            className={cn(
-              'h-14 w-14 transition-transform duration-300',
-              v.icon
-            )}
-          />
+      <CardContent className="pt-6 relative z-10 flex flex-col justify-between h-full min-h-[100px]">
+        <div className="flex items-start justify-between">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+            {label}
+          </p>
 
           {/* Trend badge */}
           {change !== undefined && (
@@ -90,19 +86,20 @@ export function StatCard({
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-          {label}
-        </p>
-
-        <p className={cn('text-2xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
+        <p className={cn('text-2xl font-bold font-mono tracking-tight mt-2', negative && 'text-loss')}>
           {value}
         </p>
+
+        {/* Large 3D Icon floating and merging on the right of the card */}
+        <div className="absolute right-2 bottom-2 h-20 w-20 opacity-85 pointer-events-none group-hover:scale-110 group-hover:translate-y-[-4px] transition-all duration-300">
+          <Icon className="h-full w-full object-contain" />
+        </div>
       </CardContent>
 
       {/* Subtle gradient overlay */}
       <div
         className={cn(
-          'absolute inset-0 bg-gradient-to-br from-transparent pointer-events-none',
+          'absolute inset-0 bg-gradient-to-br from-transparent pointer-events-none z-0',
           'transition-opacity duration-300 opacity-100 group-hover:opacity-80',
           v.gradient,
         )}
