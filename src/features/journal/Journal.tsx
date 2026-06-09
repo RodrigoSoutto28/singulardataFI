@@ -218,7 +218,7 @@ export default function Journal() {
       : []),
   ];
   const recommendedChecks = [
-    { key: 'stop_size', ok: parseFloat(formData.stop_size) > 0 },
+    { key: 'stop_size', ok: !isNaN(parseFloat(formData.stop_size)) && parseFloat(formData.stop_size) !== 0 },
     { key: 'take_profit', ok: parseFloat(formData.take_profit) > 0 },
     { key: 'strategy', ok: formData.strategy.trim().length > 0 },
   ];
@@ -1282,29 +1282,27 @@ export default function Journal() {
                       <Input
                         type="number"
                         step="any"
-                        min="0"
                         inputMode="decimal"
-                        placeholder="ej. 50.00"
+                        placeholder="ej. -50.00"
                         className="bg-muted/30 font-mono pl-7"
                         value={formData.stop_size}
-                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value.replace('-', '') }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value }))}
                         aria-invalid={!!formErrors.stop_size}
                       />
                     </div>
                     {formErrors.stop_size
                       ? <p className="text-xs text-destructive">{formErrors.stop_size}</p>
-                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop'}</p>}
+                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop (valor negativo)'}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
                     <Input
                       type="number"
                       step="any"
-                      min="0"
-                      placeholder="precio (ej. 4350.00)"
+                      placeholder="ej. 100.00"
                       className="bg-muted/30 font-mono"
                       value={formData.take_profit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value.replace('-', '') }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
                       aria-invalid={!!formErrors.take_profit}
                     />
                     {formErrors.take_profit && <p className="text-xs text-destructive">{formErrors.take_profit}</p>}
@@ -1348,8 +1346,8 @@ export default function Journal() {
                   const stopSize = parseFloat(formData.stop_size);
                   const tp = parseFloat(formData.take_profit);
                   const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && !!formData.direction;
-                  const hasRisk = !isNaN(stopSize) && stopSize > 0;
-                  const hasRR = hasRisk && !isNaN(tp) && tp > 0 && !isNaN(entry) && !isNaN(qty) && !!formData.direction;
+                  const hasRisk = !isNaN(stopSize) && stopSize !== 0;
+                  const hasRR = hasRisk && !isNaN(tp) && tp !== 0;
                   if (!hasPnl && !hasRisk && !hasRR) return null;
                   let pnl = 0, pct = 0, rr = 0;
                   if (hasPnl) {
@@ -1358,8 +1356,7 @@ export default function Journal() {
                     pct = entry !== 0 ? (diff / entry) * 100 : 0;
                   }
                   if (hasRR) {
-                    const reward = (formData.direction === 'long' ? tp - entry : entry - tp) * qty;
-                    rr = stopSize > 0 ? reward / stopSize : 0;
+                    rr = Math.abs(stopSize) > 0 ? Math.abs(tp) / Math.abs(stopSize) : 0;
                   }
                   return (
                     <div className="space-y-2">
