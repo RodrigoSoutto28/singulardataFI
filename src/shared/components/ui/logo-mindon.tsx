@@ -36,7 +36,7 @@ export function LogoMindOn({ size = 'md', showSubtitle = false, className }: Log
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox={`0 0 300 ${viewBoxHeight}`}
+      viewBox={`0 0 250 ${viewBoxHeight}`}
       width={c.width}
       height={c.height}
       className={cn('select-none', className)}
@@ -59,32 +59,34 @@ export function LogoMindOn({ size = 'md', showSubtitle = false, className }: Log
 
       {/* 
         Power icon "O":
-        Centro en x=168 + 12 = 180, y=6 + 16 = 22
+        Posición absoluta perfectamente alineada con la altura y línea base de "Mind"
+        y=61 (baseline), size=54 -> Centro geométrico aprox y=43.
+        Arco con centro en x=144, y=43.15, radio 19
       */}
-      <g transform="translate(148, 25)">
-        {/* Arco power (semicírculo con gap arriba de ~60°) */}
+      <g>
+        {/* Arco power (semicírculo con gap arriba, de x=134 a x=154) */}
         <path
-          d="M 10 9 A 18 18 0 1 0 26 9"
+          d="M 134 27 A 19 19 0 1 0 154 27"
           stroke="#C9A88A"
-          strokeWidth="6.5"
+          strokeWidth="6"
           strokeLinecap="round"
           fill="none"
         />
         {/* Barra vertical del power icon */}
         <line
-          x1="18"
-          y1="-2"
-          x2="18"
-          y2="15"
+          x1="144"
+          y1="16"
+          x2="144"
+          y2="36"
           stroke="#C9A88A"
-          strokeWidth="6.5"
+          strokeWidth="6"
           strokeLinecap="round"
         />
       </g>
 
-      {/* "n" beige */}
+      {/* "n" beige - Acercada para estar a la distancia correcta de la "O" */}
       <text
-        x="200"
+        x="168"
         y="61"
         fontFamily="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
         fontSize="54"
@@ -112,4 +114,3 @@ export function LogoMindOn({ size = 'md', showSubtitle = false, className }: Log
     </svg>
   );
 }
-
