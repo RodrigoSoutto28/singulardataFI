@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MindOn — Trading Software · Warm Beige on Dark Carbon */
+/* SINGULAR dataFI — Trading Software · Warm Beige on Dark Carbon */
 /* Palette: #1A2230 (carbon)  #C9A88A (beige primary)  #D9BE9F (beige accent)  #A6845F (beige deep) */
 
 @layer base {
@@ -24,7 +24,7 @@
     --popover: 210 25% 98%;
     --popover-foreground: 215 28% 14%;
 
-    /* Primary: #C9A88A - beige cálido del logo MindOn */
+    /* Primary: #C9A88A - beige cálido del logo SINGULAR dataFI */
     --primary: 32 35% 62%;
     --primary-foreground: 220 18% 11%;
 

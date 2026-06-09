@@ -17,7 +17,7 @@ export default function Privacy() {
         ['Almacenamiento', 'Tus datos se almacenan de forma segura en infraestructura cifrada con políticas de acceso por usuario (Row Level Security).'],
         ['Tus derechos', 'Podés exportar todos tus datos o eliminar tu cuenta en cualquier momento desde Configuración → Privacidad.'],
         ['Cookies', 'Usamos cookies técnicas necesarias para la sesión. No utilizamos cookies de terceros con fines publicitarios.'],
-        ['Contacto', 'Para ejercer tus derechos o consultas: privacy@mindon-trading.com'],
+        ['Contacto', 'Para ejercer tus derechos o consultas: privacy@singulardatafi.com'],
       ],
     },
     EN: {
@@ -30,7 +30,7 @@ export default function Privacy() {
         ['Storage', 'Your data is stored securely with encrypted infrastructure and per-user access policies (Row Level Security).'],
         ['Your rights', 'You can export all your data or delete your account anytime from Settings → Privacy.'],
         ['Cookies', 'We use essential cookies for sessions only. No third-party advertising cookies.'],
-        ['Contact', 'For inquiries: privacy@mindon-trading.com'],
+        ['Contact', 'For inquiries: privacy@singulardatafi.com'],
       ],
     },
     PT: {
@@ -43,7 +43,7 @@ export default function Privacy() {
         ['Armazenamento', 'Seus dados são armazenados em infraestrutura criptografada com políticas de acesso por usuário.'],
         ['Seus direitos', 'Você pode exportar todos os seus dados ou excluir sua conta em Configurações → Privacidade.'],
         ['Cookies', 'Usamos apenas cookies técnicos. Sem cookies publicitários de terceiros.'],
-        ['Contato', 'Consultas: privacy@mindon-trading.com'],
+        ['Contato', 'Consultas: privacy@singulardatafi.com'],
       ],
     },
   }[language];
@@ -57,7 +57,7 @@ export default function Privacy() {
               <Power strokeWidth={2.5} className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <p className="font-bold leading-tight">MindOn</p>
+              <p className="font-bold leading-tight">SINGULAR dataFI</p>
               <p className="text-xs text-muted-foreground">Trading Software</p>
             </div>
           </Link>

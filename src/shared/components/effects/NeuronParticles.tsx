@@ -41,7 +41,7 @@ export function NeuronParticles() {
     }));
 
     const connectionDistance = 150;
-    // MindOn palette: primary #C9A88A, accent #D9BE9F
+    // SINGULAR dataFI palette: primary #C9A88A, accent #D9BE9F
     const primaryColor = { r: 201, g: 168, b: 138 }; // #C9A88A
     const accentColor = { r: 217, g: 190, b: 159 }; // #D9BE9F
 
