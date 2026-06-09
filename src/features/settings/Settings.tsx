@@ -64,15 +64,23 @@ export default function Settings() {
     if (!user) return;
     setExporting(true);
     try {
-      const [trades, psych, account] = await Promise.all([
+      const [profileRes, trades, psych, account] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
         supabase.from('trades').select('*').eq('user_id', user.id),
         supabase.from('psychology_entries').select('*').eq('user_id', user.id),
         supabase.from('trading_accounts').select('*').eq('user_id', user.id),
       ]);
+
+      // Surface any per-table failure instead of silently exporting partial data.
+      const errors = [profileRes.error, trades.error, psych.error, account.error].filter(Boolean);
+      if (errors.length > 0) {
+        throw new Error(errors.map((e) => e!.message).join('; '));
+      }
+
       const payload = {
         exported_at: new Date().toISOString(),
         user: { id: user.id, email: user.email },
-        profile,
+        profile: profileRes.data,
         trades: trades.data ?? [],
         psychology_entries: psych.data ?? [],
         trading_accounts: account.data ?? [],
@@ -86,6 +94,7 @@ export default function Settings() {
       URL.revokeObjectURL(url);
       toast.success('Datos exportados correctamente');
     } catch (e) {
+      console.error('[settings] export failed:', e);
       toast.error('No pudimos exportar tus datos. Intentá nuevamente.');
     } finally {
       setExporting(false);
