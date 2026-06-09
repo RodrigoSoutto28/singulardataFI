@@ -1,4 +1,4 @@
-# Codebase Analysis Baseline – SINGULAR dataFI
+# Codebase Analysis Baseline – MindOn
 
 > Generated as the reference baseline for upcoming refactor prompts.
 > Architecture: feature-based layout (`src/app`, `src/features/*`, `src/shared/*`, `src/integrations/supabase`, `src/config`, `src/styles`).
