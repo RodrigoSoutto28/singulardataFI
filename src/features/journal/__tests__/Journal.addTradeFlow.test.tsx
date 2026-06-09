@@ -25,8 +25,9 @@ class IO {
 }
 // @ts-expect-error - jsdom does not implement IntersectionObserver
 globalThis.IntersectionObserver = IO;
-// @ts-expect-error - jsdom does not implement scrollIntoView
-HTMLElement.prototype.scrollIntoView = vi.fn();
+HTMLElement.prototype.scrollIntoView = vi.fn() as unknown as (
+  arg?: boolean | ScrollIntoViewOptions,
+) => void;
 
 // ---------- sonner spy ----------
 const toastSuccess = vi.fn();
