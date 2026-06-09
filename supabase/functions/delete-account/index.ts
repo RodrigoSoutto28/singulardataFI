@@ -58,9 +58,26 @@ Deno.serve(async (req) => {
       ['profiles', 'id'],
     ];
 
+    const failures: string[] = [];
     for (const [table, col] of tables) {
       const { error } = await admin.from(table).delete().eq(col, userId);
-      if (error) console.error(`Failed deleting ${table}:`, error.message);
+      if (error) {
+        console.error(`Failed deleting ${table}:`, error.message);
+        failures.push(table);
+      }
+    }
+
+    if (failures.length > 0) {
+      return new Response(
+        JSON.stringify({
+          error: 'Partial deletion failed',
+          failedTables: failures,
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const { error: deleteErr } = await admin.auth.admin.deleteUser(userId);
