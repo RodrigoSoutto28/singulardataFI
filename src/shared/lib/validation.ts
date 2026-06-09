@@ -28,11 +28,11 @@ export const tradeFormSchema = z
       .optional()
       .nullable(),
     stop_size: z
-      .union([z.literal(''), z.coerce.number().positive('El tamaño del stop debe ser mayor a 0')])
+      .union([z.literal(''), z.coerce.number().refine((v) => v !== 0, 'El tamaño del stop no puede ser 0')])
       .optional()
       .nullable(),
     take_profit: z
-      .union([z.literal(''), z.coerce.number().positive('El take profit debe ser mayor a 0')])
+      .union([z.literal(''), z.coerce.number().refine((v) => v !== 0, 'El take profit no puede ser 0')])
       .optional()
       .nullable(),
     commission: z
