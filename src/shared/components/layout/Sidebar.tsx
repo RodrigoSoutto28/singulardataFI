@@ -3,10 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { cn } from '@/shared/lib/utils';
 import {
-  LayoutDashboard,
-  BookOpen,
-  BarChart3,
-  Brain,
   Settings,
   LogOut,
   Power,
@@ -16,6 +12,12 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
+import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
+
+const LayoutDashboard = createIcon3DComponent('dashboard');
+const BookOpen = createIcon3DComponent('journal');
+const BarChart3 = createIcon3DComponent('analytics');
+const Brain = createIcon3DComponent('brain');
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTheme } from '@/shared/lib/ThemeContext';

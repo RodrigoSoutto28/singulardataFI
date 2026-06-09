@@ -1,4 +1,3 @@
-import { LucideIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -7,7 +6,7 @@ interface StatCardProps {
   label: string;
   value: string;
   change?: number;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   trend?: 'up' | 'down';
   color?: 'primary' | 'teal' | 'purple' | 'orange' | 'green';
   negative?: boolean;

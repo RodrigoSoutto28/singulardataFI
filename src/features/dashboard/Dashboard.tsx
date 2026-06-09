@@ -9,7 +9,15 @@ import { TaxometerWidget } from '@/features/behavioral/components/TaxometerWidge
 import { AccountSetupModal } from '@/features/dashboard/components/AccountSetupModal';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
-import { TrendingUp, Wallet, Target, Brain, Pencil, Plus, BookOpen } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
+import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
+
+const TrendingUp3D = createIcon3DComponent('equityCurve');
+const Wallet3D = createIcon3DComponent('balance');
+const Target3D = createIcon3DComponent('winrate');
+const Brain3D = createIcon3DComponent('brain');
+const BookOpen3D = createIcon3DComponent('activity');
+const PnL3D = createIcon3DComponent('pnl');
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTrades } from '@/features/journal/hooks/useTrades';
@@ -90,7 +98,7 @@ export default function Dashboard() {
               className="border-glow-pulse hover:scale-[1.02] transition-all bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shrink-0 self-start sm:self-auto"
             >
               <Link to="/psychology">
-                <Brain className="h-5 w-5 animate-pulse" />
+                <Brain3D className="h-5 w-5 animate-pulse" />
                 {t.dashboard.completeCheckInCTA}
               </Link>
             </Button>
@@ -110,7 +118,7 @@ export default function Dashboard() {
             label="Balance"
             value={formatCurrency(balance)}
             change={balanceChange}
-            icon={Wallet}
+            icon={Wallet3D}
             trend={balanceChange >= 0 ? 'up' : 'down'}
             negative={balance < 0}
           />
@@ -129,20 +137,20 @@ export default function Dashboard() {
           label="P&L Hoy"
           value={formatCurrency(todayPnL)}
           change={todayPnLPercent}
-          icon={TrendingUp}
+          icon={PnL3D}
           trend={todayPnL >= 0 ? 'up' : 'down'}
           negative={todayPnL < 0}
         />
         <StatCard
           label="Win Rate"
           value={`${winRate.toFixed(1)}%`}
-          icon={Target}
+          icon={Target3D}
           color="teal"
         />
         <StatCard
           label="Disciplina"
           value={`${disciplineScore}/10`}
-          icon={Brain}
+          icon={Brain3D}
           color="purple"
         />
       </div>
@@ -153,7 +161,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <TrendingUp3D className="h-5 w-5" />
                 {t.dashboard.equityCurve}
               </CardTitle>
             </CardHeader>
@@ -165,7 +173,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <BookOpen className="h-5 w-5 text-primary" />
+                <BookOpen3D className="h-5 w-5" />
                 {t.dashboard.recentActivity}
               </CardTitle>
             </CardHeader>
@@ -173,7 +181,7 @@ export default function Dashboard() {
               {recentTrades.length === 0 ? (
                 <div className="rounded-md bg-muted/40 border border-dashed border-border px-4 py-6 flex flex-col items-center justify-center gap-3 text-center">
                   <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                    <BookOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden />
+                    <BookOpen3D className="h-5 w-5 opacity-70" />
                   </div>
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium text-foreground">
@@ -209,7 +217,7 @@ export default function Dashboard() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Target className="h-5 w-5 text-primary" />
+            <Target3D className="h-5 w-5" />
             {t.dashboard.discipline}
           </CardTitle>
         </CardHeader>

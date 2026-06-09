@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
-import { ArrowRight, DollarSign, Shield } from 'lucide-react';
+import { ArrowRight, Shield } from 'lucide-react';
+import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 import { useTaxometer } from '@/features/behavioral/hooks/useTaxometer';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+
+const Taxometer3D = createIcon3DComponent('taxometer');
 
 export function TaxometerWidget() {
   const { stats, isLoading } = useTaxometer();
@@ -15,7 +18,7 @@ export function TaxometerWidget() {
     <Card className="lift-strong">
       <CardHeader className="pb-4">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-destructive" />
+          <Taxometer3D className="h-4 w-4" />
           {ps.errorTaxometer ?? 'Taxímetro de Errores'}
         </CardTitle>
       </CardHeader>

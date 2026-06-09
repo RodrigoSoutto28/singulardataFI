@@ -1,12 +1,11 @@
 import { cn } from '@/shared/lib/utils';
-import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/shared/components/ui/card';
 
 interface MetricCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   iconColor?: 'primary' | 'success' | 'warning' | 'destructive' | 'teal' | 'purple' | 'orange';
   className?: string;
 }

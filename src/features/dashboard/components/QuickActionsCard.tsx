@@ -1,22 +1,27 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, BookOpen, Brain, BarChart3, LucideIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
+import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
+
+const Plus3D = createIcon3DComponent('newTrade');
+const BookOpen3D = createIcon3DComponent('journal');
+const Brain3D = createIcon3DComponent('checkin');
+const BarChart3D = createIcon3DComponent('analytics');
 
 interface ActionItem {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   labelKey: 'quickActionNewTrade' | 'quickActionJournal' | 'quickActionCheckIn' | 'quickActionAnalytics';
   path: string;
   color: string;
 }
 
 const actions: ActionItem[] = [
-  { icon: Plus, labelKey: 'quickActionNewTrade', path: '/journal', color: 'text-primary' },
-  { icon: BookOpen, labelKey: 'quickActionJournal', path: '/journal', color: 'text-accent' },
-  { icon: Brain, labelKey: 'quickActionCheckIn', path: '/psychology', color: 'text-success' },
-  { icon: BarChart3, labelKey: 'quickActionAnalytics', path: '/analytics', color: 'text-warning' },
+  { icon: Plus3D, labelKey: 'quickActionNewTrade', path: '/journal', color: 'text-primary' },
+  { icon: BookOpen3D, labelKey: 'quickActionJournal', path: '/journal', color: 'text-accent' },
+  { icon: Brain3D, labelKey: 'quickActionCheckIn', path: '/psychology', color: 'text-success' },
+  { icon: BarChart3D, labelKey: 'quickActionAnalytics', path: '/analytics', color: 'text-warning' },
 ];
 
 export function QuickActionsCard() {

@@ -1,4 +1,7 @@
-import { Brain, Sparkles, Target } from 'lucide-react';
+import { Sparkles, Target } from 'lucide-react';
+import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
+
+const Brain3D = createIcon3DComponent('brain');
 import { cn } from '@/shared/lib/utils';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -29,7 +32,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
     <Card className={cn('bg-gradient-to-br from-card to-muted/20', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Brain className="h-5 w-5 text-primary" />
+          <Brain3D className="h-5 w-5" />
           {t.dashboard.mentalStateTitle}
         </CardTitle>
       </CardHeader>
