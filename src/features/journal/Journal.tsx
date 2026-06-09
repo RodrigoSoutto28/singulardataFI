@@ -1338,16 +1338,17 @@ export default function Journal() {
                   </div>
                 </div>
 
-                {/* Auto P&L + R:R preview */}
+                {/* Auto P&L + Riesgo + R:R preview */}
                 {(() => {
                   const entry = parseFloat(formData.entry_price);
                   const exit = parseFloat(formData.exit_price);
                   const qty = parseFloat(formData.quantity);
-                  const sl = parseFloat(formData.stop_loss);
+                  const stopSize = parseFloat(formData.stop_size);
                   const tp = parseFloat(formData.take_profit);
-                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && formData.direction;
-                  const hasRR = !isNaN(entry) && !isNaN(sl) && !isNaN(tp) && formData.direction;
-                  if (!hasPnl && !hasRR) return null;
+                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && !!formData.direction;
+                  const hasRisk = !isNaN(stopSize) && stopSize > 0;
+                  const hasRR = hasRisk && !isNaN(tp) && tp > 0 && !isNaN(entry) && !isNaN(qty) && !!formData.direction;
+                  if (!hasPnl && !hasRisk && !hasRR) return null;
                   let pnl = 0, pct = 0, rr = 0;
                   if (hasPnl) {
                     const diff = formData.direction === 'long' ? exit - entry : entry - exit;
@@ -1355,9 +1356,8 @@ export default function Journal() {
                     pct = entry !== 0 ? (diff / entry) * 100 : 0;
                   }
                   if (hasRR) {
-                    const reward = formData.direction === 'long' ? tp - entry : entry - tp;
-                    const risk = formData.direction === 'long' ? entry - sl : sl - entry;
-                    rr = risk > 0 ? reward / risk : 0;
+                    const reward = (formData.direction === 'long' ? tp - entry : entry - tp) * qty;
+                    rr = stopSize > 0 ? reward / stopSize : 0;
                   }
                   return (
                     <div className="space-y-2">
@@ -1368,8 +1368,14 @@ export default function Journal() {
                         )}>
                           <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.pnlEstimated ?? 'P&L Estimado'}</span>
                           <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
-                            {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
+                            {pnl >= 0 ? '+' : ''}{currencySymbol}{pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
                           </span>
+                        </div>
+                      )}
+                      {hasRisk && (
+                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.risk ?? 'Riesgo'}</span>
+                          <span className="font-mono font-bold text-loss">-{currencySymbol}{stopSize.toFixed(2)} {accountCurrency}</span>
                         </div>
                       )}
                       {hasRR && rr > 0 && (
