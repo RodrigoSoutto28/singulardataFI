@@ -1,74 +1,65 @@
-# Corregir: "Listo para registrar 80%" pero no se puede guardar
+## Goal
 
-## Diagnóstico
+Add a React Testing Library test for the Journal "Add Trade" dialog that covers:
 
-En la captura, el usuario ingresó **Stop Loss = -105.60** y **Take Profit = -105.60** (valores negativos, probablemente confundiendo "precio" con "P&L").
+1. **Happy path** — fill all required fields, submit, verify `createTrade` is called with the right payload and a success toast.
+2. **Invalid path** — submit with negative Stop Loss / Take Profit (the bug scenario), verify inline field errors render, focus/scroll moves to the first invalid field, and the error toast lists the offending fields.
 
-El schema `tradeFormSchema` (`src/shared/lib/validation.ts`) exige que `stop_loss` y `take_profit` sean **`positive`** (mayores a 0). Al enviar:
+## File
 
-1. `safeParse` falla con dos issues: `stop_loss` y `take_profit` → "debe ser mayor a 0".
-2. `handleAddTrade` setea `formErrors` y muestra el toast genérico **"Revisa los campos marcados"**.
-3. Pero los inputs de **Stop Loss, Take Profit, Exit Price, Exit Date, Commission, Strategy** **no renderizan** `formErrors[...]` debajo del campo (solo Símbolo, Dirección, Entry, Quantity lo hacen). El usuario no ve qué corregir.
-4. La barra muestra **80 %** porque `recommendedChecks` evalúa `parseFloat(stop_loss) > 0` → con -105.60 falla, y 8/10 ítems verdaderos = 80 %. La barra dice "Listo para registrar" porque sólo evalúa requeridos (los 7 requeridos están OK), por eso el botón **se ve habilitado** pero el submit es rechazado por zod.
+New: `src/features/journal/__tests__/Journal.addTradeFlow.test.tsx`
 
-Es un problema de **visibilidad de errores**, no de lógica de guardado.
+Sits next to the existing `Journal.addTrade.test.ts` (which is a source-grep smoke test). The new file is a real RTL render test.
 
-## Cambios (solo `src/features/journal/Journal.tsx`)
+## Approach
 
-### 1. Renderizar `formErrors` en los campos faltantes
+Render `<Journal />` wrapped in the minimal providers it needs:
 
-Agregar `aria-invalid` + `<p className="text-xs text-destructive">` debajo de:
+- `QueryClientProvider` (fresh `QueryClient` per test, retries off)
+- `MemoryRouter`
+- `LanguageProvider` (already used app-wide)
+- `AuthContext` mock provider supplying `{ user: { id: 'test-user' } }`
+- `ThemeProvider` if required by children
 
-- Exit Price (`formErrors.exit_price`)
-- Exit Date (`formErrors.exit_date`)
-- Stop Loss (`formErrors.stop_loss`)
-- Take Profit (`formErrors.take_profit`)
-- Commission (`formErrors.commission`)
-- Strategy (`formErrors.strategy`)
-- Notes (`formErrors.notes`)
+Mock the following modules with `vi.mock`:
 
-Mismo patrón que ya usa Symbol (línea 1096).
+- `@/config/supabase` → minimal `supabase` whose `from('trades').insert(...).select().single()` resolves to a fake row, and `from('trading_accounts')` / `from('trades').select` return empty data so `syncAccountBalance` is a no-op.
+- `@/features/dashboard/hooks/useTradingAccounts` → `useSelectedAccountId` returns `{ selectedAccountId: 'acc-1' }`.
+- `sonner` → spy on `toast.success` / `toast.error`.
+- Heavy children that aren't relevant (e.g. `TaxometerAlert`, `ImportPreviewModal`, `ProcessValidatorModal`) → stub to `() => null` to keep the render cheap.
+- `scrollIntoView` on `HTMLElement.prototype` → `vi.fn()` (jsdom doesn't implement it; needed for the auto-scroll assertion).
 
-### 2. Toast más informativo
+## Test cases
 
-Reemplazar `toast.error('Revisa los campos marcados')` por uno que liste los campos:
+### 1. `saves a valid trade and shows success toast`
 
-```ts
-const labelMap = { symbol:'Símbolo', direction:'Dirección', entry_price:'Precio entrada',
-  quantity:'Cantidad', exit_price:'Precio salida', exit_date:'Fecha cierre',
-  stop_loss:'Stop Loss', take_profit:'Take Profit', commission:'Comisión',
-  strategy:'Estrategia', entry_date:'Fecha apertura', notes:'Notas' };
-const names = Object.keys(errs).map(k => labelMap[k] ?? k).join(', ');
-toast.error(`Revisa: ${names}`);
-```
+- Click "Agregar operación" / "Nueva operación" button to open the dialog.
+- Use `userEvent` to fill: Symbol, Direction (select Long), Entry Price, Quantity, Entry Date (already pre-filled to today — leave as-is), Stop Loss = `4300`, Take Profit = `4350`, Strategy, Notes.
+- Leave status as Abierta so exit fields are not required.
+- Click "Registrar operación".
+- Assert: `supabase.from('trades').insert` called once with object containing `symbol`, `direction: 'long'`, `entry_price: <number>`, `quantity: <number>`, `user_id: 'test-user'`.
+- Assert: `toast.success` called with `/creada correctamente/i`.
+- Assert: dialog closes (`queryByRole('dialog')` is null).
 
-### 3. Auto-foco al primer campo con error
+### 2. `shows inline errors and focuses the first invalid field on negative SL/TP`
 
-Tras `setFormErrors(errs)`, hacer `document.querySelector('[aria-invalid="true"]')?.scrollIntoView({block:'center'})` para que el usuario vea el campo.
+- Open dialog, fill required fields validly, then enter Stop Loss = `-105.60` and Take Profit = `-105.60`.
+- Click "Registrar operación".
+- Assert: `toast.error` called with a string matching `/Stop Loss/` and `/Take Profit/`.
+- Assert: Stop Loss input has `aria-invalid="true"` and an adjacent message matching `/mayor a 0/i`.
+- Assert: same for Take Profit.
+- Assert: `HTMLElement.prototype.scrollIntoView` was called (the auto-scroll wired in `handleAddTrade`).
+- Assert: `supabase.from('trades').insert` was NOT called.
 
-### 4. Hint visual para SL/TP
+### 3. `lists missing required fields in the error toast when submitting empty form`
 
-Cambiar el placeholder de Stop Loss y Take Profit de `"opcional"` a `"precio (ej. 4320.50)"` para evitar la confusión con valores de P&L.
+- Open dialog, immediately submit.
+- Assert: `toast.error` called with a string containing `Símbolo`, `Precio entrada`, `Cantidad`.
+- Assert: corresponding inputs have `aria-invalid="true"`.
 
-### 5. Reflejar errores no-requeridos en la barra de progreso
+## Notes / risks
 
-Cuando `Object.keys(formErrors).length > 0`, mostrar la barra en rojo y texto "Hay campos con error" en lugar de "Listo para registrar", incluso si los requeridos están completos. Esto evita el estado contradictorio de la captura.
-
-```tsx
-const hasErrors = Object.keys(formErrors).length > 0;
-// en el header:
-{hasErrors ? 'Hay campos con error' : isPayloadReady ? 'Listo para registrar' : 'Completando datos'}
-```
-
-Y opcionalmente `disabled={!isPayloadReady || hasErrors || createTrade.isPending || updateTrade.isPending}` para que el usuario tenga que limpiar errores antes de reintentar.
-
-## Prueba post-cambio
-
-1. Abrir "Agregar operación", completar todos los requeridos, SL = `-105.60`, TP = `-105.60` → click Registrar.
-2. Aparece toast: **"Revisa: Stop Loss, Take Profit"**.
-3. Los inputs SL y TP muestran texto rojo **"El stop loss debe ser mayor a 0"** / **"El take profit debe ser mayor a 0"** debajo, con borde de error.
-4. La barra del header cambia a **"Hay campos con error"** en rojo.
-5. Corrigiendo SL/TP a valores positivos (o vaciándolos) → errores desaparecen, barra vuelve a "Listo para registrar", click Registrar guarda OK.
-6. Caso open: status = Abierta, sin exit_price/exit_date → guarda sin tocar SL/TP.
-
-No se modifica `tradeFormSchema`, `useTrades`, ni `commitTrade`.
+- The dialog trigger label and exact form labels need to be read from `Journal.tsx` before writing the test — selectors will use `getByRole('button', { name: /…/ })` and `getByLabelText(/…/i)` keyed to the Spanish labels actually in the component.
+- If `LanguageProvider` defaults to EN we will force `LanguageProvider` initial language to ES (the labels in the bug report are Spanish) or query by `name`/placeholder that is language-agnostic.
+- No production code changes. Only the new test file. If a missing test-only shim is needed (e.g. `scrollIntoView` polyfill), it goes into the test file itself, not into `src/app/test/setup.ts`, to keep this PR scoped.
+- Run with `bunx vitest run src/features/journal/__tests__/Journal.addTradeFlow.test.tsx`.
