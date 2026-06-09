@@ -57,7 +57,7 @@ export default function Privacy() {
               <Power strokeWidth={2.5} className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <p className="font-bold leading-tight">MindOn</p>
+              <p className="font-bold leading-tight">Mind On</p>
               <p className="text-xs text-muted-foreground">Trading Software</p>
             </div>
           </Link>
