@@ -22,6 +22,7 @@ import {
 } from '@/shared/components/ui/dialog';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
+import { Progress } from '@/shared/components/ui/progress';
 import { cn } from '@/shared/lib/utils';
 import {
   Plus,
@@ -191,6 +192,41 @@ export default function Journal() {
     notes: '',
   };
   const [formData, setFormData] = useState(emptyForm);
+
+  // Payload readiness (drives progress bar + Register button disabled state)
+  const FIELD_LABEL_ES: Record<string, string> = {
+    symbol: 'Símbolo',
+    direction: 'Dirección',
+    entry_price: 'Precio entrada',
+    quantity: 'Cantidad',
+    entry_date: 'Fecha entrada',
+    exit_price: 'Precio salida',
+    exit_date: 'Fecha salida',
+  };
+  const requiredChecks = [
+    { key: 'symbol', ok: formData.symbol.trim().length > 0 },
+    { key: 'direction', ok: formData.direction === 'long' || formData.direction === 'short' },
+    { key: 'entry_price', ok: parseFloat(formData.entry_price) > 0 },
+    { key: 'quantity', ok: parseFloat(formData.quantity) > 0 },
+    { key: 'entry_date', ok: formData.entry_date.trim().length > 0 },
+    ...(formData.status === 'closed'
+      ? [
+          { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
+          { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
+        ]
+      : []),
+  ];
+  const recommendedChecks = [
+    { key: 'stop_loss', ok: parseFloat(formData.stop_loss) > 0 },
+    { key: 'take_profit', ok: parseFloat(formData.take_profit) > 0 },
+    { key: 'strategy', ok: formData.strategy.trim().length > 0 },
+  ];
+  const requiredDone = requiredChecks.filter((c) => c.ok).length;
+  const recommendedDone = recommendedChecks.filter((c) => c.ok).length;
+  const totalChecks = requiredChecks.length + recommendedChecks.length;
+  const progressPct = Math.round(((requiredDone + recommendedDone) / totalChecks) * 100);
+  const isPayloadReady = requiredDone === requiredChecks.length;
+  const missingRequired = requiredChecks.filter((c) => !c.ok).map((c) => c.key);
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
@@ -1021,6 +1057,27 @@ export default function Journal() {
                   {editingTrade ? 'Edit Trade' : 'Nueva operación'}
                 </DialogDescription>
               </DialogHeader>
+              <div className="px-4 sm:px-6 pt-2 pb-3 border-b border-border shrink-0 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-muted-foreground uppercase tracking-wider">
+                    {isPayloadReady ? 'Listo para registrar' : 'Completando datos'}
+                  </span>
+                  <span
+                    className={cn(
+                      'tabular-nums',
+                      isPayloadReady ? 'text-emerald-400' : 'text-muted-foreground',
+                    )}
+                  >
+                    {progressPct}%
+                  </span>
+                </div>
+                <Progress value={progressPct} className="h-1" />
+                {!isPayloadReady && missingRequired.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    Faltan: {missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}
+                  </p>
+                )}
+              </div>
               <form onSubmit={handleAddTrade} className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
                 {(
@@ -1289,7 +1346,8 @@ export default function Journal() {
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={createTrade.isPending || updateTrade.isPending}
+                    disabled={!isPayloadReady || createTrade.isPending || updateTrade.isPending}
+                    title={!isPayloadReady ? `Faltan: ${missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}` : undefined}
                     className="btn-press"
                   >
                     {(createTrade.isPending || updateTrade.isPending) && (
