@@ -7,8 +7,15 @@ import { WelcomeScreen } from './WelcomeScreen';
 import { AccountSetupStep } from './AccountSetupStep';
 import { TourStep } from './TourStep';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
+import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { cn } from '@/shared/lib/utils';
 import confetti from 'canvas-confetti';
+
+const ONBOARDING_COPY = {
+  ES: { welcome: 'Bienvenida', account: 'Cuenta', tour: 'Tour', step: 'Paso', of: 'de', skip: 'Omitir', back: 'Atrás', next: 'Siguiente', complete: 'Completar' },
+  EN: { welcome: 'Welcome', account: 'Account', tour: 'Tour', step: 'Step', of: 'of', skip: 'Skip', back: 'Back', next: 'Next', complete: 'Complete' },
+  PT: { welcome: 'Bem-vindo', account: 'Conta', tour: 'Tour', step: 'Etapa', of: 'de', skip: 'Pular', back: 'Voltar', next: 'Próximo', complete: 'Concluir' },
+} as const;
 
 export function OnboardingWizard() {
   const { isOnboardingComplete, currentStep: savedStep, completeOnboarding, skipOnboarding, saveProgress, isLoading } =
