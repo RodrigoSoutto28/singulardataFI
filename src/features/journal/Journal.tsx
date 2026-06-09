@@ -1346,7 +1346,8 @@ export default function Journal() {
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={createTrade.isPending || updateTrade.isPending}
+                    disabled={!isPayloadReady || createTrade.isPending || updateTrade.isPending}
+                    title={!isPayloadReady ? `Faltan: ${missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}` : undefined}
                     className="btn-press"
                   >
                     {(createTrade.isPending || updateTrade.isPending) && (
