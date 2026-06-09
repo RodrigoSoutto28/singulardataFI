@@ -179,7 +179,7 @@ export default function Journal() {
     direction: '' as 'long' | 'short' | '',
     entry_price: '',
     quantity: '',
-    stop_loss: '',
+    stop_size: '',
     take_profit: '',
     commission: '',
     strategy: '',
