@@ -884,7 +884,7 @@ export default function Journal() {
                 {t.journal.viewDetails}
               </DropdownMenuItem>
               <DropdownMenuItem className="gap-2" onSelect={(e) => { e.preventDefault(); openEditTrade(trade); }}>
-                <Pencil className="h-4 w-4" />
+                <Pencil className="lucide lucide-pencil h-3.5 w-3.5 text-justify" />
                 {t.journal.editTrade}
               </DropdownMenuItem>
               <DropdownMenuItem className="gap-2">
