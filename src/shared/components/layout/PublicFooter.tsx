@@ -21,7 +21,7 @@ export function PublicFooter() {
   return (
     <footer className="w-full border-t border-border bg-background/80 backdrop-blur">
       <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-        <p>© 2026 MindOn · {labels.rights}</p>
+        <p>© 2026 Mind On · {labels.rights}</p>
         <nav className="flex items-center gap-3">
           <Link to="/terminos" className="hover:text-foreground transition-colors">{labels.terms}</Link>
           <span aria-hidden>·</span>

@@ -55,8 +55,8 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             <div className="flex items-center justify-center h-7 w-7 rounded-md bg-primary">
               <Power className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
             </div>
-            <span className="text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase">
-              MindOn
+            <span className="text-[11px] font-bold tracking-[0.18em] text-foreground uppercase">
+              Mind On
             </span>
           </div>
 

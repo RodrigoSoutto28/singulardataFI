@@ -78,7 +78,7 @@ export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: P
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
             <Sparkles className="h-6 w-6 text-primary" aria-hidden />
           </div>
-          <DialogTitle id="welcome-title">Bienvenido a MindOn</DialogTitle>
+          <DialogTitle id="welcome-title">Bienvenido a Mind On</DialogTitle>
           <DialogDescription>
             ¿Cómo quieres empezar? Puedes explorar la plataforma con datos de
             ejemplo o registrar tus propias operaciones desde cero.
