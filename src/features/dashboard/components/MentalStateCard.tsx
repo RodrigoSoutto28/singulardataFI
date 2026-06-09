@@ -45,7 +45,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
 
         {/* Progress Ring */}
         <div className="relative w-32 h-32 mx-auto">
-          <svg className="transform -rotate-90 w-32 h-32">
+          <svg className="transform -rotate-90 w-32 h-32" viewBox="0 0 128 128">
             <circle
               cx="64"
               cy="64"

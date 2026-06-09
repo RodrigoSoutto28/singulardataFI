@@ -32,7 +32,10 @@ export function AppLayout() {
   });
 
   useEffect(() => {
-    if (isTablet) setCollapsed(true);
+    // Only auto-collapse on tablet if the user has no saved preference
+    if (isTablet && localStorage.getItem('sidebar-collapsed') === null) {
+      setCollapsed(true);
+    }
   }, [isTablet]);
 
   const handleToggleCollapsed = () => {

@@ -77,30 +77,45 @@ export default function Psychology() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">{t.psychology.title}</h1>
-        <p className="text-muted-foreground mb-4">
-          Tu bienestar mental es tu ventaja competitiva más importante.
+        <h1 className="text-2xl font-bold">{t.psychology.title}</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {t.psychology.subtitle ?? 'Tu bienestar mental es tu ventaja competitiva más importante.'}
         </p>
+      </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-          <TabsList>
-            <TabsTrigger value="today">
-              <Calendar className="h-4 w-4 mr-2" />
-              Hoy
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Historial
-            </TabsTrigger>
-            <TabsTrigger value="insights">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Insights
-            </TabsTrigger>
-            <TabsTrigger value="taxometer">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Taxímetro
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+            <TabsList className="bg-muted/60 border border-border h-10 p-1 rounded-lg w-max sm:w-auto inline-flex">
+              <TabsTrigger
+                value="today"
+                className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+              >
+                <Calendar className="h-4 w-4" />
+                Hoy
+              </TabsTrigger>
+              <TabsTrigger
+                value="history"
+                className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+              >
+                <BookOpen className="h-4 w-4" />
+                Historial
+              </TabsTrigger>
+              <TabsTrigger
+                value="insights"
+                className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+              >
+                <Sparkles className="h-4 w-4" />
+                Insights
+              </TabsTrigger>
+              <TabsTrigger
+                value="taxometer"
+                className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+              >
+                <DollarSign className="h-4 w-4" />
+                Taxímetro
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="today" className="mt-6">
             <TodayCheckInView />
@@ -115,7 +130,6 @@ export default function Psychology() {
             <TaxometerDashboard />
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   );
 }

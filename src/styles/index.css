@@ -344,6 +344,20 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* Subtle bounce for emoji / icon accents */
+  .animate-subtle-bounce { animation: subtle-bounce 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  @keyframes subtle-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* Slide up fade — hero sections */
+  .animate-slide-up-fade { animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+  @keyframes slide-up-fade {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   /* Stagger animation */
   .stagger-item { opacity: 0; animation: fade-in 0.25s ease-out forwards; }
   .stagger-item:nth-child(1) { animation-delay: 0ms; }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
@@ -59,6 +59,41 @@ export default function Settings() {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+
+  // Profile Form state
+  const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [timezone, setTimezone] = useState(profile?.timezone || 'UTC');
+  const [currency, setCurrency] = useState(profile?.currency || 'USD');
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setTimezone(profile.timezone || 'UTC');
+      setCurrency(profile.currency || 'USD');
+    }
+  }, [profile]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName.trim() || null,
+          timezone,
+          currency,
+        })
+        .eq('id', user.id);
+      if (error) throw error;
+      toast.success(t.settings.saveSuccess ?? 'Perfil actualizado correctamente');
+    } catch (err) {
+      toast.error('Error al actualizar el perfil');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const handleExport = async () => {
     if (!user) return;
@@ -190,7 +225,8 @@ export default function Settings() {
             <div className="space-y-2">
               <Label>{t.settings.fullName}</Label>
               <Input
-                defaultValue={profile?.full_name || ''}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder={t.settings.yourName}
                 className="bg-muted/50"
               />
@@ -205,7 +241,7 @@ export default function Settings() {
             </div>
             <div className="space-y-2">
               <Label>{t.settings.timezone}</Label>
-              <Select defaultValue={profile?.timezone || 'UTC'}>
+              <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue />
                 </SelectTrigger>
@@ -221,7 +257,7 @@ export default function Settings() {
             </div>
             <div className="space-y-2">
               <Label>{t.settings.currency}</Label>
-              <Select defaultValue={profile?.currency || 'USD'}>
+              <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="bg-muted/50">
                   <SelectValue />
                 </SelectTrigger>
@@ -236,7 +272,9 @@ export default function Settings() {
               </Select>
             </div>
           </div>
-          <Button>{t.settings.saveChanges}</Button>
+          <Button onClick={handleSaveProfile} disabled={savingProfile}>
+            {savingProfile ? (t.settings.saving ?? 'Guardando...') : t.settings.saveChanges}
+          </Button>
         </CardContent>
       </Card>
 
@@ -245,7 +283,7 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
-            Datos y Onboarding
+            {t.settings.dataAndOnboarding ?? 'Datos y Onboarding'}
           </CardTitle>
           <CardDescription>
             Cargá datos de ejemplo para explorar la plataforma o reiniciá el
@@ -577,18 +615,17 @@ export default function Settings() {
 // ============================================================
 // IP geolocation settings card
 // ============================================================
-import { useEffect as _useEffectGeo, useState as _useStateGeo } from 'react';
 import { Globe as _GlobeIcon, MapPin as _MapPinIcon, Info as _InfoIcon, RefreshCw as _RefreshIcon, Trash2 as _TrashIcon } from 'lucide-react';
 import { useIPGeolocation } from '@/shared/hooks/useIPGeolocation';
 
 function GeolocationCard() {
   const { t } = useLanguage();
-  const [enabled, setEnabled] = _useStateGeo(
+  const [enabled, setEnabled] = useState(
     () => localStorage.getItem('singular_use_ip_detection') !== 'false',
   );
   const { detection, isLoading, detectLocation, reset, hasCache } = useIPGeolocation();
 
-  _useEffectGeo(() => {
+  useEffect(() => {
     localStorage.setItem('singular_use_ip_detection', enabled ? 'true' : 'false');
   }, [enabled]);
 

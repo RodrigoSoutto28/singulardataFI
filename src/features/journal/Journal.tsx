@@ -23,6 +23,16 @@ import {
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Progress } from '@/shared/components/ui/progress';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/components/ui/alert-dialog';
 import { cn } from '@/shared/lib/utils';
 import {
   Plus,
@@ -114,6 +124,10 @@ export default function Journal() {
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
+
+  // Alert Dialog states
+  const [tradeToDelete, setTradeToDelete] = useState<string | null>(null);
+  const [isUndoAlertOpen, setIsUndoAlertOpen] = useState(false);
 
   // Taxometer alert state
   const { todayCheckIn } = usePreMarketCheckIn();
@@ -439,7 +453,7 @@ export default function Journal() {
 
   const handleUndoLastImport = async () => {
     if (!user?.id) return;
-    if (!confirm('¿Deshacer la última importación? Se eliminarán las operaciones cargadas en ese proceso.')) return;
+    setIsUndoAlertOpen(false);
     setIsUndoing(true);
     try {
       const last = await getLastActiveBatch(user.id);
@@ -782,9 +796,10 @@ export default function Journal() {
     setPendingPayload(null);
   };
 
-  const handleDeleteTrade = async (id: string) => {
-    if (confirm('¿Eliminar esta operación?')) {
-      await deleteTrade.mutateAsync(id);
+  const handleDeleteTrade = async () => {
+    if (tradeToDelete) {
+      await deleteTrade.mutateAsync(tradeToDelete);
+      setTradeToDelete(null);
     }
   };
 
@@ -915,7 +930,7 @@ export default function Journal() {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-destructive gap-2"
-                onClick={() => handleDeleteTrade(trade.id)}
+                onClick={() => setTradeToDelete(trade.id)}
               >
                 <Trash2 className="h-4 w-4" />
                 {t.common.delete}
@@ -1486,7 +1501,7 @@ export default function Journal() {
             <Button
               onClick={async () => {
                 setDuplicateInfo(null);
-                await handleUndoLastImport();
+                setIsUndoAlertOpen(true);
               }}
               disabled={isUndoing}
             >
@@ -1647,6 +1662,42 @@ export default function Journal() {
           }}
         />
       )}
+
+      {/* Delete Trade Alert */}
+      <AlertDialog open={tradeToDelete !== null} onOpenChange={(open) => !open && setTradeToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta operación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará la operación permanentemente de tu registro.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTrade} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Undo Import Alert */}
+      <AlertDialog open={isUndoAlertOpen} onOpenChange={setIsUndoAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Deshacer la última importación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminarán permanentemente las operaciones cargadas en ese proceso. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleUndoLastImport} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Deshacer importación
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
