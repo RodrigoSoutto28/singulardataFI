@@ -147,14 +147,20 @@ export function Sidebar({
       >
 
         {/* Brand */}
-        <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-5')}>
-          <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
-            <Power className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
-          </div>
-          {!collapsed && (
-            <span className="text-[13px] tracking-[0.18em] text-foreground uppercase truncate font-bold">
-              Mind On
-            </span>
+        <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-4')}>
+          {collapsed ? (
+            /* Colapsado: solo el ícono power del logo */
+            <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
+              <Power className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
+            </div>
+          ) : (
+            /* Expandido: logo real completo */
+            <img
+              src="/logo-mindon.svg"
+              alt="MindOn Trading Software"
+              className="h-10 w-auto object-contain select-none"
+              draggable={false}
+            />
           )}
         </div>
 

@@ -1,4 +1,5 @@
-import { Sun, Moon, Menu, Power, User as UserIcon, Settings as SettingsIcon, CreditCard, LogOut } from 'lucide-react';
+import { Sun, Moon, Menu, User as UserIcon, Settings as SettingsIcon, CreditCard, LogOut } from 'lucide-react';
+
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
@@ -50,14 +51,14 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             <Menu className="h-5 w-5" />
           </Button>
 
-          {/* Mobile brand monogram */}
-          <div className="flex md:hidden items-center gap-1.5">
-            <div className="flex items-center justify-center h-7 w-7 rounded-md bg-primary">
-              <Power className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
-            </div>
-            <span className="text-[11px] font-bold tracking-[0.18em] text-foreground uppercase">
-              Mind On
-            </span>
+          {/* Mobile brand — logo real */}
+          <div className="flex md:hidden items-center">
+            <img
+              src="/logo-mindon.svg"
+              alt="MindOn Trading Software"
+              className="h-7 w-auto object-contain select-none"
+              draggable={false}
+            />
           </div>
 
           {/* Desktop brand line */}

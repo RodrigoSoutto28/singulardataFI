@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 86" fill="none">
+  <!--
+    MindOn Trading Software — Logo vectorial
+    Diseño fiel al original: "Mind" en blanco cálido, "O" poder en beige/dorado, "n" en beige
+    Subtítulo "TRADING SOFTWARE" en dorado atenuado
+  -->
+
+  <!-- "Mind" en color neutro (currentColor permite adaptarse al tema vía CSS) -->
+  <text
+    x="2"
+    y="61"
+    font-family="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="54"
+    font-weight="700"
+    letter-spacing="-2"
+    class="logo-text-main"
+    fill="currentColor"
+  >Mind</text>
+
+  <!--
+    Power icon "O":
+    Centro en aprox. x=182, y=33 (radio 22px)
+    Arco: abre por arriba (~40°), línea vertical
+  -->
+  <g transform="translate(168, 6)">
+    <!-- Arco power (semicírculo con gap arriba) -->
+    <path
+      d="M 14.8 6.2 A 20 20 0 1 1 9.2 6.2"
+      stroke="#C9A88A"
+      stroke-width="6"
+      stroke-linecap="round"
+      fill="none"
+    />
+    <!-- Barra vertical del power icon -->
+    <line
+      x1="12"
+      y1="2"
+      x2="12"
+      y2="16"
+      stroke="#C9A88A"
+      stroke-width="6"
+      stroke-linecap="round"
+    />
+  </g>
+
+  <!-- "n" beige -->
+  <text
+    x="218"
+    y="61"
+    font-family="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="54"
+    font-weight="700"
+    letter-spacing="-2"
+    fill="#C9A88A"
+  >n</text>
+
+  <!-- Subtítulo -->
+  <text
+    x="2"
+    y="81"
+    font-family="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="9.5"
+    font-weight="400"
+    letter-spacing="4"
+    fill="#A6845F"
+  >TRADING SOFTWARE</text>
+</svg>
