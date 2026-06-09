@@ -192,6 +192,41 @@ export default function Journal() {
   };
   const [formData, setFormData] = useState(emptyForm);
 
+  // Payload readiness (drives progress bar + Register button disabled state)
+  const FIELD_LABEL_ES: Record<string, string> = {
+    symbol: 'Símbolo',
+    direction: 'Dirección',
+    entry_price: 'Precio entrada',
+    quantity: 'Cantidad',
+    entry_date: 'Fecha entrada',
+    exit_price: 'Precio salida',
+    exit_date: 'Fecha salida',
+  };
+  const requiredChecks = [
+    { key: 'symbol', ok: formData.symbol.trim().length > 0 },
+    { key: 'direction', ok: formData.direction === 'long' || formData.direction === 'short' },
+    { key: 'entry_price', ok: parseFloat(formData.entry_price) > 0 },
+    { key: 'quantity', ok: parseFloat(formData.quantity) > 0 },
+    { key: 'entry_date', ok: formData.entry_date.trim().length > 0 },
+    ...(formData.status === 'closed'
+      ? [
+          { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
+          { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
+        ]
+      : []),
+  ];
+  const recommendedChecks = [
+    { key: 'stop_loss', ok: parseFloat(formData.stop_loss) > 0 },
+    { key: 'take_profit', ok: parseFloat(formData.take_profit) > 0 },
+    { key: 'strategy', ok: formData.strategy.trim().length > 0 },
+  ];
+  const requiredDone = requiredChecks.filter((c) => c.ok).length;
+  const recommendedDone = recommendedChecks.filter((c) => c.ok).length;
+  const totalChecks = requiredChecks.length + recommendedChecks.length;
+  const progressPct = Math.round(((requiredDone + recommendedDone) / totalChecks) * 100);
+  const isPayloadReady = requiredDone === requiredChecks.length;
+  const missingRequired = requiredChecks.filter((c) => !c.ok).map((c) => c.key);
+
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
