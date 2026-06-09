@@ -651,11 +651,11 @@ export default function Journal() {
       const diff = formData.direction === 'long' ? exit - entry : entry - exit;
       pnl = +(diff * qty).toFixed(2);
     }
-    if (isClosed && exit !== null && pnlPct === null && entry !== 0) {
+    if (isClosed && exit !== null && pnlPct === null && Number.isFinite(entry) && entry !== 0) {
       const pct = formData.direction === 'long'
         ? ((exit - entry) / entry) * 100
         : ((entry - exit) / entry) * 100;
-      pnlPct = +pct.toFixed(2);
+      pnlPct = Number.isFinite(pct) ? +pct.toFixed(2) : null;
     }
 
     const payload = {

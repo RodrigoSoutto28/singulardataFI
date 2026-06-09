@@ -64,7 +64,7 @@ const severityColors: Record<string, string> = {
 };
 
 export default function Insights() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { insights, newInsights, readInsights, stats, isLoading, markAsRead, refetch } = useInsights();
   const { trades } = useTrades();
 
@@ -239,7 +239,7 @@ export default function Insights() {
                                 className="gap-2"
                                 onClick={() => markAsRead.mutate(insight.id)}
                               >
-                                Marcar como leído
+                                {{ ES: 'Marcar como leído', EN: 'Mark as read', PT: 'Marcar como lido' }[language]}
                                 <ChevronRight className="h-3 w-3" />
                               </Button>
                             </div>

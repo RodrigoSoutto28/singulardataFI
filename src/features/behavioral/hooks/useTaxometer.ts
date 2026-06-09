@@ -54,12 +54,21 @@ export function useTaxometer() {
   const sumIf = (pred: (e: PsychErrorRow) => boolean) =>
     errors.filter(pred).reduce((s, e) => s + Number(e.cost_dollars || 0), 0);
 
+  const weekCost = sumIf((e) => new Date(e.timestamp).getTime() >= week);
+  const monthCost = sumIf((e) => new Date(e.timestamp).getTime() >= month);
+  const quarterCost = sumIf((e) => new Date(e.timestamp).getTime() >= quarter);
+
+  // Savings = how much LESS the user is bleeding this month vs the prior-month average.
+  // If improvement is negative (worsening), surface 0.
+  const priorMonthsAvg = quarterCost > 0 ? (quarterCost - monthCost) / 2 : 0;
+  const savingsFromImprovement = Math.max(0, priorMonthsAvg - monthCost);
+
   const stats = {
     totalCost: sumIf(() => true),
-    weekCost: sumIf((e) => new Date(e.timestamp).getTime() >= week),
-    monthCost: sumIf((e) => new Date(e.timestamp).getTime() >= month),
-    quarterCost: sumIf((e) => new Date(e.timestamp).getTime() >= quarter),
-    savingsFromImprovement: 0,
+    weekCost,
+    monthCost,
+    quarterCost,
+    savingsFromImprovement,
     count: errors.length,
   };
 

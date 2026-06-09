@@ -7,12 +7,21 @@ import { WelcomeScreen } from './WelcomeScreen';
 import { AccountSetupStep } from './AccountSetupStep';
 import { TourStep } from './TourStep';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
+import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { cn } from '@/shared/lib/utils';
 import confetti from 'canvas-confetti';
+
+const ONBOARDING_COPY = {
+  ES: { welcome: 'Bienvenida', account: 'Cuenta', tour: 'Tour', step: 'Paso', of: 'de', skip: 'Omitir', back: 'Atrás', next: 'Siguiente', complete: 'Completar' },
+  EN: { welcome: 'Welcome', account: 'Account', tour: 'Tour', step: 'Step', of: 'of', skip: 'Skip', back: 'Back', next: 'Next', complete: 'Complete' },
+  PT: { welcome: 'Bem-vindo', account: 'Conta', tour: 'Tour', step: 'Etapa', of: 'de', skip: 'Pular', back: 'Voltar', next: 'Próximo', complete: 'Concluir' },
+} as const;
 
 export function OnboardingWizard() {
   const { isOnboardingComplete, currentStep: savedStep, completeOnboarding, skipOnboarding, saveProgress, isLoading } =
     useOnboarding();
+  const { language } = useLanguage();
+  const copy = ONBOARDING_COPY[language];
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
@@ -20,9 +29,9 @@ export function OnboardingWizard() {
   }, [savedStep]);
 
   const steps = [
-    { id: 'welcome', title: 'Bienvenida', canSkip: false, manualAdvance: false },
-    { id: 'account', title: 'Cuenta', canSkip: false, manualAdvance: true },
-    { id: 'tour', title: 'Tour', canSkip: true, manualAdvance: false },
+    { id: 'welcome', title: copy.welcome, canSkip: false, manualAdvance: false },
+    { id: 'account', title: copy.account, canSkip: false, manualAdvance: true },
+    { id: 'tour', title: copy.tour, canSkip: true, manualAdvance: false },
   ];
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -66,11 +75,11 @@ export function OnboardingWizard() {
               </div>
               <div>
                 <h2 className="font-semibold">{step.title}</h2>
-                <p className="text-xs text-muted-foreground">Paso {currentStep + 1} de {steps.length}</p>
+                <p className="text-xs text-muted-foreground">{copy.step} {currentStep + 1} {copy.of} {steps.length}</p>
               </div>
             </div>
             {step.canSkip && (
-              <Button variant="ghost" size="sm" onClick={() => skipOnboarding()}>Omitir</Button>
+              <Button variant="ghost" size="sm" onClick={() => skipOnboarding()}>{copy.skip}</Button>
             )}
           </div>
 
@@ -109,13 +118,13 @@ export function OnboardingWizard() {
         {!step.manualAdvance && (
           <div className="border-t px-6 py-4 flex items-center justify-between bg-card">
             <Button variant="ghost" onClick={handleBack} disabled={currentStep === 0}>
-              <ChevronLeft className="h-4 w-4 mr-1" /> Atrás
+              <ChevronLeft className="h-4 w-4 mr-1" /> {copy.back}
             </Button>
             <Button onClick={handleNext}>
               {currentStep === steps.length - 1 ? (
-                <>Completar <Check className="h-4 w-4 ml-1" /></>
+                <>{copy.complete} <Check className="h-4 w-4 ml-1" /></>
               ) : (
-                <>Siguiente <ArrowRight className="h-4 w-4 ml-1" /></>
+                <>{copy.next} <ArrowRight className="h-4 w-4 ml-1" /></>
               )}
             </Button>
           </div>

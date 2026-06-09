@@ -46,7 +46,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Analytics() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { trades, isLoading } = useTrades();
   const { 
     stats, 
@@ -195,7 +195,7 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Sin datos mensuales
+                      {{ ES: 'Sin datos mensuales', EN: 'No monthly data', PT: 'Sem dados mensais' }[language]}
                     </div>
                   )}
                 </div>

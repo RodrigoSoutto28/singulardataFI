@@ -54,7 +54,9 @@ export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: P
     setLoading(true);
     try {
       const samples = generateSampleTrades();
-      await importTrades.mutateAsync(samples as any);
+      await importTrades.mutateAsync(
+        samples as Parameters<typeof importTrades.mutateAsync>[0],
+      );
       localStorage.setItem(STORAGE_KEY, 'true');
       toast.success('Datos de ejemplo cargados', {
         description: '30 operaciones de muestra agregadas a tu cuenta.',
