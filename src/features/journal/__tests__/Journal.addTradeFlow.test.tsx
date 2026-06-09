@@ -93,6 +93,20 @@ vi.mock('@/features/auth/hooks/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } }),
 }));
 
+vi.mock('@/features/dashboard/hooks/useTradingAccounts', () => ({
+  useTradingAccounts: () => ({
+    selectedAccount: { id: 'acc-1', currency: 'USD' },
+    accounts: [{ id: 'acc-1', currency: 'USD' }],
+    selectedAccountId: 'acc-1',
+    setSelectedAccountId: () => {},
+    isLoading: false,
+  }),
+  useSelectedAccountId: () => ({
+    selectedAccountId: 'acc-1',
+    setSelectedAccountId: () => {},
+  }),
+}));
+
 // Suppress psychological-error popup that could intercept submit
 vi.mock('@/features/journal/utils/error-detection', () => ({
   detectPsychologicalErrors: () => [],
