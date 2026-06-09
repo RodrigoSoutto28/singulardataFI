@@ -20,6 +20,7 @@ import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTheme } from '@/shared/lib/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
+import { LogoMindOn } from '@/shared/components/ui/logo-mindon';
 
 
 interface NavItem {
@@ -149,18 +150,13 @@ export function Sidebar({
         {/* Brand */}
         <div className={cn('flex items-center h-16', collapsed ? 'justify-center px-0' : 'gap-2.5 px-4')}>
           {collapsed ? (
-            /* Colapsado: solo el ícono power del logo */
+            /* Colapsado: solo el ícono power */
             <div className="relative flex items-center justify-center h-9 w-9 rounded-md bg-primary shadow-sm shadow-primary/30 shrink-0">
               <Power className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
             </div>
           ) : (
-            /* Expandido: logo real completo */
-            <img
-              src="/logo-mindon.svg"
-              alt="MindOn Trading Software"
-              className="h-10 w-auto object-contain select-none"
-              draggable={false}
-            />
+            /* Expandido: logo React con font rendering preciso */
+            <LogoMindOn size="md" showSubtitle={false} />
           )}
         </div>
 

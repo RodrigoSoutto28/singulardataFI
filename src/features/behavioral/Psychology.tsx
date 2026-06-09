@@ -138,29 +138,55 @@ export default function Psychology() {
 function TodayCheckInView() {
   const { entries, latestEntry, stats } = usePsychologyEntries();
 
-  const today = new Date().toDateString();
-  const todayEntry =
-    latestEntry && new Date(latestEntry.entry_date).toDateString() === today ? latestEntry : null;
+  const localToday = new Date();
+  const localTodayStr = `${localToday.getFullYear()}-${String(localToday.getMonth() + 1).padStart(2, '0')}-${String(localToday.getDate()).padStart(2, '0')}`;
+
+  const todayEntry = latestEntry && latestEntry.entry_date === localTodayStr ? latestEntry : null;
   const hasCheckedIn = !!todayEntry;
 
   // Streak calculations
   const { currentStreak, bestStreak, checkedInThisWeek } = useMemo(() => {
     if (!entries.length) return { currentStreak: 0, bestStreak: 0, checkedInThisWeek: 0 };
-    const days = new Set(entries.map((e) => new Date(e.entry_date).toDateString()));
+    
+    // Almacena todas las fechas "YYYY-MM-DD"
+    const days = new Set(entries.map((e) => e.entry_date));
+    
     let cur = 0;
-    const cursor = new Date();
-    while (days.has(cursor.toDateString())) {
-      cur++;
-      cursor.setDate(cursor.getDate() - 1);
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+    let checkDate = new Date();
+    
+    // Si no hizo check-in hoy, pero sí ayer, la racha actual continúa desde ayer
+    if (!days.has(localTodayStr)) {
+      if (days.has(yesterdayStr)) {
+        checkDate = yesterday;
+      } else {
+        checkDate = new Date(0); // rompe el loop de racha
+      }
     }
-    // best streak across history
+
+    // Calcular racha actual contando días consecutivos hacia atrás
+    while (checkDate.getTime() > 0) {
+      const cursorStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      if (days.has(cursorStr)) {
+        cur++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // Mejor racha histórica
     const sorted = [...days]
       .map((d) => new Date(d).getTime())
       .sort((a, b) => a - b);
     let best = 1;
     let run = 1;
     for (let i = 1; i < sorted.length; i++) {
-      const diff = (sorted[i] - sorted[i - 1]) / 86400000;
+      const diff = Math.round((sorted[i] - sorted[i - 1]) / 86400000);
       if (diff === 1) {
         run++;
         best = Math.max(best, run);
@@ -169,13 +195,15 @@ function TodayCheckInView() {
       }
     }
     if (sorted.length === 0) best = 0;
-    // this week
+    
+    // Check-ins esta semana
     const start = new Date();
     start.setDate(start.getDate() - 6);
     start.setHours(0, 0, 0, 0);
     const week = entries.filter((e) => new Date(e.entry_date) >= start).length;
+    
     return { currentStreak: cur, bestStreak: best, checkedInThisWeek: Math.min(week, 7) };
-  }, [entries]);
+  }, [entries, localTodayStr]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
@@ -429,7 +457,11 @@ function CheckInFormCard() {
       return;
     }
     try {
+      const localToday = new Date();
+      const localTodayStr = `${localToday.getFullYear()}-${String(localToday.getMonth() + 1).padStart(2, '0')}-${String(localToday.getDate()).padStart(2, '0')}`;
+
       await createEntry.mutateAsync({
+        entry_date: localTodayStr,
         pre_trade_emotion: parsed.data.emotion,
         discipline_score: parsed.data.disciplineScore,
         sleep_quality: parsed.data.sleepQuality,

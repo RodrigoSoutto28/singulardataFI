@@ -108,7 +108,6 @@ export function LogoMindOn({ size = 'md', showSubtitle = false, className }: Log
           letterSpacing="4.5"
           fill="#A6845F"
         >
-          TRADING SOFTWARE
         </text>
       )}
     </svg>
