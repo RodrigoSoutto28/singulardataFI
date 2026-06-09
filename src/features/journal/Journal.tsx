@@ -248,7 +248,7 @@ export default function Journal() {
       direction: (trade.direction as 'long' | 'short') ?? '',
       entry_price: trade.entry_price?.toString() ?? '',
       quantity: trade.quantity?.toString() ?? '',
-      stop_loss: trade.stop_loss?.toString() ?? '',
+      stop_size: trade.stop_size?.toString() ?? '',
       take_profit: trade.take_profit?.toString() ?? '',
       commission: trade.commission?.toString() ?? '',
       strategy: trade.strategy ?? '',
