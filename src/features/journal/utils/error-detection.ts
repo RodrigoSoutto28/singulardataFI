@@ -24,6 +24,7 @@ export interface TodayCheckInRef {
 export interface CurrentTradeShape {
   entry_price?: number | null;
   stop_loss?: number | null;
+  stop_size?: number | null;
   quantity?: number | null;
   entry_date?: string | null;
   notes?: string | null;
