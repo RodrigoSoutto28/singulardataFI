@@ -850,7 +850,8 @@
 
   /* 3D Icon Fusion effect: makes icons emerge smoothly from the background card/element */
   .icon3d-fusion {
-    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
+    mix-blend-mode: multiply;
+    filter: brightness(1.18) contrast(1.1) drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
     transform: translateY(-2px);
     transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
   }
@@ -859,7 +860,7 @@
   button:hover .icon3d-fusion,
   [role="tab"][data-state="active"] .icon3d-fusion {
     transform: translateY(-8px) scale(1.1);
-    filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.55));
+    filter: brightness(1.22) contrast(1.15) drop-shadow(0 24px 36px rgba(0, 0, 0, 0.55));
   }
 
   /* Tab indicator slide */

@@ -27,7 +27,7 @@ export function Icon3D({ name, className, alt, fusion = false }: Icon3DProps) {
       draggable={false}
       className={cn(
         'object-contain shrink-0 select-none transition-all duration-300',
-        fusion && 'icon3d-fusion filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.35)]',
+        fusion && 'icon3d-fusion',
         className
       )}
     />
