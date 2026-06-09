@@ -153,7 +153,7 @@ export function Sidebar({
           </div>
           {!collapsed && (
             <span className="text-[13px] font-semibold tracking-[0.18em] text-foreground uppercase truncate">
-              MindOn
+              SINGULAR dataFI
             </span>
           )}
         </div>
