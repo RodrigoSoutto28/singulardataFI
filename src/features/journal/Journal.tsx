@@ -1282,29 +1282,27 @@ export default function Journal() {
                       <Input
                         type="number"
                         step="any"
-                        min="0"
                         inputMode="decimal"
-                        placeholder="ej. 50.00"
+                        placeholder="ej. -50.00"
                         className="bg-muted/30 font-mono pl-7"
                         value={formData.stop_size}
-                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value.replace('-', '') }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value }))}
                         aria-invalid={!!formErrors.stop_size}
                       />
                     </div>
                     {formErrors.stop_size
                       ? <p className="text-xs text-destructive">{formErrors.stop_size}</p>
-                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop'}</p>}
+                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop (valor negativo)'}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
                     <Input
                       type="number"
                       step="any"
-                      min="0"
-                      placeholder="precio (ej. 4350.00)"
+                      placeholder="ej. 100.00"
                       className="bg-muted/30 font-mono"
                       value={formData.take_profit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value.replace('-', '') }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
                       aria-invalid={!!formErrors.take_profit}
                     />
                     {formErrors.take_profit && <p className="text-xs text-destructive">{formErrors.take_profit}</p>}
