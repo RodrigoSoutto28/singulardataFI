@@ -66,6 +66,7 @@ import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
+import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
 import { TaxometerAlert } from '@/features/behavioral/components/TaxometerAlert';
 import {
   detectPsychologicalErrors,
