@@ -29,7 +29,7 @@ export default function AnalyticsHub() {
               className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
             >
               <BarChart3 className="h-4 w-4" />
-              <span>Analytics</span>
+              <span>{t.extra?.analyticsTab ?? 'Analytics'}</span>
             </TabsTrigger>
             <TabsTrigger
               value="insights"
@@ -43,7 +43,7 @@ export default function AnalyticsHub() {
               className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
             >
               <FileText className="h-4 w-4" />
-              <span>Reports</span>
+              <span>{t.extra?.reportsTab ?? 'Reports'}</span>
             </TabsTrigger>
           </TabsList>
         </div>

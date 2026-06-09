@@ -150,9 +150,9 @@ export default function Analytics() {
           <CardContent className="py-16">
             <div className="text-center">
               <BarChart3 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground">Sin datos suficientes para mostrar análisis</p>
+              <p className="text-muted-foreground">{t.extra?.notEnoughData ?? 'Not enough data'}</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Agrega operaciones en el diario para ver estadísticas
+                {t.extra?.addTradesToSeeStats ?? 'Add trades to see statistics'}
               </p>
             </div>
           </CardContent>

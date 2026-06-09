@@ -31,7 +31,7 @@ export default function Auth() {
   // On mount: if no stored preference, detect from browser.
   useEffect(() => {
     if (localStorage.getItem('app-language')) return;
-    detectUserLanguage().then((d) => setLanguage(toContextCode(d.language))).catch(() => {});
+    detectUserLanguage(null, true).then((d) => setLanguage(toContextCode(d.language))).catch(() => {});
   }, [setLanguage]);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
