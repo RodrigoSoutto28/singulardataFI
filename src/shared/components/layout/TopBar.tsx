@@ -15,6 +15,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { useTheme } from '@/shared/lib/ThemeContext';
 import { AccountSwitcher } from './AccountSwitcher';
+import { LogoMindOn } from '@/shared/components/ui/logo-mindon';
 // LanguageSelector removed: language preference is managed in Settings + auto-detection
 
 
@@ -53,12 +54,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
 
           {/* Mobile brand — logo real */}
           <div className="flex md:hidden items-center">
-            <img
-              src="/logo-mindon.svg"
-              alt="MindOn Trading Software"
-              className="h-7 w-auto object-contain select-none"
-              draggable={false}
-            />
+            <LogoMindOn size="sm" showSubtitle={false} />
           </div>
 
           {/* Desktop brand line */}
