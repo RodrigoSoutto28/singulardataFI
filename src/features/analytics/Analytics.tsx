@@ -46,7 +46,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Analytics() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { trades, isLoading } = useTrades();
   const { 
     stats, 
