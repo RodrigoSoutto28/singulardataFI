@@ -195,7 +195,7 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Sin datos mensuales
+                      {t.analytics.noData}
                     </div>
                   )}
                 </div>
