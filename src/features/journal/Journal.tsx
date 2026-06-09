@@ -232,6 +232,12 @@ export default function Journal() {
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
+  const { selectedAccount } = useTradingAccounts();
+  const accountCurrency = selectedAccount?.currency ?? 'USD';
+  const CURRENCY_SYMBOLS: Record<string, string> = {
+    USD: '$', EUR: '€', GBP: '£', ARS: '$', BRL: 'R$', MXN: '$', CLP: '$', COP: '$', PEN: 'S/', UYU: '$U',
+  };
+  const currencySymbol = CURRENCY_SYMBOLS[accountCurrency] ?? '$';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
