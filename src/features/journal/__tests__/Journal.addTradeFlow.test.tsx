@@ -179,8 +179,8 @@ describe('Journal — Add Trade flow', () => {
     await user.type(d.getByPlaceholderText('0.00'), '180.50');
     await user.type(d.getAllByPlaceholderText('0')[0], '10');
 
-    // Stop loss + take profit (positive values)
-    await user.type(d.getByPlaceholderText(/4320\.50/), '170');
+    // Stop size (en USD) + take profit (precio)
+    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '50');
     await user.type(d.getByPlaceholderText(/4350\.00/), '200');
 
     await user.click(d.getByRole('button', { name: /registrar operación/i }));
@@ -192,7 +192,8 @@ describe('Journal — Add Trade flow', () => {
       direction: 'long',
       entry_price: 180.5,
       quantity: 10,
-      stop_loss: 170,
+      stop_size: 50,
+      stop_loss: null,
       take_profit: 200,
       status: 'open',
     });
