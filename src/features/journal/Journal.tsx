@@ -1282,7 +1282,7 @@ export default function Journal() {
                       <Input
                         type="number"
                         step="any"
-                        min="0"
+                        inputMode="decimal"
                         placeholder="ej. 50.00"
                         className="bg-muted/30 font-mono pl-7"
                         value={formData.stop_size}
