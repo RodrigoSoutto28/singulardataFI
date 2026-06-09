@@ -24,6 +24,7 @@ export interface TodayCheckInRef {
 export interface CurrentTradeShape {
   entry_price?: number | null;
   stop_loss?: number | null;
+  stop_size?: number | null;
   quantity?: number | null;
   entry_date?: string | null;
   notes?: string | null;
@@ -99,8 +100,10 @@ export function detectPsychologicalErrors(
     }
   }
 
-  // 4. No stop loss
-  if (!currentTrade.stop_loss) {
+  // 4. No stop loss (either price-based stop_loss or money-based stop_size counts)
+  const hasRiskDefined =
+    (currentTrade.stop_loss ?? 0) > 0 || (currentTrade.stop_size ?? 0) > 0;
+  if (!hasRiskDefined) {
     errors.push({
       type: 'no_stop_loss',
       detected: true,

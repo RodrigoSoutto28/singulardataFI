@@ -27,8 +27,8 @@ export const tradeFormSchema = z
       .union([z.literal(''), z.coerce.number().positive('El precio de salida debe ser mayor a 0')])
       .optional()
       .nullable(),
-    stop_loss: z
-      .union([z.literal(''), z.coerce.number().positive('El stop loss debe ser mayor a 0')])
+    stop_size: z
+      .union([z.literal(''), z.coerce.number().positive('El tamaño del stop debe ser mayor a 0')])
       .optional()
       .nullable(),
     take_profit: z

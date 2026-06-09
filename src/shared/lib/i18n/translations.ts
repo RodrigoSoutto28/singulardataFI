@@ -181,6 +181,9 @@ export interface Translations {
     exitPrice: string;
     quantity: string;
     stopLoss: string;
+    stopSize?: string;
+    stopSizeHint?: string;
+    risk?: string;
     takeProfit: string;
     strategy: string;
     entryDate: string;
@@ -612,6 +615,9 @@ const baseTranslations: Record<Language, Translations> = {
       exitPrice: 'Precio de Salida',
       quantity: 'Cantidad',
       stopLoss: 'Stop Loss',
+      stopSize: 'Tamaño del Stop',
+      stopSizeHint: 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop',
+      risk: 'Riesgo',
       takeProfit: 'Take Profit',
       strategy: 'Estrategia',
       entryDate: 'Fecha de Entrada',
@@ -1026,6 +1032,9 @@ const baseTranslations: Record<Language, Translations> = {
       exitPrice: 'Exit Price',
       quantity: 'Quantity',
       stopLoss: 'Stop Loss',
+      stopSize: 'Stop Size',
+      stopSizeHint: 'How much money you are willing to lose if the stop is hit',
+      risk: 'Risk',
       takeProfit: 'Take Profit',
       strategy: 'Strategy',
       entryDate: 'Entry Date',
@@ -1440,6 +1449,9 @@ const baseTranslations: Record<Language, Translations> = {
       exitPrice: 'Preço de Saída',
       quantity: 'Quantidade',
       stopLoss: 'Stop Loss',
+      stopSize: 'Tamanho do Stop',
+      stopSizeHint: 'Quanto dinheiro está disposto a perder se o stop for atingido',
+      risk: 'Risco',
       takeProfit: 'Take Profit',
       strategy: 'Estratégia',
       entryDate: 'Data de Entrada',

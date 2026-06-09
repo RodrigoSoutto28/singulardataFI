@@ -66,6 +66,7 @@ import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
+import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
 import { TaxometerAlert } from '@/features/behavioral/components/TaxometerAlert';
 import {
   detectPsychologicalErrors,
@@ -179,7 +180,7 @@ export default function Journal() {
     direction: '' as 'long' | 'short' | '',
     entry_price: '',
     quantity: '',
-    stop_loss: '',
+    stop_size: '',
     take_profit: '',
     commission: '',
     strategy: '',
@@ -217,7 +218,7 @@ export default function Journal() {
       : []),
   ];
   const recommendedChecks = [
-    { key: 'stop_loss', ok: parseFloat(formData.stop_loss) > 0 },
+    { key: 'stop_size', ok: parseFloat(formData.stop_size) > 0 },
     { key: 'take_profit', ok: parseFloat(formData.take_profit) > 0 },
     { key: 'strategy', ok: formData.strategy.trim().length > 0 },
   ];
@@ -231,6 +232,12 @@ export default function Journal() {
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
+  const { selectedAccount } = useTradingAccounts();
+  const accountCurrency = selectedAccount?.currency ?? 'USD';
+  const CURRENCY_SYMBOLS: Record<string, string> = {
+    USD: '$', EUR: '€', GBP: '£', ARS: '$', BRL: 'R$', MXN: '$', CLP: '$', COP: '$', PEN: 'S/', UYU: '$U',
+  };
+  const currencySymbol = CURRENCY_SYMBOLS[accountCurrency] ?? '$';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetForm = () => {
@@ -248,7 +255,7 @@ export default function Journal() {
       direction: (trade.direction as 'long' | 'short') ?? '',
       entry_price: trade.entry_price?.toString() ?? '',
       quantity: trade.quantity?.toString() ?? '',
-      stop_loss: trade.stop_loss?.toString() ?? '',
+      stop_size: trade.stop_size?.toString() ?? '',
       take_profit: trade.take_profit?.toString() ?? '',
       commission: trade.commission?.toString() ?? '',
       strategy: trade.strategy ?? '',
@@ -614,7 +621,7 @@ export default function Journal() {
       const labelMap: Record<string, string> = {
         symbol: 'Símbolo', direction: 'Dirección', entry_price: 'Precio entrada',
         quantity: 'Cantidad', exit_price: 'Precio salida', exit_date: 'Fecha cierre',
-        stop_loss: 'Stop Loss', take_profit: 'Take Profit', commission: 'Comisión',
+        stop_loss: 'Stop Loss', stop_size: 'Tamaño del Stop', take_profit: 'Take Profit', commission: 'Comisión',
         strategy: 'Estrategia', entry_date: 'Fecha apertura', notes: 'Notas',
       };
       const names = Object.keys(errs).map((k) => labelMap[k] ?? k).join(', ');
@@ -656,7 +663,8 @@ export default function Journal() {
       direction: formData.direction as 'long' | 'short',
       entry_price: entry,
       quantity: qty,
-      stop_loss: num(formData.stop_loss),
+      stop_loss: null,
+      stop_size: num(formData.stop_size),
       take_profit: num(formData.take_profit),
       commission: num(formData.commission) ?? 0,
       strategy: formData.strategy.trim() || null,
@@ -676,6 +684,7 @@ export default function Journal() {
       {
         entry_price: payload.entry_price,
         stop_loss: payload.stop_loss,
+        stop_size: payload.stop_size,
         quantity: payload.quantity,
         entry_date: payload.entry_date,
         notes: payload.notes,
@@ -1261,19 +1270,29 @@ export default function Journal() {
                     {formErrors.exit_date && <p className="text-xs text-destructive">{formErrors.exit_date}</p>}
                   </div>
 
-                  {/* SL / TP */}
+                  {/* Stop Size (en moneda de la cuenta) */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.stopLoss}</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder="precio (ej. 4320.50)"
-                      className="bg-muted/30 font-mono"
-                      value={formData.stop_loss}
-                      onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
-                      aria-invalid={!!formErrors.stop_loss}
-                    />
-                    {formErrors.stop_loss && <p className="text-xs text-destructive">{formErrors.stop_loss}</p>}
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {(t.journal.stopSize ?? 'Tamaño del Stop')} ({accountCurrency})
+                    </Label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-mono text-muted-foreground">
+                        {currencySymbol}
+                      </span>
+                      <Input
+                        type="number"
+                        step="any"
+                        inputMode="decimal"
+                        placeholder="ej. 50.00"
+                        className="bg-muted/30 font-mono pl-7"
+                        value={formData.stop_size}
+                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value }))}
+                        aria-invalid={!!formErrors.stop_size}
+                      />
+                    </div>
+                    {formErrors.stop_size
+                      ? <p className="text-xs text-destructive">{formErrors.stop_size}</p>
+                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop'}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
@@ -1319,16 +1338,17 @@ export default function Journal() {
                   </div>
                 </div>
 
-                {/* Auto P&L + R:R preview */}
+                {/* Auto P&L + Riesgo + R:R preview */}
                 {(() => {
                   const entry = parseFloat(formData.entry_price);
                   const exit = parseFloat(formData.exit_price);
                   const qty = parseFloat(formData.quantity);
-                  const sl = parseFloat(formData.stop_loss);
+                  const stopSize = parseFloat(formData.stop_size);
                   const tp = parseFloat(formData.take_profit);
-                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && formData.direction;
-                  const hasRR = !isNaN(entry) && !isNaN(sl) && !isNaN(tp) && formData.direction;
-                  if (!hasPnl && !hasRR) return null;
+                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && !!formData.direction;
+                  const hasRisk = !isNaN(stopSize) && stopSize > 0;
+                  const hasRR = hasRisk && !isNaN(tp) && tp > 0 && !isNaN(entry) && !isNaN(qty) && !!formData.direction;
+                  if (!hasPnl && !hasRisk && !hasRR) return null;
                   let pnl = 0, pct = 0, rr = 0;
                   if (hasPnl) {
                     const diff = formData.direction === 'long' ? exit - entry : entry - exit;
@@ -1336,9 +1356,8 @@ export default function Journal() {
                     pct = entry !== 0 ? (diff / entry) * 100 : 0;
                   }
                   if (hasRR) {
-                    const reward = formData.direction === 'long' ? tp - entry : entry - tp;
-                    const risk = formData.direction === 'long' ? entry - sl : sl - entry;
-                    rr = risk > 0 ? reward / risk : 0;
+                    const reward = (formData.direction === 'long' ? tp - entry : entry - tp) * qty;
+                    rr = stopSize > 0 ? reward / stopSize : 0;
                   }
                   return (
                     <div className="space-y-2">
@@ -1349,8 +1368,14 @@ export default function Journal() {
                         )}>
                           <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.pnlEstimated ?? 'P&L Estimado'}</span>
                           <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
-                            {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
+                            {pnl >= 0 ? '+' : ''}{currencySymbol}{pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
                           </span>
+                        </div>
+                      )}
+                      {hasRisk && (
+                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.risk ?? 'Riesgo'}</span>
+                          <span className="font-mono font-bold text-loss">-{currencySymbol}{stopSize.toFixed(2)} {accountCurrency}</span>
                         </div>
                       )}
                       {hasRR && rr > 0 && (

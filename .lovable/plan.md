@@ -1,65 +1,83 @@
-## Goal
+## Objetivo
 
-Add a React Testing Library test for the Journal "Add Trade" dialog that covers:
+En el formulario "Agregar / Editar operación", reemplazar el campo **Stop Loss (precio)** por **Tamaño del Stop** expresado en la moneda de la cuenta de trading activa (por defecto USD). El resto del formulario queda intacto.
 
-1. **Happy path** — fill all required fields, submit, verify `createTrade` is called with the right payload and a success toast.
-2. **Invalid path** — submit with negative Stop Loss / Take Profit (the bug scenario), verify inline field errors render, focus/scroll moves to the first invalid field, and the error toast lists the offending fields.
+## Cambios
 
-## File
+### 1. Base de datos — nueva columna `stop_size`
 
-New: `src/features/journal/__tests__/Journal.addTradeFlow.test.tsx`
+Agregar a `public.trades`:
 
-Sits next to the existing `Journal.addTrade.test.ts` (which is a source-grep smoke test). The new file is a real RTL render test.
+- `stop_size numeric(15,2)` — monto en dinero que el usuario está dispuesto a perder en el trade, en la moneda de la cuenta.
 
-## Approach
+Se mantiene `stop_loss numeric(20,8)` para no romper imports de brokers (MT4/MT5/cTrader siguen guardando precio del SL). El formulario manual deja de escribir en `stop_loss`.
 
-Render `<Journal />` wrapped in the minimal providers it needs:
+(Migración separada, aprobada por el usuario antes de tocar código.)
 
-- `QueryClientProvider` (fresh `QueryClient` per test, retries off)
-- `MemoryRouter`
-- `LanguageProvider` (already used app-wide)
-- `AuthContext` mock provider supplying `{ user: { id: 'test-user' } }`
-- `ThemeProvider` if required by children
+### 2. Hook de cuenta activa → moneda
 
-Mock the following modules with `vi.mock`:
+Reutilizar `useSelectedAccountId` + el hook que ya carga la cuenta activa (`useTradingAccount` / `useTradingAccounts`) para exponer `activeAccount.currency` (default `'USD'`). No se agrega selector visible: la moneda viene de la cuenta.
 
-- `@/config/supabase` → minimal `supabase` whose `from('trades').insert(...).select().single()` resolves to a fake row, and `from('trading_accounts')` / `from('trades').select` return empty data so `syncAccountBalance` is a no-op.
-- `@/features/dashboard/hooks/useTradingAccounts` → `useSelectedAccountId` returns `{ selectedAccountId: 'acc-1' }`.
-- `sonner` → spy on `toast.success` / `toast.error`.
-- Heavy children that aren't relevant (e.g. `TaxometerAlert`, `ImportPreviewModal`, `ProcessValidatorModal`) → stub to `() => null` to keep the render cheap.
-- `scrollIntoView` on `HTMLElement.prototype` → `vi.fn()` (jsdom doesn't implement it; needed for the auto-scroll assertion).
+### 3. Formulario `src/features/journal/Journal.tsx`
 
-## Test cases
+- `formData`: renombrar `stop_loss: ''` a `stop_size: ''` (estado del formulario únicamente; el nombre del campo en DB sigue siendo `stop_size`). `take_profit` queda igual (precio).
+- Reemplazar el `<Input>` de Stop Loss (líneas ~1264-1277) por:
+  - Label: `Tamaño del Stop ({currency})` — ej. "Tamaño del Stop (USD)".
+  - `Input` `type="number" step="any" min="0"` con prefijo visual del símbolo de moneda dentro del input (`$`, `€`, `R$`, etc., derivado de `currency`).
+  - Placeholder: `ej. 50.00`.
+  - Help text debajo: "Cuánto dinero estás dispuesto a perder si se ejecuta el stop".
+- `handleAddTrade`: en el `payload` quitar `stop_loss: num(formData.stop_loss)` y agregar `stop_size: num(formData.stop_size)`. `stop_loss` se envía como `null` desde el formulario manual.
+- `openEditTrade`: hidratar `stop_size` desde `trade.stop_size?.toString() ?? ''` en vez de `stop_loss`.
+- `recommendedChecks` (línea ~220): cambiar `stop_loss` → `stop_size` (`parseFloat(formData.stop_size) > 0`).
+- Detector psicológico (`detectPsychologicalErrors`): el chequeo de "missing stop loss" debe considerar válido si `stop_size > 0` (pasarle `stop_size` además de `stop_loss`, o calcular `hasRiskDefined = stop_size > 0 || stop_loss > 0`).
+- Preview R:R (líneas ~1322-1364): se elimina el bloque R:R basado en `entry/sl/tp` y se reemplaza por un resumen simple cuando hay datos:
+  - **P&L Estimado** (igual que hoy, sin tocar).
+  - **Riesgo** = `stop_size` formateado en la moneda (`$50.00`).
+  - **R:R** se muestra solo si hay `stop_size > 0` Y `take_profit > 0` Y `entry_price > 0` Y `quantity > 0` Y `direction`. Cálculo: `reward = (direction==='long' ? tp-entry : entry-tp) * qty`; `rr = reward / stop_size`.
 
-### 1. `saves a valid trade and shows success toast`
+### 4. Validación `src/shared/lib/validation.ts`
 
-- Click "Agregar operación" / "Nueva operación" button to open the dialog.
-- Use `userEvent` to fill: Symbol, Direction (select Long), Entry Price, Quantity, Entry Date (already pre-filled to today — leave as-is), Stop Loss = `4300`, Take Profit = `4350`, Strategy, Notes.
-- Leave status as Abierta so exit fields are not required.
-- Click "Registrar operación".
-- Assert: `supabase.from('trades').insert` called once with object containing `symbol`, `direction: 'long'`, `entry_price: <number>`, `quantity: <number>`, `user_id: 'test-user'`.
-- Assert: `toast.success` called with `/creada correctamente/i`.
-- Assert: dialog closes (`queryByRole('dialog')` is null).
+En `tradeFormSchema`:
 
-### 2. `shows inline errors and focuses the first invalid field on negative SL/TP`
+- Eliminar el campo `stop_loss` del schema (el formulario ya no lo envía).
+- Agregar:
+  ```ts
+  stop_size: z
+    .union([z.literal(''), z.coerce.number().positive('El tamaño del stop debe ser mayor a 0')])
+    .optional()
+    .nullable(),
+  ```
+- `take_profit` queda como está.
 
-- Open dialog, fill required fields validly, then enter Stop Loss = `-105.60` and Take Profit = `-105.60`.
-- Click "Registrar operación".
-- Assert: `toast.error` called with a string matching `/Stop Loss/` and `/Take Profit/`.
-- Assert: Stop Loss input has `aria-invalid="true"` and an adjacent message matching `/mayor a 0/i`.
-- Assert: same for Take Profit.
-- Assert: `HTMLElement.prototype.scrollIntoView` was called (the auto-scroll wired in `handleAddTrade`).
-- Assert: `supabase.from('trades').insert` was NOT called.
+### 5. i18n `src/shared/lib/i18n/translations.ts`
 
-### 3. `lists missing required fields in the error toast when submitting empty form`
+Agregar claves nuevas (ES/EN/PT):
 
-- Open dialog, immediately submit.
-- Assert: `toast.error` called with a string containing `Símbolo`, `Precio entrada`, `Cantidad`.
-- Assert: corresponding inputs have `aria-invalid="true"`.
+- `stopSize`: "Tamaño del Stop" / "Stop Size" / "Tamanho do Stop"
+- `stopSizeHint`: "Cuánto dinero estás dispuesto a perder…" / "How much money you're willing to lose…" / "Quanto dinheiro está disposto a perder…"
+- `risk`: "Riesgo" / "Risk" / "Risco"
 
-## Notes / risks
+La clave `stopLoss` se mantiene (la usan vistas de detalle y ledger para imports).
 
-- The dialog trigger label and exact form labels need to be read from `Journal.tsx` before writing the test — selectors will use `getByRole('button', { name: /…/ })` and `getByLabelText(/…/i)` keyed to the Spanish labels actually in the component.
-- If `LanguageProvider` defaults to EN we will force `LanguageProvider` initial language to ES (the labels in the bug report are Spanish) or query by `name`/placeholder that is language-agnostic.
-- No production code changes. Only the new test file. If a missing test-only shim is needed (e.g. `scrollIntoView` polyfill), it goes into the test file itself, not into `src/app/test/setup.ts`, to keep this PR scoped.
-- Run with `bunx vitest run src/features/journal/__tests__/Journal.addTradeFlow.test.tsx`.
+### 6. Tests
+
+Actualizar `src/features/journal/__tests__/Journal.addTradeFlow.test.tsx`:
+
+- En el happy-path, escribir `'50'` en el nuevo input "Tamaño del Stop" y assert que el payload contiene `stop_size: 50` y `stop_loss: null`.
+- El caso de error de Stop negativo pasa a usar `-50` en `stop_size` y verifica el mensaje "tamaño del stop debe ser mayor a 0" y `aria-invalid` en ese input.
+- Eliminar la línea que tipea `take_profit` negativo si la combinación deja de tener sentido, o ajustar el regex del toast a "Tamaño del Stop".
+
+## Fuera de alcance (no se toca)
+
+- Ledger, AnalyticsHub, exportadores, importadores: siguen leyendo `stop_loss` (precio) como hoy. La nueva columna `stop_size` es solo lectura/escritura desde el formulario manual por ahora.
+- Edición de trades importados: si un trade no tiene `stop_size`, el campo aparece vacío y el usuario puede llenarlo.
+- Selector de moneda en el formulario: no se agrega; sale automáticamente de la cuenta activa.
+
+## Plan de prueba
+
+1. Abrir "Agregar operación" con cuenta USD → label muestra "Tamaño del Stop (USD)" con prefijo `$`.
+2. Llenar todos los requeridos + `Tamaño del Stop = 50` + `Take Profit = 4350` + `Entry = 4300`, qty=1, long → R:R = `(4350-4300)*1 / 50 = 1.00` se muestra "1 : 1.00".
+3. Cambiar la cuenta activa a una con `currency='EUR'` → label cambia a "Tamaño del Stop (EUR)" con `€`.
+4. Guardar → en DB el trade tiene `stop_size = 50.00` y `stop_loss = NULL`.
+5. Editar el trade guardado → el campo se rehidrata con `50`.
+6. Importar un CSV MT5 con SL precio → el trade aparece con `stop_loss` (precio) y `stop_size` NULL; el ledger sigue mostrando todo bien.

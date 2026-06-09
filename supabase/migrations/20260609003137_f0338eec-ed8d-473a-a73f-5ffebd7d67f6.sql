@@ -1,0 +1,2 @@
+ALTER TABLE public.trades ADD COLUMN IF NOT EXISTS stop_size numeric(15,2);
+COMMENT ON COLUMN public.trades.stop_size IS 'Monto en dinero (moneda de la cuenta) que el usuario arriesga en este trade. Reemplaza al precio del SL para el formulario manual.';

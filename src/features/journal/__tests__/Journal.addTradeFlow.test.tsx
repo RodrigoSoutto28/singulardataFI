@@ -93,6 +93,20 @@ vi.mock('@/features/auth/hooks/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'test-user' } }),
 }));
 
+vi.mock('@/features/dashboard/hooks/useTradingAccounts', () => ({
+  useTradingAccounts: () => ({
+    selectedAccount: { id: 'acc-1', currency: 'USD' },
+    accounts: [{ id: 'acc-1', currency: 'USD' }],
+    selectedAccountId: 'acc-1',
+    setSelectedAccountId: () => {},
+    isLoading: false,
+  }),
+  useSelectedAccountId: () => ({
+    selectedAccountId: 'acc-1',
+    setSelectedAccountId: () => {},
+  }),
+}));
+
 // Suppress psychological-error popup that could intercept submit
 vi.mock('@/features/journal/utils/error-detection', () => ({
   detectPsychologicalErrors: () => [],
@@ -165,8 +179,8 @@ describe('Journal — Add Trade flow', () => {
     await user.type(d.getByPlaceholderText('0.00'), '180.50');
     await user.type(d.getAllByPlaceholderText('0')[0], '10');
 
-    // Stop loss + take profit (positive values)
-    await user.type(d.getByPlaceholderText(/4320\.50/), '170');
+    // Stop size (en USD) + take profit (precio)
+    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '50');
     await user.type(d.getByPlaceholderText(/4350\.00/), '200');
 
     await user.click(d.getByRole('button', { name: /registrar operación/i }));
@@ -178,7 +192,8 @@ describe('Journal — Add Trade flow', () => {
       direction: 'long',
       entry_price: 180.5,
       quantity: 10,
-      stop_loss: 170,
+      stop_size: 50,
+      stop_loss: null,
       take_profit: 200,
       status: 'open',
     });
@@ -210,8 +225,8 @@ describe('Journal — Add Trade flow', () => {
     ) as HTMLInputElement;
     await user.type(exitDate, '2026-06-09T10:00');
 
-    // Now the offending negative SL / TP
-    await user.type(d.getByPlaceholderText(/4320\.50/), '-105.60');
+    // Now offending negative Stop Size / Take Profit
+    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '-50');
     await user.type(d.getByPlaceholderText(/4350\.00/), '-105.60');
 
     // Button should be enabled because required fields are satisfied
@@ -221,11 +236,11 @@ describe('Journal — Add Trade flow', () => {
 
     await waitFor(() => expect(toastError).toHaveBeenCalled());
     const msg = String(toastError.mock.calls[0][0]);
-    expect(msg).toMatch(/Stop Loss/);
+    expect(msg).toMatch(/Tamaño del Stop/);
     expect(msg).toMatch(/Take Profit/);
 
     // Inline errors visible
-    expect(d.getByText(/stop loss debe ser mayor a 0/i)).toBeInTheDocument();
+    expect(d.getByText(/tamaño del stop debe ser mayor a 0/i)).toBeInTheDocument();
     expect(d.getByText(/take profit debe ser mayor a 0/i)).toBeInTheDocument();
 
     // First invalid field was scrolled into view

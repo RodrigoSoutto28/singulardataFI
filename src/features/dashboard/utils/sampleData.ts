@@ -74,6 +74,7 @@ export function generateSampleTrades(): SampleTrade[] {
       stop_loss: Number(
         (direction === 'long' ? entry - stopDistance : entry + stopDistance).toFixed(5),
       ),
+      stop_size: null,
       take_profit: Number(
         (direction === 'long' ? entry + takeDistance : entry - takeDistance).toFixed(5),
       ),
