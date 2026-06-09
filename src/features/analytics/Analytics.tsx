@@ -403,19 +403,29 @@ export default function Analytics() {
                   {monthlyPnl.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyPnl}>
+                        <defs>
+                          <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--profit))" stopOpacity={0.95}/>
+                            <stop offset="100%" stopColor="hsl(var(--profit))" stopOpacity={0.65}/>
+                          </linearGradient>
+                          <linearGradient id="lossGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--loss))" stopOpacity={0.95}/>
+                            <stop offset="100%" stopColor="hsl(var(--loss))" stopOpacity={0.65}/>
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                         <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip />} cursor={false} />
                         <Bar
                           dataKey="pnl"
                           radius={[4, 4, 0, 0]}
-                          fill="hsl(var(--primary))"
+                          maxBarSize={45}
                         >
                           {monthlyPnl.map((entry, index) => (
                             <Cell
                               key={`cell-${index}`}
-                              fill={entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                              fill={entry.pnl >= 0 ? 'url(#profitGrad)' : 'url(#lossGrad)'}
                             />
                           ))}
                         </Bar>
@@ -574,12 +584,13 @@ export default function Analytics() {
                           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                           <XAxis dataKey="emotion" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
                           <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
-                          <Tooltip content={<CustomTooltip />} />
+                          <Tooltip content={<CustomTooltip />} cursor={false} />
                           <Bar
                             dataKey="winRate"
                             radius={[4, 4, 0, 0]}
                             fill="hsl(var(--primary))"
                             name="Win Rate (%)"
+                            maxBarSize={45}
                           >
                             {translatedPerformanceByEmotion.map((entry, index) => (
                               <Cell
@@ -602,12 +613,13 @@ export default function Analytics() {
                           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                           <XAxis dataKey="emotion" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
                           <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                          <Tooltip content={<CustomTooltip />} />
+                          <Tooltip content={<CustomTooltip />} cursor={false} />
                           <Bar
                             dataKey="pnl"
                             radius={[4, 4, 0, 0]}
                             fill="hsl(var(--primary))"
                             name="P&L ($)"
+                            maxBarSize={45}
                           >
                             {translatedPerformanceByEmotion.map((entry, index) => (
                               <Cell

@@ -40,21 +40,21 @@
     --accent: 30 45% 72%;
     --accent-foreground: 220 18% 11%;
 
-    /* Destructive - ROJO INTENSO */
-    --destructive: 0 75% 52%;
+    /* Destructive - ROJO OSCURO */
+    --destructive: 0 75% 44%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success - VERDE VIVO */
-    --success: 165 65% 40%;
+    /* Success - VERDE OSCURO */
+    --success: 165 70% 32%;
     --success-foreground: 0 0% 100%;
 
     /* Warning - NARANJA BRILLANTE */
     --warning: 32 95% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Profit/Loss - MÁXIMO CONTRASTE */
-    --profit: 165 70% 38%;
-    --loss: 0 80% 50%;
+    /* Profit/Loss - TONOS OSCUROS E INSTITUCIONALES */
+    --profit: 165 75% 30%;
+    --loss: 0 80% 42%;
 
     /* Borders - sutiles pero visibles */
     --border: 215 14% 80%;
@@ -108,15 +108,15 @@
     --accent: 30 50% 75%;
     --accent-foreground: 220 18% 11%;
 
-    /* Semantic colors — vibrantes sobre fondo neutro */
-    --destructive: 0 78% 62%;
+    /* Semantic colors — oscuros e institucionales sobre fondo carbon */
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
-    --success: 165 65% 52%;
+    --success: 165 65% 40%;
     --success-foreground: 0 0% 100%;
     --warning: 32 95% 60%;
     --warning-foreground: 220 18% 11%;
-    --profit: 165 68% 50%;
-    --loss: 0 78% 62%;
+    --profit: 165 70% 36%;
+    --loss: 0 75% 46%;
 
     /* Borders sutiles, casi imperceptibles */
     --border: 220 12% 22%;
