@@ -152,8 +152,8 @@ export function Sidebar({
             <Power className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2.5} />
           </div>
           {!collapsed && (
-            <span className="text-[13px] font-semibold tracking-[0.18em] text-foreground uppercase truncate">
-              MindOn
+            <span className="text-[13px] tracking-[0.18em] text-foreground uppercase truncate font-bold">
+              Mind On
             </span>
           )}
         </div>
