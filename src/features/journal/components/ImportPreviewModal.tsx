@@ -137,10 +137,13 @@ export function ImportPreviewModal({
     (t, i) => selectedIndices.has(i) && (t.pnl ?? 0) < 0
   ).length;
 
-  // Reset selection when trades change
-  if (trades.length > 0 && selectedIndices.size === 0) {
-    setSelectedIndices(new Set(trades.map((_, i) => i)));
-  }
+  // Reset selection when trades change (proper effect — no setState during render)
+  useEffect(() => {
+    if (trades.length > 0 && selectedIndices.size === 0) {
+      setSelectedIndices(new Set(trades.map((_, i) => i)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trades]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
