@@ -161,9 +161,9 @@ describe('Journal — Add Trade flow', () => {
     await user.type(d.getByPlaceholderText(/EUR\/USD/i), 'AAPL');
     await user.click(d.getByRole('button', { name: /largo/i }));
 
-    // Entry price + quantity (placeholders are numeric)
+    // Entry price + quantity (placeholders are numeric; "0" appears twice → quantity is first)
     await user.type(d.getByPlaceholderText('0.00'), '180.50');
-    await user.type(d.getByPlaceholderText('0'), '10');
+    await user.type(d.getAllByPlaceholderText('0')[0], '10');
 
     // Stop loss + take profit (positive values)
     await user.type(d.getByPlaceholderText(/4320\.50/), '170');
