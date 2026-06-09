@@ -72,15 +72,29 @@ export default function Dashboard() {
     <div className="space-y-4 md:space-y-6" data-tour="dashboard">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 via-primary/15 to-accent/10 border border-primary/40 p-6 md:p-8 animate-slide-up-fade">
-        <div className="relative z-10">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">
-            {getGreeting(t)}, {userName} 👋
-          </h1>
-          <p className="text-muted-foreground">
-            {hasCheckedInToday
-              ? t.dashboard.planActive
-              : t.dashboard.completeCheckIn}
-          </p>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">
+              {getGreeting(t)}, {userName} 👋
+            </h1>
+            <p className="text-muted-foreground">
+              {hasCheckedInToday
+                ? t.dashboard.planActive
+                : t.dashboard.completeCheckIn}
+            </p>
+          </div>
+          {!hasCheckedInToday && (
+            <Button
+              asChild
+              size="lg"
+              className="border-glow-pulse hover:scale-[1.02] transition-all bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shrink-0 self-start sm:self-auto"
+            >
+              <Link to="/psychology">
+                <Brain className="h-5 w-5 animate-pulse" />
+                {t.dashboard.completeCheckInCTA}
+              </Link>
+            </Button>
+          )}
         </div>
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
         <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-accent/20 blur-3xl" />

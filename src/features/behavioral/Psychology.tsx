@@ -208,7 +208,7 @@ function TodayCheckInView() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
       {/* Left - Stats */}
-      <div className="space-y-4 md:space-y-6">
+      <div className={cn("space-y-4 md:space-y-6", !hasCheckedIn && "order-2 lg:order-1")}>
 
         <Card>
           <CardHeader className="pb-3">
@@ -310,7 +310,7 @@ function TodayCheckInView() {
       </div>
 
       {/* Right - Form / Summary */}
-      <div>
+      <div className={cn(!hasCheckedIn && "order-1 lg:order-2")}>
         {hasCheckedIn ? <CheckInSummaryCard entry={todayEntry!} /> : <CheckInFormCard />}
       </div>
     </div>

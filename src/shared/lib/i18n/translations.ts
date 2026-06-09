@@ -100,6 +100,7 @@ export interface Translations {
     goodEvening: string;
     recentActivity: string;
     completeCheckIn: string;
+    completeCheckInCTA: string;
     planActive: string;
     mentalStateTitle: string;
     disciplineTopTier: string;
@@ -628,6 +629,7 @@ const baseTranslations: Record<Language, Translations> = {
       goodEvening: 'Buenas noches',
       recentActivity: 'Actividad Reciente',
       completeCheckIn: 'Completa tu check-in pre-mercado para comenzar.',
+      completeCheckInCTA: 'Hacer Check-in',
       planActive: 'Tu plan de hoy está activo. Mantén la disciplina.',
       mentalStateTitle: 'Estado Mental',
       disciplineTopTier: 'Mantén este nivel de disciplina. Eres Top 10% de traders.',
@@ -1095,6 +1097,7 @@ const baseTranslations: Record<Language, Translations> = {
       goodEvening: 'Good evening',
       recentActivity: 'Recent Activity',
       completeCheckIn: 'Complete your pre-market check-in to get started.',
+      completeCheckInCTA: 'Complete Check-in',
       planActive: 'Your plan for today is active. Stay disciplined.',
       mentalStateTitle: 'Mental State',
       disciplineTopTier: 'Keep this discipline level. You are Top 10% of traders.',
@@ -1562,6 +1565,7 @@ const baseTranslations: Record<Language, Translations> = {
       goodEvening: 'Boa noite',
       recentActivity: 'Atividade Recente',
       completeCheckIn: 'Complete seu check-in pré-mercado para começar.',
+      completeCheckInCTA: 'Fazer Check-in',
       planActive: 'Seu plano de hoje está ativo. Mantenha a disciplina.',
       mentalStateTitle: 'Estado Mental',
       disciplineTopTier: 'Mantenha este nível de disciplina. Você está no Top 10% dos traders.',

@@ -13,6 +13,12 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/shared/components/ui/tabs';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -1512,135 +1518,160 @@ export default function Journal() {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <BarChart3 className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {t.journal.totalTrades}
-            </span>
-          </div>
-          <p className="text-2xl font-bold font-mono-numbers">{filteredTrades.length}</p>
+      <Tabs defaultValue="trades" className="w-full space-y-6">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+          <TabsList className="bg-muted/60 border border-border h-10 p-1 rounded-lg w-max sm:w-auto inline-flex">
+            <TabsTrigger
+              value="trades"
+              className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>{t.journal.allTrades}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="imports"
+              className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
+            >
+              <Upload className="h-4 w-4" />
+              <span>{t.extra?.importHistoryTitle ?? 'Historial de importaciones'}</span>
+            </TabsTrigger>
+          </TabsList>
         </div>
 
-        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-md bg-success/10">
-              <TrendingUp className="h-4 w-4 text-success" />
-            </div>
-            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {t.journal.winRate}
-            </span>
-          </div>
-          <p className="text-2xl font-bold font-mono-numbers text-success">{winRate}%</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {winningTrades}W / {losingTrades}L
-          </p>
-        </div>
-
-        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
-          <div className="flex items-center gap-2 mb-2">
-            <div className={cn("p-1.5 rounded-md", totalPnl >= 0 ? "bg-profit/10" : "bg-loss/10")}>
-              <DollarSign className={cn("h-4 w-4", totalPnl >= 0 ? "text-profit" : "text-loss")} />
-            </div>
-            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {t.journal.totalPnl}
-            </span>
-          </div>
-          <p className={cn(
-            'text-2xl font-bold font-mono-numbers',
-            totalPnl >= 0 ? 'text-profit' : 'text-loss'
-          )}>
-            {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
-          </p>
-        </div>
-
-        <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <Calendar className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {t.journal.openPositions}
-            </span>
-          </div>
-          <p className="text-2xl font-bold font-mono-numbers">
-            {filteredTrades.filter(tr => tr.status === 'open').length}
-          </p>
-        </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t.journal.searchSymbol}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-muted/30"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[160px] bg-muted/30">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder={t.journal.filterStatus} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t.journal.allTrades}</SelectItem>
-            <SelectItem value="open">{t.journal.open}</SelectItem>
-            <SelectItem value="closed">{t.journal.closed}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Trades List */}
-      <div className="space-y-2">
-        {isLoading ? (
-          <div className="space-y-2" aria-busy="true" aria-live="polite">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-lg" />
-            ))}
-          </div>
-        ) : paginatedTrades.length > 0 ? (
-          <>
-            {paginatedTrades.map((trade, index) => (
-              <TradeRow key={trade.id} trade={trade} index={index} />
-            ))}
-            <div ref={sentinelRef} aria-hidden="true" className="h-1" />
-            {isFetchingNextPage && (
-              <div className="flex justify-center pt-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <TabsContent value="trades" className="mt-6 space-y-6 outline-none">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {t.journal.totalTrades}
+                </span>
               </div>
-            )}
-            {hasNextPage && !isFetchingNextPage && (
-              <div className="flex justify-center pt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fetchNextPage()}
-                  className="gap-2"
-                >
-                  Cargar más
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <EmptyState
-            icon={BarChart3}
-            title={t.journal.noTradesFound}
-            description={t.journal.importEmptyHint}
-            actionLabel={t.journal.addFirstTrade}
-            actionIcon={Plus}
-            onAction={() => setIsAddTradeOpen(true)}
-          />
-        )}
-      </div>
+              <p className="text-2xl font-bold font-mono-numbers">{filteredTrades.length}</p>
+            </div>
 
-      <ImportHistorySection />
+            <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-md bg-success/10">
+                  <TrendingUp className="h-4 w-4 text-success" />
+                </div>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {t.journal.winRate}
+                </span>
+              </div>
+              <p className="text-2xl font-bold font-mono-numbers text-success">{winRate}%</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {winningTrades}W / {losingTrades}L
+              </p>
+            </div>
+
+            <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={cn("p-1.5 rounded-md", totalPnl >= 0 ? "bg-profit/10" : "bg-loss/10")}>
+                  <DollarSign className={cn("h-4 w-4", totalPnl >= 0 ? "text-profit" : "text-loss")} />
+                </div>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {t.journal.totalPnl}
+                </span>
+              </div>
+              <p className={cn(
+                'text-2xl font-bold font-mono-numbers',
+                totalPnl >= 0 ? 'text-profit' : 'text-loss'
+              )}>
+                {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-lg bg-card border border-border stat-card hover-lift">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <Calendar className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {t.journal.openPositions}
+                </span>
+              </div>
+              <p className="text-2xl font-bold font-mono-numbers">
+                {filteredTrades.filter(tr => tr.status === 'open').length}
+              </p>
+            </div>
+          </div>
+
+          {/* Search & Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t.journal.searchSymbol}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-muted/30"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[160px] bg-muted/30">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder={t.journal.filterStatus} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t.journal.allTrades}</SelectItem>
+                <SelectItem value="open">{t.journal.open}</SelectItem>
+                <SelectItem value="closed">{t.journal.closed}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Trades List */}
+          <div className="space-y-2">
+            {isLoading ? (
+              <div className="space-y-2" aria-busy="true" aria-live="polite">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : paginatedTrades.length > 0 ? (
+              <>
+                {paginatedTrades.map((trade, index) => (
+                  <TradeRow key={trade.id} trade={trade} index={index} />
+                ))}
+                <div ref={sentinelRef} aria-hidden="true" className="h-1" />
+                {isFetchingNextPage && (
+                  <div className="flex justify-center pt-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                {hasNextPage && !isFetchingNextPage && (
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchNextPage()}
+                      className="gap-2"
+                    >
+                      Cargar más
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <EmptyState
+                icon={BarChart3}
+                title={t.journal.noTradesFound}
+                description={t.journal.importEmptyHint}
+                actionLabel={t.journal.addFirstTrade}
+                actionIcon={Plus}
+                onAction={() => setIsAddTradeOpen(true)}
+              />
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="imports" className="mt-6 outline-none">
+          <ImportHistorySection />
+        </TabsContent>
+      </Tabs>
 
       <TaxometerAlert
         open={taxometerOpen}
