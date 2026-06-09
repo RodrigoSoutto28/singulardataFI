@@ -41,7 +41,7 @@ export default function Terms() {
         ['2. Natureza do serviço', 'MindOn é uma ferramenta de análise e diário. Não oferece assessoria financeira, sinais ou garantias de lucro. O usuário é o único responsável pelas suas decisões.'],
         ['3. Conta', 'Você é responsável por manter suas credenciais confidenciais. Comunique uso não autorizado imediatamente.'],
         ['4. Dados do usuário', 'Suas operações, notas e métricas são privadas e pertencem a você. Pode exportá-las ou eliminá-las em Configurações.'],
-        ['5. Limitação de responsabilidade', 'Mind On não se responsabiliza por perdas financeiras. O servicio es fornecido "como está" sem garantias.'],
+        ['5. Limitação de responsabilidade', 'Mind On não se responsabiliza por perdas financeiras. O serviço é fornecido "como está" sem garantias.'],
         ['6. Alterações', 'Podemos atualizar estes termos. As alterações são publicadas no app e nesta página.'],
         ['7. Contato', 'Consultas: hello@mindon-trading.com'],
       ],
