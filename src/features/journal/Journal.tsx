@@ -1374,12 +1374,8 @@ export default function Journal() {
                           </span>
                         </div>
                       )}
-                      {hasRisk && (
-                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
-                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.risk ?? 'Riesgo'}</span>
-                          <span className="font-mono font-bold text-loss">-{currencySymbol}{stopSize.toFixed(2)} {accountCurrency}</span>
-                        </div>
-                      )}
+                      {/* Riesgo estimado removido: el usuario ingresa el stop manualmente */}
+
                       {hasRR && rr > 0 && (
                         <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
                           <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">R:R</span>
