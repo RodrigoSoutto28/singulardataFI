@@ -445,7 +445,96 @@ export interface Translations {
     sampleLoadedDesc: string;
     sampleFailed: string;
   };
+
+  extra?: {
+    refresh: string;
+    undo: string;
+    generate: string;
+    preview: string;
+    print: string;
+    share: string;
+    exportPdf: string;
+    viewAll: string;
+    importHistoryTitle: string;
+    noImportsYet: string;
+    loadHistoryError: string;
+    undoConfirm: string;
+    removedTrades: string;
+    undoError: string;
+    colDate: string;
+    colFile: string;
+    colHash: string;
+    colImported: string;
+    colSkipped: string;
+    colStatus: string;
+    colActions: string;
+    statusUndone: string;
+    statusNotImported: string;
+    statusWithSkips: string;
+    statusActive: string;
+    analyticsTab: string;
+    reportsTab: string;
+    notEnoughData: string;
+    addTradesToSeeStats: string;
+    startLoggingTrades: string;
+    needFiveTrades: string;
+    noInsightsYet: string;
+    insightsGeneratedAuto: string;
+    aiInsightsTitle: string;
+    poweredByML: string;
+    reportTypePlaceholder: string;
+    weekly: string;
+    monthly: string;
+    quarterly: string;
+    yearly: string;
+    generateReport: string;
+    noDataReports: string;
+    addTradesForReports: string;
+    monthlyPerformanceReport: string;
+    latest: string;
+    generated: string;
+    reportSections: string;
+    executiveSummary: string;
+    executiveSummaryDesc: string;
+    tradeAnalysis: string;
+    tradeAnalysisDesc: string;
+    psychologyInsights: string;
+    psychologyInsightsDesc: string;
+    exportOptions: string;
+    exportOptionsDesc: string;
+    pdfReport: string;
+    pdfReportDesc: string;
+    csvData: string;
+    csvDataDesc: string;
+    shareLink: string;
+    shareLinkDesc: string;
+    totalPnl: string;
+    winRate: string;
+    totalTrades: string;
+    profitFactor: string;
+    averageWin: string;
+    averageLoss: string;
+    bestTrade: string;
+    worstTrade: string;
+    detectedBroker: string;
+    delimiter: string;
+    duplicates: string;
+    fileLabel: string;
+    brokerLabel: string;
+    tradesLabel: string;
+    ignored: string;
+    missing: string;
+    unmapped: string;
+    symbol: string;
+    direction: string;
+    entryCol: string;
+    exitCol: string;
+    volume: string;
+    dateCol: string;
+    sourceCol: string;
+  };
 }
+
 
 const baseTranslations: Record<Language, Translations> = {
   ES: {
@@ -864,6 +953,56 @@ const baseTranslations: Record<Language, Translations> = {
         clear: 'Limpiar caché',
       },
     },
+    extra: {
+      refresh: 'Actualizar', undo: 'Deshacer', generate: 'Generar', preview: 'Vista previa',
+      print: 'Imprimir', share: 'Compartir', exportPdf: 'Exportar PDF', viewAll: 'Ver todos',
+      importHistoryTitle: 'Historial de importaciones',
+      noImportsYet: 'Aún no has importado archivos.',
+      loadHistoryError: 'No se pudo cargar el historial de importaciones',
+      undoConfirm: '¿Deshacer esta importación? Se eliminarán las operaciones cargadas.',
+      removedTrades: 'Se eliminaron {n} operaciones',
+      undoError: 'No se pudo deshacer la importación',
+      colDate: 'Fecha', colFile: 'Archivo', colHash: 'Hash', colImported: 'Importadas',
+      colSkipped: 'Omitidas', colStatus: 'Estado', colActions: 'Acciones',
+      statusUndone: 'Deshecho', statusNotImported: 'Sin importar',
+      statusWithSkips: 'Con omisiones', statusActive: 'Activo',
+      analyticsTab: 'Analítica', reportsTab: 'Reportes',
+      notEnoughData: 'Sin datos suficientes para mostrar análisis',
+      addTradesToSeeStats: 'Agrega operaciones en el diario para ver estadísticas',
+      startLoggingTrades: 'Comienza a registrar operaciones para recibir insights',
+      needFiveTrades: 'Necesitas al menos 5 operaciones para que la IA analice tus patrones',
+      noInsightsYet: 'No hay insights disponibles aún',
+      insightsGeneratedAuto: 'Los insights se generarán automáticamente a medida que registres operaciones',
+      aiInsightsTitle: 'Insights de IA', poweredByML: 'Impulsado por machine learning',
+      reportTypePlaceholder: 'Tipo de reporte',
+      weekly: 'Semanal', monthly: 'Mensual', quarterly: 'Trimestral', yearly: 'Anual',
+      generateReport: 'Generar Reporte',
+      noDataReports: 'No hay datos para generar reportes',
+      addTradesForReports: 'Agrega operaciones en el diario para generar reportes de rendimiento',
+      monthlyPerformanceReport: 'Reporte de Rendimiento Mensual', latest: 'Último',
+      generated: 'Generado',
+      reportSections: 'Secciones del reporte',
+      executiveSummary: 'Resumen ejecutivo',
+      executiveSummaryDesc: 'Vista general de tu rendimiento de trading',
+      tradeAnalysis: 'Análisis de operaciones',
+      tradeAnalysisDesc: 'Desglose detallado de todas las operaciones con estadísticas',
+      psychologyInsights: 'Insights de psicología',
+      psychologyInsightsDesc: 'Patrones emocionales y seguimiento de disciplina',
+      exportOptions: 'Opciones de Exportación',
+      exportOptionsDesc: 'Elegí el formato de exportación que preferís',
+      pdfReport: 'Reporte PDF', pdfReportDesc: 'Reporte completo con formato',
+      csvData: 'Datos CSV', csvDataDesc: 'Exportación de datos sin procesar',
+      shareLink: 'Link para compartir', shareLinkDesc: 'Generar reporte compartible',
+      totalPnl: 'P&L Total', winRate: 'Tasa de aciertos',
+      totalTrades: 'Operaciones totales', profitFactor: 'Factor de beneficio',
+      averageWin: 'Ganancia promedio', averageLoss: 'Pérdida promedio',
+      bestTrade: 'Mejor operación', worstTrade: 'Peor operación',
+      detectedBroker: 'Broker detectado', delimiter: 'Delimitador', duplicates: 'Duplicados',
+      fileLabel: 'Archivo', brokerLabel: 'Broker', tradesLabel: 'Operaciones',
+      ignored: 'Ignoradas', missing: 'Faltantes', unmapped: 'Sin mapear',
+      symbol: 'Símbolo', direction: 'Dirección', entryCol: 'Entrada', exitCol: 'Salida',
+      volume: 'Volumen', dateCol: 'Fecha', sourceCol: 'Origen',
+    },
   },
   EN: {
     common: {
@@ -1281,6 +1420,56 @@ const baseTranslations: Record<Language, Translations> = {
         clear: 'Clear cache',
       },
     },
+    extra: {
+      refresh: 'Refresh', undo: 'Undo', generate: 'Generate', preview: 'Preview',
+      print: 'Print', share: 'Share', exportPdf: 'Export PDF', viewAll: 'View all',
+      importHistoryTitle: 'Import history',
+      noImportsYet: 'You have not imported any files yet.',
+      loadHistoryError: 'Could not load import history',
+      undoConfirm: 'Undo this import? The loaded trades will be removed.',
+      removedTrades: 'Removed {n} trades',
+      undoError: 'Could not undo the import',
+      colDate: 'Date', colFile: 'File', colHash: 'Hash', colImported: 'Imported',
+      colSkipped: 'Skipped', colStatus: 'Status', colActions: 'Actions',
+      statusUndone: 'Undone', statusNotImported: 'Not imported',
+      statusWithSkips: 'With skips', statusActive: 'Active',
+      analyticsTab: 'Analytics', reportsTab: 'Reports',
+      notEnoughData: 'Not enough data to show analysis',
+      addTradesToSeeStats: 'Add trades in the journal to see statistics',
+      startLoggingTrades: 'Start logging trades to receive insights',
+      needFiveTrades: 'You need at least 5 trades for the AI to analyze your patterns',
+      noInsightsYet: 'No insights available yet',
+      insightsGeneratedAuto: 'Insights will be generated automatically as you log trades',
+      aiInsightsTitle: 'AI Insights', poweredByML: 'Powered by machine learning',
+      reportTypePlaceholder: 'Report type',
+      weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly',
+      generateReport: 'Generate Report',
+      noDataReports: 'No data to generate reports',
+      addTradesForReports: 'Add trades in the journal to generate performance reports',
+      monthlyPerformanceReport: 'Monthly Performance Report', latest: 'Latest',
+      generated: 'Generated',
+      reportSections: 'Report Sections',
+      executiveSummary: 'Executive Summary',
+      executiveSummaryDesc: 'High-level overview of your trading performance',
+      tradeAnalysis: 'Trade Analysis',
+      tradeAnalysisDesc: 'Detailed breakdown of all trades with statistics',
+      psychologyInsights: 'Psychology Insights',
+      psychologyInsightsDesc: 'Emotional patterns and discipline tracking',
+      exportOptions: 'Export Options',
+      exportOptionsDesc: 'Choose the export format you prefer',
+      pdfReport: 'PDF Report', pdfReportDesc: 'Full formatted report',
+      csvData: 'CSV Data', csvDataDesc: 'Raw data export',
+      shareLink: 'Share Link', shareLinkDesc: 'Generate a shareable report',
+      totalPnl: 'Total P&L', winRate: 'Win Rate',
+      totalTrades: 'Total Trades', profitFactor: 'Profit Factor',
+      averageWin: 'Average Win', averageLoss: 'Average Loss',
+      bestTrade: 'Best Trade', worstTrade: 'Worst Trade',
+      detectedBroker: 'Detected broker', delimiter: 'Delimiter', duplicates: 'Duplicates',
+      fileLabel: 'File', brokerLabel: 'Broker', tradesLabel: 'Trades',
+      ignored: 'Ignored', missing: 'Missing', unmapped: 'Unmapped',
+      symbol: 'Symbol', direction: 'Direction', entryCol: 'Entry', exitCol: 'Exit',
+      volume: 'Volume', dateCol: 'Date', sourceCol: 'Source',
+    },
   },
   PT: {
     common: {
@@ -1697,6 +1886,56 @@ const baseTranslations: Record<Language, Translations> = {
         detectNow: 'Detectar agora',
         clear: 'Limpar cache',
       },
+    },
+    extra: {
+      refresh: 'Atualizar', undo: 'Desfazer', generate: 'Gerar', preview: 'Visualizar',
+      print: 'Imprimir', share: 'Compartilhar', exportPdf: 'Exportar PDF', viewAll: 'Ver todos',
+      importHistoryTitle: 'Histórico de importações',
+      noImportsYet: 'Você ainda não importou arquivos.',
+      loadHistoryError: 'Não foi possível carregar o histórico de importações',
+      undoConfirm: 'Desfazer esta importação? As operações carregadas serão removidas.',
+      removedTrades: '{n} operações removidas',
+      undoError: 'Não foi possível desfazer a importação',
+      colDate: 'Data', colFile: 'Arquivo', colHash: 'Hash', colImported: 'Importadas',
+      colSkipped: 'Ignoradas', colStatus: 'Status', colActions: 'Ações',
+      statusUndone: 'Desfeito', statusNotImported: 'Não importado',
+      statusWithSkips: 'Com omissões', statusActive: 'Ativo',
+      analyticsTab: 'Analítica', reportsTab: 'Relatórios',
+      notEnoughData: 'Sem dados suficientes para mostrar análise',
+      addTradesToSeeStats: 'Adicione operações no diário para ver estatísticas',
+      startLoggingTrades: 'Comece a registrar operações para receber insights',
+      needFiveTrades: 'Você precisa de pelo menos 5 operações para a IA analisar seus padrões',
+      noInsightsYet: 'Ainda não há insights disponíveis',
+      insightsGeneratedAuto: 'Os insights serão gerados automaticamente conforme você registrar operações',
+      aiInsightsTitle: 'Insights de IA', poweredByML: 'Impulsionado por machine learning',
+      reportTypePlaceholder: 'Tipo de relatório',
+      weekly: 'Semanal', monthly: 'Mensal', quarterly: 'Trimestral', yearly: 'Anual',
+      generateReport: 'Gerar Relatório',
+      noDataReports: 'Sem dados para gerar relatórios',
+      addTradesForReports: 'Adicione operações no diário para gerar relatórios de desempenho',
+      monthlyPerformanceReport: 'Relatório de Desempenho Mensal', latest: 'Mais recente',
+      generated: 'Gerado',
+      reportSections: 'Seções do relatório',
+      executiveSummary: 'Resumo executivo',
+      executiveSummaryDesc: 'Visão geral do seu desempenho de trading',
+      tradeAnalysis: 'Análise de operações',
+      tradeAnalysisDesc: 'Detalhamento completo de todas as operações com estatísticas',
+      psychologyInsights: 'Insights de psicologia',
+      psychologyInsightsDesc: 'Padrões emocionais e acompanhamento de disciplina',
+      exportOptions: 'Opções de Exportação',
+      exportOptionsDesc: 'Escolha o formato de exportação que preferir',
+      pdfReport: 'Relatório PDF', pdfReportDesc: 'Relatório completo formatado',
+      csvData: 'Dados CSV', csvDataDesc: 'Exportação de dados brutos',
+      shareLink: 'Link para compartilhar', shareLinkDesc: 'Gerar relatório compartilhável',
+      totalPnl: 'P&L Total', winRate: 'Taxa de acerto',
+      totalTrades: 'Operações totais', profitFactor: 'Fator de lucro',
+      averageWin: 'Ganho médio', averageLoss: 'Perda média',
+      bestTrade: 'Melhor operação', worstTrade: 'Pior operação',
+      detectedBroker: 'Corretora detectada', delimiter: 'Delimitador', duplicates: 'Duplicados',
+      fileLabel: 'Arquivo', brokerLabel: 'Corretora', tradesLabel: 'Operações',
+      ignored: 'Ignoradas', missing: 'Faltantes', unmapped: 'Não mapeadas',
+      symbol: 'Símbolo', direction: 'Direção', entryCol: 'Entrada', exitCol: 'Saída',
+      volume: 'Volume', dateCol: 'Data', sourceCol: 'Origem',
     },
   },
 };

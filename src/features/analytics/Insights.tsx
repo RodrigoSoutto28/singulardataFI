@@ -177,9 +177,9 @@ export default function Insights() {
           <CardContent className="py-16">
             <div className="text-center">
               <Brain className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground">Comienza a registrar operaciones para recibir insights</p>
+              <p className="text-muted-foreground">{t.extra?.startLoggingTrades ?? 'Start logging trades'}</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Necesitas al menos 5 operaciones para que la IA analice tus patrones
+                {t.extra?.needFiveTrades ?? 'You need at least 5 trades'}
               </p>
             </div>
           </CardContent>
@@ -189,9 +189,9 @@ export default function Insights() {
           <CardContent className="py-16">
             <div className="text-center">
               <Sparkles className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground">No hay insights disponibles aún</p>
+              <p className="text-muted-foreground">{t.extra?.noInsightsYet ?? 'No insights yet'}</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Los insights se generarán automáticamente a medida que registres operaciones
+                {t.extra?.insightsGeneratedAuto ?? 'Insights will appear automatically'}
               </p>
             </div>
           </CardContent>

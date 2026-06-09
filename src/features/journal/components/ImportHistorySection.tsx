@@ -16,6 +16,7 @@ import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { listImportBatches, undoImportBatch } from '@/features/journal/hooks/useImportBatches';
 import { toast } from 'sonner';
 import { useTrades } from '@/features/journal/hooks/useTrades';
+import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 
 interface BatchRow {
   id: string;
@@ -30,6 +31,7 @@ interface BatchRow {
 
 export function ImportHistorySection() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { refetch } = useTrades();
   const [batches, setBatches] = useState<BatchRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,11 +44,11 @@ export function ImportHistorySection() {
       const data = await listImportBatches(user.id);
       setBatches(data as BatchRow[]);
     } catch (e) {
-      toast.error('No se pudo cargar el historial de importaciones');
+      toast.error(t.extra?.loadHistoryError ?? 'Could not load import history');
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     load();
@@ -54,14 +56,14 @@ export function ImportHistorySection() {
 
   const handleUndo = async (batchId: string) => {
     if (!user) return;
-    if (!confirm('¿Deshacer esta importación? Se eliminarán las operaciones cargadas.')) return;
+    if (!confirm(t.extra?.undoConfirm ?? 'Undo this import?')) return;
     setUndoingId(batchId);
     try {
       const removed = await undoImportBatch(user.id, batchId);
-      toast.success(`Se eliminaron ${removed} operaciones`);
+      toast.success((t.extra?.removedTrades ?? 'Removed {n} trades').replace('{n}', String(removed)));
       await Promise.all([load(), refetch()]);
     } catch (e) {
-      toast.error('No se pudo deshacer la importación');
+      toast.error(t.extra?.undoError ?? 'Could not undo the import');
     } finally {
       setUndoingId(null);
     }
@@ -72,30 +74,30 @@ export function ImportHistorySection() {
       <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <History className="h-4 w-4 text-primary" />
-          Historial de importaciones
+          {t.extra?.importHistoryTitle ?? 'Import history'}
         </CardTitle>
         <Button variant="ghost" size="sm" onClick={load} disabled={loading} className="gap-1.5">
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-          Actualizar
+          {t.extra?.refresh ?? 'Refresh'}
         </Button>
       </CardHeader>
       <CardContent className="pt-0">
         {batches.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Aún no has importado archivos.
+            {t.extra?.noImportsYet ?? 'No imports yet.'}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Archivo</TableHead>
-                  <TableHead className="font-mono text-xs">Hash</TableHead>
-                  <TableHead className="text-right">Importadas</TableHead>
-                  <TableHead className="text-right">Omitidas</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  <TableHead>{t.extra?.colDate ?? 'Date'}</TableHead>
+                  <TableHead>{t.extra?.colFile ?? 'File'}</TableHead>
+                  <TableHead className="font-mono text-xs">{t.extra?.colHash ?? 'Hash'}</TableHead>
+                  <TableHead className="text-right">{t.extra?.colImported ?? 'Imported'}</TableHead>
+                  <TableHead className="text-right">{t.extra?.colSkipped ?? 'Skipped'}</TableHead>
+                  <TableHead>{t.extra?.colStatus ?? 'Status'}</TableHead>
+                  <TableHead className="text-right">{t.extra?.colActions ?? 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -131,22 +133,22 @@ export function ImportHistorySection() {
                               {b.is_undone ? (
                                 <Badge variant="outline" className="gap-1 text-muted-foreground">
                                   <XCircle className="h-3 w-3" />
-                                  Deshecho
+                                  {t.extra?.statusUndone ?? 'Undone'}
                                 </Badge>
                               ) : allSkipped ? (
                                 <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
                                   <XCircle className="h-3 w-3" />
-                                  Sin importar
+                                  {t.extra?.statusNotImported ?? 'Not imported'}
                                 </Badge>
                               ) : hasIssues ? (
                                 <Badge variant="outline" className="gap-1 border-warn/40 text-warn">
                                   <AlertTriangle className="h-3 w-3" />
-                                  Con omisiones
+                                  {t.extra?.statusWithSkips ?? 'With skips'}
                                 </Badge>
                               ) : (
                                 <Badge variant="secondary" className="gap-1">
                                   <CheckCircle2 className="h-3 w-3" />
-                                  Activo
+                                  {t.extra?.statusActive ?? 'Active'}
                                 </Badge>
                               )}
                             </div>
@@ -176,7 +178,7 @@ export function ImportHistorySection() {
                           ) : (
                             <Undo2 className="h-3.5 w-3.5" />
                           )}
-                          Deshacer
+                          {t.extra?.undo ?? 'Undo'}
                         </Button>
                       )}
                     </TableCell>

@@ -1,6 +1,7 @@
 import { cn } from '@/shared/lib/utils';
 import { Sparkles, AlertTriangle, TrendingUp, Brain } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
+import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 
 interface Insight {
   id: string;
@@ -37,6 +38,7 @@ const iconStyles = {
 };
 
 export function AIInsightCard({ insights, className }: AIInsightCardProps) {
+  const { t } = useLanguage();
   return (
     <div className={cn('bg-card border border-border rounded-lg p-6', className)}>
       <div className="flex items-center justify-between mb-4">
@@ -45,12 +47,12 @@ export function AIInsightCard({ insights, className }: AIInsightCardProps) {
             <Sparkles className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">AI Insights</h3>
-            <p className="text-xs text-muted-foreground">Powered by machine learning</p>
+            <h3 className="text-lg font-semibold">{t.extra?.aiInsightsTitle ?? 'AI Insights'}</h3>
+            <p className="text-xs text-muted-foreground">{t.extra?.poweredByML ?? 'Powered by machine learning'}</p>
           </div>
         </div>
         <Button variant="ghost" size="sm" className="text-primary">
-          View all
+          {t.extra?.viewAll ?? 'View all'}
         </Button>
       </div>
 
