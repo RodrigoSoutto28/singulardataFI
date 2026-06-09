@@ -1203,7 +1203,9 @@ export default function Journal() {
                       value={formData.exit_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
                       disabled={formData.status === 'open'}
+                      aria-invalid={!!formErrors.exit_price}
                     />
+                    {formErrors.exit_price && <p className="text-xs text-destructive">{formErrors.exit_price}</p>}
                   </div>
 
                   {/* Status */}
@@ -1242,7 +1244,9 @@ export default function Journal() {
                       value={formData.entry_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
                       required
+                      aria-invalid={!!formErrors.entry_date}
                     />
+                    {formErrors.entry_date && <p className="text-xs text-destructive">{formErrors.entry_date}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.closeDateTime ?? 'Cierre'}</Label>
@@ -1252,7 +1256,9 @@ export default function Journal() {
                       value={formData.exit_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, exit_date: e.target.value }))}
                       disabled={formData.status === 'open'}
+                      aria-invalid={!!formErrors.exit_date}
                     />
+                    {formErrors.exit_date && <p className="text-xs text-destructive">{formErrors.exit_date}</p>}
                   </div>
 
                   {/* SL / TP */}
@@ -1261,22 +1267,26 @@ export default function Journal() {
                     <Input
                       type="number"
                       step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
+                      placeholder="precio (ej. 4320.50)"
                       className="bg-muted/30 font-mono"
                       value={formData.stop_loss}
                       onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
+                      aria-invalid={!!formErrors.stop_loss}
                     />
+                    {formErrors.stop_loss && <p className="text-xs text-destructive">{formErrors.stop_loss}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
                     <Input
                       type="number"
                       step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
+                      placeholder="precio (ej. 4350.00)"
                       className="bg-muted/30 font-mono"
                       value={formData.take_profit}
                       onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
+                      aria-invalid={!!formErrors.take_profit}
                     />
+                    {formErrors.take_profit && <p className="text-xs text-destructive">{formErrors.take_profit}</p>}
                   </div>
 
                   {/* Commission */}
@@ -1289,7 +1299,9 @@ export default function Journal() {
                       className="bg-muted/30 font-mono"
                       value={formData.commission}
                       onChange={(e) => setFormData(prev => ({ ...prev, commission: e.target.value }))}
+                      aria-invalid={!!formErrors.commission}
                     />
+                    {formErrors.commission && <p className="text-xs text-destructive">{formErrors.commission}</p>}
                   </div>
 
                   {/* Strategy */}
@@ -1301,7 +1313,9 @@ export default function Journal() {
                       className="bg-muted/30"
                       value={formData.strategy}
                       onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
+                      aria-invalid={!!formErrors.strategy}
                     />
+                    {formErrors.strategy && <p className="text-xs text-destructive">{formErrors.strategy}</p>}
                   </div>
                 </div>
 
