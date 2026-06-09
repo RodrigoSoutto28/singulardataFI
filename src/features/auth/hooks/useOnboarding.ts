@@ -42,11 +42,16 @@ export function useOnboarding() {
 
   const saveProgress = async (step: number) => {
     if (!user) return;
-    await supabase.from('profiles').update({ onboarding_step: step }).eq('id', user.id);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ onboarding_step: step })
+      .eq('id', user.id);
+    if (error) console.error('[onboarding] saveProgress failed:', error.message);
   };
 
   return {
-    isOnboardingComplete: data?.onboarding_completed ?? true,
+    // Default to false for new users (no profile row yet) so the wizard shows.
+    isOnboardingComplete: data?.onboarding_completed ?? false,
     currentStep: data?.onboarding_step ?? 0,
     completeOnboarding: completeOnboarding.mutate,
     skipOnboarding: skipOnboarding.mutate,
