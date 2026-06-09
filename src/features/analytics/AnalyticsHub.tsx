@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import Analytics from './Analytics';
 import Insights from './Insights';
 import Reports from './Reports';
-import { BarChart3, Sparkles, FileText } from 'lucide-react';
+import { Icon3D } from '@/shared/components/ui/Icon3D';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 
 export default function AnalyticsHub() {
@@ -28,21 +28,21 @@ export default function AnalyticsHub() {
               value="analytics"
               className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
             >
-              <BarChart3 className="h-4 w-4" />
+              <Icon3D name="analytics" className="h-5 w-5" />
               <span>{t.extra?.analyticsTab ?? 'Analytics'}</span>
             </TabsTrigger>
             <TabsTrigger
               value="insights"
               className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
             >
-              <Sparkles className="h-4 w-4" />
+              <Icon3D name="brain" className="h-5 w-5" />
               <span>{t.insights.title}</span>
             </TabsTrigger>
             <TabsTrigger
               value="reports"
               className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
             >
-              <FileText className="h-4 w-4" />
+              <Icon3D name="journal" className="h-5 w-5" />
               <span>{t.extra?.reportsTab ?? 'Reports'}</span>
             </TabsTrigger>
           </TabsList>

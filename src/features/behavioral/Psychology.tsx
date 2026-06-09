@@ -38,6 +38,7 @@ import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { usePsychologyEntries, PsychologyEntry } from '@/features/behavioral/hooks/usePsychologyEntries';
 import { toast } from 'sonner';
 import { psychologyEntrySchema } from '@/shared/lib/validation';
+import { Icon3D } from '@/shared/components/ui/Icon3D';
 
 type Emotion =
   | 'confident'
@@ -90,28 +91,28 @@ export default function Psychology() {
                 value="today"
                 className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
               >
-                <Calendar className="h-4 w-4" />
+                <Icon3D name="calendar" className="h-5 w-5" />
                 Hoy
               </TabsTrigger>
               <TabsTrigger
                 value="history"
                 className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
               >
-                <BookOpen className="h-4 w-4" />
+                <Icon3D name="journal" className="h-5 w-5" />
                 Historial
               </TabsTrigger>
               <TabsTrigger
                 value="insights"
                 className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
               >
-                <Sparkles className="h-4 w-4" />
+                <Icon3D name="brain" className="h-5 w-5" />
                 Insights
               </TabsTrigger>
               <TabsTrigger
                 value="taxometer"
                 className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
               >
-                <DollarSign className="h-4 w-4" />
+                <Icon3D name="taxometer" className="h-5 w-5" />
                 Taxímetro
               </TabsTrigger>
             </TabsList>
