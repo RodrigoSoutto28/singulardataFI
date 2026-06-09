@@ -75,11 +75,11 @@ export function OnboardingWizard() {
               </div>
               <div>
                 <h2 className="font-semibold">{step.title}</h2>
-                <p className="text-xs text-muted-foreground">Paso {currentStep + 1} de {steps.length}</p>
+                <p className="text-xs text-muted-foreground">{copy.step} {currentStep + 1} {copy.of} {steps.length}</p>
               </div>
             </div>
             {step.canSkip && (
-              <Button variant="ghost" size="sm" onClick={() => skipOnboarding()}>Omitir</Button>
+              <Button variant="ghost" size="sm" onClick={() => skipOnboarding()}>{copy.skip}</Button>
             )}
           </div>
 
