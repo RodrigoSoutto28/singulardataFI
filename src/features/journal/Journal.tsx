@@ -611,7 +611,19 @@ export default function Journal() {
         if (!errs[k]) errs[k] = i.message;
       });
       setFormErrors(errs);
-      toast.error('Revisa los campos marcados');
+      const labelMap: Record<string, string> = {
+        symbol: 'Símbolo', direction: 'Dirección', entry_price: 'Precio entrada',
+        quantity: 'Cantidad', exit_price: 'Precio salida', exit_date: 'Fecha cierre',
+        stop_loss: 'Stop Loss', take_profit: 'Take Profit', commission: 'Comisión',
+        strategy: 'Estrategia', entry_date: 'Fecha apertura', notes: 'Notas',
+      };
+      const names = Object.keys(errs).map((k) => labelMap[k] ?? k).join(', ');
+      toast.error(`Revisa: ${names}`);
+      setTimeout(() => {
+        const el = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+        el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        el?.focus?.();
+      }, 0);
       return;
     }
 
