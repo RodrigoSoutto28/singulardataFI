@@ -1,4 +1,8 @@
 User-agent: *
+Allow: /
+Allow: /auth
+Allow: /terminos
+Allow: /privacidad
 Disallow: /dashboard
 Disallow: /journal
 Disallow: /analytics
@@ -6,10 +10,8 @@ Disallow: /psychology
 Disallow: /insights
 Disallow: /reports
 Disallow: /settings
+Disallow: /profile
 Disallow: /admin
-Allow: /
-Allow: /auth
-Allow: /terminos
-Allow: /privacidad
+Disallow: /reset-password
 
-Sitemap: https://mindon.lovable.app/sitemap.xml
+Sitemap: https://singulardatafi.lovable.app/sitemap.xml
