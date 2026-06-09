@@ -677,6 +677,7 @@ export default function Journal() {
       {
         entry_price: payload.entry_price,
         stop_loss: payload.stop_loss,
+        stop_size: payload.stop_size,
         quantity: payload.quantity,
         entry_date: payload.entry_date,
         notes: payload.notes,
