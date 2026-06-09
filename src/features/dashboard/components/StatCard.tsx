@@ -60,16 +60,22 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden group cursor-default min-h-[120px]',
+        'relative overflow-hidden group cursor-default min-h-[120px] bg-card/25 backdrop-blur-md border-white/5',
         'transition-all duration-300',
         v.glow,
         className,
       )}
     >
       <CardContent className="pt-6 relative z-10 flex flex-col justify-between h-full min-h-[100px]">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between mr-24">
           <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
             {label}
+          </p>
+        </div>
+
+        <div className="flex items-end justify-between mt-2 mr-24">
+          <p className={cn('text-2xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
+            {value}
           </p>
 
           {/* Trend badge */}
@@ -77,7 +83,7 @@ export function StatCard({
             <Badge
               variant={trend === 'up' ? 'default' : 'destructive'}
               className={cn(
-                'text-xs font-mono',
+                'text-xs font-mono ml-2 shrink-0',
                 trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
               )}
             >
@@ -86,12 +92,8 @@ export function StatCard({
           )}
         </div>
 
-        <p className={cn('text-2xl font-bold font-mono tracking-tight mt-2', negative && 'text-loss')}>
-          {value}
-        </p>
-
-        {/* Large 3D Icon floating and merging on the right of the card */}
-        <div className="absolute right-2 bottom-2 h-20 w-20 opacity-85 pointer-events-none group-hover:scale-110 group-hover:translate-y-[-4px] transition-all duration-300">
+        {/* Large 3D Icon floating and merging on the top-right of the card */}
+        <div className="absolute right-2 top-2 h-24 w-24 opacity-90 pointer-events-none group-hover:scale-115 group-hover:translate-y-[-2px] group-hover:rotate-6 transition-all duration-300">
           <Icon className="h-full w-full object-contain" />
         </div>
       </CardContent>

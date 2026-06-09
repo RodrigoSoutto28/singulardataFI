@@ -7,7 +7,7 @@ import { useTaxometer } from '@/features/behavioral/hooks/useTaxometer';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 
-const Taxometer3D = createIcon3DComponent('taxometer');
+const Taxometer3D = createIcon3DComponent('taxometer', true);
 
 export function TaxometerWidget() {
   const { stats, isLoading } = useTaxometer();
@@ -15,14 +15,19 @@ export function TaxometerWidget() {
   const ps = t.psychology;
 
   return (
-    <Card className="lift-strong">
-      <CardHeader className="pb-4">
+    <Card className="lift-strong bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group">
+      <CardHeader className="pb-4 relative z-10 mr-16">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Taxometer3D className="h-4 w-4" />
           {ps.errorTaxometer ?? 'Taxímetro de Errores'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+
+      {/* Floating 3D Taxometer Icon in the top-right corner */}
+      <div className="absolute right-2 top-2 h-16 w-16 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
+        <Taxometer3D className="h-full w-full object-contain" />
+      </div>
+
+      <CardContent className="space-y-4 relative z-10">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-3 w-20" />

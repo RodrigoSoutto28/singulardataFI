@@ -29,14 +29,19 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
   const dashLength = (disciplineScore / 10) * circumference;
 
   return (
-    <Card className={cn('bg-gradient-to-br from-card to-muted/20', className)}>
-      <CardHeader>
+    <Card className={cn('bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group', className)}>
+      <CardHeader className="relative z-10 mr-16">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Brain3D className="h-5 w-5" />
           {t.dashboard.mentalStateTitle}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      
+      {/* Large 3D Brain Icon floating at the top right of the card */}
+      <div className="absolute right-2 top-2 h-16 w-16 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
+        <Brain3D className="h-full w-full object-contain" />
+      </div>
+
+      <CardContent className="space-y-4 relative z-10">
         {/* Score Visual */}
         <div className="text-center">
           <div className="text-4xl mb-1.5 animate-subtle-bounce">{status.emoji}</div>
