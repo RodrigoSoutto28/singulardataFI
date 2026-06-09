@@ -229,15 +229,15 @@ export default function Analytics() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Total PnL */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{t.analytics.totalPnl}</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{t.analytics.totalPnl}</p>
                 <p className={cn(
-                  'text-2xl font-bold font-mono-numbers',
+                  'text-2xl font-bold font-mono-numbers mt-1',
                   stats.totalPnl >= 0 ? 'text-profit' : 'text-loss'
                 )}>
                   {stats.totalPnl >= 0 ? '+' : ''}${stats.totalPnl.toLocaleString()}
@@ -256,10 +256,10 @@ export default function Analytics() {
         {/* Win Rate */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{t.analytics.winRate}</p>
-                <p className="text-2xl font-bold font-mono-numbers text-primary">{stats.winRate.toFixed(1)}%</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{t.analytics.winRate}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-primary mt-1">{stats.winRate.toFixed(1)}%</p>
                 <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
                   {stats.winningTrades} W - {stats.losingTrades} L
                 </p>
@@ -274,10 +274,10 @@ export default function Analytics() {
         {/* Profit Factor */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{t.analytics.profitFactor}</p>
-                <p className="text-2xl font-bold font-mono-numbers text-accent">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{t.analytics.profitFactor}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-accent mt-1">
                   {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
                 </p>
                 <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
@@ -294,10 +294,10 @@ export default function Analytics() {
         {/* Max Drawdown */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{localT.maxDrawdown}</p>
-                <p className="text-2xl font-bold font-mono-numbers text-loss">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{localT.maxDrawdown}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-loss mt-1">
                   {stats.maxDrawdown.toFixed(1)}%
                 </p>
                 <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
@@ -314,11 +314,11 @@ export default function Analytics() {
         {/* Math Expectancy */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{localT.expectancy}</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{localT.expectancy}</p>
                 <p className={cn(
-                  'text-2xl font-bold font-mono-numbers',
+                  'text-2xl font-bold font-mono-numbers mt-1',
                   stats.expectancy >= 0 ? 'text-profit' : 'text-loss'
                 )}>
                   {stats.expectancy >= 0 ? '+' : ''}${stats.expectancy.toFixed(1)}
@@ -337,10 +337,10 @@ export default function Analytics() {
         {/* Average R:R */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{localT.avgRR}</p>
-                <p className="text-2xl font-bold font-mono-numbers text-primary">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{localT.avgRR}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-primary mt-1">
                   1:{stats.avgRR.toFixed(1)}
                 </p>
                 <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
@@ -357,10 +357,10 @@ export default function Analytics() {
         {/* Total Trades */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{t.analytics.totalTrades}</p>
-                <p className="text-2xl font-bold font-mono-numbers">{stats.totalTrades}</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-muted-foreground truncate">{t.analytics.totalTrades}</p>
+                <p className="text-2xl font-bold font-mono-numbers mt-1">{stats.totalTrades}</p>
                 <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
                   Operaciones totales
                 </p>
