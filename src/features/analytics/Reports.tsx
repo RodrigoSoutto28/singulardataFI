@@ -79,7 +79,8 @@ export default function Reports() {
   const { stats } = useAnalytics(trades);
 
   const hasData = trades.length > 0;
-  const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const localeMap = { ES: 'es-ES', EN: 'en-US', PT: 'pt-BR' } as const;
+  const currentMonth = new Date().toLocaleDateString(localeMap[language] ?? 'en-US', { month: 'long', year: 'numeric' });
 
   if (isLoading) {
     return (

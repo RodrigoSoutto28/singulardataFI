@@ -64,7 +64,7 @@ const severityColors: Record<string, string> = {
 };
 
 export default function Insights() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { insights, newInsights, readInsights, stats, isLoading, markAsRead, refetch } = useInsights();
   const { trades } = useTrades();
 
