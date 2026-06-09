@@ -14,10 +14,10 @@ import {
 } from 'lucide-react';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
-const LayoutDashboard = createIcon3DComponent('dashboard');
-const BookOpen = createIcon3DComponent('journal');
-const BarChart3 = createIcon3DComponent('analytics');
-const Brain = createIcon3DComponent('brain');
+const LayoutDashboard = createIcon3DComponent('dashboard', true);
+const BookOpen = createIcon3DComponent('journal', true);
+const BarChart3 = createIcon3DComponent('analytics', true);
+const Brain = createIcon3DComponent('brain', true);
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTheme } from '@/shared/lib/ThemeContext';
@@ -113,7 +113,7 @@ export function Sidebar({
           />
           <item.icon
             className={cn(
-              'h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110 shrink-0',
+              'h-[26px] w-[26px] transition-transform duration-200 group-hover:scale-110 shrink-0',
               isActive && 'text-primary'
             )}
           />

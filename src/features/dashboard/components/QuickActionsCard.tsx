@@ -5,10 +5,10 @@ import { Button } from '@/shared/components/ui/button';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
-const Plus3D = createIcon3DComponent('newTrade');
-const BookOpen3D = createIcon3DComponent('journal');
-const Brain3D = createIcon3DComponent('checkin');
-const BarChart3D = createIcon3DComponent('analytics');
+const Plus3D = createIcon3DComponent('newTrade', true);
+const BookOpen3D = createIcon3DComponent('journal', true);
+const Brain3D = createIcon3DComponent('checkin', true);
+const BarChart3D = createIcon3DComponent('analytics', true);
 
 interface ActionItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -35,11 +35,11 @@ export function QuickActionsCard() {
           <Button
             key={action.labelKey}
             variant="outline"
-            className="h-20 flex-col gap-2 group"
+            className="h-24 flex-col gap-2 group overflow-hidden"
             onClick={() => navigate(action.path)}
           >
-            <action.icon className={cn('h-5 w-5 icon-spring', action.color)} aria-hidden />
-            <span className="text-xs">{t.dashboard[action.labelKey]}</span>
+            <action.icon className={cn('h-10 w-10 icon-spring', action.color)} aria-hidden />
+            <span className="text-xs font-medium">{t.dashboard[action.labelKey]}</span>
           </Button>
         ))}
       </CardContent>

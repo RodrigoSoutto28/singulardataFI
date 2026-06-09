@@ -848,6 +848,22 @@
     transform: rotate(-8deg) scale(1.12);
   }
 
+  /* 3D Icon Fusion effect: makes icons emerge smoothly from the background card/element */
+  .icon3d-fusion {
+    filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.45));
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0.3) 95%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0.3) 95%, rgba(0, 0, 0, 0) 100%);
+    transform: translateY(-2px);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
+  }
+
+  .group:hover .icon3d-fusion,
+  button:hover .icon3d-fusion,
+  [role="tab"][data-state="active"] .icon3d-fusion {
+    transform: translateY(-6px) scale(1.08);
+    filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.55));
+  }
+
   /* Tab indicator slide */
   .tab-indicator {
     position: relative;

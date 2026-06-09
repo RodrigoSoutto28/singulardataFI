@@ -12,12 +12,12 @@ import { Button } from '@/shared/components/ui/button';
 import { Pencil, Plus } from 'lucide-react';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
-const TrendingUp3D = createIcon3DComponent('equityCurve');
-const Wallet3D = createIcon3DComponent('balance');
-const Target3D = createIcon3DComponent('winrate');
-const Brain3D = createIcon3DComponent('brain');
-const BookOpen3D = createIcon3DComponent('activity');
-const PnL3D = createIcon3DComponent('pnl');
+const TrendingUp3D = createIcon3DComponent('equityCurve', true);
+const Wallet3D = createIcon3DComponent('balance', true);
+const Target3D = createIcon3DComponent('winrate', true);
+const Brain3D = createIcon3DComponent('brain', true);
+const BookOpen3D = createIcon3DComponent('activity', true);
+const PnL3D = createIcon3DComponent('pnl', true);
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTrades } from '@/features/journal/hooks/useTrades';

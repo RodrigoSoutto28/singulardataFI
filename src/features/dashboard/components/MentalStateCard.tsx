@@ -1,7 +1,7 @@
 import { Sparkles, Target } from 'lucide-react';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
-const Brain3D = createIcon3DComponent('brain');
+const Brain3D = createIcon3DComponent('brain', true);
 import { cn } from '@/shared/lib/utils';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';

@@ -68,21 +68,13 @@ export function StatCard({
     >
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
-          {/* Icon with spring animation on group hover */}
-          <div
+          {/* Icon showing directly emerging from card background with 3D fusion */}
+          <Icon
             className={cn(
-              'p-2 rounded-lg transition-all duration-300',
-              'group-hover:scale-110 group-hover:rotate-[-6deg]',
-              v.bg,
+              'h-14 w-14 transition-transform duration-300',
+              v.icon
             )}
-          >
-            <Icon
-              className={cn(
-                'h-5 w-5 transition-transform duration-300',
-                v.icon,
-              )}
-            />
-          </div>
+          />
 
           {/* Trend badge */}
           {change !== undefined && (
