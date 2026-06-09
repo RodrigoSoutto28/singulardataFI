@@ -159,7 +159,7 @@ describe('Journal — Add Trade flow', () => {
     await user.click(d.getByRole('button', { name: /abierta/i }));
 
     await user.type(d.getByPlaceholderText(/EUR\/USD/i), 'AAPL');
-    await user.click(d.getByRole('button', { name: /long/i }));
+    await user.click(d.getByRole('button', { name: /largo/i }));
 
     // Entry price + quantity (placeholders are numeric)
     await user.type(d.getByPlaceholderText('0.00'), '180.50');
@@ -193,7 +193,7 @@ describe('Journal — Add Trade flow', () => {
 
     // Status is "closed" by default — fill the closed-trade required set
     await user.type(d.getByPlaceholderText(/EUR\/USD/i), 'AAPL');
-    await user.click(d.getByRole('button', { name: /long/i }));
+    await user.click(d.getByRole('button', { name: /largo/i }));
     await user.type(d.getByPlaceholderText('0.00'), '180.50'); // entry
     await user.type(d.getByPlaceholderText('0'), '10'); // quantity
 
@@ -244,7 +244,7 @@ describe('Journal — Add Trade flow', () => {
     // Submit button is disabled until required fields are met; assert that
     // and instead drive a partial-fill so the schema rejects with multiple issues.
     await user.type(d.getByPlaceholderText(/EUR\/USD/i), 'AAPL');
-    await user.click(d.getByRole('button', { name: /long/i }));
+    await user.click(d.getByRole('button', { name: /largo/i }));
     await user.type(d.getByPlaceholderText('0.00'), '180.50');
     await user.type(d.getByPlaceholderText('0'), '10');
     // Provide an exit_price but leave exit_date empty (status=closed)
