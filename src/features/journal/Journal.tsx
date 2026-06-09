@@ -22,6 +22,7 @@ import {
 } from '@/shared/components/ui/dialog';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
+import { Progress } from '@/shared/components/ui/progress';
 import { cn } from '@/shared/lib/utils';
 import {
   Plus,
