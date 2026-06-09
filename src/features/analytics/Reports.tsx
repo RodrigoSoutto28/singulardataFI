@@ -74,7 +74,7 @@ function MetricCard({
 }
 
 export default function Reports() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { trades, isLoading } = useTrades();
   const { stats } = useAnalytics(trades);
 
