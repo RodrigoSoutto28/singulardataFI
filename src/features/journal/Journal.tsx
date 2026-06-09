@@ -611,7 +611,19 @@ export default function Journal() {
         if (!errs[k]) errs[k] = i.message;
       });
       setFormErrors(errs);
-      toast.error('Revisa los campos marcados');
+      const labelMap: Record<string, string> = {
+        symbol: 'Símbolo', direction: 'Dirección', entry_price: 'Precio entrada',
+        quantity: 'Cantidad', exit_price: 'Precio salida', exit_date: 'Fecha cierre',
+        stop_loss: 'Stop Loss', take_profit: 'Take Profit', commission: 'Comisión',
+        strategy: 'Estrategia', entry_date: 'Fecha apertura', notes: 'Notas',
+      };
+      const names = Object.keys(errs).map((k) => labelMap[k] ?? k).join(', ');
+      toast.error(`Revisa: ${names}`);
+      setTimeout(() => {
+        const el = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+        el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        el?.focus?.();
+      }, 0);
       return;
     }
 
@@ -1059,19 +1071,37 @@ export default function Journal() {
               </DialogHeader>
               <div className="px-4 sm:px-6 pt-2 pb-3 border-b border-border shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-muted-foreground uppercase tracking-wider">
-                    {isPayloadReady ? 'Listo para registrar' : 'Completando datos'}
+                  <span
+                    className={cn(
+                      'uppercase tracking-wider',
+                      Object.keys(formErrors).length > 0
+                        ? 'text-destructive'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {Object.keys(formErrors).length > 0
+                      ? 'Hay campos con error'
+                      : isPayloadReady
+                        ? 'Listo para registrar'
+                        : 'Completando datos'}
                   </span>
                   <span
                     className={cn(
                       'tabular-nums',
-                      isPayloadReady ? 'text-emerald-400' : 'text-muted-foreground',
+                      Object.keys(formErrors).length > 0
+                        ? 'text-destructive'
+                        : isPayloadReady
+                          ? 'text-emerald-400'
+                          : 'text-muted-foreground',
                     )}
                   >
                     {progressPct}%
                   </span>
                 </div>
-                <Progress value={progressPct} className="h-1" />
+                <Progress
+                  value={progressPct}
+                  className={cn('h-1', Object.keys(formErrors).length > 0 && '[&>div]:bg-destructive')}
+                />
                 {!isPayloadReady && missingRequired.length > 0 && (
                   <p className="text-[10px] text-muted-foreground">
                     Faltan: {missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}
@@ -1173,7 +1203,9 @@ export default function Journal() {
                       value={formData.exit_price}
                       onChange={(e) => setFormData(prev => ({ ...prev, exit_price: e.target.value }))}
                       disabled={formData.status === 'open'}
+                      aria-invalid={!!formErrors.exit_price}
                     />
+                    {formErrors.exit_price && <p className="text-xs text-destructive">{formErrors.exit_price}</p>}
                   </div>
 
                   {/* Status */}
@@ -1212,7 +1244,9 @@ export default function Journal() {
                       value={formData.entry_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, entry_date: e.target.value }))}
                       required
+                      aria-invalid={!!formErrors.entry_date}
                     />
+                    {formErrors.entry_date && <p className="text-xs text-destructive">{formErrors.entry_date}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.closeDateTime ?? 'Cierre'}</Label>
@@ -1222,7 +1256,9 @@ export default function Journal() {
                       value={formData.exit_date}
                       onChange={(e) => setFormData(prev => ({ ...prev, exit_date: e.target.value }))}
                       disabled={formData.status === 'open'}
+                      aria-invalid={!!formErrors.exit_date}
                     />
+                    {formErrors.exit_date && <p className="text-xs text-destructive">{formErrors.exit_date}</p>}
                   </div>
 
                   {/* SL / TP */}
@@ -1231,22 +1267,26 @@ export default function Journal() {
                     <Input
                       type="number"
                       step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
+                      placeholder="precio (ej. 4320.50)"
                       className="bg-muted/30 font-mono"
                       value={formData.stop_loss}
                       onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
+                      aria-invalid={!!formErrors.stop_loss}
                     />
+                    {formErrors.stop_loss && <p className="text-xs text-destructive">{formErrors.stop_loss}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
                     <Input
                       type="number"
                       step="any"
-                      placeholder={t.journal.optional ?? 'opcional'}
+                      placeholder="precio (ej. 4350.00)"
                       className="bg-muted/30 font-mono"
                       value={formData.take_profit}
                       onChange={(e) => setFormData(prev => ({ ...prev, take_profit: e.target.value }))}
+                      aria-invalid={!!formErrors.take_profit}
                     />
+                    {formErrors.take_profit && <p className="text-xs text-destructive">{formErrors.take_profit}</p>}
                   </div>
 
                   {/* Commission */}
@@ -1259,7 +1299,9 @@ export default function Journal() {
                       className="bg-muted/30 font-mono"
                       value={formData.commission}
                       onChange={(e) => setFormData(prev => ({ ...prev, commission: e.target.value }))}
+                      aria-invalid={!!formErrors.commission}
                     />
+                    {formErrors.commission && <p className="text-xs text-destructive">{formErrors.commission}</p>}
                   </div>
 
                   {/* Strategy */}
@@ -1271,7 +1313,9 @@ export default function Journal() {
                       className="bg-muted/30"
                       value={formData.strategy}
                       onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
+                      aria-invalid={!!formErrors.strategy}
                     />
+                    {formErrors.strategy && <p className="text-xs text-destructive">{formErrors.strategy}</p>}
                   </div>
                 </div>
 
