@@ -225,8 +225,8 @@ describe('Journal — Add Trade flow', () => {
     ) as HTMLInputElement;
     await user.type(exitDate, '2026-06-09T10:00');
 
-    // Now the offending negative SL / TP
-    await user.type(d.getByPlaceholderText(/4320\.50/), '-105.60');
+    // Now offending negative Stop Size / Take Profit
+    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '-50');
     await user.type(d.getByPlaceholderText(/4350\.00/), '-105.60');
 
     // Button should be enabled because required fields are satisfied
@@ -236,11 +236,11 @@ describe('Journal — Add Trade flow', () => {
 
     await waitFor(() => expect(toastError).toHaveBeenCalled());
     const msg = String(toastError.mock.calls[0][0]);
-    expect(msg).toMatch(/Stop Loss/);
+    expect(msg).toMatch(/Tamaño del Stop/);
     expect(msg).toMatch(/Take Profit/);
 
     // Inline errors visible
-    expect(d.getByText(/stop loss debe ser mayor a 0/i)).toBeInTheDocument();
+    expect(d.getByText(/tamaño del stop debe ser mayor a 0/i)).toBeInTheDocument();
     expect(d.getByText(/take profit debe ser mayor a 0/i)).toBeInTheDocument();
 
     // First invalid field was scrolled into view
