@@ -93,7 +93,7 @@ export function StatCard({
         </div>
 
         {/* Large 3D Icon floating and merging on the top-right of the card */}
-        <div className="absolute right-2 top-2 h-24 w-24 opacity-90 pointer-events-none group-hover:scale-115 group-hover:translate-y-[-2px] group-hover:rotate-6 transition-all duration-300">
+        <div className="absolute right-2 top-2 h-28 w-28 opacity-90 pointer-events-none group-hover:scale-115 group-hover:translate-y-[-2px] group-hover:rotate-6 transition-all duration-300">
           <Icon className="h-full w-full object-contain" />
         </div>
       </CardContent>

@@ -23,7 +23,7 @@ export function TaxometerWidget() {
       </CardHeader>
 
       {/* Floating 3D Taxometer Icon in the top-right corner */}
-      <div className="absolute right-2 top-2 h-16 w-16 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
+      <div className="absolute right-2 top-2 h-20 w-20 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
         <Taxometer3D className="h-full w-full object-contain" />
       </div>
 

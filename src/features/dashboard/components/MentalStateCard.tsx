@@ -37,7 +37,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
       </CardHeader>
       
       {/* Large 3D Brain Icon floating at the top right of the card */}
-      <div className="absolute right-2 top-2 h-16 w-16 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
+      <div className="absolute right-2 top-2 h-20 w-20 opacity-90 pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-300">
         <Brain3D className="h-full w-full object-contain" />
       </div>
 
