@@ -195,7 +195,7 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      {t.analytics.noData}
+                      {{ ES: 'Sin datos mensuales', EN: 'No monthly data', PT: 'Sem dados mensais' }[language]}
                     </div>
                   )}
                 </div>
