@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 import { Trade } from '@/features/journal/hooks/useTrades';
+import { Tables } from '@/shared/types/database';
+
+type PsychologyEntry = Tables<'psychology_entries'>;
 
 interface AnalyticsStats {
   totalPnl: number;
@@ -12,7 +15,10 @@ interface AnalyticsStats {
   avgLoss: number;
   largestWin: number;
   largestLoss: number;
-  maxDrawdown: number;
+  maxDrawdown: number;          // Drawdown máximo en porcentaje (%)
+  maxDrawdownAbsolute: number;  // Drawdown máximo en valor absoluto ($)
+  expectancy: number;           // Esperanza matemática ($)
+  avgRR: number;                // Ratio de Riesgo/Recompensa promedio obtenido
 }
 
 interface EquityPoint {
@@ -32,12 +38,20 @@ interface PerformanceByHour {
   hour: string;
   winRate: number;
   trades: number;
+  pnl: number;
 }
 
 interface AssetDistribution {
   name: string;
   value: number;
   color: string;
+}
+
+interface PerformanceByEmotion {
+  emotion: string;
+  winRate: number;
+  pnl: number;
+  trades: number;
 }
 
 const assetColors: Record<string, string> = {
@@ -49,7 +63,11 @@ const assetColors: Record<string, string> = {
   commodities: 'hsl(22, 90%, 52%)',
 };
 
-export function useAnalytics(trades: Trade[]) {
+export function useAnalytics(
+  trades: Trade[], 
+  psychologyEntries: PsychologyEntry[] = [], 
+  initialBalance = 10000
+) {
   const stats = useMemo<AnalyticsStats>(() => {
     if (!trades.length) {
       return {
@@ -64,6 +82,9 @@ export function useAnalytics(trades: Trade[]) {
         largestWin: 0,
         largestLoss: 0,
         maxDrawdown: 0,
+        maxDrawdownAbsolute: 0,
+        expectancy: 0,
+        avgRR: 0,
       };
     }
 
@@ -82,20 +103,52 @@ export function useAnalytics(trades: Trade[]) {
     const largestWin = pnlValues.length ? Math.max(...pnlValues, 0) : 0;
     const largestLoss = pnlValues.length ? Math.min(...pnlValues, 0) : 0;
 
-    // Calculate max drawdown
-    let peak = 0;
-    let maxDrawdown = 0;
-    let cumulative = 0;
-    closedTrades.forEach(t => {
-      cumulative += t.pnl ?? 0;
-      if (cumulative > peak) peak = cumulative;
-      const drawdown = peak - cumulative;
-      if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+    // 1. Cálculo del Max Drawdown (en porcentaje y absoluto) basado en la curva de equidad
+    const sortedClosedTrades = [...closedTrades]
+      .map(t => ({ ...t, _ref: t.exit_date ?? t.entry_date }))
+      .filter(t => !!t._ref)
+      .sort((a, b) => new Date(a._ref!).getTime() - new Date(b._ref!).getTime());
+
+    let peak = initialBalance;
+    let maxDrawdownAbsolute = 0;
+    let maxDrawdownPercent = 0;
+    let cumulativeBalance = initialBalance;
+
+    sortedClosedTrades.forEach(t => {
+      cumulativeBalance += t.pnl ?? 0;
+      if (cumulativeBalance > peak) peak = cumulativeBalance;
+      
+      const drawdownAbs = peak - cumulativeBalance;
+      if (drawdownAbs > maxDrawdownAbsolute) {
+        maxDrawdownAbsolute = drawdownAbs;
+      }
+
+      const drawdownPct = peak > 0 ? (drawdownAbs / peak) * 100 : 0;
+      if (drawdownPct > maxDrawdownPercent) {
+        maxDrawdownPercent = drawdownPct;
+      }
     });
+
+    // 2. Esperanza matemática (Expectancy)
+    // Expectancy = (Win Rate * Avg Win) - (Loss Rate * Avg Loss)
+    const totalTradesCount = closedTrades.length;
+    const winRateFraction = totalTradesCount ? wins.length / totalTradesCount : 0;
+    const lossRateFraction = totalTradesCount ? losses.length / totalTradesCount : 0;
+    const expectancy = (winRateFraction * avgWin) - (lossRateFraction * avgLoss);
+
+    // 3. Ratio de Riesgo/Recompensa (R:R) promedio obtenido
+    // Evaluado sobre operaciones con stop_size (pérdida definida) y pnl no nulo
+    const tradesWithRR = closedTrades.filter(t => {
+      const stopVal = Math.abs(t.stop_size ?? 0);
+      return stopVal > 0 && t.pnl !== null;
+    });
+    const avgRR = tradesWithRR.length
+      ? tradesWithRR.reduce((sum, t) => sum + (Math.abs(t.pnl ?? 0) / Math.abs(t.stop_size ?? 1)), 0) / tradesWithRR.length
+      : 0;
 
     return {
       totalPnl,
-      winRate: closedTrades.length ? (wins.length / closedTrades.length) * 100 : 0,
+      winRate: totalTradesCount ? (wins.length / totalTradesCount) * 100 : 0,
       totalTrades: trades.length,
       winningTrades: wins.length,
       losingTrades: losses.length,
@@ -104,20 +157,24 @@ export function useAnalytics(trades: Trade[]) {
       avgLoss,
       largestWin,
       largestLoss,
-      maxDrawdown,
+      maxDrawdown: maxDrawdownPercent,
+      maxDrawdownAbsolute,
+      expectancy,
+      avgRR,
     };
-  }, [trades]);
+  }, [trades, initialBalance]);
 
+  // Curva de Equidad basada en Balance Inicial Real
   const equityCurve = useMemo<EquityPoint[]>(() => {
     if (!trades.length) return [];
 
     const closedTrades = trades
-      .filter(t => t.status === 'closed')
+      .filter(t => t.status === 'closed' && t.pnl !== null)
       .map(t => ({ ...t, _ref: t.exit_date ?? t.entry_date }))
       .filter(t => !!t._ref)
       .sort((a, b) => new Date(a._ref!).getTime() - new Date(b._ref!).getTime());
 
-    let cumulative = 0;
+    let cumulative = initialBalance;
     return closedTrades.map(t => {
       const pnl = t.pnl ?? 0;
       cumulative += pnl;
@@ -127,7 +184,7 @@ export function useAnalytics(trades: Trade[]) {
         pnl,
       };
     });
-  }, [trades]);
+  }, [trades, initialBalance]);
 
   const monthlyPnl = useMemo(() => {
     if (!trades.length) return [];
@@ -203,25 +260,28 @@ export function useAnalytics(trades: Trade[]) {
     }));
   }, [trades]);
 
+  // Distribución de 24 horas cubriendo las sesiones del mercado mundial en bloques de 4 horas
   const performanceByHour = useMemo<PerformanceByHour[]>(() => {
-    const hours = ['8-10', '10-12', '12-14', '14-16', '16-18'];
-    const hourData: Record<string, { wins: number; total: number }> = {};
+    const hours = ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'];
+    const hourData: Record<string, { wins: number; total: number; pnl: number }> = {};
 
     hours.forEach(h => {
-      hourData[h] = { wins: 0, total: 0 };
+      hourData[h] = { wins: 0, total: 0, pnl: 0 };
     });
 
     trades.filter(t => t.status === 'closed' && t.entry_date).forEach(t => {
       const hour = new Date(t.entry_date).getHours();
       let bucket = '';
-      if (hour >= 8 && hour < 10) bucket = '8-10';
-      else if (hour >= 10 && hour < 12) bucket = '10-12';
-      else if (hour >= 12 && hour < 14) bucket = '12-14';
-      else if (hour >= 14 && hour < 16) bucket = '14-16';
-      else if (hour >= 16 && hour < 18) bucket = '16-18';
+      if (hour >= 0 && hour < 4) bucket = '00-04';
+      else if (hour >= 4 && hour < 8) bucket = '04-08';
+      else if (hour >= 8 && hour < 12) bucket = '08-12';
+      else if (hour >= 12 && hour < 16) bucket = '12-16';
+      else if (hour >= 16 && hour < 20) bucket = '16-20';
+      else if (hour >= 20 && hour < 24) bucket = '20-24';
 
       if (bucket && hourData[bucket]) {
         hourData[bucket].total += 1;
+        hourData[bucket].pnl += t.pnl ?? 0;
         if ((t.pnl ?? 0) > 0) hourData[bucket].wins += 1;
       }
     });
@@ -230,8 +290,48 @@ export function useAnalytics(trades: Trade[]) {
       hour,
       winRate: hourData[hour].total > 0 ? Math.round((hourData[hour].wins / hourData[hour].total) * 100) : 0,
       trades: hourData[hour].total,
+      pnl: Math.round(hourData[hour].pnl),
     }));
   }, [trades]);
+
+  // Correlación de Psicología (Emociones) con resultados
+  const performanceByEmotion = useMemo<PerformanceByEmotion[]>(() => {
+    if (!psychologyEntries.length) return [];
+
+    // Mapear fecha local (YYYY-MM-DD) -> emoción
+    const emotionMap: Record<string, string> = {};
+    psychologyEntries.forEach(entry => {
+      if (entry.entry_date && entry.pre_trade_emotion) {
+        emotionMap[entry.entry_date] = entry.pre_trade_emotion;
+      }
+    });
+
+    const emotionData: Record<string, { wins: number; total: number; pnl: number }> = {};
+
+    trades.filter(t => t.status === 'closed' && t.entry_date).forEach(t => {
+      const dateObj = new Date(t.entry_date);
+      const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+      
+      const emotion = emotionMap[dateStr] ?? 'Desconocido';
+
+      if (!emotionData[emotion]) {
+        emotionData[emotion] = { wins: 0, total: 0, pnl: 0 };
+      }
+
+      emotionData[emotion].total += 1;
+      emotionData[emotion].pnl += t.pnl ?? 0;
+      if ((t.pnl ?? 0) > 0) {
+        emotionData[emotion].wins += 1;
+      }
+    });
+
+    return Object.entries(emotionData).map(([emotion, data]) => ({
+      emotion,
+      winRate: data.total > 0 ? Math.round((data.wins / data.total) * 100) : 0,
+      pnl: Math.round(data.pnl),
+      trades: data.total,
+    }));
+  }, [trades, psychologyEntries]);
 
   return {
     stats,
@@ -241,5 +341,6 @@ export function useAnalytics(trades: Trade[]) {
     assetDistribution,
     performanceByDay,
     performanceByHour,
+    performanceByEmotion,
   };
 }

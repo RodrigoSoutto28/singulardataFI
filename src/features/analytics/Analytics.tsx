@@ -27,6 +27,9 @@ import {
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTrades } from '@/features/journal/hooks/useTrades';
 import { useAnalytics } from '@/features/dashboard/hooks/useAnalytics';
+import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
+import { usePsychologyEntries } from '@/features/behavioral/hooks/usePsychologyEntries';
+import { Language } from '@/shared/lib/i18n/translations';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -35,7 +38,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="text-xs text-muted-foreground mb-1">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm font-semibold font-mono-numbers" style={{ color: entry.color }}>
-            {entry.name}: {typeof entry.value === 'number' && entry.name.includes('$') 
+            {entry.name}: {typeof entry.value === 'number' && (entry.name.includes('$') || entry.name.includes('P&L'))
               ? `$${entry.value.toLocaleString()}` 
               : entry.value}
           </p>
@@ -48,7 +51,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function Analytics() {
   const { t, language } = useLanguage();
-  const { trades, isLoading } = useTrades();
+  const { trades, isLoading: tradesLoading } = useTrades();
+  const { selectedAccount, isLoading: accountsLoading } = useTradingAccounts();
+  const { entries: psychologyEntries, isLoading: psychologyLoading } = usePsychologyEntries();
   const [dateRange, setDateRange] = useState<'30' | '90' | '180' | 'all'>('30');
 
   const filteredTrades = useMemo(() => {
@@ -59,16 +64,121 @@ export default function Analytics() {
     return trades.filter(t => t.entry_date && new Date(t.entry_date) >= cutoff);
   }, [trades, dateRange]);
 
+  const initialBalance = selectedAccount?.initial_balance ?? 10000;
+
   const { 
     stats, 
     monthlyPnl, 
     winLossDistribution, 
     assetDistribution,
     performanceByDay,
-    performanceByHour 
-  } = useAnalytics(filteredTrades);
+    performanceByHour,
+    performanceByEmotion
+  } = useAnalytics(filteredTrades, psychologyEntries, initialBalance);
 
   const hasData = filteredTrades.length > 0;
+
+  const localT = useMemo(() => {
+    const dict = {
+      ES: {
+        expectancy: 'Esperanza Matemática',
+        expectancyDesc: 'Retorno esperado por operación',
+        avgRR: 'R:R Promedio',
+        avgRRDesc: 'Ratio Riesgo/Recompensa promedio',
+        maxDrawdown: 'Drawdown Máx',
+        maxDrawdownDesc: 'Drawdown máximo registrado',
+        psychologyCorrelation: 'Correlación Emocional',
+        emotionAnalysis: 'Análisis de Rendimiento por Emoción',
+        winRateByEmotion: 'Win Rate por Emoción',
+        pnlByEmotion: 'P&L por Emoción',
+        noPsychologyData: 'No hay suficientes datos emocionales registrados.',
+        allSessions: 'Sesiones 24 Horas',
+        hours24Desc: 'Distribución en bloques de 4 horas',
+        emotion: 'Emoción',
+      },
+      EN: {
+        expectancy: 'Math Expectancy',
+        expectancyDesc: 'Expected return per trade',
+        avgRR: 'Average R:R',
+        avgRRDesc: 'Average Risk/Reward ratio',
+        maxDrawdown: 'Max Drawdown',
+        maxDrawdownDesc: 'Maximum drawdown recorded',
+        psychologyCorrelation: 'Emotional Correlation',
+        emotionAnalysis: 'Performance Analysis by Emotion',
+        winRateByEmotion: 'Win Rate by Emotion',
+        pnlByEmotion: 'P&L by Emotion',
+        noPsychologyData: 'Not enough emotional data recorded.',
+        allSessions: '24-Hour Sessions',
+        hours24Desc: 'Distribution in 4-hour blocks',
+        emotion: 'Emotion',
+      },
+      PT: {
+        expectancy: 'Expectativa Matemática',
+        expectancyDesc: 'Retorno esperado por operação',
+        avgRR: 'R:R Médio',
+        avgRRDesc: 'Rácio Risco/Retorno médio',
+        maxDrawdown: 'Drawdown Máx',
+        maxDrawdownDesc: 'Drawdown máximo registrado',
+        psychologyCorrelation: 'Correlação Emocional',
+        emotionAnalysis: 'Análise de Desempenho por Emoção',
+        winRateByEmotion: 'Taxa de Acerto por Emoção',
+        pnlByEmotion: 'P&L por Emoção',
+        noPsychologyData: 'Não há dados emocionais suficientes registrados.',
+        allSessions: 'Sessões 24 Horas',
+        hours24Desc: 'Distribuição em blocos de 4 horas',
+        emotion: 'Emoção',
+      }
+    };
+    return dict[language as Language] ?? dict.EN;
+  }, [language]);
+
+  const getEmotionLabel = useMemo(() => {
+    return (emotionKey: string) => {
+      const key = emotionKey.toLowerCase();
+      const translations = t.psychology?.emotions as Record<string, string> | undefined;
+      if (translations && translations[key]) {
+        return translations[key];
+      }
+      const fallback: Record<string, string> = {
+        confident: language === 'ES' ? 'Confiado' : language === 'PT' ? 'Confiante' : 'Confident',
+        calm: language === 'ES' ? 'Calmado' : language === 'PT' ? 'Calmo' : 'Calm',
+        neutral: 'Neutral',
+        excited: language === 'ES' ? 'Emocionado' : language === 'PT' ? 'Excitado' : 'Excited',
+        anxious: language === 'ES' ? 'Ansioso' : language === 'PT' ? 'Ansioso' : 'Anxious',
+        fearful: language === 'ES' ? 'Temeroso' : language === 'PT' ? 'Com Medo' : 'Fearful',
+        greedy: language === 'ES' ? 'Codicioso' : language === 'PT' ? 'Ganancioso' : 'Greedy',
+        frustrated: language === 'ES' ? 'Frustrado' : language === 'PT' ? 'Frustrado' : 'Frustrated',
+        fomo: 'FOMO',
+        vengeful: language === 'ES' ? 'Vengativo' : language === 'PT' ? 'Vingativo' : 'Vengeful',
+        desconocido: language === 'ES' ? 'Sin Registrar' : language === 'PT' ? 'Não Registrado' : 'Unregistered',
+        unknown: language === 'ES' ? 'Sin Registrar' : language === 'PT' ? 'Não Registrado' : 'Unregistered',
+      };
+      return fallback[key] ?? emotionKey;
+    };
+  }, [t.psychology?.emotions, language]);
+
+  const translatedPerformanceByEmotion = useMemo(() => {
+    return performanceByEmotion.map(item => ({
+      ...item,
+      emotion: getEmotionLabel(item.emotion),
+    }));
+  }, [performanceByEmotion, getEmotionLabel]);
+
+  const getSessionLabel = useMemo(() => {
+    return (hourBlock: string) => {
+      const labels: Record<string, Record<string, string>> = {
+        '00-04': { ES: 'Tokio/Asia', EN: 'Tokyo/Asia', PT: 'Tóquio/Ásia' },
+        '04-08': { ES: 'Londres Open', EN: 'London Open', PT: 'Londres Open' },
+        '08-12': { ES: 'Londres/NY', EN: 'London/NY', PT: 'Londres/NY' },
+        '12-16': { ES: 'Nueva York', EN: 'New York', PT: 'Nova York' },
+        '16-20': { ES: 'Cierre NY', EN: 'NY Close', PT: 'NY Close' },
+        '20-24': { ES: 'Asia Open', EN: 'Asia Open', PT: 'Ásia Open' },
+      };
+      return labels[hourBlock]?.[language] ?? labels[hourBlock]?.EN ?? '';
+    };
+  }, [language]);
+
+  const isLoading = tradesLoading || accountsLoading || psychologyLoading;
 
   if (isLoading) {
     return (
@@ -119,7 +229,8 @@ export default function Analytics() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        {/* Total PnL */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -131,52 +242,130 @@ export default function Analytics() {
                 )}>
                   {stats.totalPnl >= 0 ? '+' : ''}${stats.totalPnl.toLocaleString()}
                 </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  Bal: ${initialBalance.toLocaleString()}
+                </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-success" />
+              <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center shrink-0">
+                <DollarSign className="h-5 w-5 text-profit" />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Win Rate */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{t.analytics.winRate}</p>
                 <p className="text-2xl font-bold font-mono-numbers text-primary">{stats.winRate.toFixed(1)}%</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  {stats.winningTrades} W - {stats.losingTrades} L
+                </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
                 <Target className="h-5 w-5 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Profit Factor */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{t.analytics.profitFactor}</p>
-                <p className="text-2xl font-bold font-mono-numbers">
+                <p className="text-2xl font-bold font-mono-numbers text-accent">
                   {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
                 </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  {stats.profitFactor >= 1 ? 'Rentable' : 'No Rentable'}
+                </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
                 <TrendingUp className="h-5 w-5 text-accent" />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Max Drawdown */}
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{localT.maxDrawdown}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-loss">
+                  {stats.maxDrawdown.toFixed(1)}%
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  -${Math.round(stats.maxDrawdownAbsolute).toLocaleString()}
+                </p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-destructive/20 flex items-center justify-center shrink-0">
+                <Activity className="h-5 w-5 text-loss" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Math Expectancy */}
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{localT.expectancy}</p>
+                <p className={cn(
+                  'text-2xl font-bold font-mono-numbers',
+                  stats.expectancy >= 0 ? 'text-profit' : 'text-loss'
+                )}>
+                  {stats.expectancy >= 0 ? '+' : ''}${stats.expectancy.toFixed(1)}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  {localT.expectancyDesc}
+                </p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center shrink-0">
+                <DollarSign className="h-5 w-5 text-warning" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Average R:R */}
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{localT.avgRR}</p>
+                <p className="text-2xl font-bold font-mono-numbers text-primary">
+                  1:{stats.avgRR.toFixed(1)}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  {localT.avgRRDesc}
+                </p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Total Trades */}
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{t.analytics.totalTrades}</p>
                 <p className="text-2xl font-bold font-mono-numbers">{stats.totalTrades}</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1 truncate">
+                  Operaciones totales
+                </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                 <Activity className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
@@ -339,7 +528,10 @@ export default function Analytics() {
                 <div className="space-y-4">
                   {performanceByHour.map((time) => (
                     <div key={time.hour} className="flex items-center gap-4">
-                      <span className="w-16 text-sm font-medium text-muted-foreground">{time.hour}</span>
+                      <div className="w-24 flex flex-col shrink-0">
+                        <span className="text-sm font-medium font-mono-numbers">{time.hour}</span>
+                        <span className="text-[10px] text-muted-foreground truncate">{getSessionLabel(time.hour)}</span>
+                      </div>
                       <div className="flex-1 h-8 rounded-lg bg-muted overflow-hidden">
                         <div
                           className={cn(
@@ -351,7 +543,7 @@ export default function Analytics() {
                           <span className="text-xs font-semibold font-mono-numbers">{time.winRate}%</span>
                         </div>
                       </div>
-                      <span className="w-16 text-right text-xs text-muted-foreground">
+                      <span className="w-16 text-right text-xs text-muted-foreground font-mono-numbers">
                         {time.trades} {t.analytics.trades}
                       </span>
                     </div>
@@ -360,6 +552,83 @@ export default function Analytics() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Psychology Correlation / Emociones */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                {localT.psychologyCorrelation}
+              </CardTitle>
+              <CardDescription>{localT.emotionAnalysis}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {translatedPerformanceByEmotion.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Win Rate by Emotion */}
+                  <div>
+                    <h4 className="text-sm font-semibold mb-4 text-center">{localT.winRateByEmotion}</h4>
+                    <div className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={translatedPerformanceByEmotion}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                          <XAxis dataKey="emotion" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
+                          <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar
+                            dataKey="winRate"
+                            radius={[4, 4, 0, 0]}
+                            fill="hsl(var(--primary))"
+                            name="Win Rate (%)"
+                          >
+                            {translatedPerformanceByEmotion.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.winRate >= 50 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* PnL by Emotion */}
+                  <div>
+                    <h4 className="text-sm font-semibold mb-4 text-center">{localT.pnlByEmotion}</h4>
+                    <div className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={translatedPerformanceByEmotion}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                          <XAxis dataKey="emotion" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
+                          <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar
+                            dataKey="pnl"
+                            radius={[4, 4, 0, 0]}
+                            fill="hsl(var(--primary))"
+                            name="P&L ($)"
+                          >
+                            {translatedPerformanceByEmotion.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.pnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-12 text-center text-muted-foreground flex flex-col items-center justify-center">
+                  <Activity className="h-12 w-12 text-muted-foreground/30 mb-2" />
+                  <p>{localT.noPsychologyData}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Asset Distribution */}
           {assetDistribution.length > 0 && (
