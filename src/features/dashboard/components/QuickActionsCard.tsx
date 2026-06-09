@@ -29,17 +29,19 @@ export function QuickActionsCard() {
   const { t } = useLanguage();
 
   return (
-    <Card className="bg-gradient-to-r from-primary/5 via-card to-accent/5 border-primary/20">
-      <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4 [&>*]:stagger-item">
+    <Card className="bg-gradient-to-r from-primary/5 via-card to-accent/5 border-primary/20 overflow-visible">
+      <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 overflow-visible [&>*]:stagger-item">
         {actions.map((action) => (
           <Button
             key={action.labelKey}
             variant="outline"
-            className="h-24 flex-col gap-2 group overflow-hidden"
+            className="h-28 flex-col justify-end pb-3 gap-2 group relative overflow-visible bg-card/50 border-border/60 hover:bg-card hover:border-primary/45 transition-all duration-300"
             onClick={() => navigate(action.path)}
           >
-            <action.icon className={cn('h-10 w-10 icon-spring', action.color)} aria-hidden />
-            <span className="text-xs font-medium">{t.dashboard[action.labelKey]}</span>
+            <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 transition-all duration-300 group-hover:scale-115 group-hover:translate-y-[-6px] pointer-events-none drop-shadow-[0_10px_15px_rgba(0,0,0,0.4)]">
+              <action.icon className={cn('h-14 w-14 object-contain', action.color)} aria-hidden />
+            </div>
+            <span className="text-xs font-semibold tracking-tight">{t.dashboard[action.labelKey]}</span>
           </Button>
         ))}
       </CardContent>
