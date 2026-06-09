@@ -33,9 +33,12 @@ export function AvatarUploader({ size = 'lg' }: AvatarUploaderProps) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    // Validación básica
-    if (!file.type.startsWith('image/')) {
-      toast.error('El archivo debe ser una imagen');
+    // Validación estricta: allowlist de MIME y extensión (sin SVG por riesgo XSS)
+    const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const ALLOWED_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (!ALLOWED_MIME.includes(file.type) || !ALLOWED_EXT.includes(ext)) {
+      toast.error('Formato no permitido. Usá PNG, JPG, WEBP o GIF.');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
