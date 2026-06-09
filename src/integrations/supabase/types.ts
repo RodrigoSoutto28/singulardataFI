@@ -631,6 +631,7 @@ export type Database = {
           setup_type: string | null
           status: Database["public"]["Enums"]["trade_status"] | null
           stop_loss: number | null
+          stop_size: number | null
           strategy: string | null
           swap: number | null
           symbol: string
@@ -661,6 +662,7 @@ export type Database = {
           setup_type?: string | null
           status?: Database["public"]["Enums"]["trade_status"] | null
           stop_loss?: number | null
+          stop_size?: number | null
           strategy?: string | null
           swap?: number | null
           symbol: string
@@ -691,6 +693,7 @@ export type Database = {
           setup_type?: string | null
           status?: Database["public"]["Enums"]["trade_status"] | null
           stop_loss?: number | null
+          stop_size?: number | null
           strategy?: string | null
           swap?: number | null
           symbol?: string
