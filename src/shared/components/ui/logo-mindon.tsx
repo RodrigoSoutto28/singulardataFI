@@ -1,15 +1,15 @@
 /**
- * LogoMindOn — Logo vectorial de la marca MindOn Trading Software
+ * LogoMindOn — Logo de la marca MindOn Trading Software.
  *
- * Diseño fiel al logo oficial:
- *   - "Mind" en color del tema (foreground)
- *   - "O" representada como ícono de power en beige #C9A88A
+ * Diseño 100% fiel al logo oficial:
+ *   - "Mind" en color adaptable al tema (text-foreground)
+ *   - "O" representada como un ícono de power en beige #C9A88A
  *   - "n" en beige #C9A88A
- *   - Subtítulo opcional "TRADING SOFTWARE" en dorado #A6845F
+ *   - Subtítulo "TRADING SOFTWARE" en dorado/bronce #A6845F
  *
- * Se utiliza 100% SVG para asegurar que el ícono y el texto queden
- * perfectamente alineados en la misma línea base, evitando el desfase
- * que ocurre al mezclar elementos HTML <span> con <svg>.
+ * Se utiliza una estructura HTML con Flexbox en lugar de coordenadas SVG absolutas
+ * para el texto. Esto previene desalineaciones, problemas de renderizado de fuentes
+ * del sistema, solapamientos y cortes inexplicables en distintos navegadores.
  */
 
 import { cn } from '@/shared/lib/utils';
@@ -23,93 +23,105 @@ interface LogoMindOnProps {
   className?: string;
 }
 
-const CONFIG = {
-  sm: { width: 110, height: 32 },
-  md: { width: 155, height: 45 },
-  lg: { width: 280, height: 80 },
-} as const;
-
 export function LogoMindOn({ size = 'md', showSubtitle = false, className }: LogoMindOnProps) {
-  const c = CONFIG[size];
-  const viewBoxHeight = showSubtitle ? 86 : 70;
+  // Configuración de tamaños para asegurar proporción matemática perfecta
+  const styles = {
+    sm: {
+      fontSize: '20px',
+      iconSize: '15px',
+      iconStroke: '2.5',
+      subtitleSize: '7.5px',
+      subtitleSpacing: '2px',
+      gap: '2px',
+      marginTop: '1px',
+    },
+    md: {
+      fontSize: '26px',
+      iconSize: '20px',
+      iconStroke: '3.5',
+      subtitleSize: '9px',
+      subtitleSpacing: '3px',
+      gap: '3px',
+      marginTop: '2px',
+    },
+    lg: {
+      fontSize: '48px',
+      iconSize: '36px',
+      iconStroke: '6',
+      subtitleSize: '15px',
+      subtitleSpacing: '5px',
+      gap: '5.5px',
+      marginTop: '4px',
+    },
+  }[size];
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox={`0 0 250 ${viewBoxHeight}`}
-      width={c.width}
-      height={c.height}
-      className={cn('select-none', className)}
-      fill="none"
-      aria-label="MindOn Trading Software"
-      role="img"
-    >
-      {/* "Mind" — usa currentColor (adaptable a dark/light) */}
-      <text
-        x="2"
-        y="61"
-        fontFamily="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-        fontSize="54"
-        fontWeight="700"
-        letterSpacing="-2"
-        fill="currentColor"
+    <div className={cn('flex flex-col items-start select-none font-bold', className)}>
+      <div 
+        className="flex items-center leading-none" 
+        style={{ gap: styles.gap }}
       >
-        Mind
-      </text>
-
-      {/* 
-        Power icon "O":
-        Posición absoluta perfectamente alineada con la altura y línea base de "Mind"
-        y=61 (baseline), size=54 -> Centro geométrico aprox y=43.
-        Arco con centro en x=144, y=43.15, radio 19
-      */}
-      <g>
-        {/* Arco power (semicírculo con gap arriba, de x=134 a x=154) */}
-        <path
-          d="M 134 27 A 19 19 0 1 0 154 27"
-          stroke="#C9A88A"
-          strokeWidth="6"
-          strokeLinecap="round"
-          fill="none"
-        />
-        {/* Barra vertical del power icon */}
-        <line
-          x1="144"
-          y1="16"
-          x2="144"
-          y2="36"
-          stroke="#C9A88A"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-      </g>
-
-      {/* "n" beige - Acercada para estar a la distancia correcta de la "O" */}
-      <text
-        x="168"
-        y="61"
-        fontFamily="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-        fontSize="54"
-        fontWeight="700"
-        letterSpacing="-2"
-        fill="#C9A88A"
-      >
-        n
-      </text>
-
-      {/* Subtítulo */}
-      {showSubtitle && (
-        <text
-          x="4"
-          y="83"
-          fontFamily="'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-          fontSize="10"
-          fontWeight="400"
-          letterSpacing="4.5"
-          fill="#A6845F"
+        {/* "Mind" en color adaptable */}
+        <span 
+          className="text-foreground tracking-tight"
+          style={{ 
+            fontSize: styles.fontSize,
+            fontFamily: "'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+            fontWeight: 700,
+          }}
         >
-        </text>
+          Mind
+        </span>
+
+        {/* Icono de Power "O" */}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#C9A88A"
+          strokeWidth={styles.iconStroke}
+          strokeLinecap="round"
+          className="shrink-0"
+          style={{ 
+            width: styles.iconSize, 
+            height: styles.iconSize,
+          }}
+        >
+          {/* Círculo del botón de encendido con apertura en la parte superior */}
+          <path d="M 18.36 5.64 A 9 9 0 1 1 5.64 5.64" />
+          {/* Línea vertical que pasa por el centro del gap superior */}
+          <line x1="12" y1="2" x2="12" y2="12" />
+        </svg>
+
+        {/* "n" en color beige oficial */}
+        <span 
+          className="tracking-tight"
+          style={{ 
+            fontSize: styles.fontSize,
+            color: '#C9A88A',
+            fontFamily: "'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+            fontWeight: 700,
+          }}
+        >
+          n
+        </span>
+      </div>
+
+      {/* Subtítulo "TRADING SOFTWARE" */}
+      {showSubtitle && (
+        <span
+          className="uppercase tracking-wider font-semibold"
+          style={{
+            fontSize: styles.subtitleSize,
+            letterSpacing: styles.subtitleSpacing,
+            color: '#A6845F',
+            fontFamily: "'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+            marginTop: styles.marginTop,
+            paddingLeft: '1px',
+          }}
+        >
+          TRADING SOFTWARE
+        </span>
       )}
-    </svg>
+    </div>
   );
 }
