@@ -1270,19 +1270,29 @@ export default function Journal() {
                     {formErrors.exit_date && <p className="text-xs text-destructive">{formErrors.exit_date}</p>}
                   </div>
 
-                  {/* SL / TP */}
+                  {/* Stop Size (en moneda de la cuenta) */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.stopLoss}</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      placeholder="precio (ej. 4320.50)"
-                      className="bg-muted/30 font-mono"
-                      value={formData.stop_loss}
-                      onChange={(e) => setFormData(prev => ({ ...prev, stop_loss: e.target.value }))}
-                      aria-invalid={!!formErrors.stop_loss}
-                    />
-                    {formErrors.stop_loss && <p className="text-xs text-destructive">{formErrors.stop_loss}</p>}
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {(t.journal.stopSize ?? 'Tamaño del Stop')} ({accountCurrency})
+                    </Label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-mono text-muted-foreground">
+                        {currencySymbol}
+                      </span>
+                      <Input
+                        type="number"
+                        step="any"
+                        min="0"
+                        placeholder="ej. 50.00"
+                        className="bg-muted/30 font-mono pl-7"
+                        value={formData.stop_size}
+                        onChange={(e) => setFormData(prev => ({ ...prev, stop_size: e.target.value }))}
+                        aria-invalid={!!formErrors.stop_size}
+                      />
+                    </div>
+                    {formErrors.stop_size
+                      ? <p className="text-xs text-destructive">{formErrors.stop_size}</p>
+                      : <p className="text-[10px] text-muted-foreground">{t.journal.stopSizeHint ?? 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop'}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.journal.takeProfit}</Label>
