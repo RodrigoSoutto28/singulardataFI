@@ -181,6 +181,9 @@ export interface Translations {
     exitPrice: string;
     quantity: string;
     stopLoss: string;
+    stopSize?: string;
+    stopSizeHint?: string;
+    risk?: string;
     takeProfit: string;
     strategy: string;
     entryDate: string;
