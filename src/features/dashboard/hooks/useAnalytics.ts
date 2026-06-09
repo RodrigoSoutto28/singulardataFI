@@ -213,8 +213,8 @@ export function useAnalytics(
     const losses = trades.filter(t => t.status === 'closed' && (t.pnl ?? 0) < 0).length;
 
     return [
-      { name: 'Winning', value: wins, color: 'hsl(142, 76%, 45%)' },
-      { name: 'Losing', value: losses, color: 'hsl(0, 72%, 55%)' },
+      { name: 'Winning', value: wins, color: 'hsl(var(--profit))' },
+      { name: 'Losing', value: losses, color: 'hsl(var(--loss))' },
     ];
   }, [trades]);
 
