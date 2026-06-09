@@ -33,7 +33,7 @@ describe('Journal — unified Add Trade form', () => {
     expect(formEnd).toBeGreaterThan(formStart);
     const body = src.slice(formStart, formEnd);
     expect(body).toMatch(/formData\.entry_price/);
-    expect(body).toMatch(/formData\.stop_loss/);
+    expect(body).toMatch(/formData\.stop_size/);
     expect(body).toMatch(/formData\.take_profit/);
     expect(body).toMatch(/formData\.exit_price/);
   });

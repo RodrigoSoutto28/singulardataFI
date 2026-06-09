@@ -156,13 +156,24 @@ export function useTrades() {
         account_id: trade.account_id ?? selectedAccountId ?? null,
       }));
 
-      const { data, error } = await supabase
-        .from('trades')
-        .upsert(tradesWithUser as TradeInsert[], {
-          onConflict: 'user_id,import_row_hash',
-          ignoreDuplicates: true,
-        })
-        .select();
+      // Check if any of the trades has an import_row_hash
+      const hasHash = tradesWithUser.some((t) => t.import_row_hash !== undefined && t.import_row_hash !== null);
+
+      let query;
+      if (hasHash) {
+        query = supabase
+          .from('trades')
+          .upsert(tradesWithUser as TradeInsert[], {
+            onConflict: 'user_id,import_row_hash',
+            ignoreDuplicates: true,
+          });
+      } else {
+        query = supabase
+          .from('trades')
+          .insert(tradesWithUser as TradeInsert[]);
+      }
+
+      const { data, error } = await query.select();
 
       if (error) throw error;
       return data ?? [];

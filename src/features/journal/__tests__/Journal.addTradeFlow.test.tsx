@@ -180,8 +180,8 @@ describe('Journal — Add Trade flow', () => {
     await user.type(d.getAllByPlaceholderText('0')[0], '10');
 
     // Stop size (en USD) + take profit (precio)
-    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '50');
-    await user.type(d.getByPlaceholderText(/4350\.00/), '200');
+    await user.type(d.getByPlaceholderText(/ej\. -50\.00/), '50');
+    await user.type(d.getByPlaceholderText(/ej\. 100\.00/), '200');
 
     await user.click(d.getByRole('button', { name: /registrar operación/i }));
 
@@ -225,9 +225,9 @@ describe('Journal — Add Trade flow', () => {
     ) as HTMLInputElement;
     await user.type(exitDate, '2026-06-09T10:00');
 
-    // Now offending negative Stop Size / Take Profit
-    await user.type(d.getByPlaceholderText(/ej\. 50\.00/), '-50');
-    await user.type(d.getByPlaceholderText(/4350\.00/), '-105.60');
+    // Now offending 0 Stop Size / Take Profit
+    await user.type(d.getByPlaceholderText(/ej\. -50\.00/), '0');
+    await user.type(d.getByPlaceholderText(/ej\. 100\.00/), '0');
 
     // Button should be enabled because required fields are satisfied
     const submit = d.getByRole('button', { name: /registrar operación/i });
@@ -240,8 +240,8 @@ describe('Journal — Add Trade flow', () => {
     expect(msg).toMatch(/Take Profit/);
 
     // Inline errors visible
-    expect(d.getByText(/tamaño del stop debe ser mayor a 0/i)).toBeInTheDocument();
-    expect(d.getByText(/take profit debe ser mayor a 0/i)).toBeInTheDocument();
+    expect(d.getByText(/tamaño del stop no puede ser 0/i)).toBeInTheDocument();
+    expect(d.getByText(/take profit no puede ser 0/i)).toBeInTheDocument();
 
     // First invalid field was scrolled into view
     expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
