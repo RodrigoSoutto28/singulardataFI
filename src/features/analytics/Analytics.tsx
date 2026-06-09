@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
@@ -48,6 +49,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function Analytics() {
   const { t, language } = useLanguage();
   const { trades, isLoading } = useTrades();
+  const [dateRange, setDateRange] = useState<'30' | '90' | '180' | 'all'>('30');
+
+  const filteredTrades = useMemo(() => {
+    if (dateRange === 'all') return trades;
+    const cutoff = new Date();
+    const days = parseInt(dateRange);
+    cutoff.setDate(cutoff.getDate() - days);
+    return trades.filter(t => t.entry_date && new Date(t.entry_date) >= cutoff);
+  }, [trades, dateRange]);
+
   const { 
     stats, 
     monthlyPnl, 
@@ -55,9 +66,9 @@ export default function Analytics() {
     assetDistribution,
     performanceByDay,
     performanceByHour 
-  } = useAnalytics(trades);
+  } = useAnalytics(filteredTrades);
 
-  const hasData = trades.length > 0;
+  const hasData = filteredTrades.length > 0;
 
   if (isLoading) {
     return (
@@ -72,10 +83,38 @@ export default function Analytics() {
       {/* Date range filter — horizontal scroll pills on mobile */}
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none">
         <div className="flex items-center gap-2 w-max sm:flex-wrap sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.last30Days}</Button>
-          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.last90Days}</Button>
-          <Button variant="default" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.sixMonths}</Button>
-          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap shrink-0">{t.analytics.allTime}</Button>
+          <Button 
+            variant={dateRange === '30' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setDateRange('30')}
+            className="rounded-full whitespace-nowrap shrink-0"
+          >
+            {t.analytics.last30Days}
+          </Button>
+          <Button 
+            variant={dateRange === '90' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setDateRange('90')}
+            className="rounded-full whitespace-nowrap shrink-0"
+          >
+            {t.analytics.last90Days}
+          </Button>
+          <Button 
+            variant={dateRange === '180' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setDateRange('180')}
+            className="rounded-full whitespace-nowrap shrink-0"
+          >
+            {t.analytics.sixMonths}
+          </Button>
+          <Button 
+            variant={dateRange === 'all' ? 'default' : 'outline'} 
+            size="sm" 
+            onClick={() => setDateRange('all')}
+            className="rounded-full whitespace-nowrap shrink-0"
+          >
+            {t.analytics.allTime}
+          </Button>
         </div>
       </div>
 

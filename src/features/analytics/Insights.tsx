@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
@@ -67,6 +68,17 @@ export default function Insights() {
   const { t, language } = useLanguage();
   const { insights, newInsights, readInsights, stats, isLoading, markAsRead, refetch } = useInsights();
   const { trades } = useTrades();
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  const filteredNewInsights = useMemo(() => {
+    if (categoryFilter === 'all') return newInsights;
+    return newInsights.filter(i => i.insight_type === categoryFilter);
+  }, [newInsights, categoryFilter]);
+
+  const filteredReadInsights = useMemo(() => {
+    if (categoryFilter === 'all') return readInsights;
+    return readInsights.filter(i => i.insight_type === categoryFilter);
+  }, [readInsights, categoryFilter]);
 
   const hasData = trades.length >= 5;
 
@@ -153,20 +165,46 @@ export default function Insights() {
 
       {/* Insight Categories */}
       <div className="flex flex-wrap gap-2">
-        <Button variant="default" size="sm">{t.insights.allInsights}</Button>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant={categoryFilter === 'all' ? 'default' : 'outline'} 
+          size="sm"
+          onClick={() => setCategoryFilter('all')}
+        >
+          {t.insights.allInsights}
+        </Button>
+        <Button 
+          variant={categoryFilter === 'overtrading' ? 'default' : 'outline'} 
+          size="sm" 
+          className="gap-2"
+          onClick={() => setCategoryFilter('overtrading')}
+        >
           <Clock className="h-4 w-4 text-destructive" />
           {t.insights.overtrading}
         </Button>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant={categoryFilter === 'pattern' ? 'default' : 'outline'} 
+          size="sm" 
+          className="gap-2"
+          onClick={() => setCategoryFilter('pattern')}
+        >
           <Repeat className="h-4 w-4 text-primary" />
           {t.insights.patterns}
         </Button>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant={categoryFilter === 'edge' ? 'default' : 'outline'} 
+          size="sm" 
+          className="gap-2"
+          onClick={() => setCategoryFilter('edge')}
+        >
           <Target className="h-4 w-4 text-accent" />
           {t.insights.edges}
         </Button>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant={categoryFilter === 'warning' ? 'default' : 'outline'} 
+          size="sm" 
+          className="gap-2"
+          onClick={() => setCategoryFilter('warning')}
+        >
           <AlertTriangle className="h-4 w-4 text-warning" />
           {t.insights.warnings}
         </Button>
@@ -199,17 +237,17 @@ export default function Insights() {
       ) : (
         <>
           {/* New Insights */}
-          {newInsights.length > 0 && (
+          {filteredNewInsights.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
                 {t.insights.newInsights}
                 <Badge className="bg-destructive text-destructive-foreground text-xs">
-                  {newInsights.length}
+                  {filteredNewInsights.length}
                 </Badge>
               </h2>
               <div className="grid gap-4">
-                {newInsights.map((insight) => {
+                {filteredNewInsights.map((insight) => {
                   const Icon = insightIcons[insight.insight_type] || Brain;
                   const colors = insightColors[insight.insight_type] || insightColors.pattern;
                   

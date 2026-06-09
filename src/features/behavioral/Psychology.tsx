@@ -682,10 +682,12 @@ function EntryCard({ entry }: { entry: PsychologyEntry }) {
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium text-sm">
-            {new Date(entry.entry_date).toLocaleDateString('es-ES', {
+            {new Date(entry.created_at || entry.entry_date).toLocaleString('es-ES', {
               weekday: 'long',
               month: 'short',
               day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
             })}
           </span>
         </div>
