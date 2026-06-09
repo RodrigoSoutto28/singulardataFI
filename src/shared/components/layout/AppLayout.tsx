@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Sheet, SheetContent } from '@/shared/components/ui/sheet';
 import { CorporateGrid } from '@/shared/components/effects/CorporateGrid';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
+import { PageLoader } from '@/shared/components/ui/page-loader';
 
 function useIsTablet() {
   const [isTablet, setIsTablet] = useState(false);
@@ -85,13 +86,20 @@ export function AppLayout() {
           sectionTitle={sectionTitle}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-6 lg:px-8 lg:py-7 page-enter">
-            <Outlet />
+          <div className="mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-6 lg:px-8 lg:py-7">
+            {/*
+              key={location.key}: fuerza a React a desmontar y remontar el Suspense
+              en cada navegación, mostrando el skeleton loader siempre desde cero
+              y con los colores actuales del tema (sin "freeze" del workspace anterior).
+            */}
+            <Suspense key={location.key} fallback={<PageLoader />}>
+              <div className="page-enter">
+                <Outlet />
+              </div>
+            </Suspense>
           </div>
         </main>
       </div>
     </div>
   );
 }
-
-
