@@ -218,7 +218,7 @@ export default function Journal() {
       : []),
   ];
   const recommendedChecks = [
-    { key: 'stop_size', ok: parseFloat(formData.stop_size) > 0 },
+    { key: 'stop_size', ok: !isNaN(parseFloat(formData.stop_size)) && parseFloat(formData.stop_size) !== 0 },
     { key: 'take_profit', ok: parseFloat(formData.take_profit) > 0 },
     { key: 'strategy', ok: formData.strategy.trim().length > 0 },
   ];
