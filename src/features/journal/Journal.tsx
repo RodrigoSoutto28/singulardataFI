@@ -1346,8 +1346,8 @@ export default function Journal() {
                   const stopSize = parseFloat(formData.stop_size);
                   const tp = parseFloat(formData.take_profit);
                   const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && !!formData.direction;
-                  const hasRisk = !isNaN(stopSize) && stopSize > 0;
-                  const hasRR = hasRisk && !isNaN(tp) && tp > 0 && !isNaN(entry) && !isNaN(qty) && !!formData.direction;
+                  const hasRisk = !isNaN(stopSize) && stopSize !== 0;
+                  const hasRR = hasRisk && !isNaN(tp) && tp !== 0;
                   if (!hasPnl && !hasRisk && !hasRR) return null;
                   let pnl = 0, pct = 0, rr = 0;
                   if (hasPnl) {
@@ -1356,8 +1356,7 @@ export default function Journal() {
                     pct = entry !== 0 ? (diff / entry) * 100 : 0;
                   }
                   if (hasRR) {
-                    const reward = (formData.direction === 'long' ? tp - entry : entry - tp) * qty;
-                    rr = stopSize > 0 ? reward / stopSize : 0;
+                    rr = Math.abs(stopSize) > 0 ? Math.abs(tp) / Math.abs(stopSize) : 0;
                   }
                   return (
                     <div className="space-y-2">
