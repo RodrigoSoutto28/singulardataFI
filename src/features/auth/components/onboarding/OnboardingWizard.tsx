@@ -20,6 +20,8 @@ const ONBOARDING_COPY = {
 export function OnboardingWizard() {
   const { isOnboardingComplete, currentStep: savedStep, completeOnboarding, skipOnboarding, saveProgress, isLoading } =
     useOnboarding();
+  const { language } = useLanguage();
+  const copy = ONBOARDING_COPY[language];
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
@@ -27,9 +29,9 @@ export function OnboardingWizard() {
   }, [savedStep]);
 
   const steps = [
-    { id: 'welcome', title: 'Bienvenida', canSkip: false, manualAdvance: false },
-    { id: 'account', title: 'Cuenta', canSkip: false, manualAdvance: true },
-    { id: 'tour', title: 'Tour', canSkip: true, manualAdvance: false },
+    { id: 'welcome', title: copy.welcome, canSkip: false, manualAdvance: false },
+    { id: 'account', title: copy.account, canSkip: false, manualAdvance: true },
+    { id: 'tour', title: copy.tour, canSkip: true, manualAdvance: false },
   ];
 
   const progress = ((currentStep + 1) / steps.length) * 100;
