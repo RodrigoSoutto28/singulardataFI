@@ -1059,19 +1059,37 @@ export default function Journal() {
               </DialogHeader>
               <div className="px-4 sm:px-6 pt-2 pb-3 border-b border-border shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-muted-foreground uppercase tracking-wider">
-                    {isPayloadReady ? 'Listo para registrar' : 'Completando datos'}
+                  <span
+                    className={cn(
+                      'uppercase tracking-wider',
+                      Object.keys(formErrors).length > 0
+                        ? 'text-destructive'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {Object.keys(formErrors).length > 0
+                      ? 'Hay campos con error'
+                      : isPayloadReady
+                        ? 'Listo para registrar'
+                        : 'Completando datos'}
                   </span>
                   <span
                     className={cn(
                       'tabular-nums',
-                      isPayloadReady ? 'text-emerald-400' : 'text-muted-foreground',
+                      Object.keys(formErrors).length > 0
+                        ? 'text-destructive'
+                        : isPayloadReady
+                          ? 'text-emerald-400'
+                          : 'text-muted-foreground',
                     )}
                   >
                     {progressPct}%
                   </span>
                 </div>
-                <Progress value={progressPct} className="h-1" />
+                <Progress
+                  value={progressPct}
+                  className={cn('h-1', Object.keys(formErrors).length > 0 && '[&>div]:bg-destructive')}
+                />
                 {!isPayloadReady && missingRequired.length > 0 && (
                   <p className="text-[10px] text-muted-foreground">
                     Faltan: {missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}
