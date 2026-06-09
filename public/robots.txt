@@ -14,4 +14,4 @@ Disallow: /profile
 Disallow: /admin
 Disallow: /reset-password
 
-Sitemap: https://singulardatafi.lovable.app/sitemap.xml
+Sitemap: https://mindon.lovable.app/sitemap.xml

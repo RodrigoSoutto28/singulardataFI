@@ -56,7 +56,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
               <Power className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <span className="text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase">
-              SINGULAR dataFI
+              MindOn
             </span>
           </div>
 

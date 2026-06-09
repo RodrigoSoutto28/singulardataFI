@@ -233,7 +233,7 @@ export default function Auth() {
               <Power className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">SINGULAR dataFI</h1>
+              <h1 className="text-2xl font-bold">MindOn</h1>
               <p className="text-sm text-muted-foreground">{localized.tagline}</p>
             </div>
           </div>
