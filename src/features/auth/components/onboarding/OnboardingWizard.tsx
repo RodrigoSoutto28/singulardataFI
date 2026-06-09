@@ -118,13 +118,13 @@ export function OnboardingWizard() {
         {!step.manualAdvance && (
           <div className="border-t px-6 py-4 flex items-center justify-between bg-card">
             <Button variant="ghost" onClick={handleBack} disabled={currentStep === 0}>
-              <ChevronLeft className="h-4 w-4 mr-1" /> Atrás
+              <ChevronLeft className="h-4 w-4 mr-1" /> {copy.back}
             </Button>
             <Button onClick={handleNext}>
               {currentStep === steps.length - 1 ? (
-                <>Completar <Check className="h-4 w-4 ml-1" /></>
+                <>{copy.complete} <Check className="h-4 w-4 ml-1" /></>
               ) : (
-                <>Siguiente <ArrowRight className="h-4 w-4 ml-1" /></>
+                <>{copy.next} <ArrowRight className="h-4 w-4 ml-1" /></>
               )}
             </Button>
           </div>
