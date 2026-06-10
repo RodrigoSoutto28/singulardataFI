@@ -66,34 +66,31 @@ export function StatCard({
         className,
       )}
     >
-      <CardContent className="pt-6 relative z-10 flex flex-col justify-between h-full min-h-[100px]">
-        <div className="flex items-start justify-between mr-20 md:mr-24">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+      <CardContent className="pt-6 relative z-10 flex items-center justify-between gap-3 h-full min-h-[100px]">
+        <div className="flex flex-col justify-between flex-1 min-w-0 h-full">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
             {label}
           </p>
+          <div className="flex items-end gap-2 mt-2 flex-wrap">
+            <p className={cn('text-2xl md:text-3xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
+              {value}
+            </p>
+            {change !== undefined && (
+              <Badge
+                variant={trend === 'up' ? 'default' : 'destructive'}
+                className={cn(
+                  'text-xs font-mono shrink-0',
+                  trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
+                )}
+              >
+                {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
+              </Badge>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-end justify-between mt-2 mr-20 md:mr-24">
-          <p className={cn('text-2xl md:text-3xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
-            {value}
-          </p>
-
-          {/* Trend badge */}
-          {change !== undefined && (
-            <Badge
-              variant={trend === 'up' ? 'default' : 'destructive'}
-              className={cn(
-                'text-xs font-mono ml-2 shrink-0',
-                trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
-              )}
-            >
-              {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
-            </Badge>
-          )}
-        </div>
-
-        {/* 3D Icon floating in the top-right of the card */}
-        <div className="absolute right-3 top-3 h-16 w-16 md:h-20 md:w-20 opacity-95 pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+        {/* 3D Icon vertically centered on the right */}
+        <div className="shrink-0 h-16 w-16 md:h-20 md:w-20 opacity-95 pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
           <Icon className="h-full w-full object-contain" />
         </div>
       </CardContent>
