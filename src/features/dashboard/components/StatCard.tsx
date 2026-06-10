@@ -67,14 +67,14 @@ export function StatCard({
       )}
     >
       <CardContent className="pt-6 relative z-10 flex flex-col justify-between h-full min-h-[100px]">
-        <div className="flex items-start justify-between mr-24">
+        <div className="flex items-start justify-between mr-24 md:mr-32">
           <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
             {label}
           </p>
         </div>
 
-        <div className="flex items-end justify-between mt-2 mr-24">
-          <p className={cn('text-2xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
+        <div className="flex items-end justify-between mt-2 mr-24 md:mr-32">
+          <p className={cn('text-2xl md:text-3xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
             {value}
           </p>
 
@@ -93,7 +93,7 @@ export function StatCard({
         </div>
 
         {/* Large 3D Icon floating and merging on the top-right of the card */}
-        <div className="absolute right-2 top-2 h-28 w-28 opacity-90 pointer-events-none group-hover:scale-115 group-hover:translate-y-[-2px] group-hover:rotate-6 transition-all duration-300">
+        <div className="absolute right-2 top-2 h-20 w-20 md:h-28 md:w-28 opacity-90 pointer-events-none group-hover:scale-115 group-hover:translate-y-[-2px] group-hover:rotate-6 transition-all duration-300">
           <Icon className="h-full w-full object-contain" />
         </div>
       </CardContent>

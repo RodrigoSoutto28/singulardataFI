@@ -39,9 +39,9 @@ export function QuickActionsCard() {
             onClick={() => navigate(action.path)}
           >
             <div className="absolute top-2 right-2 transition-all duration-300 group-hover:scale-115 group-hover:rotate-6 pointer-events-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]">
-              <action.icon className="h-20 w-20 object-contain" aria-hidden />
+              <action.icon className="h-16 w-16 md:h-20 md:w-20 object-contain" aria-hidden />
             </div>
-            <span className="text-xs font-semibold tracking-tight text-foreground/90">{t.dashboard[action.labelKey]}</span>
+            <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 max-w-[70%] text-left">{t.dashboard[action.labelKey]}</span>
           </Button>
         ))}
       </CardContent>
