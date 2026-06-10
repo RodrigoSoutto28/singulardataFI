@@ -87,7 +87,7 @@ export default function Settings() {
         })
         .eq('id', user.id);
       if (error) throw error;
-      toast.success(t.settings.saveSuccess ?? 'Perfil actualizado correctamente');
+      toast.success((t.settings as any).saveSuccess ?? 'Perfil actualizado correctamente');
     } catch (err) {
       toast.error('Error al actualizar el perfil');
     } finally {
@@ -273,7 +273,7 @@ export default function Settings() {
             </div>
           </div>
           <Button onClick={handleSaveProfile} disabled={savingProfile}>
-            {savingProfile ? (t.settings.saving ?? 'Guardando...') : t.settings.saveChanges}
+            {savingProfile ? ((t.settings as any).saving ?? 'Guardando...') : t.settings.saveChanges}
           </Button>
         </CardContent>
       </Card>
@@ -283,7 +283,7 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
-            {t.settings.dataAndOnboarding ?? 'Datos y Onboarding'}
+            {(t.settings as any).dataAndOnboarding ?? 'Datos y Onboarding'}
           </CardTitle>
           <CardDescription>
             Cargá datos de ejemplo para explorar la plataforma o reiniciá el

@@ -29,19 +29,19 @@ export function QuickActionsCard() {
   const { t } = useLanguage();
 
   return (
-    <Card className="bg-gradient-to-r from-primary/5 via-card/40 to-accent/5 border-primary/20 overflow-visible backdrop-blur-md">
-      <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 overflow-visible [&>*]:stagger-item">
+    <Card className="bg-gradient-to-r from-primary/5 via-card/40 to-accent/5 border-primary/20 overflow-hidden backdrop-blur-md">
+      <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 [&>*]:stagger-item">
         {actions.map((action) => (
           <Button
             key={action.labelKey}
             variant="outline"
-            className="h-28 flex-col items-start justify-end p-4 gap-1 group relative overflow-visible bg-card/25 backdrop-blur-lg border-white/5 hover:bg-card/45 hover:border-primary/50 transition-all duration-300 shadow-md"
+            className="h-24 flex-col items-start justify-end p-4 gap-1 group relative overflow-hidden bg-card/25 backdrop-blur-lg border-white/5 hover:bg-card/45 hover:border-primary/50 transition-all duration-300 shadow-md"
             onClick={() => navigate(action.path)}
           >
-            <div className="absolute top-2 right-2 transition-all duration-300 group-hover:scale-115 group-hover:rotate-6 pointer-events-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]">
-              <action.icon className="h-16 w-16 md:h-20 md:w-20 object-contain" aria-hidden />
+            <div className="absolute right-1 bottom-1 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 pointer-events-none opacity-90">
+              <action.icon className="h-14 w-14 md:h-16 md:w-16 object-contain" aria-hidden />
             </div>
-            <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 max-w-[70%] text-left">{t.dashboard[action.labelKey]}</span>
+            <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 max-w-[65%] text-left self-start mt-1">{t.dashboard[action.labelKey]}</span>
           </Button>
         ))}
       </CardContent>

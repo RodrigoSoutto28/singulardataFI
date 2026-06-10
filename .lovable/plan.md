@@ -1,49 +1,49 @@
-## Auditoría profunda de 5 módulos
+## Objetivo
 
-Recorrer Journal/Import, Analytics, Behavioral, Onboarding y Settings — leer código, ejecutar en el preview los flujos críticos, corregir bugs y dejar todo internacionalizado y consistente.
+Regenerar los iconos 3D del dashboard con **fondo transparente** y reubicarlos para que se integren mejor con las tarjetas (sin tapar texto ni invadir otros elementos), inspirado en la imagen de referencia (estética cobre/bronce + verde salvia + púrpura profundo sobre fondo oscuro, iconos flotando limpios sin caja de color sólido detrás).
 
-## Por módulo
+## Diagnóstico actual
 
-### 1. Journal / Import / Export
-- Leer `Journal.tsx`, `useTrades`, `useInfiniteTrades`, `useImportTrades`, `useImportBatches`, `useExportTrades`, `ImportPreviewModal`, `ImportHistorySection`, parsers de broker (MT4/MT5/cTrader/TradingView), `xlsx-adapter`, `error-detection`.
-- Verificar: crear/editar/eliminar trade, sync de balance, paginación infinita, dedupe por `import_row_hash`, modal preview obligatorio, undo de import, export HTML/PDF/XLSX con datos reales.
-- Strings hardcodeadas → mover a diccionario i18n.
-- Probar en preview: importar CSV de muestra (si hay), crear trade manual, exportar.
+Mirando la captura adjunta, los iconos actuales tienen problemas:
+1. **Fondos sólidos cuadrados** (verde, púrpura, naranja) que crean "parches" visuales que rompen la composición del dashboard.
+2. **Posicionamiento invasivo**: los iconos sobresalen fuera de las tarjetas (Quick Actions, StatCards) y se solapan con tarjetas vecinas.
+3. **Tamaño excesivo** en algunos casos (h-28 w-28 en StatCard, h-20 w-20 en QuickActions) que compite con los números/labels.
+4. Los iconos de Estado Mental (cerebro) y Taxímetro (engranajes) son demasiado grandes y desbordan la tarjeta.
 
-### 2. Analytics Hub
-- Leer `AnalyticsHub`, `Analytics`, `Insights`, `Reports`, `useInsights`, `useAnalytics`.
-- Verificar: tabs traducidas, métricas (win rate, profit factor, expectativa, Sharpe, drawdown, equity), estados vacíos, exportación de reportes, AI insights.
-- Confirmar cálculos contra fórmulas del project-knowledge.
+## Cambios propuestos
 
-### 3. Behavioral / Pre-Market
-- Leer `Psychology`, `PreMarketCheckInModal`, `PreMarketGate`, `TaxometerWidget`, `TaxometerDashboard`, `TaxometerAlert`, `usePsychologyEntries`, `usePreMarketCheckIn`, `useTaxometer`, `streak-manager`, `color-psychology`.
-- Verificar: gate diario, check-in se guarda, taxometer reacciona a P&L vs riesgo, streaks, alertas, psychology entries CRUD.
-- i18n completo en alertas y labels.
+### 1. Regenerar los 13 iconos 3D con fondo transparente
+Usar `imagegen` con `transparent_background: true` y prompt consistente:
+- Estilo: render 3D fotorrealista, materiales **cobre pulido + verde salvia + púrpura profundo**, iluminación cinematográfica suave, sin fondo, sin plataforma/base.
+- Iconos a regenerar (mismas rutas en `src/assets/icons3d/`):
+  `dashboard, journal, analytics, brain, new_trade, checkin, balance, pnl, winrate, discipline, equity_curve, taxometer, activity`.
 
-### 4. Onboarding
-- Leer `OnboardingWizard`, `WelcomeScreen`, `WelcomeModal`, `AccountSetupStep`, `FirstCheckInStep`, `TourStep`, `OnboardingTour`, `useOnboarding`.
-- Verificar: secuencia welcome → account → tour, persistencia de paso, skip, primera cuenta creada correctamente, tour highlights navegan a las secciones reales.
-- i18n completo (sin "Bienvenido" hardcoded).
+### 2. Reubicar y redimensionar iconos en componentes
 
-### 5. Settings / Profile
-- Leer `Settings.tsx`, `Profile.tsx`, `AvatarUploader`, `LanguageSelector`, edge function `delete-account`.
-- Verificar: cambio de idioma persiste en `profiles.preferred_language`, tema dark/light, avatar upload a bucket `avatars`, export de datos JSON, eliminar cuenta (confirma + llama edge function + signOut), validaciones.
+**`StatCard.tsx`** — icono actual `h-20 w-20 md:h-28 w-28` absoluto top-right.
+- Reducir a `h-16 w-16 md:h-20 w-20`.
+- Ajustar márgenes del contenido (`mr-24 md:mr-32` → `mr-20 md:mr-24`).
+- Reposicionar a `right-3 top-3` con leve rotación.
 
-## Estrategia de ejecución
+**`QuickActionsCard.tsx`** — iconos `h-16 md:h-20` que sobresalen del botón.
+- Mantener tamaño pero asegurar `overflow-hidden` en lugar de `overflow-visible` para que no invadan tarjetas vecinas.
+- Reposicionar a esquina inferior-derecha sutil (`bottom-2 right-2`) y mover el label arriba para mejor legibilidad.
 
-1. **Lectura paralela** de los archivos clave de cada módulo (batch grande).
-2. **Lista priorizada de bugs** detectados (críticos / medios / cosméticos).
-3. **Fixes en parallel writes** por módulo, agrupando por archivo.
-4. **Verificación visual** en preview de los flujos críticos (crear trade, abrir import modal, abrir check-in, cambiar idioma, abrir onboarding).
-5. **Re-scan i18n**: `rg` final para strings ES/EN hardcodeadas en los módulos auditados.
-6. **Reporte final** con bugs encontrados, fixes aplicados y acciones pendientes del usuario.
+**`MentalStateCard.tsx`** — cerebro `h-16 md:h-20`.
+- Mantener tamaño; ajustar a `right-3 top-3`. Ya está OK tras transparencia.
 
-## Fuera de alcance esta pasada
+**`TaxometerWidget.tsx`** — `h-20 w-20`.
+- Reducir a `h-14 w-14` y posicionar `right-3 top-3`.
 
-- Activar Stripe / pagos.
-- Performance profiling profundo (sólo lazy-load y memo obvios si aparecen).
-- Tests automatizados nuevos (sólo correré los existentes si fallan).
+### 3. Limpieza del helper Icon3D
+- Eliminar `drop-shadow-xl` del componente base `Icon3D.tsx` (genera halo oscuro que con PNG transparente se nota feo); reemplazar por sombra sutil `drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]` aplicada solo en hover.
+
+### 4. (Opcional) Script post-proceso
+Ya existe `remove-white-bg.js` — si algún icono nuevo viniera con fondo blanco residual, ejecutarlo una vez sobre `src/assets/icons3d/` para garantizar transparencia total.
+
+## Fuera de alcance
+- No se tocan colores semánticos del tema ni layout general (grid de tarjetas).
+- No se modifican datos, hooks ni lógica.
 
 ## Entregable
-
-Reporte estructurado por módulo con: ✅ verificado, 🔧 corregido, ⚠️ requiere acción del usuario (ej. completar copy legal, configurar OAuth, etc.).
+Dashboard con iconos 3D flotantes limpios, sin parches de color de fondo, correctamente contenidos en sus tarjetas y proporcionados al contenido — coherente con la referencia visual aportada.
