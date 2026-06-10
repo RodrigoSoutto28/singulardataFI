@@ -30,16 +30,14 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
 
   return (
     <Card className={cn('bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group', className)}>
-      <CardHeader className="relative z-10 mr-20 md:mr-24">
+      <CardHeader className="relative z-10">
         <CardTitle className="flex items-center gap-2 text-base">
+          <div className="h-7 w-7 shrink-0 transition-transform duration-300 group-hover:scale-110">
+            <Brain3D className="h-full w-full object-contain" />
+          </div>
           {t.dashboard.mentalStateTitle}
         </CardTitle>
       </CardHeader>
-      
-      {/* Large 3D Brain Icon floating at the top right of the card */}
-      <div className="absolute right-3 top-3 h-14 w-14 md:h-16 md:w-16 opacity-95 pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-        <Brain3D className="h-full w-full object-contain" />
-      </div>
 
       <CardContent className="space-y-4 relative z-10">
         {/* Score Visual */}

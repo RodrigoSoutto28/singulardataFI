@@ -35,13 +35,13 @@ export function QuickActionsCard() {
           <Button
             key={action.labelKey}
             variant="outline"
-            className="h-24 flex-col items-start justify-end p-4 gap-1 group relative overflow-hidden bg-card/25 backdrop-blur-lg border-white/5 hover:bg-card/45 hover:border-primary/50 transition-all duration-300 shadow-md"
+            className="h-28 flex-col items-center justify-center p-3 gap-2 group relative overflow-hidden bg-card/25 backdrop-blur-lg border-white/5 hover:bg-card/45 hover:border-primary/50 transition-all duration-300 shadow-md"
             onClick={() => navigate(action.path)}
           >
-            <div className="absolute right-1 bottom-1 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 pointer-events-none opacity-90">
-              <action.icon className="h-14 w-14 md:h-16 md:w-16 object-contain" aria-hidden />
+            <div className="h-14 w-14 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 pointer-events-none opacity-95">
+              <action.icon className="h-full w-full object-contain" aria-hidden />
             </div>
-            <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 max-w-[65%] text-left self-start mt-1">{t.dashboard[action.labelKey]}</span>
+            <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 text-center">{t.dashboard[action.labelKey]}</span>
           </Button>
         ))}
       </CardContent>
