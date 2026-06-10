@@ -16,16 +16,14 @@ export function TaxometerWidget() {
 
   return (
     <Card className="lift-strong bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group">
-      <CardHeader className="pb-4 relative z-10 mr-16">
+      <CardHeader className="pb-4 relative z-10">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <div className="h-6 w-6 shrink-0 transition-transform duration-300 group-hover:scale-110">
+            <Taxometer3D className="h-full w-full object-contain" />
+          </div>
           {ps.errorTaxometer ?? 'Taxímetro de Errores'}
         </CardTitle>
       </CardHeader>
-
-      {/* Floating 3D Taxometer Icon in the top-right corner */}
-      <div className="absolute right-3 top-3 h-14 w-14 opacity-95 pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-        <Taxometer3D className="h-full w-full object-contain" />
-      </div>
 
       <CardContent className="space-y-4 relative z-10">
         {isLoading ? (
