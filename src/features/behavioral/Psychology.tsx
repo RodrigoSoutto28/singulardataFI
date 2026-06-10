@@ -91,7 +91,7 @@ export default function Psychology() {
                 value="today"
                 className="gap-2 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-3 sm:px-4 h-8 whitespace-nowrap"
               >
-                <Icon3D name="calendar" className="h-5 w-5" />
+                <Icon3D name="checkin" className="h-5 w-5" />
                 Hoy
               </TabsTrigger>
               <TabsTrigger
