@@ -15,12 +15,13 @@ export function TaxometerWidget() {
   const ps = t.psychology;
 
   return (
-    <Card className="lift-strong bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group">
-      <CardHeader className="pb-4 relative z-10">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <div className="h-6 w-6 shrink-0 transition-transform duration-300 group-hover:scale-110">
-            <Taxometer3D className="h-full w-full object-contain" />
-          </div>
+    <Card className="lift-strong relative overflow-hidden group">
+      <div className="icon3d-hero">
+        <Taxometer3D className="h-full w-full object-contain" />
+      </div>
+
+      <CardHeader className="pb-4 relative z-10 pr-24">
+        <CardTitle className="text-sm font-medium">
           {ps.errorTaxometer ?? 'Taxímetro de Errores'}
         </CardTitle>
       </CardHeader>

@@ -29,16 +29,16 @@ export function QuickActionsCard() {
   const { t } = useLanguage();
 
   return (
-    <Card className="bg-gradient-to-r from-primary/5 via-card/40 to-accent/5 border-primary/20 overflow-hidden backdrop-blur-md">
+    <Card className="overflow-hidden">
       <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 [&>*]:stagger-item">
         {actions.map((action) => (
           <Button
             key={action.labelKey}
             variant="outline"
-            className="h-28 flex-col items-center justify-center p-3 gap-2 group relative overflow-hidden bg-card/25 backdrop-blur-lg border-white/5 hover:bg-card/45 hover:border-primary/50 transition-all duration-300 shadow-md"
+            className="h-32 flex-col items-center justify-center p-3 gap-2 group relative overflow-hidden glass-subtle hover:bg-white/10 hover:border-primary/50 transition-all duration-300 rounded-2xl"
             onClick={() => navigate(action.path)}
           >
-            <div className="h-14 w-14 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 pointer-events-none opacity-95">
+            <div className="h-16 w-16 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 pointer-events-none opacity-95 drop-shadow-[0_6px_12px_rgba(0,0,0,0.3)]">
               <action.icon className="h-full w-full object-contain" aria-hidden />
             </div>
             <span className="text-xs md:text-sm font-semibold tracking-tight text-foreground/90 text-center">{t.dashboard[action.labelKey]}</span>
