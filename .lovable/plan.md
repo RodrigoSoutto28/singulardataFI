@@ -1,49 +1,56 @@
-## Objetivo
+# Plan: Glassmorphism global + iconos 3D ampliados
 
-Regenerar los iconos 3D del dashboard con **fondo transparente** y reubicarlos para que se integren mejor con las tarjetas (sin tapar texto ni invadir otros elementos), inspirado en la imagen de referencia (estética cobre/bronce + verde salvia + púrpura profundo sobre fondo oscuro, iconos flotando limpios sin caja de color sólido detrás).
+## 1. Actualizar memoria del proyecto
+- Reescribir la regla central de estilo en `mem://index.md`: pasar de "Solid backgrounds, NO glassmorphism" a **"Glassmorphism global: fondos translúcidos con backdrop-blur, bordes suaves rounded-2xl, borde 1px translúcido, sombra difusa"**.
+- Guardar un nuevo memo `mem://style/glass-system` con los tokens y reglas de uso.
 
-## Diagnóstico actual
+## 2. Tokens de diseño (src/styles/index.css)
+Añadir tokens semánticos para el sistema glass (modo claro y oscuro):
+- `--glass-bg`, `--glass-bg-strong`, `--glass-border`, `--glass-highlight`, `--glass-shadow`, `--glass-blur` (ej. 18px).
+- Utilities reutilizables:
+  - `.glass-card` — fondo `hsl(var(--glass-bg))`, `backdrop-blur-xl`, borde translúcido, `rounded-2xl`, sombra suave, highlight superior.
+  - `.glass-card-strong` — variante con más opacidad para modales/sidebar.
+  - `.glass-panel` — variante sin sombra para contenedores anidados.
+- Mantener fallback sólido para navegadores sin `backdrop-filter`.
 
-Mirando la captura adjunta, los iconos actuales tienen problemas:
-1. **Fondos sólidos cuadrados** (verde, púrpura, naranja) que crean "parches" visuales que rompen la composición del dashboard.
-2. **Posicionamiento invasivo**: los iconos sobresalen fuera de las tarjetas (Quick Actions, StatCards) y se solapan con tarjetas vecinas.
-3. **Tamaño excesivo** en algunos casos (h-28 w-28 en StatCard, h-20 w-20 en QuickActions) que compite con los números/labels.
-4. Los iconos de Estado Mental (cerebro) y Taxímetro (engranajes) son demasiado grandes y desbordan la tarjeta.
+## 3. Aplicar glass a toda la web
+Reemplazar fondos sólidos por `.glass-card` / `.glass-card-strong` en:
+- Sidebar (`Sidebar.tsx`) — `glass-sidebar` actualizado a versión glass real con blur.
+- TopBar (`TopBar.tsx`).
+- Todas las cards del Dashboard: `StatCard`, `MentalStateCard`, `QuickActionsCard`, `CapitalCard`, `EquityChart`, `RecentTrades`, `AIInsightCard`, `TasksCard`, `AchievementBadges`, `MetricCard`.
+- Cards de Analytics, Journal, Psychology, Settings, Profile.
+- Modales (`AccountSetupModal`, `PreMarketCheckInModal`, `ImportPreviewModal`, `ProcessValidatorModal`, dialogs shadcn).
+- Componente base `card.tsx` shadcn — cambiar a glass por defecto.
+- Tooltips, Popovers, Dropdowns, Select, Sheet, Drawer — versión glass.
+- Inputs, Selects, Botones secundarios — bordes suaves translúcidos.
+- Bordes globales: subir `--radius` a `1rem` (rounded-2xl por defecto).
 
-## Cambios propuestos
+## 4. Iconos 3D de la sidebar → 40px
+- `Sidebar.tsx`: aumentar `h-[26px] w-[26px]` a `h-10 w-10` en el render del icono nav.
+- Aumentar altura de fila de `h-10` a `h-14` para acomodar el icono.
+- Sidebar colapsada: ancho `w-[64px]` → `w-[80px]`.
+- Ajustar gap y padding para mantener equilibrio visual.
 
-### 1. Regenerar los 13 iconos 3D con fondo transparente
-Usar `imagegen` con `transparent_background: true` y prompt consistente:
-- Estilo: render 3D fotorrealista, materiales **cobre pulido + verde salvia + púrpura profundo**, iluminación cinematográfica suave, sin fondo, sin plataforma/base.
-- Iconos a regenerar (mismas rutas en `src/assets/icons3d/`):
-  `dashboard, journal, analytics, brain, new_trade, checkin, balance, pnl, winrate, discipline, equity_curve, taxometer, activity`.
+## 5. Iconos 3D del Dashboard → 128px fusionados arriba-derecha
+Mover de la disposición inline actual a una **fusión hero en esquina superior derecha** de cada card:
+- `StatCard.tsx`: icono `h-32 w-32` posicionado `absolute -top-4 -right-4` con `pointer-events-none`, ligeramente saliente, máscara/gradient radial para que se "funda" con el fondo glass. Texto vuelve a layout vertical normal con `pr-24` para reservar espacio.
+- `MentalStateCard.tsx`: Brain3D `h-32 w-32` absolute esquina superior derecha; quitar del CardTitle.
+- `TaxometerWidget.tsx`: igual con Taxometer3D `h-32 w-32`.
+- `QuickActionsCard.tsx`: los 4 botones internos mantienen icono pequeño (ya centrados); la card en sí recibe un icono hero opcional o se omite (decidir: omitir para no saturar).
+- `CapitalCard`, `EquityChart`, `RecentTrades`, `AIInsightCard`, `TasksCard`, `AchievementBadges`: añadir su Icon3D correspondiente (`balance`, `equity_curve`, `journal`, `brain`, `checkin`, `discipline`) en `h-32 w-32` absolute top-right con opacidad 90% y ligera rotación.
+- Container card: `overflow-hidden` con `rounded-2xl` para recortar el icono al borde glass.
+- Añadir un "glow" sutil radial detrás del icono usando el color de acento de la card.
 
-### 2. Reubicar y redimensionar iconos en componentes
+## 6. Icon3D helper
+- `Icon3D.tsx`: añadir variante `hero` que aplique drop-shadow más fuerte y un radial-gradient mask para fusión suave con la card glass.
 
-**`StatCard.tsx`** — icono actual `h-20 w-20 md:h-28 w-28` absoluto top-right.
-- Reducir a `h-16 w-16 md:h-20 w-20`.
-- Ajustar márgenes del contenido (`mr-24 md:mr-32` → `mr-20 md:mr-24`).
-- Reposicionar a `right-3 top-3` con leve rotación.
+## 7. Verificación
+- Revisar contraste de texto sobre fondos glass en modo claro y oscuro.
+- Confirmar que `CorporateGrid` de fondo sigue visible detrás del blur.
+- Probar viewport 1780px (actual) y mobile.
 
-**`QuickActionsCard.tsx`** — iconos `h-16 md:h-20` que sobresalen del botón.
-- Mantener tamaño pero asegurar `overflow-hidden` en lugar de `overflow-visible` para que no invadan tarjetas vecinas.
-- Reposicionar a esquina inferior-derecha sutil (`bottom-2 right-2`) y mover el label arriba para mejor legibilidad.
-
-**`MentalStateCard.tsx`** — cerebro `h-16 md:h-20`.
-- Mantener tamaño; ajustar a `right-3 top-3`. Ya está OK tras transparencia.
-
-**`TaxometerWidget.tsx`** — `h-20 w-20`.
-- Reducir a `h-14 w-14` y posicionar `right-3 top-3`.
-
-### 3. Limpieza del helper Icon3D
-- Eliminar `drop-shadow-xl` del componente base `Icon3D.tsx` (genera halo oscuro que con PNG transparente se nota feo); reemplazar por sombra sutil `drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]` aplicada solo en hover.
-
-### 4. (Opcional) Script post-proceso
-Ya existe `remove-white-bg.js` — si algún icono nuevo viniera con fondo blanco residual, ejecutarlo una vez sobre `src/assets/icons3d/` para garantizar transparencia total.
-
-## Fuera de alcance
-- No se tocan colores semánticos del tema ni layout general (grid de tarjetas).
-- No se modifican datos, hooks ni lógica.
-
-## Entregable
-Dashboard con iconos 3D flotantes limpios, sin parches de color de fondo, correctamente contenidos en sus tarjetas y proporcionados al contenido — coherente con la referencia visual aportada.
+## Detalles técnicos
+- Sin cambios de lógica de negocio, solo presentación.
+- Sin nuevas dependencias.
+- Archivos principales a editar: `src/styles/index.css`, `src/shared/components/ui/card.tsx`, `src/shared/components/ui/Icon3D.tsx`, `src/shared/components/layout/Sidebar.tsx`, `src/shared/components/layout/TopBar.tsx`, todos los `src/features/dashboard/components/*.tsx`, modales y dialogs.
+- Actualizar memoria: `mem://index.md` + nuevo `mem://style/glass-system`.
