@@ -60,38 +60,36 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden group cursor-default min-h-[120px] bg-card/25 backdrop-blur-md border-white/5',
+        'relative overflow-hidden group cursor-default min-h-[140px]',
         'transition-all duration-300',
         v.glow,
         className,
       )}
     >
-      <CardContent className="pt-6 relative z-10 flex items-center justify-between gap-3 h-full min-h-[100px]">
-        <div className="flex flex-col justify-between flex-1 min-w-0 h-full">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
-            {label}
-          </p>
-          <div className="flex items-end gap-2 mt-2 flex-wrap">
-            <p className={cn('text-2xl md:text-3xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
-              {value}
-            </p>
-            {change !== undefined && (
-              <Badge
-                variant={trend === 'up' ? 'default' : 'destructive'}
-                className={cn(
-                  'text-xs font-mono shrink-0',
-                  trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
-                )}
-              >
-                {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
-              </Badge>
-            )}
-          </div>
-        </div>
+      {/* Hero 3D icon — fusionado en esquina superior derecha */}
+      <div className="icon3d-hero">
+        <Icon className="h-full w-full object-contain" />
+      </div>
 
-        {/* 3D Icon vertically centered on the right */}
-        <div className="shrink-0 h-16 w-16 md:h-20 md:w-20 opacity-95 pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-          <Icon className="h-full w-full object-contain" />
+      <CardContent className="pt-6 relative z-10 flex flex-col justify-between h-full min-h-[120px] pr-20">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold truncate">
+          {label}
+        </p>
+        <div className="flex items-end gap-2 mt-2 flex-wrap">
+          <p className={cn('text-2xl md:text-3xl font-bold font-mono tracking-tight', negative && 'text-loss')}>
+            {value}
+          </p>
+          {change !== undefined && (
+            <Badge
+              variant={trend === 'up' ? 'default' : 'destructive'}
+              className={cn(
+                'text-xs font-mono shrink-0',
+                trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
+              )}
+            >
+              {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
+            </Badge>
+          )}
         </div>
       </CardContent>
 

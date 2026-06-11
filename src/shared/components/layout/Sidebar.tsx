@@ -98,22 +98,22 @@ export function Sidebar({
       >
         <div
           className={cn(
-            'relative flex items-center h-10 rounded-md text-sm font-medium transition-all duration-200',
+            'relative flex items-center h-14 rounded-xl text-sm font-medium transition-all duration-200',
             collapsed ? 'justify-center px-0 mx-1' : 'gap-3 px-3',
             isActive
-              ? 'text-primary bg-primary/8'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+              ? 'text-primary bg-primary/10 backdrop-blur-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
           )}
         >
           <span
             className={cn(
-              'absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary transition-all duration-300',
+              'absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary transition-all duration-300',
               isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
             )}
           />
           <item.icon
             className={cn(
-              'h-[26px] w-[26px] transition-transform duration-200 group-hover:scale-110 shrink-0',
+              'h-10 w-10 transition-transform duration-200 group-hover:scale-110 shrink-0',
               isActive && 'text-primary'
             )}
           />
@@ -144,7 +144,7 @@ export function Sidebar({
         onMouseLeave={handleMouseLeave}
         className={cn(
           'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-500 ease-in-out z-30',
-          collapsed ? 'w-[64px]' : 'w-[230px]',
+          collapsed ? 'w-[80px]' : 'w-[240px]',
           collapsedProp && isHovering && 'shadow-xl shadow-black/20'
         )}
       >

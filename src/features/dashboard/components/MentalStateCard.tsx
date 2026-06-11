@@ -29,12 +29,14 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
   const dashLength = (disciplineScore / 10) * circumference;
 
   return (
-    <Card className={cn('bg-card/25 backdrop-blur-md border-white/5 relative overflow-hidden group', className)}>
-      <CardHeader className="relative z-10">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <div className="h-7 w-7 shrink-0 transition-transform duration-300 group-hover:scale-110">
-            <Brain3D className="h-full w-full object-contain" />
-          </div>
+    <Card className={cn('relative overflow-hidden group', className)}>
+      {/* Hero 3D icon — esquina superior derecha */}
+      <div className="icon3d-hero">
+        <Brain3D className="h-full w-full object-contain" />
+      </div>
+
+      <CardHeader className="relative z-10 pr-24">
+        <CardTitle className="text-base">
           {t.dashboard.mentalStateTitle}
         </CardTitle>
       </CardHeader>
