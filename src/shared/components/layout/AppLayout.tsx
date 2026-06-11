@@ -86,7 +86,7 @@ export function AppLayout() {
           sectionTitle={sectionTitle}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-6 lg:px-8 lg:py-7">
+          <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 md:px-5 md:py-5 lg:px-6 lg:py-6">
             {/*
               key={location.key}: fuerza a React a desmontar y remontar el Suspense
               en cada navegación, mostrando el skeleton loader siempre desde cero

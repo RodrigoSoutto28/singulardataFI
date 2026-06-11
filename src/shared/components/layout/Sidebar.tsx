@@ -98,11 +98,11 @@ export function Sidebar({
       >
         <div
           className={cn(
-            'relative flex items-center h-12 rounded-xl text-sm font-medium transition-all duration-200',
-            collapsed ? 'justify-center px-0 mx-1' : 'gap-2.5 px-2',
+            'relative flex items-center h-11 rounded-lg text-sm font-medium transition-all duration-200',
+            collapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5',
             isActive
-              ? 'text-primary bg-primary/10 backdrop-blur-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+              ? 'text-primary bg-primary/10'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           )}
         >
           <span
@@ -111,13 +111,11 @@ export function Sidebar({
               isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
             )}
           />
-          <div className={cn(
-            'shrink-0 transition-transform duration-200 group-hover:scale-110',
-            collapsed ? 'h-9 w-9' : 'h-8 w-8'
-          )}>
-            <item.icon className="h-full w-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.25)]" />
+          {/* Icon wrapper: fixed size so collapsed/expanded stay consistent */}
+          <div className="h-8 w-8 shrink-0 flex items-center justify-center">
+            <item.icon className="h-full w-full drop-shadow-[0_3px_8px_rgba(0,0,0,0.22)] transition-transform duration-200 group-hover:scale-110" />
           </div>
-          {!collapsed && <span className="tracking-tight truncate">{t.nav[item.titleKey]}</span>}
+          {!collapsed && <span className="tracking-tight truncate text-[13px]">{t.nav[item.titleKey]}</span>}
         </div>
       </Link>
     );
@@ -143,8 +141,8 @@ export function Sidebar({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-500 ease-in-out z-30',
-          collapsed ? 'w-[80px]' : 'w-[240px]',
+          'flex flex-col h-full sticky top-0 glass-sidebar transition-[width] duration-300 ease-in-out z-30 overflow-hidden',
+          collapsed ? 'w-[64px]' : 'w-[220px]',
           collapsedProp && isHovering && 'shadow-xl shadow-black/20'
         )}
       >
@@ -176,7 +174,10 @@ export function Sidebar({
         )}
 
         {/* Nav */}
-        <nav className={cn('flex-1 flex flex-col gap-0.5 overflow-y-auto scrollbar-none', collapsed ? 'px-2 pt-3' : 'px-3')}>
+        <nav className={cn(
+          'flex-1 flex flex-col gap-0.5 overflow-y-auto scrollbar-none py-1',
+          collapsed ? 'px-1.5' : 'px-2'
+        )}>
           {navItems.map((item) => (
             <NavRow key={item.href} item={item} />
           ))}

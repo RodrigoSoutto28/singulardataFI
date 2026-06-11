@@ -23,74 +23,51 @@ export function StatCard({
   negative,
   className,
 }: StatCardProps) {
-  const colorVariants = {
-    primary: {
-      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-primary/40',
-      gradient: 'to-primary/5',
-    },
-    teal: {
-      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(173_80%_40%/0.4)]',
-      gradient: 'to-[hsl(173_80%_40%/0.05)]',
-    },
-    purple: {
-      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(265_84%_60%/0.4)]',
-      gradient: 'to-[hsl(265_84%_60%/0.05)]',
-    },
-    orange: {
-      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-[hsl(28_95%_55%/0.4)]',
-      gradient: 'to-[hsl(28_95%_55%/0.05)]',
-    },
-    green: {
-      glow: 'hover:shadow-[0_0_24px_-4px] hover:shadow-success/40',
-      gradient: 'to-success/5',
-    },
+  const glowMap = {
+    primary: 'hover:shadow-[0_0_28px_-4px_hsl(var(--primary)/0.45)]',
+    teal:    'hover:shadow-[0_0_28px_-4px_hsl(173_80%_40%/0.45)]',
+    purple:  'hover:shadow-[0_0_28px_-4px_hsl(265_84%_60%/0.45)]',
+    orange:  'hover:shadow-[0_0_28px_-4px_hsl(28_95%_55%/0.45)]',
+    green:   'hover:shadow-[0_0_28px_-4px_hsl(var(--success)/0.45)]',
   } as const;
-  const v = colorVariants[color];
 
   return (
     <Card
       className={cn(
-        'relative overflow-visible group cursor-default min-h-[130px]',
-        'transition-all duration-300',
-        v.glow,
+        'relative overflow-visible group cursor-default min-h-[120px] transition-all duration-300',
+        glowMap[color],
         className,
       )}
     >
-      {/* Hero 3D icon — floats top-right, slightly overflowing the card */}
+      {/* 3D icon — floats top-right, slightly outside the card */}
       <div className="icon3d-hero">
         <Icon className="h-full w-full" />
       </div>
 
-      <CardContent className="pt-5 pb-4 px-4 relative z-10 flex flex-col justify-between h-full min-h-[110px] pr-28">
+      <CardContent className="pt-5 pb-4 px-4 relative z-10 flex flex-col justify-between h-full min-h-[110px] pr-24">
         <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold truncate">
           {label}
         </p>
         <div className="flex items-end gap-2 mt-auto flex-wrap">
-          <p className={cn('text-2xl font-bold font-mono tracking-tight leading-none', negative && 'text-loss')}>
+          <p className={cn(
+            'text-xl sm:text-2xl font-bold font-mono tracking-tight leading-none',
+            negative && 'text-loss'
+          )}>
             {value}
           </p>
           {change !== undefined && (
             <Badge
               variant={trend === 'up' ? 'default' : 'destructive'}
               className={cn(
-                'text-xs font-mono shrink-0 mb-0.5',
+                'text-[10px] font-mono shrink-0 mb-0.5 px-1.5 py-0.5',
                 trend === 'up' && 'bg-success/15 text-success hover:bg-success/20',
               )}
             >
-              {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
+              {trend === 'up' ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
             </Badge>
           )}
         </div>
       </CardContent>
-
-      {/* Subtle gradient overlay */}
-      <div
-        className={cn(
-          'absolute inset-0 bg-gradient-to-br from-transparent pointer-events-none z-0 rounded-[inherit]',
-          'transition-opacity duration-300 opacity-100 group-hover:opacity-80',
-          v.gradient,
-        )}
-      />
     </Card>
   );
 }
