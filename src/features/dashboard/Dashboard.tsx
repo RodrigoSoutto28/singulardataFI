@@ -91,18 +91,6 @@ export default function Dashboard() {
                 : t.dashboard.completeCheckIn}
             </p>
           </div>
-          {!hasCheckedInToday && (
-            <Button
-              asChild
-              size="lg"
-              className="border-glow-pulse hover:scale-[1.02] transition-all bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shrink-0 self-start sm:self-auto"
-            >
-              <Link to="/psychology">
-                <Brain3D className="h-5 w-5 animate-pulse" />
-                {t.dashboard.completeCheckInCTA}
-              </Link>
-            </Button>
-          )}
         </div>
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
         <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-accent/20 blur-3xl" />
