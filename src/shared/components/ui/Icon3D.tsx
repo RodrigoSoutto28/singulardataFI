@@ -8,15 +8,15 @@ interface Icon3DProps {
   className?: string;
   /** Alt text for accessibility */
   alt?: string;
-  /** Apply advanced blending/fusion styling to emerge from the background */
+  /** @deprecated - kept for API compatibility, no longer has effect */
   fusion?: boolean;
 }
 
 /**
  * Renders a 3D photorealistic sculpted icon from the icon registry.
- * Drop-in replacement for lucide-react icons with the same sizing API.
+ * Images are true PNGs with alpha channel — no CSS blend-mode hacks needed.
  */
-export function Icon3D({ name, className, alt, fusion = false }: Icon3DProps) {
+export function Icon3D({ name, className, alt }: Icon3DProps) {
   const src = icon3dRegistry[name];
 
   return (
@@ -26,7 +26,7 @@ export function Icon3D({ name, className, alt, fusion = false }: Icon3DProps) {
       loading="lazy"
       draggable={false}
       className={cn(
-        'object-contain shrink-0 select-none transition-all duration-300 drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]',
+        'object-contain shrink-0 select-none transition-all duration-300',
         className
       )}
     />
@@ -38,9 +38,9 @@ export function Icon3D({ name, className, alt, fusion = false }: Icon3DProps) {
  * This enables using Icon3D as a drop-in for components that expect
  * a React component with a `className` prop (like NavItem.icon).
  */
-export function createIcon3DComponent(name: Icon3DName, defaultFusion = false) {
+export function createIcon3DComponent(name: Icon3DName, _fusion?: boolean) {
   const Icon3DComponent = ({ className }: { className?: string }) => (
-    <Icon3D name={name} className={className} fusion={defaultFusion} />
+    <Icon3D name={name} className={className} />
   );
   Icon3DComponent.displayName = `Icon3D(${name})`;
   return Icon3DComponent;

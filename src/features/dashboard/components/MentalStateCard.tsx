@@ -1,13 +1,13 @@
 import { Sparkles, Target } from 'lucide-react';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
-
-const Brain3D = createIcon3DComponent('brain', true);
 import { cn } from '@/shared/lib/utils';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
+
+const Brain3D = createIcon3DComponent('brain');
 
 interface MentalStateCardProps {
   disciplineScore: number;
@@ -29,13 +29,13 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
   const dashLength = (disciplineScore / 10) * circumference;
 
   return (
-    <Card className={cn('relative overflow-hidden group', className)}>
-      {/* Hero 3D icon — esquina superior derecha */}
+    <Card className={cn('relative overflow-visible group', className)}>
+      {/* Hero 3D icon — floats top-right */}
       <div className="icon3d-hero">
-        <Brain3D className="h-full w-full object-contain" />
+        <Brain3D className="h-full w-full" />
       </div>
 
-      <CardHeader className="relative z-10 pr-24">
+      <CardHeader className="relative z-10 pr-28 pb-2">
         <CardTitle className="text-base">
           {t.dashboard.mentalStateTitle}
         </CardTitle>
@@ -107,4 +107,3 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
     </Card>
   );
 }
-

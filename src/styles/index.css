@@ -907,19 +907,35 @@
     transform: rotate(-8deg) scale(1.12);
   }
 
-  /* 3D Icon Fusion effect: makes icons emerge smoothly from the background card/element */
+  /* 3D Icon — hero card positioning: floats top-right of any relative card */
+  .icon3d-hero {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+  }
+
+  .group:hover .icon3d-hero {
+    transform: translateY(-6px) rotate(4deg) scale(1.08);
+    filter: drop-shadow(0 22px 36px rgba(0, 0, 0, 0.5));
+  }
+
+  /* 3D Icon Fusion effect — sidebar and inline icons */
   .icon3d-fusion {
-    mix-blend-mode: multiply;
-    filter: brightness(1.18) contrast(1.1) drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
-    transform: translateY(-2px);
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
     transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
   }
 
   .group:hover .icon3d-fusion,
   button:hover .icon3d-fusion,
   [role="tab"][data-state="active"] .icon3d-fusion {
-    transform: translateY(-8px) scale(1.1);
-    filter: brightness(1.22) contrast(1.15) drop-shadow(0 24px 36px rgba(0, 0, 0, 0.55));
+    transform: translateY(-4px) scale(1.08);
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.5));
   }
 
   /* Tab indicator slide */

@@ -98,8 +98,8 @@ export function Sidebar({
       >
         <div
           className={cn(
-            'relative flex items-center h-14 rounded-xl text-sm font-medium transition-all duration-200',
-            collapsed ? 'justify-center px-0 mx-1' : 'gap-3 px-3',
+            'relative flex items-center h-12 rounded-xl text-sm font-medium transition-all duration-200',
+            collapsed ? 'justify-center px-0 mx-1' : 'gap-2.5 px-2',
             isActive
               ? 'text-primary bg-primary/10 backdrop-blur-sm'
               : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
@@ -111,12 +111,12 @@ export function Sidebar({
               isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
             )}
           />
-          <item.icon
-            className={cn(
-              'h-10 w-10 transition-transform duration-200 group-hover:scale-110 shrink-0',
-              isActive && 'text-primary'
-            )}
-          />
+          <div className={cn(
+            'shrink-0 transition-transform duration-200 group-hover:scale-110',
+            collapsed ? 'h-9 w-9' : 'h-8 w-8'
+          )}>
+            <item.icon className="h-full w-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.25)]" />
+          </div>
           {!collapsed && <span className="tracking-tight truncate">{t.nav[item.titleKey]}</span>}
         </div>
       </Link>
