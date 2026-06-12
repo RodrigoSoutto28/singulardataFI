@@ -20,7 +20,7 @@ export function TaxometerWidget() {
         <Taxometer3D className="h-full w-full object-contain" />
       </div>
 
-      <CardHeader className="pb-4 relative z-10 pr-24">
+      <CardHeader className="pb-4 relative z-10 pr-[6.5rem] md:pr-[7.5rem]">
         <CardTitle className="text-sm font-medium">
           {ps.errorTaxometer ?? 'Taxímetro de Errores'}
         </CardTitle>
