@@ -33,20 +33,18 @@ export function QuickActionsCard() {
             key={action.labelKey}
             type="button"
             onClick={() => navigate(action.path)}
-            className="group flex flex-col items-center justify-between h-28 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 px-3 py-3 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="group flex flex-col items-center justify-center gap-2 h-32 rounded-xl border border-border/60 glass-subtle hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 px-3 py-3 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
-            {/* Icon — occupies the top 2/3, centered */}
-            <div className="flex flex-1 items-center justify-center w-full">
-              <div className="w-14 h-14 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <action.icon
-                  className="h-full w-full drop-shadow-[0_6px_14px_rgba(0,0,0,0.28)]"
-                  aria-hidden
-                />
-              </div>
+            {/* Icon — centered */}
+            <div className="w-16 h-16 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+              <action.icon
+                className="h-full w-full drop-shadow-[0_6px_14px_rgba(0,0,0,0.28)]"
+                aria-hidden
+              />
             </div>
 
-            {/* Label — anchored to the bottom */}
-            <span className="text-xs font-semibold tracking-tight text-foreground/75 text-center leading-tight w-full shrink-0">
+            {/* Label */}
+            <span className="text-xs font-semibold tracking-tight text-foreground/80 text-center leading-tight w-full">
               {t.dashboard[action.labelKey]}
             </span>
           </button>
