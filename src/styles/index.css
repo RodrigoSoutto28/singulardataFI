@@ -907,23 +907,7 @@
     transform: rotate(-8deg) scale(1.12);
   }
 
-  /* 3D Icon — hero card positioning: floats top-right of any relative card */
-  .icon3d-hero {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 120px;
-    height: 120px;
-    pointer-events: none;
-    z-index: 1;
-    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.35s ease;
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
-  }
-
-  .group:hover .icon3d-hero {
-    transform: translateY(-6px) rotate(4deg) scale(1.08);
-    filter: drop-shadow(0 22px 36px rgba(0, 0, 0, 0.5));
-  }
+  /* (icon3d-hero is defined earlier — single source of truth) */
 
   /* 3D Icon Fusion effect — sidebar and inline icons */
   .icon3d-fusion {
