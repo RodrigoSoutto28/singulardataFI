@@ -38,6 +38,8 @@ export default function Auth() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // ⚠️ TEMPORARY: Auth bypass — siempre redirige al dashboard
+  return <Navigate to="/dashboard" replace />;
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
   const localized = {
