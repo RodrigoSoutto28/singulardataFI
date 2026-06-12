@@ -1,56 +1,45 @@
-# Plan: Glassmorphism global + iconos 3D ampliados
+## Plan: Desactivar bypass + corregir posicionamiento
 
-## 1. Actualizar memoria del proyecto
-- Reescribir la regla central de estilo en `mem://index.md`: pasar de "Solid backgrounds, NO glassmorphism" a **"Glassmorphism global: fondos translúcidos con backdrop-blur, bordes suaves rounded-2xl, borde 1px translúcido, sombra difusa"**.
-- Guardar un nuevo memo `mem://style/glass-system` con los tokens y reglas de uso.
+### 1. Desactivar bypass de autenticación
+- `src/features/auth/components/ProtectedRoute.tsx`: cambiar `BYPASS_AUTH = true` → `false`. Mantener el flag con comentario para reactivación rápida en desarrollo.
+- Revisar `src/features/auth/Auth.tsx` para retirar cualquier redirección/atajo de bypass añadido previamente y restaurar el flujo normal de sign-in.
 
-## 2. Tokens de diseño (src/styles/index.css)
-Añadir tokens semánticos para el sistema glass (modo claro y oscuro):
-- `--glass-bg`, `--glass-bg-strong`, `--glass-border`, `--glass-highlight`, `--glass-shadow`, `--glass-blur` (ej. 18px).
-- Utilities reutilizables:
-  - `.glass-card` — fondo `hsl(var(--glass-bg))`, `backdrop-blur-xl`, borde translúcido, `rounded-2xl`, sombra suave, highlight superior.
-  - `.glass-card-strong` — variante con más opacidad para modales/sidebar.
-  - `.glass-panel` — variante sin sombra para contenedores anidados.
-- Mantener fallback sólido para navegadores sin `backdrop-filter`.
+### 2. Corregir StatCards (icono 3D tapa texto)
+- `src/features/dashboard/components/StatCard.tsx`:
+  - El icono `.icon3d-hero` (128px, top-right, rotado) se superpone al valor en pantallas medianas. Reducir a 96×96 (`h-24 w-24`) en la card, mantener offset suave y aumentar `pr-` del CardContent a `pr-28`.
+  - Subir `min-h-[140px]` para que el valor y el badge no compitan con el icono.
+  - Asegurar `overflow-hidden` (no `overflow-visible`) para que el icono no se salga de la card en grids estrechos.
 
-## 3. Aplicar glass a toda la web
-Reemplazar fondos sólidos por `.glass-card` / `.glass-card-strong` en:
-- Sidebar (`Sidebar.tsx`) — `glass-sidebar` actualizado a versión glass real con blur.
-- TopBar (`TopBar.tsx`).
-- Todas las cards del Dashboard: `StatCard`, `MentalStateCard`, `QuickActionsCard`, `CapitalCard`, `EquityChart`, `RecentTrades`, `AIInsightCard`, `TasksCard`, `AchievementBadges`, `MetricCard`.
-- Cards de Analytics, Journal, Psychology, Settings, Profile.
-- Modales (`AccountSetupModal`, `PreMarketCheckInModal`, `ImportPreviewModal`, `ProcessValidatorModal`, dialogs shadcn).
-- Componente base `card.tsx` shadcn — cambiar a glass por defecto.
-- Tooltips, Popovers, Dropdowns, Select, Sheet, Drawer — versión glass.
-- Inputs, Selects, Botones secundarios — bordes suaves translúcidos.
-- Bordes globales: subir `--radius` a `1rem` (rounded-2xl por defecto).
+### 3. Corregir Sidebar (iconos 40px cortados)
+- `src/shared/components/layout/Sidebar.tsx`:
+  - Filas `h-14` con icono `h-10 w-10` deja sólo 8px de padding vertical → reducir icono a `h-9 w-9` (36px) o subir fila a `h-16`.
+  - Centrar icono en modo colapsado (`w-20`) usando `justify-center` y quitar padding lateral en ese estado.
+  - Garantizar que el label expandido use `truncate` y `min-w-0` para evitar desbordes.
 
-## 4. Iconos 3D de la sidebar → 40px
-- `Sidebar.tsx`: aumentar `h-[26px] w-[26px]` a `h-10 w-10` en el render del icono nav.
-- Aumentar altura de fila de `h-10` a `h-14` para acomodar el icono.
-- Sidebar colapsada: ancho `w-[64px]` → `w-[80px]`.
-- Ajustar gap y padding para mantener equilibrio visual.
+### 4. Corregir TopBar
+- `src/shared/components/layout/TopBar.tsx`:
+  - El grid `grid-cols-[auto_1fr_auto]` en mobile y `flex` en desktop genera saltos. Unificar a `flex items-center justify-between` con un contenedor central oculto en desktop.
+  - Alinear `AccountSwitcher`, theme toggle y avatar con `items-center` y `h-9` consistente.
+  - Asegurar `min-w-0` y `truncate` en el nombre del perfil.
 
-## 5. Iconos 3D del Dashboard → 128px fusionados arriba-derecha
-Mover de la disposición inline actual a una **fusión hero en esquina superior derecha** de cada card:
-- `StatCard.tsx`: icono `h-32 w-32` posicionado `absolute -top-4 -right-4` con `pointer-events-none`, ligeramente saliente, máscara/gradient radial para que se "funda" con el fondo glass. Texto vuelve a layout vertical normal con `pr-24` para reservar espacio.
-- `MentalStateCard.tsx`: Brain3D `h-32 w-32` absolute esquina superior derecha; quitar del CardTitle.
-- `TaxometerWidget.tsx`: igual con Taxometer3D `h-32 w-32`.
-- `QuickActionsCard.tsx`: los 4 botones internos mantienen icono pequeño (ya centrados); la card en sí recibe un icono hero opcional o se omite (decidir: omitir para no saturar).
-- `CapitalCard`, `EquityChart`, `RecentTrades`, `AIInsightCard`, `TasksCard`, `AchievementBadges`: añadir su Icon3D correspondiente (`balance`, `equity_curve`, `journal`, `brain`, `checkin`, `discipline`) en `h-32 w-32` absolute top-right con opacidad 90% y ligera rotación.
-- Container card: `overflow-hidden` con `rounded-2xl` para recortar el icono al borde glass.
-- Añadir un "glow" sutil radial detrás del icono usando el color de acento de la card.
+### 5. Corregir QuickActionsCard
+- `src/features/dashboard/components/QuickActionsCard.tsx`:
+  - Botones `h-28` con icono `w-14 h-14` + label dejan el label pegado al borde. Pasar a `h-32`, icono `h-16 w-16`, distribución `justify-center gap-2` en lugar de `justify-between`.
+  - Añadir `glass-subtle` para coherencia con sistema glass.
 
-## 6. Icon3D helper
-- `Icon3D.tsx`: añadir variante `hero` que aplique drop-shadow más fuerte y un radial-gradient mask para fusión suave con la card glass.
+### 6. Verificación
+- Ejecutar dev server, abrir `/dashboard`, `/journal`, `/analytics`, `/psychology`, `/settings` en desktop (1742px) y mobile (390px) vía `browser--view_preview` + screenshots, confirmando que:
+  - Ningún icono 3D tapa texto.
+  - Sidebar colapsada y expandida centran correctamente.
+  - TopBar no salta entre breakpoints.
+  - Auth redirige a `/auth` cuando no hay sesión.
 
-## 7. Verificación
-- Revisar contraste de texto sobre fondos glass en modo claro y oscuro.
-- Confirmar que `CorporateGrid` de fondo sigue visible detrás del blur.
-- Probar viewport 1780px (actual) y mobile.
+### Archivos a modificar
+- `src/features/auth/components/ProtectedRoute.tsx`
+- `src/features/auth/Auth.tsx` (revisar)
+- `src/features/dashboard/components/StatCard.tsx`
+- `src/features/dashboard/components/QuickActionsCard.tsx`
+- `src/shared/components/layout/Sidebar.tsx`
+- `src/shared/components/layout/TopBar.tsx`
 
-## Detalles técnicos
-- Sin cambios de lógica de negocio, solo presentación.
-- Sin nuevas dependencias.
-- Archivos principales a editar: `src/styles/index.css`, `src/shared/components/ui/card.tsx`, `src/shared/components/ui/Icon3D.tsx`, `src/shared/components/layout/Sidebar.tsx`, `src/shared/components/layout/TopBar.tsx`, todos los `src/features/dashboard/components/*.tsx`, modales y dialogs.
-- Actualizar memoria: `mem://index.md` + nuevo `mem://style/glass-system`.
+Sin cambios de lógica de negocio ni de datos.

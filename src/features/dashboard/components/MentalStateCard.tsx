@@ -29,13 +29,13 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
   const dashLength = (disciplineScore / 10) * circumference;
 
   return (
-    <Card className={cn('relative overflow-visible group', className)}>
-      {/* Hero 3D icon — floats top-right */}
+    <Card className={cn('relative overflow-hidden group', className)}>
+      {/* Hero 3D icon — anchored top-right */}
       <div className="icon3d-hero">
         <Brain3D className="h-full w-full" />
       </div>
 
-      <CardHeader className="relative z-10 pr-28 pb-2">
+      <CardHeader className="relative z-10 pr-[6.5rem] md:pr-[7.5rem] pb-2">
         <CardTitle className="text-base">
           {t.dashboard.mentalStateTitle}
         </CardTitle>

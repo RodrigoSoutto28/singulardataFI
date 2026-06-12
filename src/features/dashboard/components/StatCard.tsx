@@ -34,17 +34,17 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'relative overflow-visible group cursor-default min-h-[120px] transition-all duration-300',
+        'relative overflow-hidden group cursor-default min-h-[140px] transition-all duration-300',
         glowMap[color],
         className,
       )}
     >
-      {/* 3D icon — floats top-right, slightly outside the card */}
+      {/* 3D icon — anchored top-right, sized to never overlap value */}
       <div className="icon3d-hero">
         <Icon className="h-full w-full" />
       </div>
 
-      <CardContent className="pt-5 pb-4 px-4 relative z-10 flex flex-col justify-between h-full min-h-[110px] pr-24">
+      <CardContent className="pt-5 pb-4 px-4 relative z-10 flex flex-col justify-between h-full min-h-[120px] pr-[6.5rem] md:pr-[7.5rem]">
         <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold truncate">
           {label}
         </p>
