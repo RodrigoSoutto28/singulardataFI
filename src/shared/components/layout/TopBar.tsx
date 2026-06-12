@@ -39,13 +39,13 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
 
   return (
     <header className="sticky top-0 z-40 h-16 glass-topbar">
-      <div className="grid grid-cols-[auto_1fr_auto] md:flex md:items-center md:justify-between h-full px-3 md:px-6 gap-2">
+      <div className="flex items-center justify-between h-full px-3 md:px-6 gap-3">
         {/* Left: hamburger (mobile) + brand */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1 md:flex-none">
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden h-9 w-9"
+            className="md:hidden h-9 w-9 shrink-0"
             onClick={onMenuClick}
             aria-label="Abrir menú"
           >
@@ -53,24 +53,24 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
           </Button>
 
           {/* Mobile brand — logo real */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center min-w-0">
             <LogoMindOn size="sm" showSubtitle={false} />
           </div>
 
           {/* Desktop brand line */}
-          <h1 className="hidden md:block text-sm font-light text-muted-foreground tracking-[0.08em]">
+          <h1 className="hidden md:block text-sm font-light text-muted-foreground tracking-[0.08em] truncate">
             {t.topbar.title}
           </h1>
         </div>
 
         {/* Center: section title (mobile only) */}
-        <div className="md:hidden flex items-center justify-center min-w-0">
-          {sectionTitle && (
+        {sectionTitle && (
+          <div className="md:hidden flex items-center justify-center min-w-0 flex-1">
             <span className="text-sm font-semibold text-foreground truncate">
               {sectionTitle}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Right */}
         <div className="flex items-center gap-1.5 md:gap-2 justify-self-end">
