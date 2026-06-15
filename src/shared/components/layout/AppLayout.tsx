@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Sheet, SheetContent } from '@/shared/components/ui/sheet';
 import { CorporateGrid } from '@/shared/components/effects/CorporateGrid';
+import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PageLoader } from '@/shared/components/ui/page-loader';
 
@@ -62,6 +63,8 @@ export function AppLayout() {
   return (
     <div className="flex h-[100dvh] w-full bg-background relative overflow-hidden">
       <CorporateGrid />
+      <TechGridTexture />
+
 
       {/* Desktop / Tablet Sidebar */}
       <div className="hidden md:block relative z-10 h-full">
