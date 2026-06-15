@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { toast } from 'sonner';
 import { translateAuthError } from '@/shared/lib/validation';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
+import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 
 export default function ResetPassword() {
@@ -54,9 +55,10 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <main className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-border bg-card">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <TechGridTexture />
+      <main className="flex-1 flex items-center justify-center p-6 relative z-10">
+        <Card className="w-full max-w-md border-border bg-card/95 backdrop-blur-sm shadow-2xl">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary">

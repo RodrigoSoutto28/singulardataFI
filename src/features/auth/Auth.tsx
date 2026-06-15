@@ -13,7 +13,7 @@ import { Power, Brain, Shield, BarChart3, LineChart } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/shared/lib/validation';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
-import ParticleBackground from '@/shared/components/effects/ParticleBackground';
+import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 import { LanguageSelector } from '@/shared/components/layout/LanguageSelector';
 import { detectUserLanguage, toContextCode, toDbCode } from '@/shared/lib/i18n/detector';
 import { useEffect } from 'react';
@@ -218,7 +218,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      <ParticleBackground />
+      <TechGridTexture />
       <div className="absolute top-4 right-4 z-50">
         <LanguageSelector variant="compact" />
       </div>
