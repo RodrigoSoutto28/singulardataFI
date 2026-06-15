@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Sheet, SheetContent } from '@/shared/components/ui/sheet';
 import { CorporateGrid } from '@/shared/components/effects/CorporateGrid';
+import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PageLoader } from '@/shared/components/ui/page-loader';
 
