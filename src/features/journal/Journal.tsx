@@ -513,7 +513,7 @@ export default function Journal() {
       )
     );
 
-    const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never>> = [];
+    const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never> & { _importKey: string }> = [];
     const validationErrors: string[] = [];
     let skippedDuplicates = 0;
 
@@ -544,6 +544,8 @@ export default function Journal() {
       const exitDateIso = trade.exitDate ?? (isClosed ? trade.entryDate : null);
 
       dbTrades.push({
+        // Guardamos la key junto al trade para evitar desalineamiento de índices
+        _importKey: key,
         symbol: trade.symbol,
         direction: trade.direction,
         entry_price: trade.entryPrice,
@@ -584,17 +586,15 @@ export default function Journal() {
         skippedDuplicates,
       });
 
-      // Attach batch + per-row hash to every trade
+      // Attach batch + per-row hash to every trade usando la key guardada
       const tradesWithBatch = await Promise.all(
-        dbTrades.map(async (t, idx) => ({
+        dbTrades.map(async ({ _importKey, ...t }) => ({
           ...t,
           import_batch_id: batchId,
-          import_row_hash: await hashRow(
-            user.id,
-            buildImportTradeKey(selectedTrades[idx] ?? (t as unknown as ImportedTrade)),
-          ),
+          import_row_hash: await hashRow(user.id, _importKey),
         })),
       );
+
 
       const inserted = await importTrades.mutateAsync(tradesWithBatch);
       const insertedCount = inserted.length;

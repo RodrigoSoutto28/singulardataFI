@@ -21,20 +21,28 @@ async function syncAccountBalance(userId: string, accountId: string | null) {
   if (accountId) {
     accountQuery = accountQuery.eq('id', accountId);
   } else {
-    accountQuery = accountQuery.order('created_at', { ascending: false }).limit(1);
+    accountQuery = accountQuery.order('created_at', { ascending: true }).limit(1);
   }
 
   const { data: account, error: accountError } = await accountQuery.maybeSingle();
   if (accountError || !account) return;
 
+  // Solo incluir trades con account_id explícito de ESTA cuenta.
+  // Los trades legados (account_id = null) solo se atribuyen a la primera cuenta
+  // cuando no se seleccionó ninguna cuenta específica (accountId === null).
   let tradesQuery = supabase
     .from('trades')
-    .select('pnl, account_id')
+    .select('pnl')
     .eq('user_id', userId)
     .eq('status', 'closed');
 
-  // Trades attributable to this account: explicit account_id match OR legacy null
-  tradesQuery = tradesQuery.or(`account_id.eq.${account.id},account_id.is.null`);
+  if (accountId) {
+    // Cuenta específica: solo sus trades explícitos + legados sin asignar
+    tradesQuery = tradesQuery.or(`account_id.eq.${account.id},account_id.is.null`);
+  } else {
+    // Sin cuenta seleccionada: solo los trades sin account_id (verdaderos legados)
+    tradesQuery = tradesQuery.is('account_id', null);
+  }
 
   const { data: trades, error: tradesError } = await tradesQuery;
   if (tradesError) return;
@@ -47,6 +55,7 @@ async function syncAccountBalance(userId: string, accountId: string | null) {
     .update({ current_balance: newBalance })
     .eq('id', account.id);
 }
+
 
 export function useTrades() {
   const { user } = useAuth();
@@ -76,13 +85,16 @@ export function useTrades() {
   });
 
   const invalidateAndSyncBalance = async () => {
+    // Invalida tanto la lista completa como la vista paginada del Journal
     await queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
+    await queryClient.invalidateQueries({ queryKey: ['trades-infinite', user?.id] });
     if (user?.id) {
       await syncAccountBalance(user.id, selectedAccountId);
       await queryClient.invalidateQueries({ queryKey: ['trading_accounts', user?.id] });
       await queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
     }
   };
+
 
   const createTrade = useMutation({
     mutationFn: async (trade: Omit<TradeInsert, 'user_id'>) => {

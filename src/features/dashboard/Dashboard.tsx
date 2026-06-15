@@ -41,7 +41,8 @@ export default function Dashboard() {
   const { trades } = useTrades();
   const { account } = useTradingAccount();
   const { latestEntry } = usePsychologyEntries();
-  const { stats, equityCurve } = useAnalytics(trades);
+  const { stats, equityCurve } = useAnalytics(trades, [], account?.initial_balance ?? 0);
+
 
   const balance = account?.current_balance ?? 0;
   const initialBalance = account?.initial_balance ?? 0;

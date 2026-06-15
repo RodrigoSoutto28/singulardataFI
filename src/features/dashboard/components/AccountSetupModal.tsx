@@ -57,16 +57,21 @@ export function AccountSetupModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const parsedInitial = parseFloat(initialBalance) || 0;
-    const parsedCurrent = parseFloat(currentBalance) || 0;
+    const parsedInitial = parseFloat(initialBalance);
+    const parsedCurrent = parseFloat(currentBalance);
 
     if (!name.trim()) {
       toast.error('El nombre de la cuenta es requerido');
       return;
     }
 
-    if (parsedInitial < 0 || parsedCurrent < 0) {
-      toast.error('Los balances no pueden ser negativos');
+    // NaN (campo vacío) o negativo son inválidos
+    if (isNaN(parsedInitial) || parsedInitial < 0) {
+      toast.error('El balance inicial debe ser un número mayor o igual a 0');
+      return;
+    }
+    if (isNaN(parsedCurrent) || parsedCurrent < 0) {
+      toast.error('El balance actual debe ser un número mayor o igual a 0');
       return;
     }
 
@@ -79,7 +84,7 @@ export function AccountSetupModal({
           initial_balance: parsedInitial,
           current_balance: parsedCurrent,
         });
-        toast.success('Cuenta actualizada correctamente');
+        // El toast lo emite onSuccess de la mutación (useTradingAccounts)
       } else {
         await createAccount({
           name: name.trim(),

@@ -29,6 +29,7 @@ import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useTheme } from '@/shared/lib/ThemeContext';
 import { Language } from '@/shared/lib/i18n/translations';
 import { supabase } from '@/config/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   User,
   Bell,
@@ -45,6 +46,9 @@ import {
   Globe,
   Download,
   Trash2,
+  MapPin as _MapPinIcon,
+  Info as _InfoIcon,
+  RefreshCw as _RefreshIcon,
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useLoadSampleData } from '@/features/auth/components/onboarding/WelcomeModal';
@@ -56,9 +60,23 @@ export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const { load: loadSample, loading: loadingSample } = useLoadSampleData();
+  const queryClient = useQueryClient();
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+
+  // Notification preferences — persistidas en localStorage
+  const readNotifPref = (key: string, def = true) => {
+    try { return localStorage.getItem(key) !== 'false'; } catch { return def; }
+  };
+  const [notifAI, setNotifAI] = useState(() => readNotifPref('notif_ai_insights'));
+  const [notifReminders, setNotifReminders] = useState(() => readNotifPref('notif_trade_reminders'));
+  const [notifWeekly, setNotifWeekly] = useState(() => readNotifPref('notif_weekly_reports'));
+  const [notifOvertrading, setNotifOvertrading] = useState(() => readNotifPref('notif_overtrading'));
+
+  const saveNotifPref = (key: string, value: boolean) => {
+    try { localStorage.setItem(key, value ? 'true' : 'false'); } catch { /* ignore */ }
+  };
 
   // Profile Form state
   const [fullName, setFullName] = useState(profile?.full_name || '');
@@ -147,6 +165,8 @@ export default function Settings() {
         throw error ?? new Error('delete failed');
       }
       toast.success('Tu cuenta y datos fueron eliminados.');
+      // Limpiar cache de React Query antes de cerrar sesión
+      queryClient.clear();
       await signOut();
     } catch {
       toast.error('No pudimos eliminar la cuenta. Contactanos a privacy@mindon-trading.com');
@@ -351,7 +371,10 @@ export default function Settings() {
               <p className="font-medium">{t.settings.aiInsights}</p>
               <p className="text-sm text-muted-foreground">{t.settings.aiInsightsDesc}</p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={notifAI}
+              onCheckedChange={(v) => { setNotifAI(v); saveNotifPref('notif_ai_insights', v); }}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -359,7 +382,10 @@ export default function Settings() {
               <p className="font-medium">{t.settings.tradeReminders}</p>
               <p className="text-sm text-muted-foreground">{t.settings.tradeRemindersDesc}</p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={notifReminders}
+              onCheckedChange={(v) => { setNotifReminders(v); saveNotifPref('notif_trade_reminders', v); }}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -367,7 +393,10 @@ export default function Settings() {
               <p className="font-medium">{t.settings.weeklyReports}</p>
               <p className="text-sm text-muted-foreground">{t.settings.weeklyReportsDesc}</p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={notifWeekly}
+              onCheckedChange={(v) => { setNotifWeekly(v); saveNotifPref('notif_weekly_reports', v); }}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -375,7 +404,10 @@ export default function Settings() {
               <p className="font-medium">{t.settings.overtradingAlerts}</p>
               <p className="text-sm text-muted-foreground">{t.settings.overtradingAlertsDesc}</p>
             </div>
-            <Switch defaultChecked />
+            <Switch
+              checked={notifOvertrading}
+              onCheckedChange={(v) => { setNotifOvertrading(v); saveNotifPref('notif_overtrading', v); }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -462,7 +494,13 @@ export default function Settings() {
               <p className="font-medium">{t.settings.twoFactor}</p>
               <p className="text-sm text-muted-foreground">{t.settings.twoFactorDesc}</p>
             </div>
-            <Button variant="outline" size="sm">{t.common.enable}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.info('Autenticación de dos factores disponible próximamente.')}
+            >
+              {t.common.enable}
+            </Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -470,7 +508,20 @@ export default function Settings() {
               <p className="font-medium">{t.settings.changePassword}</p>
               <p className="text-sm text-muted-foreground">{t.settings.changePasswordDesc}</p>
             </div>
-            <Button variant="outline" size="sm">{t.common.change}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (!user?.email) return;
+                const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+                  redirectTo: `${window.location.origin}/reset-password`,
+                });
+                if (error) toast.error('No se pudo enviar el email de cambio de contraseña.');
+                else toast.success('Te enviamos un email para cambiar tu contraseña.');
+              }}
+            >
+              {t.common.change}
+            </Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -478,7 +529,13 @@ export default function Settings() {
               <p className="font-medium">{t.settings.activeSessions}</p>
               <p className="text-sm text-muted-foreground">{t.settings.activeSessionsDesc}</p>
             </div>
-            <Button variant="outline" size="sm">{t.settings.viewAll}</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.info('Gestión de sesiones disponible próximamente.')}
+            >
+              {t.settings.viewAll}
+            </Button>
           </div>
         </CardContent>
       </Card>

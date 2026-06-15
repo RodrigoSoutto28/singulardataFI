@@ -5,6 +5,13 @@ import type { Database } from '@/integrations/supabase/types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error(
+    '[Config] Las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY son requeridas. ' +
+    'Verificá tu archivo .env o la configuración de Lovable.'
+  );
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/config/supabase";
 

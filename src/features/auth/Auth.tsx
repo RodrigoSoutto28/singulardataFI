@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
@@ -37,6 +37,7 @@ export default function Auth() {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const signInEmailRef = useRef<HTMLInputElement>(null);
 
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
@@ -164,8 +165,11 @@ export default function Auth() {
       setFieldErrors(errs);
       return;
     }
+    // Zod ya validó exitosamente — parsed.data está garantizado
+    if (!parsed.success) return; // guarda de tipo para TypeScript
     setIsLoading(true);
-    const { error } = await signUp(parsed.data!.email, parsed.data!.password, parsed.data!.fullName);
+    const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.fullName);
+
     if (error) toast.error(translateAuthError(error.message));
     else {
       // Persist detected/current language onto the new profile (best-effort).
@@ -197,7 +201,7 @@ export default function Auth() {
   };
 
   const handleForgotPassword = async () => {
-    const email = (document.getElementById('signin-email') as HTMLInputElement | null)?.value?.trim();
+    const email = signInEmailRef.current?.value?.trim();
     if (!email) {
       setFieldErrors({ email: 'Email requerido' });
       return;
@@ -282,7 +286,7 @@ export default function Auth() {
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">{t.auth.email}</Label>
-                      <Input id="signin-email" name="email" type="email" placeholder="trader@example.com" required aria-invalid={!!fieldErrors.email} className="bg-muted/50 border-border" />
+                      <Input ref={signInEmailRef} id="signin-email" name="email" type="email" placeholder="trader@example.com" required aria-invalid={!!fieldErrors.email} className="bg-muted/50 border-border" />
                       {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
                     </div>
                     <div className="space-y-2">
