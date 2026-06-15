@@ -63,6 +63,8 @@ export function AppLayout() {
   return (
     <div className="flex h-[100dvh] w-full bg-background relative overflow-hidden">
       <CorporateGrid />
+      <TechGridTexture />
+
 
       {/* Desktop / Tablet Sidebar */}
       <div className="hidden md:block relative z-10 h-full">
