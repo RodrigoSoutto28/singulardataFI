@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Power } from 'lucide-react';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
+import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 
 export default function Terms() {
   const { language } = useLanguage();
@@ -49,8 +50,9 @@ export default function Terms() {
   }[language];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <TechGridTexture />
+      <header className="border-b border-border relative z-10 bg-background/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
@@ -63,7 +65,7 @@ export default function Terms() {
           </Link>
         </div>
       </header>
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         <article className="max-w-3xl mx-auto px-4 py-10">
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">{c.title}</h1>
           <p className="text-xs text-muted-foreground mb-8">{c.updated}</p>
