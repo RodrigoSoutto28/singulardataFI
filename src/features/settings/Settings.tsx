@@ -672,7 +672,7 @@ export default function Settings() {
 // ============================================================
 // IP geolocation settings card
 // ============================================================
-import { Globe as _GlobeIcon, MapPin as _MapPinIcon, Info as _InfoIcon, RefreshCw as _RefreshIcon, Trash2 as _TrashIcon } from 'lucide-react';
+import { MapPin as _MapPinIcon, Info as _InfoIcon, RefreshCw as _RefreshIcon, Trash2 as _TrashIcon } from 'lucide-react';
 import { useIPGeolocation } from '@/shared/hooks/useIPGeolocation';
 
 function GeolocationCard() {
@@ -705,7 +705,7 @@ function GeolocationCard() {
     <Card className="bg-card border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <_GlobeIcon className="h-5 w-5 text-primary" />
+          <Globe className="h-5 w-5 text-primary" />
           {labels.title}
         </CardTitle>
         <CardDescription>{labels.description}</CardDescription>
