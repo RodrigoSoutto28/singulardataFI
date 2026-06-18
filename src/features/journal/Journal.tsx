@@ -78,6 +78,8 @@ import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/features/journal/components/ImportPreviewModal';
 import { ImportHistorySection } from '@/features/journal/components/ImportHistorySection';
 import { useDebounce } from '@/shared/hooks/useDebounce';
+import { useSubscription } from '@/shared/hooks/useSubscription';
+import { UpgradeModal, useUpgradeModal } from '@/shared/components/ui/UpgradeModal';
 import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
@@ -251,6 +253,8 @@ export default function Journal() {
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
+  const { canUseFeature } = useSubscription();
+  const { upgradeModalOpen, featureMessage, recommendedPlan, openUpgradeModal, closeUpgradeModal } = useUpgradeModal();
   const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
   const { selectedAccount } = useTradingAccounts();
   const accountCurrency = selectedAccount?.currency ?? 'USD';
@@ -310,6 +314,12 @@ export default function Journal() {
     : '0.0';
 
   const handleExport = (format: 'excel' | 'pdf' | 'html') => {
+    // Gate export behind Pro plan
+    if (!canUseFeature('export_reports')) {
+      openUpgradeModal({ feature: 'Exportar reportes en Excel, PDF y HTML', plan: 'pro' });
+      return;
+    }
+
     const filename = `trading-journal-${new Date().toISOString().split('T')[0]}`;
     
     const exportData = filteredTrades.map(trade => ({
@@ -1729,6 +1739,14 @@ export default function Journal() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Upgrade Modal for Pro features */}
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onClose={closeUpgradeModal}
+        featureMessage={featureMessage}
+        recommendedPlan={recommendedPlan}
+      />
     </div>
   );
 }

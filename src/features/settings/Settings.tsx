@@ -54,6 +54,8 @@ import { cn } from '@/shared/lib/utils';
 import { useLoadSampleData } from '@/features/auth/components/onboarding/WelcomeModal';
 import { resetOnboardingTour } from '@/features/auth/components/onboarding/OnboardingTour';
 import { toast } from 'sonner';
+import { useSubscription } from '@/shared/hooks/useSubscription';
+import { UpgradeModal, useUpgradeModal } from '@/shared/components/ui/UpgradeModal';
 
 export default function Settings() {
   const { profile, user, signOut } = useAuth();
@@ -61,6 +63,8 @@ export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { load: loadSample, loading: loadingSample } = useLoadSampleData();
   const queryClient = useQueryClient();
+  const { plan, isPro, isPower, isExpired, expiresAt, daysUntilExpiry } = useSubscription();
+  const { upgradeModalOpen, featureMessage, recommendedPlan, openUpgradeModal, closeUpgradeModal } = useUpgradeModal();
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
@@ -423,41 +427,63 @@ export default function Settings() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {plans.map((plan) => {
-              const isCurrentPlan = profile?.subscription_plan === plan.id;
-              const Icon = plan.icon;
+            {plans.map((p) => {
+              const isCurrentPlan = profile?.subscription_plan === p.id;
+              const Icon = p.icon;
 
               return (
                 <div
-                  key={plan.id}
+                  key={p.id}
                   className={cn(
                     'relative p-6 rounded-lg border transition-colors',
-                    plan.popular
+                    p.popular
                       ? 'border-primary bg-primary/5'
                       : 'border-border bg-muted/50',
                     isCurrentPlan && 'ring-2 ring-primary'
                   )}
                 >
-                  {plan.popular && (
+                  {p.popular && (
                     <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
                       {t.common.mostPopular}
                     </Badge>
                   )}
+                  {isCurrentPlan && (
+                    <Badge className="absolute -top-2 right-4 bg-emerald-600 text-white text-[10px]">
+                      Activo
+                    </Badge>
+                  )}
 
                   <div className="flex items-center gap-2 mb-4">
-                    <Icon className={cn('h-6 w-6', plan.popular ? 'text-primary' : 'text-muted-foreground')} />
-                    <h3 className="font-bold text-lg">{plan.name}</h3>
+                    <Icon className={cn('h-6 w-6', p.popular ? 'text-primary' : 'text-muted-foreground')} />
+                    <h3 className="font-bold text-lg">{p.name}</h3>
                   </div>
 
                   <div className="mb-4">
-                    <span className="text-3xl font-bold font-mono-numbers">${plan.price}</span>
+                    <span className="text-3xl font-bold font-mono-numbers">${p.price}</span>
                     <span className="text-muted-foreground">/month</span>
                   </div>
 
-                  <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground mb-4">{p.description}</p>
+
+                  {/* Show expiry info for current paid plan */}
+                  {isCurrentPlan && p.id !== 'free' && expiresAt && (
+                    <div className={cn(
+                      'mb-4 rounded-md px-3 py-2 text-xs',
+                      isExpired
+                        ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    )}>
+                      {isExpired
+                        ? `⚠️ Vencido el ${new Date(expiresAt).toLocaleDateString('es-ES')}`
+                        : daysUntilExpiry !== null && daysUntilExpiry <= 7
+                        ? `⏰ Vence en ${daysUntilExpiry} día${daysUntilExpiry === 1 ? '' : 's'}`
+                        : `✓ Activo hasta ${new Date(expiresAt).toLocaleDateString('es-ES')}`
+                      }
+                    </div>
+                  )}
 
                   <ul className="space-y-2 mb-6">
-                    {plan.features.map((feature, i) => (
+                    {p.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4 text-success" />
                         {feature}
@@ -465,13 +491,20 @@ export default function Settings() {
                     ))}
                   </ul>
 
-                  <Button
-                    variant={isCurrentPlan ? 'outline' : 'default'}
-                    className="w-full"
-                    disabled={isCurrentPlan}
-                  >
-                    {isCurrentPlan ? t.common.currentPlan : t.common.upgrade}
-                  </Button>
+                  {isCurrentPlan ? (
+                    <Button variant="outline" className="w-full" disabled>
+                      {t.common.currentPlan}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="default"
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-semibold gap-2"
+                      onClick={() => openUpgradeModal({ plan: p.id as 'pro' | 'power' })}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {t.common.upgrade} a {p.name}
+                    </Button>
+                  )}
                 </div>
               );
             })}
