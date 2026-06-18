@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/config/supabase';
 import { Profile } from '@/shared/types/database';
@@ -25,6 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
+
+  // Ref so the Supabase auth callback (which captures a stale closure)
+  // can always read the CURRENT guest status without re-registering the listener.
+  const isGuestRef = useRef(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -53,6 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // cubriendo también la sesión existente. No necesitamos getSession() extra.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // If we are in guest mode, do NOT let Supabase overwrite the guest state.
+        if (isGuestRef.current) return;
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -102,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    isGuestRef.current = false; // reset ref before clearing state
     if (!isGuest) await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -110,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInAsGuest = () => {
+    isGuestRef.current = true; // set ref BEFORE setState so the listener guard is active immediately
     setIsGuest(true);
     setUser(GUEST_MOCK_USER);
     setSession(null);

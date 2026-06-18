@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { supabase } from '@/config/supabase';
@@ -27,7 +27,6 @@ const GoogleIcon = () => (
 export default function Auth() {
   const { user, loading, signIn, signUp, signInAsGuest } = useAuth();
   const { t, language, setLanguage } = useLanguage();
-  const navigate = useNavigate();
 
   // On mount: if no stored preference, detect from browser.
   useEffect(() => {
@@ -126,7 +125,10 @@ export default function Auth() {
 
   const handleGuestLogin = () => {
     signInAsGuest();
-    navigate('/dashboard');
+    // Do NOT call navigate() here — it causes a race condition where
+    // ProtectedRoute evaluates before React commits the signInAsGuest() state batch.
+    // The existing `if (!loading && user) return <Navigate to="/dashboard" replace />`
+    // in this component handles the redirect naturally once state is committed.
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
