@@ -7,14 +7,14 @@ import { PageLoader } from "@/shared/components/ui/page-loader";
 const BYPASS_AUTH = false;
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isGuest } = useAuth();
   if (BYPASS_AUTH) {
     return <>{children}</>;
   }
   if (loading) {
     return <PageLoader />;
   }
-  if (!user) {
+  if (!user && !isGuest) {
     return <Navigate to="/auth" replace />;
   }
   return <>{children}</>;

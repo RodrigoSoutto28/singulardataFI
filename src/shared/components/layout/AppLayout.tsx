@@ -8,6 +8,7 @@ import { TechGridTexture } from '@/shared/components/effects/TechGridTexture';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { PageLoader } from '@/shared/components/ui/page-loader';
 import { SubscriptionExpiryBanner } from '@/shared/components/ui/SubscriptionExpiryBanner';
+import { GuestBanner } from '@/shared/components/ui/GuestBanner';
 
 function useIsTablet() {
   const [isTablet, setIsTablet] = useState(false);
@@ -89,6 +90,7 @@ export function AppLayout() {
           onMenuClick={() => setMobileMenuOpen(true)}
           sectionTitle={sectionTitle}
         />
+        <GuestBanner />
         <SubscriptionExpiryBanner />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 md:px-5 md:py-5 lg:px-6 lg:py-6">

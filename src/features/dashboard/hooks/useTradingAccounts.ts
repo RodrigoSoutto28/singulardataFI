@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { Tables, TablesInsert, TablesUpdate } from '@/shared/types/database';
 import { toast } from 'sonner';
 import { getUserErrorMessage } from '@/shared/lib/errors';
+import { GUEST_MOCK_ACCOUNT } from '@/features/auth/utils/guestMockData';
 
 export type TradingAccount = Tables<'trading_accounts'>;
 export type TradingAccountInsert = TablesInsert<'trading_accounts'>;
@@ -46,13 +47,21 @@ export function useSelectedAccountId() {
 }
 
 export function useTradingAccounts() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const queryClient = useQueryClient();
   const { selectedAccountId, setSelectedAccountId } = useSelectedAccountId();
+
+  // ── Guest mode: single static demo account ──
+  const guestAccountNoOp = useMutation({
+    mutationFn: async () => {
+      toast.info('Registrate para gestionar tus cuentas.');
+    },
+  });
 
   const accountsQuery = useQuery({
     queryKey: ['trading_accounts', user?.id],
     queryFn: async () => {
+      if (isGuest) return [GUEST_MOCK_ACCOUNT];
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('trading_accounts')
@@ -64,7 +73,7 @@ export function useTradingAccounts() {
       if (error) throw error;
       return (data ?? []) as TradingAccount[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id || isGuest,
   });
 
   const accounts = accountsQuery.data ?? [];
@@ -178,6 +187,26 @@ export function useTradingAccounts() {
       queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
     },
   });
+
+  if (isGuest) {
+    return {
+      accounts: [GUEST_MOCK_ACCOUNT],
+      selectedAccount: GUEST_MOCK_ACCOUNT,
+      selectedAccountId: GUEST_MOCK_ACCOUNT.id,
+      setSelectedAccountId: () => {},
+      isLoading: false,
+      error: null,
+      createAccount: guestAccountNoOp.mutateAsync as any,
+      updateAccount: guestAccountNoOp.mutateAsync as any,
+      updateBalance: guestAccountNoOp.mutateAsync as any,
+      updateInitialBalance: guestAccountNoOp.mutateAsync as any,
+      deactivateAccount: guestAccountNoOp.mutateAsync as any,
+      isCreating: false,
+      isUpdating: false,
+      isUpdatingInitialBalance: false,
+      refetch: accountsQuery.refetch,
+    };
+  }
 
   return {
     accounts,

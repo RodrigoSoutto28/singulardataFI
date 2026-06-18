@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { supabase } from '@/config/supabase';
@@ -9,7 +9,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Power, Brain, Shield, BarChart3, LineChart } from 'lucide-react';
+import { Power, Brain, Shield, BarChart3, LineChart, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { signInSchema, signUpSchema, translateAuthError } from '@/shared/lib/validation';
 import { PublicFooter } from '@/shared/components/layout/PublicFooter';
@@ -25,8 +25,9 @@ const GoogleIcon = () => (
 );
 
 export default function Auth() {
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn, signUp, signInAsGuest } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
 
   // On mount: if no stored preference, detect from browser.
   useEffect(() => {
@@ -55,6 +56,8 @@ export default function Auth() {
       orContinueWith: 'o continuá con',
       googleSignIn: 'Continuar con Google',
       oauthError: 'No pudimos iniciar sesión con Google. Intentá nuevamente.',
+      guestBtn: 'Explorar sin registrarme',
+      guestHint: 'Datos de demo · Sin compromiso',
     },
     EN: {
       tagline: 'Trading Software',
@@ -69,6 +72,8 @@ export default function Auth() {
       orContinueWith: 'or continue with',
       googleSignIn: 'Continue with Google',
       oauthError: 'Could not sign in with Google. Please try again.',
+      guestBtn: 'Explore without signing up',
+      guestHint: 'Demo data · No commitment',
     },
     PT: {
       tagline: 'Trading Software',
@@ -83,12 +88,14 @@ export default function Auth() {
       orContinueWith: 'ou continue com',
       googleSignIn: 'Continuar com Google',
       oauthError: 'Não foi possível entrar com Google. Tente novamente.',
+      guestBtn: 'Explorar sem cadastro',
+      guestHint: 'Dados de demonstração · Sem compromisso',
     },
     FR: {
       tagline: 'Trading Software',
       confirmPassword: 'Confirmer le mot de passe',
       confirmMismatch: 'Les mots de passe ne correspondent pas',
-      acceptTerms: 'J’accepte les',
+      acceptTerms: 'J\'accepte les',
       termsLink: 'Conditions Générales',
       and: 'et la',
       privacyLink: 'Politique de Confidentialité',
@@ -97,6 +104,8 @@ export default function Auth() {
       orContinueWith: 'ou continuer avec',
       googleSignIn: 'Continuer avec Google',
       oauthError: 'Impossible de se connecter avec Google. Veuillez réessayer.',
+      guestBtn: 'Explorer sans inscription',
+      guestHint: 'Données de démo · Sans engagement',
     },
   }[language] ?? {
     tagline: 'Trading Software',
@@ -111,6 +120,13 @@ export default function Auth() {
     orContinueWith: 'or continue with',
     googleSignIn: 'Continue with Google',
     oauthError: 'Could not sign in with Google. Please try again.',
+    guestBtn: 'Explore without signing up',
+    guestHint: 'Demo data · No commitment',
+  };
+
+  const handleGuestLogin = () => {
+    signInAsGuest();
+    navigate('/dashboard');
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -352,6 +368,25 @@ export default function Auth() {
               <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogle} disabled={oauthLoading} aria-label={localized.googleSignIn}>
                 <GoogleIcon />
                 {localized.googleSignIn}
+              </Button>
+
+              {/* Guest access */}
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50" /></div>
+                <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground/60">·</span></div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-dashed border-border/60 hover:border-border"
+                onClick={handleGuestLogin}
+                id="guest-login-btn"
+              >
+                <Eye className="h-4 w-4" />
+                <span className="flex flex-col items-start">
+                  <span className="text-sm">{localized.guestBtn}</span>
+                  <span className="text-[10px] opacity-60">{localized.guestHint}</span>
+                </span>
               </Button>
             </CardContent>
           </Card>

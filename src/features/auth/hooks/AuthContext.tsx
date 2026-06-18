@@ -2,15 +2,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/config/supabase';
 import { Profile } from '@/shared/types/database';
+import { GUEST_MOCK_USER, GUEST_MOCK_PROFILE } from '@/features/auth/utils/guestMockData';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  isGuest: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  signInAsGuest: () => void;
   refreshProfile: () => Promise<void>;
 }
 
@@ -21,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -98,10 +102,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (!isGuest) await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setProfile(null);
+    setIsGuest(false);
+  };
+
+  const signInAsGuest = () => {
+    setIsGuest(true);
+    setUser(GUEST_MOCK_USER);
+    setSession(null);
+    setProfile(GUEST_MOCK_PROFILE);
+    setLoading(false);
   };
 
   return (
@@ -111,9 +124,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         profile,
         loading,
+        isGuest,
         signIn,
         signUp,
         signOut,
+        signInAsGuest,
         refreshProfile,
       }}
     >

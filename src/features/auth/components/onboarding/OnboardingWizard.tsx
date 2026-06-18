@@ -8,6 +8,7 @@ import { AccountSetupStep } from './AccountSetupStep';
 import { TourStep } from './TourStep';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
+import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { cn } from '@/shared/lib/utils';
 import confetti from 'canvas-confetti';
 
@@ -21,6 +22,7 @@ export function OnboardingWizard() {
   const { isOnboardingComplete, currentStep: savedStep, completeOnboarding, skipOnboarding, saveProgress, isLoading } =
     useOnboarding();
   const { language } = useLanguage();
+  const { isGuest } = useAuth();
   const copy = ONBOARDING_COPY[language];
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -55,7 +57,7 @@ export function OnboardingWizard() {
     completeOnboarding();
   };
 
-  if (isLoading || isOnboardingComplete) return null;
+  if (isLoading || isOnboardingComplete || isGuest) return null;
 
   const step = steps[currentStep];
 

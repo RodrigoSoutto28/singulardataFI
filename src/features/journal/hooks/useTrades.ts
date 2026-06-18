@@ -5,6 +5,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/shared/types/database';
 import { toast } from 'sonner';
 import { getUserErrorMessage } from '@/shared/lib/errors';
 import { useSelectedAccountId } from '@/features/dashboard/hooks/useTradingAccounts';
+import { GUEST_MOCK_TRADES } from '@/features/auth/utils/guestMockData';
 
 export type Trade = Tables<'trades'>;
 export type TradeInsert = TablesInsert<'trades'>;
@@ -58,13 +59,21 @@ async function syncAccountBalance(userId: string, accountId: string | null) {
 
 
 export function useTrades() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const queryClient = useQueryClient();
   const { selectedAccountId } = useSelectedAccountId();
+
+  // ── Guest mode: return demo data, all mutations are no-ops ──
+  const guestNoOp = useMutation({
+    mutationFn: async () => {
+      toast.info('Registrate para guardar tus operaciones.');
+    },
+  });
 
   const tradesQuery = useQuery({
     queryKey: ['trades', user?.id, selectedAccountId],
     queryFn: async () => {
+      if (isGuest) return GUEST_MOCK_TRADES;
       if (!user?.id) return [];
 
       let query = supabase
@@ -81,7 +90,7 @@ export function useTrades() {
       if (error) throw error;
       return data as Trade[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id || isGuest,
   });
 
   const invalidateAndSyncBalance = async () => {
@@ -197,6 +206,22 @@ export function useTrades() {
       toast.error(getUserErrorMessage(error, 'No se pudieron importar las operaciones.'));
     },
   });
+
+  // In guest mode, replace all mutations with friendly no-ops
+  if (isGuest) {
+    return {
+      trades: tradesQuery.data ?? GUEST_MOCK_TRADES,
+      isLoading: tradesQuery.isLoading,
+      error: null,
+      createTrade: guestNoOp,
+      updateTrade: guestNoOp,
+      deleteTrade: guestNoOp,
+      importTrades: guestNoOp,
+      refetch: tradesQuery.refetch,
+      syncBalance: () => Promise.resolve(),
+      invalidateAndSyncBalance: async () => {},
+    };
+  }
 
   return {
     trades: tradesQuery.data ?? [],
