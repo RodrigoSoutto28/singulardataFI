@@ -47,7 +47,7 @@ export function useInfiniteTrades({
         .order('entry_date', { ascending: false })
         .range(from, to);
 
-      if (status !== 'all') q = q.eq('status', status as any);
+      if (status !== 'all') q = q.eq('status', status as 'open' | 'closed' | 'cancelled');
       if (trimmedSearch) q = q.ilike('symbol', `%${trimmedSearch}%`);
 
       const { data, error } = await q;

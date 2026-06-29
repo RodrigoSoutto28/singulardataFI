@@ -31,12 +31,24 @@ import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccount
 import { usePsychologyEntries } from '@/features/behavioral/hooks/usePsychologyEntries';
 import { Language } from '@/shared/lib/i18n/translations';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  name: string;
+  value: number | string;
+  color: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border border-border bg-popover p-3 shadow-lg">
         <p className="text-xs text-muted-foreground mb-1">{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry: TooltipEntry, index: number) => (
           <p key={index} className="text-sm font-semibold font-mono-numbers" style={{ color: entry.color }}>
             {entry.name}: {typeof entry.value === 'number' && (entry.name.includes('$') || entry.name.includes('P&L'))
               ? `$${entry.value.toLocaleString()}` 

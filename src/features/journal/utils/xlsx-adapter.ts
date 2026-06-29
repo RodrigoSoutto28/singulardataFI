@@ -5,8 +5,6 @@
  * high-severity vulnerabilities. Exposes a small surface area used across
  * the app for importing and exporting trade data.
  */
-import ExcelJS from 'exceljs';
-
 export interface ParsedSheet {
   name: string;
   /** Rows as arrays of cell values (header detection handled by caller). */
@@ -26,6 +24,7 @@ export async function parseXLSX(file: File): Promise<ParsedWorkbook> {
 
 /** Same as `parseXLSX` but accepts a raw ArrayBuffer. */
 export async function parseXLSXBuffer(buffer: ArrayBuffer): Promise<ParsedWorkbook> {
+  const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(buffer);
 
@@ -72,6 +71,7 @@ export async function writeXLSXFile(
   filename: string,
   sheets: ExportSheet[],
 ): Promise<void> {
+  const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   wb.created = new Date();
 

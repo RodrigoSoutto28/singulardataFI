@@ -6,7 +6,7 @@ import { toast as sonnerToast } from 'sonner';
  * - toast.success → 4s (default configurado en <Toaster />)
  */
 const originalError = sonnerToast.error.bind(sonnerToast);
-sonnerToast.error = ((message: any, opts?: any) => {
+sonnerToast.error = ((message: Parameters<typeof sonnerToast.error>[0], opts?: Parameters<typeof sonnerToast.error>[1]) => {
   return originalError(message, { duration: 10000, ...opts });
 }) as typeof sonnerToast.error;
 

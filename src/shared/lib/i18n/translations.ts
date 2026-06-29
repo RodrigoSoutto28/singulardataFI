@@ -373,6 +373,9 @@ export interface Translations {
     timezone: string;
     currency: string;
     saveChanges: string;
+    saveSuccess: string;
+    saving: string;
+    dataAndOnboarding: string;
     notifications: string;
     configureAlerts: string;
     aiInsights: string;
@@ -888,6 +891,9 @@ const baseTranslations: Record<Language, Translations> = {
       timezone: 'Zona Horaria',
       currency: 'Moneda',
       saveChanges: 'Guardar Cambios',
+      saveSuccess: 'Perfil actualizado correctamente',
+      saving: 'Guardando...',
+      dataAndOnboarding: 'Datos y Onboarding',
       notifications: 'Notificaciones',
       configureAlerts: 'Configura cómo recibes alertas',
       aiInsights: 'Insights de IA',
@@ -1356,6 +1362,9 @@ const baseTranslations: Record<Language, Translations> = {
       timezone: 'Timezone',
       currency: 'Currency',
       saveChanges: 'Save Changes',
+      saveSuccess: 'Profile updated successfully',
+      saving: 'Saving...',
+      dataAndOnboarding: 'Data & Onboarding',
       notifications: 'Notifications',
       configureAlerts: 'Configure how you receive alerts',
       aiInsights: 'AI Insights',
@@ -1824,6 +1833,9 @@ const baseTranslations: Record<Language, Translations> = {
       timezone: 'Fuso Horário',
       currency: 'Moeda',
       saveChanges: 'Salvar Alterações',
+      saveSuccess: 'Perfil atualizado com sucesso',
+      saving: 'Salvando...',
+      dataAndOnboarding: 'Dados e Onboarding',
       notifications: 'Notificações',
       configureAlerts: 'Configure como você recebe alertas',
       aiInsights: 'Insights de IA',

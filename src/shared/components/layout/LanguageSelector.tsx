@@ -37,7 +37,7 @@ export function LanguageSelector({ variant = 'default' }: Props) {
     try {
       setLanguage(toContextCode(next));
       if (user) {
-        await supabase.from('profiles').update({ language: next } as any).eq('id', user.id);
+        await supabase.from('profiles').update({ language: next }).eq('id', user.id);
       }
       const messages: Record<SupportedLanguage, string> = {
         es: 'Idioma cambiado a Español',

@@ -72,7 +72,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useExportTrades } from '@/features/journal/hooks/useExportTrades';
-import { useImportTrades } from '@/features/journal/hooks/useImportTrades';
+import { useImportTrades, type ParseMetadata, type FileParseResult } from '@/features/journal/hooks/useImportTrades';
 import { useTrades, Trade, type TradeInsert } from '@/features/journal/hooks/useTrades';
 import { toast } from 'sonner';
 import { ImportPreviewModal } from '@/features/journal/components/ImportPreviewModal';
@@ -176,11 +176,11 @@ export default function Journal() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewTrades, setPreviewTrades] = useState<ImportedTrade[]>([]);
   const [previewErrors, setPreviewErrors] = useState<string[]>([]);
-  const [previewMetadata, setPreviewMetadata] = useState<any>(null);
+  const [previewMetadata, setPreviewMetadata] = useState<ParseMetadata | null>(null);
   const [previewRawRows, setPreviewRawRows] = useState<string[][]>([]);
   const [previewFileName, setPreviewFileName] = useState('');
   const [previewFileHash, setPreviewFileHash] = useState('');
-  const [previewPerFileReports, setPreviewPerFileReports] = useState<any[] | undefined>(undefined);
+  const [previewPerFileReports, setPreviewPerFileReports] = useState<FileParseResult[] | undefined>(undefined);
   const [isUndoing, setIsUndoing] = useState(false);
   const [duplicatePositionIds, setDuplicatePositionIds] = useState<string[]>([]);
   const [duplicateInfo, setDuplicateInfo] = useState<{

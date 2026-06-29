@@ -14,12 +14,36 @@ export interface GeolocationResult {
   service: string;
 }
 
+interface IpApiCoResponse {
+  error?: boolean;
+  reason?: string;
+  country_code?: string;
+  country_name?: string;
+  city?: string;
+  region?: string;
+  timezone?: string;
+  currency?: string;
+  ip?: string;
+}
+
+interface IpWhoIsResponse {
+  success?: boolean;
+  message?: string;
+  country_code?: string;
+  country?: string;
+  city?: string;
+  region?: string;
+  timezone?: { id?: string };
+  currency?: { code?: string };
+  ip?: string;
+}
+
 export interface GeolocationService {
   name: string;
   endpoint: string;
   priority: number;
   rateLimit: { requestsPerDay: number; requestsPerMinute: number };
-  parse: (response: any) => GeolocationResult;
+  parse: (response: Record<string, unknown>) => GeolocationResult;
 }
 
 const IPAPI_CO: GeolocationService = {
@@ -27,13 +51,14 @@ const IPAPI_CO: GeolocationService = {
   endpoint: 'https://ipapi.co/json/',
   priority: 1,
   rateLimit: { requestsPerDay: 1000, requestsPerMinute: 60 },
-  parse: (data) => {
+  parse: (response) => {
+    const data = response as unknown as IpApiCoResponse;
     if (!data || data.error || !data.country_code) {
       throw new Error(data?.reason || 'Invalid ipapi.co response');
     }
     return {
       countryCode: data.country_code,
-      countryName: data.country_name,
+      countryName: data.country_name || '',
       city: data.city,
       region: data.region,
       timezone: data.timezone,
@@ -49,13 +74,14 @@ const IPWHO_IS: GeolocationService = {
   endpoint: 'https://ipwho.is/',
   priority: 2,
   rateLimit: { requestsPerDay: 10000, requestsPerMinute: 60 },
-  parse: (data) => {
+  parse: (response) => {
+    const data = response as unknown as IpWhoIsResponse;
     if (!data || data.success === false || !data.country_code) {
       throw new Error(data?.message || 'Invalid ipwho.is response');
     }
     return {
       countryCode: data.country_code,
-      countryName: data.country,
+      countryName: data.country || '',
       city: data.city,
       region: data.region,
       timezone: data.timezone?.id,

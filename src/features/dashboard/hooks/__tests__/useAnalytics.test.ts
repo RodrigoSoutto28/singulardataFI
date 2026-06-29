@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useAnalytics } from '../useAnalytics';
+import type { Trade } from '@/features/journal/hooks/useTrades';
+import type { Tables } from '@/shared/types/database';
+
+type PsychologyEntry = Tables<'psychology_entries'>;
 
 describe('useAnalytics — mathematical and behavioral metrics logic', () => {
   it('correctly calculates metrics for closed trades', () => {
@@ -23,7 +27,7 @@ describe('useAnalytics — mathematical and behavioral metrics logic', () => {
         asset_class: 'stocks',
         symbol: 'AAPL',
       },
-    ] as any[];
+    ] as unknown as Trade[];
 
     const { result } = renderHook(() => useAnalytics(mockTrades, [], 10000));
     const { stats, equityCurve, performanceByHour } = result.current;
@@ -73,14 +77,14 @@ describe('useAnalytics — mathematical and behavioral metrics logic', () => {
         exit_date: '2025-06-01T12:00:00',
         symbol: 'BTCUSD',
       },
-    ] as any[];
+    ] as unknown as Trade[];
 
     const mockPsychologyEntries = [
       {
         entry_date: d1Str,
         pre_trade_emotion: 'confident',
       },
-    ] as any[];
+    ] as unknown as PsychologyEntry[];
 
     const { result } = renderHook(() => useAnalytics(mockTrades, mockPsychologyEntries, 10000));
     const { performanceByEmotion } = result.current;

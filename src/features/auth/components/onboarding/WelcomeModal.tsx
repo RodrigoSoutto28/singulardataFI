@@ -62,9 +62,10 @@ export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: P
         description: '30 operaciones de muestra agregadas a tu cuenta.',
       });
       setOpen(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
       toast.error('No se pudieron cargar los datos de ejemplo', {
-        description: e?.message,
+        description: message,
       });
     } finally {
       setLoading(false);
@@ -146,12 +147,15 @@ export function useLoadSampleData() {
     setLoading(true);
     try {
       const samples = generateSampleTrades();
-      await importTrades.mutateAsync(samples as any);
+      await importTrades.mutateAsync(
+        samples as Parameters<typeof importTrades.mutateAsync>[0],
+      );
       toast.success('Datos de ejemplo cargados', {
         description: '30 operaciones agregadas.',
       });
-    } catch (e: any) {
-      toast.error('No se pudieron cargar los datos', { description: e?.message });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      toast.error('No se pudieron cargar los datos', { description: message });
     } finally {
       setLoading(false);
     }

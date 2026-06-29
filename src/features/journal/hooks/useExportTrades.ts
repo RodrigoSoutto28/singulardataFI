@@ -1,7 +1,5 @@
 import { useCallback } from 'react';
 import { writeXLSXFile } from '@/features/journal/utils/xlsx-adapter';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
 interface Trade {
   id: string;
@@ -79,9 +77,12 @@ export function useExportTrades() {
         columnWidths: [20, 15],
       },
     ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const exportToPDF = useCallback((trades: Trade[], filename = 'trading-journal') => {
+  const exportToPDF = useCallback(async (trades: Trade[], filename = 'trading-journal') => {
+    const jsPDF = (await import('jspdf')).default;
+    const autoTable = (await import('jspdf-autotable')).default;
     const doc = new jsPDF('l', 'mm', 'a4');
     
     // Title
@@ -119,7 +120,7 @@ export function useExportTrades() {
     
     // Trades table
     doc.setFontSize(12);
-    doc.text('Trade Details', 14, (doc as any).lastAutoTable.finalY + 15);
+    doc.text('Trade Details', 14, (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15);
     
     const tableData = trades.map((trade) => [
       trade.symbol,
@@ -134,7 +135,7 @@ export function useExportTrades() {
     ]);
     
     autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 20,
+      startY: (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20,
       head: [['Symbol', 'Dir', 'Status', 'Entry', 'Exit', 'P&L ($)', 'P&L (%)', 'Date', 'Strategy']],
       body: tableData,
       theme: 'striped',
@@ -146,7 +147,7 @@ export function useExportTrades() {
           fontStyle: 'bold',
         },
       },
-      didParseCell: (data: any) => {
+      didParseCell: (data: { column: { index: number }; section: string; cell: { raw: unknown; styles: { textColor: number[] } } }) => {
         // Color P&L column
         if (data.column.index === 5 && data.section === 'body') {
           const value = parseFloat(data.cell.raw as string);

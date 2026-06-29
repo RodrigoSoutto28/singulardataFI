@@ -467,7 +467,7 @@ export function ImportPreviewModal({
           </div>
         )}
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col overflow-hidden">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'trades' | 'raw')} className="flex-1 flex flex-col overflow-hidden">
           <div className="px-6 py-2 border-b border-slate-800 bg-slate-900/50">
             <TabsList className="bg-slate-800/50 border border-slate-700/50 h-9 p-1">
               <TabsTrigger value="trades" className="text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-white">

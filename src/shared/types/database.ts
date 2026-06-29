@@ -122,7 +122,7 @@ export interface AIInsight {
   is_read: boolean;
   is_actionable: boolean;
   action_taken: boolean;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   expires_at: string | null;
   created_at: string;
 }

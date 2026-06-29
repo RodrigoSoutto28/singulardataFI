@@ -21,8 +21,9 @@ import {
 import { useLanguage } from '@/shared/lib/i18n/LanguageContext';
 import { useInsights } from '@/features/analytics/hooks/useInsights';
 import { useTrades } from '@/features/journal/hooks/useTrades';
+import type { LucideIcon } from 'lucide-react';
 
-const insightIcons: Record<string, any> = {
+const insightIcons: Record<string, LucideIcon> = {
   warning: AlertTriangle,
   opportunity: TrendingUp,
   pattern: Repeat,
