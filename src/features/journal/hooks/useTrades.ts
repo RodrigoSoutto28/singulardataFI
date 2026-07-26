@@ -105,7 +105,7 @@ export function useTrades() {
   };
 
 
-  const createTradeMutation = useMutation({
+  const createTrade = useMutation({
     mutationFn: async (trade: Omit<TradeInsert, 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
 
@@ -132,8 +132,6 @@ export function useTrades() {
       toast.error(getUserErrorMessage(error, 'No se pudo crear la operación. Inténtalo de nuevo.'));
     },
   });
-
-  const createTrade = (trade: Omit<TradeInsert, 'user_id'>) => createTradeMutation.mutateAsync(trade);
 
   const updateTrade = useMutation({
     mutationFn: async ({ id, ...updates }: TradeUpdate & { id: string }) => {
