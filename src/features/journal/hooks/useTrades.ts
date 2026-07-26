@@ -218,7 +218,10 @@ export function useTrades() {
       createTrade: guestNoOp,
       updateTrade: guestNoOp,
       deleteTrade: guestNoOp,
-      importTrades: guestNoOp,
+      importTrades: async () => {
+        toast.info('Registrate para guardar tus operaciones.');
+        return [];
+      },
       refetch: tradesQuery.refetch,
       syncBalance: () => Promise.resolve(),
       invalidateAndSyncBalance: async () => {},
