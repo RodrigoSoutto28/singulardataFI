@@ -159,7 +159,7 @@ async function openAddTradeDialog(user: ReturnType<typeof userEvent.setup>) {
 beforeEach(() => {
   localStorage.clear();
   localStorage.setItem('app-language', 'ES');
-  createTradeMutateAsync.mockClear();
+  createTrade.mockClear();
   toastSuccess.mockClear();
   toastError.mockClear();
   (HTMLElement.prototype.scrollIntoView as unknown as ReturnType<typeof vi.fn>).mockClear();
