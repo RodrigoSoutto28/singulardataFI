@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useIPGeolocation } from '../useIPGeolocation';
-import { detectLanguageByIP, detectLanguageByIPFromCache } from '@/shared/lib/geolocation/ip-detector';
+import { detectLanguageByIP, detectLanguageByIPFromCache, IPLanguageDetection } from '@/shared/lib/geolocation/ip-detector';
 import { clearGeolocationCache, getCachedGeolocation } from '@/shared/lib/geolocation/cache';
+import type { GeolocationResult } from '@/shared/lib/geolocation/services';
 
 vi.mock('@/shared/lib/geolocation/ip-detector', () => ({
   detectLanguageByIP: vi.fn(),
@@ -15,11 +16,18 @@ vi.mock('@/shared/lib/geolocation/cache', () => ({
 }));
 
 describe('useIPGeolocation hook', () => {
-  const mockDetection = {
-    countryCode: 'AR',
+  const mockDetection: IPLanguageDetection = {
+    country: 'AR',
     countryName: 'Argentina',
     language: 'es',
+    confidence: 'high',
     cached: false,
+    service: 'ipwho.is',
+  };
+
+  const mockGeolocation: GeolocationResult = {
+    countryCode: 'AR',
+    countryName: 'Argentina',
     service: 'ipwho.is',
   };
 
@@ -29,7 +37,7 @@ describe('useIPGeolocation hook', () => {
 
   it('initializes with cached value if present', () => {
     vi.mocked(detectLanguageByIPFromCache).mockReturnValue(mockDetection);
-    vi.mocked(getCachedGeolocation).mockReturnValue(mockDetection);
+    vi.mocked(getCachedGeolocation).mockReturnValue(mockGeolocation);
 
     const { result } = renderHook(() => useIPGeolocation());
 

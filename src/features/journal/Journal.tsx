@@ -255,7 +255,7 @@ export default function Journal() {
   const { importFromFile, importFromFiles } = useImportTrades();
   const { canUseFeature } = useSubscription();
   const { upgradeModalOpen, featureMessage, recommendedPlan, openUpgradeModal, closeUpgradeModal } = useUpgradeModal();
-  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance, isCreatePending, isUpdatePending } = useTrades();
   const { selectedAccount } = useTradingAccounts();
   const accountCurrency = selectedAccount?.currency ?? 'USD';
   const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -523,7 +523,7 @@ export default function Journal() {
       )
     );
 
-    const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never> & { _importKey: string }> = [];
+    const dbTrades: Array<Omit<Parameters<typeof importTrades>[0][number], never> & { _importKey: string }> = [];
     const validationErrors: string[] = [];
     let skippedDuplicates = 0;
 
@@ -606,7 +606,7 @@ export default function Journal() {
       );
 
 
-      const inserted = await importTrades.mutateAsync(tradesWithBatch);
+      const inserted = await importTrades(tradesWithBatch);
       const insertedCount = inserted.length;
       const dbSkipped = dbTrades.length - insertedCount;
       const totalSkipped = skippedDuplicates + dbSkipped;
@@ -747,9 +747,9 @@ export default function Journal() {
       const wasOpen = !editingTrade || editingTrade.status !== 'closed';
       let savedTrade: Trade | null = null;
       if (editingTrade) {
-        savedTrade = (await updateTrade.mutateAsync({ id: editingTrade.id, ...payload })) as Trade;
+        savedTrade = await updateTrade({ id: editingTrade.id, ...payload });
       } else {
-        savedTrade = (await createTrade.mutateAsync(payload)) as Trade;
+        savedTrade = await createTrade(payload);
       }
       setIsAddTradeOpen(false);
       resetForm();
@@ -814,7 +814,7 @@ export default function Journal() {
 
   const handleDeleteTrade = async () => {
     if (tradeToDelete) {
-      await deleteTrade.mutateAsync(tradeToDelete);
+      await deleteTrade(tradeToDelete);
       setTradeToDelete(null);
     }
   };
@@ -1441,11 +1441,11 @@ export default function Journal() {
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={!isPayloadReady || createTrade.isPending || updateTrade.isPending}
+                    disabled={!isPayloadReady || isCreatePending || isUpdatePending}
                     title={!isPayloadReady ? `Faltan: ${missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}` : undefined}
                     className="btn-press"
                   >
-                    {(createTrade.isPending || updateTrade.isPending) && (
+                    {(isCreatePending || isUpdatePending) && (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     )}
                     {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}

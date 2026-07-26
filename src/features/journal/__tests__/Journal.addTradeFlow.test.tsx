@@ -42,19 +42,23 @@ vi.mock('sonner', () => ({
 }));
 
 // ---------- hook mocks ----------
-const createTradeMutateAsync = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
-const updateTradeMutateAsync = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
-const deleteTradeMutateAsync = vi.fn().mockResolvedValue(undefined);
-const importTradesMutateAsync = vi.fn().mockResolvedValue([]);
+const createTrade = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
+const updateTrade = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
+const deleteTrade = vi.fn().mockResolvedValue(undefined);
+const importTrades = vi.fn().mockResolvedValue([]);
 
 vi.mock('@/features/journal/hooks/useTrades', () => ({
   useTrades: () => ({
     trades: [],
     isLoading: false,
-    createTrade: { mutateAsync: createTradeMutateAsync, isPending: false },
-    updateTrade: { mutateAsync: updateTradeMutateAsync, isPending: false },
-    deleteTrade: { mutateAsync: deleteTradeMutateAsync, isPending: false },
-    importTrades: { mutateAsync: importTradesMutateAsync, isPending: false },
+    createTrade,
+    updateTrade,
+    deleteTrade,
+    importTrades,
+    isCreatePending: false,
+    isUpdatePending: false,
+    isDeletePending: false,
+    isImportPending: false,
     refetch: vi.fn(),
     invalidateAndSyncBalance: vi.fn(),
   }),
@@ -155,7 +159,7 @@ async function openAddTradeDialog(user: ReturnType<typeof userEvent.setup>) {
 beforeEach(() => {
   localStorage.clear();
   localStorage.setItem('app-language', 'ES');
-  createTradeMutateAsync.mockClear();
+  createTrade.mockClear();
   toastSuccess.mockClear();
   toastError.mockClear();
   (HTMLElement.prototype.scrollIntoView as unknown as ReturnType<typeof vi.fn>).mockClear();
@@ -185,8 +189,8 @@ describe('Journal — Add Trade flow', () => {
 
     await user.click(d.getByRole('button', { name: /registrar operación/i }));
 
-    await waitFor(() => expect(createTradeMutateAsync).toHaveBeenCalledTimes(1));
-    const payload = createTradeMutateAsync.mock.calls[0][0];
+    await waitFor(() => expect(createTrade).toHaveBeenCalledTimes(1));
+    const payload = createTrade.mock.calls[0][0];
     expect(payload).toMatchObject({
       symbol: 'AAPL',
       direction: 'long',
@@ -247,7 +251,7 @@ describe('Journal — Add Trade flow', () => {
     expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
 
     // Save was NOT called
-    expect(createTradeMutateAsync).not.toHaveBeenCalled();
+    expect(createTrade).not.toHaveBeenCalled();
   });
 
   it('lists missing required fields when submitting an empty form', async () => {

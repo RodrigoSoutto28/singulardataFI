@@ -76,6 +76,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Breakout', setup_type: 'Breakout',
     notes: 'Clean break of resistance', tags: ['breakout', 'trend'], rating: 4,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(30), updated_at: daysAgo(30),
   },
   {
@@ -88,6 +89,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '4H', strategy: 'Trend Following', setup_type: 'Pullback',
     notes: 'Trend continuation, good R:R', tags: ['trend'], rating: 5,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(28), updated_at: daysAgo(27),
   },
   {
@@ -100,6 +102,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1D', strategy: 'Support/Resistance', setup_type: 'Bounce',
     notes: 'Hit stop, market was choppy', tags: ['loss', 'crypto'], rating: 2,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(25), updated_at: daysAgo(24),
   },
   {
@@ -112,6 +115,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1D', strategy: 'Earnings Play', setup_type: 'Momentum',
     notes: 'Strong earnings beat', tags: ['stocks', 'earnings'], rating: 5,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(22), updated_at: daysAgo(20),
   },
   {
@@ -124,6 +128,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Breakout', setup_type: 'Breakout',
     notes: 'Yen weakness persisting', tags: ['forex', 'yen'], rating: 4,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(20), updated_at: daysAgo(19),
   },
   {
@@ -136,6 +141,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '4H', strategy: 'Short Squeeze Fade', setup_type: 'Reversal',
     notes: 'Overbought on RSI, clean short', tags: ['crypto', 'short'], rating: 4,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(18), updated_at: daysAgo(17),
   },
   {
@@ -148,6 +154,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Range Trading', setup_type: 'Mean Reversion',
     notes: 'Bad timing, news spike', tags: ['loss', 'forex'], rating: 2,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(16), updated_at: daysAgo(15),
   },
   {
@@ -160,6 +167,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1D', strategy: 'Momentum', setup_type: 'Momentum',
     notes: 'Strong volume breakout', tags: ['stocks', 'momentum'], rating: 5,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(14), updated_at: daysAgo(12),
   },
   {
@@ -172,6 +180,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '4H', strategy: 'Support/Resistance', setup_type: 'Bounce',
     notes: 'Dollar strength surprised', tags: ['gold', 'loss'], rating: 3,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(11), updated_at: daysAgo(10),
   },
   {
@@ -184,6 +193,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Trend Following', setup_type: 'Pullback',
     notes: 'CPI data came in cool', tags: ['index', 'macro'], rating: 4,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(9), updated_at: daysAgo(8),
   },
   {
@@ -196,6 +206,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '4H', strategy: 'Trend Following', setup_type: 'Pullback',
     notes: 'Weak Aus jobs data', tags: ['forex', 'short'], rating: 4,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(7), updated_at: daysAgo(6),
   },
   {
@@ -208,6 +219,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Support/Resistance', setup_type: 'Bounce',
     notes: 'Fed speaker was hawkish', tags: ['index', 'loss'], rating: 2,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(5), updated_at: daysAgo(4),
   },
   {
@@ -220,6 +232,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Breakout', setup_type: 'Breakout',
     notes: 'Clean break after consolidation', tags: ['forex', 'breakout'], rating: 5,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(4), updated_at: daysAgo(3),
   },
   {
@@ -232,6 +245,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '4H', strategy: 'Momentum', setup_type: 'Momentum',
     notes: 'ETF inflows driving price', tags: ['crypto', 'momentum'], rating: 5,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(2), updated_at: daysAgo(1),
   },
   {
@@ -244,6 +258,7 @@ export const GUEST_MOCK_TRADES: Trade[] = [
     timeframe: '1H', strategy: 'Trend Following', setup_type: 'Pullback',
     notes: 'Waiting for target', tags: ['forex', 'open'], rating: null,
     stop_size: null, import_row_hash: null,
+    import_batch_id: null,
     created_at: daysAgo(0), updated_at: daysAgo(0),
   },
 ];
