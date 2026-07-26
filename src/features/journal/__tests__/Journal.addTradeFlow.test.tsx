@@ -251,7 +251,7 @@ describe('Journal — Add Trade flow', () => {
     expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalled();
 
     // Save was NOT called
-    expect(createTradeMutateAsync).not.toHaveBeenCalled();
+    expect(createTrade).not.toHaveBeenCalled();
   });
 
   it('lists missing required fields when submitting an empty form', async () => {
