@@ -747,9 +747,9 @@ export default function Journal() {
       const wasOpen = !editingTrade || editingTrade.status !== 'closed';
       let savedTrade: Trade | null = null;
       if (editingTrade) {
-        savedTrade = (await updateTrade.mutateAsync({ id: editingTrade.id, ...payload })) as Trade;
+        savedTrade = await updateTrade({ id: editingTrade.id, ...payload });
       } else {
-        savedTrade = (await createTrade.mutateAsync(payload)) as Trade;
+        savedTrade = await createTrade(payload);
       }
       setIsAddTradeOpen(false);
       resetForm();
