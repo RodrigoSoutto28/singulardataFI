@@ -1441,11 +1441,11 @@ export default function Journal() {
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={!isPayloadReady || createTrade.isPending || updateTrade.isPending}
+                    disabled={!isPayloadReady || isCreatePending || isUpdatePending}
                     title={!isPayloadReady ? `Faltan: ${missingRequired.map((k) => FIELD_LABEL_ES[k] ?? k).join(', ')}` : undefined}
                     className="btn-press"
                   >
-                    {(createTrade.isPending || updateTrade.isPending) && (
+                    {(isCreatePending || isUpdatePending) && (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     )}
                     {editingTrade ? (t.common.save ?? 'Save') : t.journal.registerTrade}
