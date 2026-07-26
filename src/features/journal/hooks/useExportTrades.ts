@@ -120,7 +120,7 @@ export function useExportTrades() {
     
     // Trades table
     doc.setFontSize(12);
-    doc.text('Trade Details', 14, (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15);
+    doc.text('Trade Details', 14, (doc as InstanceType<typeof jsPDF> & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15);
     
     const tableData = trades.map((trade) => [
       trade.symbol,
@@ -135,7 +135,7 @@ export function useExportTrades() {
     ]);
     
     autoTable(doc, {
-      startY: (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20,
+      startY: (doc as InstanceType<typeof jsPDF> & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20,
       head: [['Symbol', 'Dir', 'Status', 'Entry', 'Exit', 'P&L ($)', 'P&L (%)', 'Date', 'Strategy']],
       body: tableData,
       theme: 'striped',
