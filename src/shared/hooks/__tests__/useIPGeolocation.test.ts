@@ -37,7 +37,7 @@ describe('useIPGeolocation hook', () => {
 
   it('initializes with cached value if present', () => {
     vi.mocked(detectLanguageByIPFromCache).mockReturnValue(mockDetection);
-    vi.mocked(getCachedGeolocation).mockReturnValue(mockDetection);
+    vi.mocked(getCachedGeolocation).mockReturnValue(mockGeolocation);
 
     const { result } = renderHook(() => useIPGeolocation());
 
