@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useIPGeolocation } from '../useIPGeolocation';
-import { detectLanguageByIP, detectLanguageByIPFromCache } from '@/shared/lib/geolocation/ip-detector';
+import { detectLanguageByIP, detectLanguageByIPFromCache, IPLanguageDetection } from '@/shared/lib/geolocation/ip-detector';
 import { clearGeolocationCache, getCachedGeolocation } from '@/shared/lib/geolocation/cache';
 
 vi.mock('@/shared/lib/geolocation/ip-detector', () => ({
