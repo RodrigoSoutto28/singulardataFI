@@ -213,6 +213,11 @@ export function useTrades() {
 
   const importTrades = async (trades: Omit<TradeInsert, 'user_id'>[]) => importTradesMutation.mutateAsync(trades);
 
+  const isCreatePending = createTradeMutation.isPending;
+  const isUpdatePending = updateTradeMutation.isPending;
+  const isDeletePending = deleteTradeMutation.isPending;
+  const isImportPending = importTradesMutation.isPending;
+
   // In guest mode, replace all mutations with friendly no-ops
   if (isGuest) {
     return {
@@ -234,6 +239,10 @@ export function useTrades() {
         await guestNoOp();
         return [];
       },
+      isCreatePending: false,
+      isUpdatePending: false,
+      isDeletePending: false,
+      isImportPending: false,
       refetch: tradesQuery.refetch,
       syncBalance: () => Promise.resolve(),
       invalidateAndSyncBalance: async () => {},
@@ -248,6 +257,10 @@ export function useTrades() {
     updateTrade,
     deleteTrade,
     importTrades,
+    isCreatePending,
+    isUpdatePending,
+    isDeletePending,
+    isImportPending,
     refetch: tradesQuery.refetch,
     syncBalance: () => (user?.id ? syncAccountBalance(user.id, selectedAccountId) : Promise.resolve()),
     invalidateAndSyncBalance,
