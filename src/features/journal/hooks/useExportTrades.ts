@@ -147,7 +147,7 @@ export function useExportTrades() {
           fontStyle: 'bold',
         },
       },
-      didParseCell: (data: { column: { index: number }; section: string; cell: { raw: unknown; styles: { textColor: number[] } } }) => {
+      didParseCell: (data: any) => {
         // Color P&L column
         if (data.column.index === 5 && data.section === 'body') {
           const value = parseFloat(data.cell.raw as string);
