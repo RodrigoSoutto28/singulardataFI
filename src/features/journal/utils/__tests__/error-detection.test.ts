@@ -91,7 +91,7 @@ describe('error-detection', () => {
       };
 
       const currentTrade = {
-        symbol: 'EURUSD',
+        entry_date: '2025-06-01T10:00:00Z',
       };
 
       const result = detectPsychologicalErrors(currentTrade, todayTrades, checkIn);
