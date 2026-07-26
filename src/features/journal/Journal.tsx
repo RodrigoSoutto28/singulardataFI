@@ -814,7 +814,7 @@ export default function Journal() {
 
   const handleDeleteTrade = async () => {
     if (tradeToDelete) {
-      await deleteTrade.mutateAsync(tradeToDelete);
+      await deleteTrade(tradeToDelete);
       setTradeToDelete(null);
     }
   };
