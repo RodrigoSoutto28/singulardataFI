@@ -189,8 +189,8 @@ describe('Journal — Add Trade flow', () => {
 
     await user.click(d.getByRole('button', { name: /registrar operación/i }));
 
-    await waitFor(() => expect(createTradeMutateAsync).toHaveBeenCalledTimes(1));
-    const payload = createTradeMutateAsync.mock.calls[0][0];
+    await waitFor(() => expect(createTrade).toHaveBeenCalledTimes(1));
+    const payload = createTrade.mock.calls[0][0];
     expect(payload).toMatchObject({
       symbol: 'AAPL',
       direction: 'long',
