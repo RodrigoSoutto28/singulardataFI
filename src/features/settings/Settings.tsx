@@ -810,7 +810,7 @@ function GeolocationCard() {
                   onClick={reset}
                   className="gap-2 text-muted-foreground"
                 >
-                  <_TrashIcon className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3.5 w-3.5" />
                   {labels.clear}
                 </Button>
               )}
