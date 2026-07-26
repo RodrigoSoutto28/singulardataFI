@@ -2,7 +2,7 @@ import { Trade } from '@/features/journal/hooks/useTrades';
 
 type SampleTrade = Omit<
   Trade,
-  'id' | 'user_id' | 'created_at' | 'updated_at' | 'account_id' | 'import_batch_id' | 'import_row_hash'
+  'id' | 'user_id' | 'created_at' | 'updated_at' | 'account_id' | 'import_row_hash'
 >;
 
 const SYMBOLS = [
@@ -93,6 +93,7 @@ export function generateSampleTrades(): SampleTrade[] {
           : null,
       tags: null,
       rating: isWin ? Math.floor(rand(3, 6)) : Math.floor(rand(1, 4)),
+      import_batch_id: null,
     });
   }
 
