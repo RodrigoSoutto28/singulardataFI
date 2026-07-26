@@ -54,7 +54,7 @@ export function WelcomeModal({ open: openProp, onOpenChange, manual = false }: P
     setLoading(true);
     try {
       const samples = generateSampleTrades();
-      await importTrades.mutateAsync(samples);
+      await importTrades(samples);
       localStorage.setItem(STORAGE_KEY, 'true');
       toast.success('Datos de ejemplo cargados', {
         description: '30 operaciones de muestra agregadas a tu cuenta.',
@@ -145,7 +145,7 @@ export function useLoadSampleData() {
     setLoading(true);
     try {
       const samples = generateSampleTrades();
-      await importTrades.mutateAsync(samples);
+      await importTrades(samples);
       toast.success('Datos de ejemplo cargados', {
         description: '30 operaciones agregadas.',
       });

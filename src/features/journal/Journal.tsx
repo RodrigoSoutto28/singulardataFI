@@ -523,7 +523,7 @@ export default function Journal() {
       )
     );
 
-    const dbTrades: Array<Omit<Parameters<typeof importTrades.mutateAsync>[0][number], never> & { _importKey: string }> = [];
+    const dbTrades: Array<Omit<Parameters<typeof importTrades>[0][number], never> & { _importKey: string }> = [];
     const validationErrors: string[] = [];
     let skippedDuplicates = 0;
 
@@ -606,7 +606,7 @@ export default function Journal() {
       );
 
 
-      const inserted = await importTrades.mutateAsync(tradesWithBatch);
+      const inserted = await importTrades(tradesWithBatch);
       const insertedCount = inserted.length;
       const dbSkipped = dbTrades.length - insertedCount;
       const totalSkipped = skippedDuplicates + dbSkipped;
