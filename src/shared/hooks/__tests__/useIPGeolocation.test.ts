@@ -17,8 +17,10 @@ vi.mock('@/shared/lib/geolocation/cache', () => ({
 describe('useIPGeolocation hook', () => {
   const mockDetection = {
     countryCode: 'AR',
+    country: 'AR',
     countryName: 'Argentina',
     language: 'es',
+    confidence: 'high',
     cached: false,
     service: 'ipwho.is',
   };
