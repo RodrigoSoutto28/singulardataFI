@@ -167,7 +167,7 @@ export function useTrades() {
     },
   });
 
-  const importTrades = useMutation({
+  const importTradesMutation = useMutation({
     mutationFn: async (trades: Omit<TradeInsert, 'user_id'>[]) => {
       if (!user?.id) throw new Error('User not authenticated');
 
@@ -206,6 +206,8 @@ export function useTrades() {
       toast.error(getUserErrorMessage(error, 'No se pudieron importar las operaciones.'));
     },
   });
+
+  const importTrades = async (trades: Omit<TradeInsert, 'user_id'>[]) => importTradesMutation.mutateAsync(trades);
 
   // In guest mode, replace all mutations with friendly no-ops
   if (isGuest) {
