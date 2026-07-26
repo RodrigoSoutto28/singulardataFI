@@ -255,7 +255,7 @@ export default function Journal() {
   const { importFromFile, importFromFiles } = useImportTrades();
   const { canUseFeature } = useSubscription();
   const { upgradeModalOpen, featureMessage, recommendedPlan, openUpgradeModal, closeUpgradeModal } = useUpgradeModal();
-  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance } = useTrades();
+  const { trades, isLoading, createTrade, updateTrade, deleteTrade, importTrades, refetch, invalidateAndSyncBalance, isCreatePending, isUpdatePending } = useTrades();
   const { selectedAccount } = useTradingAccounts();
   const accountCurrency = selectedAccount?.currency ?? 'USD';
   const CURRENCY_SYMBOLS: Record<string, string> = {
