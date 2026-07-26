@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useIPGeolocation } from '../useIPGeolocation';
 import { detectLanguageByIP, detectLanguageByIPFromCache, IPLanguageDetection } from '@/shared/lib/geolocation/ip-detector';
 import { clearGeolocationCache, getCachedGeolocation } from '@/shared/lib/geolocation/cache';
+import type { GeolocationResult } from '@/shared/lib/geolocation/services';
 
 vi.mock('@/shared/lib/geolocation/ip-detector', () => ({
   detectLanguageByIP: vi.fn(),
