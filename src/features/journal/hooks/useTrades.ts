@@ -63,12 +63,10 @@ export function useTrades() {
   const queryClient = useQueryClient();
   const { selectedAccountId } = useSelectedAccountId();
 
-  // ── Guest mode: return demo data, all mutations are no-ops ──
-  const guestNoOp = useMutation({
-    mutationFn: async () => {
-      toast.info('Registrate para guardar tus operaciones.');
-    },
-  });
+  // ── Guest mode: return demo data, all mutations are friendly no-ops ──
+  const guestNoOp = async () => {
+    toast.info('Registrate para guardar tus operaciones.');
+  };
 
   const tradesQuery = useQuery({
     queryKey: ['trades', user?.id, selectedAccountId],
@@ -105,7 +103,7 @@ export function useTrades() {
   };
 
 
-  const createTrade = useMutation({
+  const createTradeMutation = useMutation({
     mutationFn: async (trade: Omit<TradeInsert, 'user_id'>) => {
       if (!user?.id) throw new Error('User not authenticated');
 
@@ -133,7 +131,9 @@ export function useTrades() {
     },
   });
 
-  const updateTrade = useMutation({
+  const createTrade = async (trade: Omit<TradeInsert, 'user_id'>) => createTradeMutation.mutateAsync(trade);
+
+  const updateTradeMutation = useMutation({
     mutationFn: async ({ id, ...updates }: TradeUpdate & { id: string }) => {
       const { data, error } = await supabase
         .from('trades')
@@ -153,7 +153,9 @@ export function useTrades() {
     },
   });
 
-  const deleteTrade = useMutation({
+  const updateTrade = async ({ id, ...updates }: TradeUpdate & { id: string }) => updateTradeMutation.mutateAsync({ id, ...updates });
+
+  const deleteTradeMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('trades').delete().eq('id', id);
       if (error) throw error;
@@ -166,6 +168,8 @@ export function useTrades() {
       toast.error(getUserErrorMessage(error, 'No se pudo eliminar.'));
     },
   });
+
+  const deleteTrade = async (id: string) => deleteTradeMutation.mutateAsync(id);
 
   const importTradesMutation = useMutation({
     mutationFn: async (trades: Omit<TradeInsert, 'user_id'>[]) => {
@@ -215,11 +219,19 @@ export function useTrades() {
       trades: tradesQuery.data ?? GUEST_MOCK_TRADES,
       isLoading: tradesQuery.isLoading,
       error: null,
-      createTrade: guestNoOp,
-      updateTrade: guestNoOp,
-      deleteTrade: guestNoOp,
+      createTrade: async () => {
+        await guestNoOp();
+        return null;
+      },
+      updateTrade: async () => {
+        await guestNoOp();
+        return null;
+      },
+      deleteTrade: async () => {
+        await guestNoOp();
+      },
       importTrades: async () => {
-        toast.info('Registrate para guardar tus operaciones.');
+        await guestNoOp();
         return [];
       },
       refetch: tradesQuery.refetch,
