@@ -42,19 +42,23 @@ vi.mock('sonner', () => ({
 }));
 
 // ---------- hook mocks ----------
-const createTradeMutateAsync = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
-const updateTradeMutateAsync = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
-const deleteTradeMutateAsync = vi.fn().mockResolvedValue(undefined);
-const importTradesMutateAsync = vi.fn().mockResolvedValue([]);
+const createTrade = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
+const updateTrade = vi.fn().mockResolvedValue({ id: 't-1', status: 'open' });
+const deleteTrade = vi.fn().mockResolvedValue(undefined);
+const importTrades = vi.fn().mockResolvedValue([]);
 
 vi.mock('@/features/journal/hooks/useTrades', () => ({
   useTrades: () => ({
     trades: [],
     isLoading: false,
-    createTrade: { mutateAsync: createTradeMutateAsync, isPending: false },
-    updateTrade: { mutateAsync: updateTradeMutateAsync, isPending: false },
-    deleteTrade: { mutateAsync: deleteTradeMutateAsync, isPending: false },
-    importTrades: { mutateAsync: importTradesMutateAsync, isPending: false },
+    createTrade,
+    updateTrade,
+    deleteTrade,
+    importTrades,
+    isCreatePending: false,
+    isUpdatePending: false,
+    isDeletePending: false,
+    isImportPending: false,
     refetch: vi.fn(),
     invalidateAndSyncBalance: vi.fn(),
   }),
