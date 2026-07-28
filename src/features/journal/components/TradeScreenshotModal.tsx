@@ -9,7 +9,7 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Loader2, Upload, Trash2, Image, X, ZoomIn } from 'lucide-react';
+import { Loader2, Upload, Trash2, Image, X, ZoomIn, Save, CheckCircle2 } from 'lucide-react';
 import { useTradeScreenshots, type TradeScreenshot } from '@/features/journal/hooks/useTradeScreenshots';
 import { cn } from '@/shared/lib/utils';
 import { Trade } from '@/features/journal/hooks/useTrades';
@@ -28,6 +28,11 @@ export function TradeScreenshotModal({ open, onClose, trade }: TradeScreenshotMo
   const [zoomedUrl, setZoomedUrl] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Preview state (before saving)
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+
   const { uploading, uploadScreenshot, fetchScreenshots, deleteScreenshot } = useTradeScreenshots();
 
   // Load screenshots when modal opens
@@ -39,18 +44,53 @@ export function TradeScreenshotModal({ open, onClose, trade }: TradeScreenshotMo
       .finally(() => setLoadingList(false));
   }, [open, trade.id]);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Clean up object URL when preview changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const result = await uploadScreenshot(trade.id, file, caption || undefined);
+    // Basic client-side validation
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    if (!allowed.includes(ext)) return;
+
+    // Revoke previous preview URL to avoid memory leaks
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    setPreviewFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setJustSaved(false);
+
+    // Reset input to allow re-selecting same file
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSave = async () => {
+    if (!previewFile) return;
+
+    const result = await uploadScreenshot(trade.id, previewFile, caption || undefined);
     if (result) {
       setScreenshots((prev) => [result, ...prev]);
       setCaption('');
+      setPreviewFile(null);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2500);
     }
+  };
 
-    // Reset input so same file can be re-selected
-    if (fileInputRef.current) fileInputRef.current.value = '';
+  const handleCancelPreview = () => {
+    setPreviewFile(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setCaption('');
   };
 
   const handleDelete = async (screenshot: TradeScreenshot) => {
@@ -76,49 +116,112 @@ export function TradeScreenshotModal({ open, onClose, trade }: TradeScreenshotMo
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-            {/* Upload section */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+            {/* ── Upload section ── */}
             <div className="space-y-3">
               <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Agregar nueva captura
               </Label>
-              <Input
-                placeholder="Descripción opcional (ej: entrada, setup)"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                className="bg-muted/30 text-sm"
-                disabled={uploading}
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full gap-2 border-dashed hover:border-primary/50"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-                {uploading ? 'Subiendo...' : 'Seleccionar imagen'}
-              </Button>
-              <p className="text-[10px] text-muted-foreground text-center">
-                PNG, JPG, WEBP o GIF · máx. 5 MB
-              </p>
+
+              {/* Image preview before saving */}
+              {previewUrl ? (
+                <div className="space-y-3">
+                  {/* Thumbnail preview */}
+                  <div className="relative rounded-lg overflow-hidden border border-border bg-muted/20">
+                    <img
+                      src={previewUrl}
+                      alt="Vista previa"
+                      className="w-full max-h-52 object-contain bg-black/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCancelPreview}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-background/80 hover:bg-background transition-colors"
+                      title="Cancelar selección"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-background/80 backdrop-blur-sm text-[10px] text-muted-foreground truncate">
+                      {previewFile?.name} · {((previewFile?.size ?? 0) / 1024).toFixed(0)} KB
+                    </div>
+                  </div>
+
+                  {/* Caption input */}
+                  <Input
+                    placeholder="Descripción opcional (ej: entrada, setup)"
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    className="bg-muted/30 text-sm"
+                    disabled={uploading}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                  />
+
+                  {/* Save & Cancel buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={handleCancelPreview}
+                      disabled={uploading}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1.5" />
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      onClick={handleSave}
+                      disabled={uploading}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Save className="h-3.5 w-3.5" />
+                      )}
+                      {uploading ? 'Guardando...' : 'Guardar imagen'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                /* Select image button */
+                <div className="space-y-2">
+                  {justSaved && (
+                    <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-md px-3 py-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                      Captura guardada correctamente
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2 border-dashed hover:border-primary/50"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="h-4 w-4" />
+                    Seleccionar imagen
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    PNG, JPG, WEBP o GIF · máx. 5 MB
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Existing screenshots */}
+            {/* ── Saved screenshots ── */}
             <div className="space-y-2">
               <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Capturas guardadas
+                Capturas guardadas {screenshots.length > 0 && `(${screenshots.length})`}
               </Label>
 
               {loadingList ? (
@@ -145,13 +248,13 @@ export function TradeScreenshotModal({ open, onClose, trade }: TradeScreenshotMo
                         onClick={() => setZoomedUrl(sc.image_url)}
                         loading="lazy"
                       />
-                      {/* Overlay on hover */}
+                      {/* Hover overlay */}
                       <div className="absolute inset-0 bg-background/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button
                           type="button"
                           onClick={() => setZoomedUrl(sc.image_url)}
                           className="p-1.5 rounded-md bg-muted hover:bg-muted/80 transition-colors"
-                          title="Ver a pantalla completa"
+                          title="Ver ampliada"
                         >
                           <ZoomIn className="h-4 w-4" />
                         </button>
@@ -192,7 +295,7 @@ export function TradeScreenshotModal({ open, onClose, trade }: TradeScreenshotMo
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox / zoom view */}
+      {/* Lightbox */}
       {zoomedUrl && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-background/90 backdrop-blur-sm"

@@ -1374,41 +1374,56 @@ export default function Journal() {
                   </div>
                 </div>
 
-                {/* Auto P&L + Riesgo + R:R preview */}
-                {(() => {
-                  const entry = parseFloat(formData.entry_price);
-                  const exit = parseFloat(formData.exit_price);
-                  const qty = parseFloat(formData.quantity);
+                {/* Panel de resultados reales (sólo visible al editar si el trade tiene datos) */}
+                {editingTrade && (() => {
+                  const realPnl = editingTrade.pnl;
+                  const realPct = editingTrade.pnl_percentage;
+                  const realStop = editingTrade.stop_loss;
+                  const realTp = editingTrade.take_profit;
                   const stopSize = parseFloat(formData.stop_size);
                   const tp = parseFloat(formData.take_profit);
-                  const hasPnl = !isNaN(entry) && !isNaN(exit) && !isNaN(qty) && !!formData.direction;
-                  const hasRisk = !isNaN(stopSize) && stopSize !== 0;
-                  const hasRR = hasRisk && !isNaN(tp) && tp !== 0;
-                  if (!hasPnl && !hasRisk && !hasRR) return null;
-                  let pnl = 0, pct = 0, rr = 0;
-                  if (hasPnl) {
-                    const diff = formData.direction === 'long' ? exit - entry : entry - exit;
-                    pnl = diff * qty;
-                    pct = entry !== 0 ? (diff / entry) * 100 : 0;
-                  }
-                  if (hasRR) {
-                    rr = Math.abs(stopSize) > 0 ? Math.abs(tp) / Math.abs(stopSize) : 0;
-                  }
+                  const hasRR = !isNaN(stopSize) && stopSize !== 0 && !isNaN(tp) && tp !== 0;
+                  const rr = hasRR ? Math.abs(tp) / Math.abs(stopSize) : 0;
+
+                  const hasAnything = realPnl !== null || realStop !== null || realTp !== null || hasRR;
+                  if (!hasAnything) return null;
+
                   return (
                     <div className="space-y-2">
-                      {hasPnl && (
+                      {/* P&L real del trade */}
+                      {realPnl !== null && (
                         <div className={cn(
                           'flex items-center justify-between rounded-md px-3 py-2.5 border',
-                          pnl >= 0 ? 'bg-profit/5 border-profit/20' : 'bg-loss/5 border-loss/20'
+                          realPnl >= 0 ? 'bg-profit/5 border-profit/20' : 'bg-loss/5 border-loss/20'
                         )}>
-                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">{t.journal.pnlEstimated ?? 'P&L Estimado'}</span>
-                          <span className={cn('font-mono font-bold', pnl >= 0 ? 'text-profit' : 'text-loss')}>
-                            {pnl >= 0 ? '+' : ''}{currencySymbol}{pnl.toFixed(2)} ({pct >= 0 ? '+' : ''}{pct.toFixed(2)}%)
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+                            P&amp;L Real
+                          </span>
+                          <span className={cn('font-mono font-bold text-sm', realPnl >= 0 ? 'text-profit' : 'text-loss')}>
+                            {realPnl >= 0 ? '+' : ''}{currencySymbol}{realPnl.toFixed(2)}
+                            {realPct !== null && (
+                              <span className="ml-1.5 text-xs font-normal opacity-70">
+                                ({realPct >= 0 ? '+' : ''}{realPct.toFixed(2)}%)
+                              </span>
+                            )}
                           </span>
                         </div>
                       )}
-                      {/* Riesgo estimado removido: el usuario ingresa el stop manualmente */}
-
+                      {/* Stop Loss real registrado */}
+                      {realStop !== null && (
+                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-loss/5 border-loss/20">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Stop Loss</span>
+                          <span className="font-mono font-bold text-sm text-loss">{currencySymbol}{Number(realStop).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {/* Take Profit real registrado */}
+                      {realTp !== null && (
+                        <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-profit/5 border-profit/20">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Take Profit</span>
+                          <span className="font-mono font-bold text-sm text-profit">{currencySymbol}{Number(realTp).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {/* R:R calculado desde los campos manuales */}
                       {hasRR && rr > 0 && (
                         <div className="flex items-center justify-between rounded-md px-3 py-2.5 border bg-muted/30 border-border">
                           <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">R:R</span>
