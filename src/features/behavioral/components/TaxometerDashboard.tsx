@@ -51,7 +51,7 @@ export function TaxometerDashboard() {
     name: ERROR_LABELS[type as ErrorType] ?? type,
     value: d.total_cost,
     count: d.count,
-    color: ERROR_TONE[type as ErrorType] ?? 'hsl(var(--primary))',
+    color: ERROR_TONE[type as ErrorType] ?? 'hsl(var(--chart-1))',
   }));
 
   const cmp = comparison(stats.totalCost);
