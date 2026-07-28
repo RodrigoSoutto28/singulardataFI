@@ -600,7 +600,7 @@ export default function Analytics() {
                           <Bar
                             dataKey="winRate"
                             radius={[4, 4, 0, 0]}
-                            fill="hsl(var(--primary))"
+                            fill="hsl(var(--chart-1))"
                             name="Win Rate (%)"
                             maxBarSize={45}
                           >
@@ -629,7 +629,7 @@ export default function Analytics() {
                           <Bar
                             dataKey="pnl"
                             radius={[4, 4, 0, 0]}
-                            fill="hsl(var(--primary))"
+                            fill="hsl(var(--chart-1))"
                             name="P&L ($)"
                             maxBarSize={45}
                           >

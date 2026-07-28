@@ -63,12 +63,12 @@
 
     --radius: 1rem;
 
-    /* Charts - paleta cálida + neutros */
-    --chart-1: 32 35% 55%;
-    --chart-2: 30 45% 68%;
-    --chart-3: 28 30% 45%;
+    /* Charts - paleta cálida + neutros (WCAG 2.1 AA: >=3:1 vs --card) */
+    --chart-1: 32 45% 45%;
+    --chart-2: 30 45% 46%;
+    --chart-3: 28 30% 40%;
     --chart-4: 220 14% 40%;
-    --chart-5: 35 25% 75%;
+    --chart-5: 35 25% 45%;
 
     --teal: 30 45% 72%;
 
@@ -116,7 +116,7 @@
     --warning: 32 95% 60%;
     --warning-foreground: 220 18% 11%;
     --profit: 165 70% 36%;
-    --loss: 0 75% 46%;
+    --loss: 0 75% 63%;
 
     /* Borders sutiles, casi imperceptibles */
     --border: 220 12% 22%;
