@@ -34,7 +34,7 @@
 
     /* Muted - tono gris medio para empty states y zonas secundarias */
     --muted: 215 14% 87%;
-    --muted-foreground: 215 16% 42%;
+    --muted-foreground: 215 16% 34%;
 
     /* Accent: #D9BE9F - beige claro */
     --accent: 30 45% 72%;
@@ -48,8 +48,8 @@
     --success: 165 70% 32%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning - NARANJA BRILLANTE */
-    --warning: 32 95% 50%;
+    /* Warning - NARANJA (oscurecido para cumplir WCAG AA sobre fondos claros) */
+    --warning: 32 95% 30%;
     --warning-foreground: 0 0% 100%;
 
     /* Profit/Loss - TONOS OSCUROS E INSTITUCIONALES */
@@ -1422,7 +1422,7 @@
   }
 
   .text-attention {
-    color: hsl(32 95% 50%);
+    color: hsl(var(--warning));
   }
 
   .bg-premium {
