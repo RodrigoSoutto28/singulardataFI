@@ -1422,7 +1422,7 @@
   }
 
   .text-attention {
-    color: hsl(32 95% 50%);
+    color: hsl(var(--warning));
   }
 
   .bg-premium {
