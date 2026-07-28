@@ -83,6 +83,7 @@ import { UpgradeModal, useUpgradeModal } from '@/shared/components/ui/UpgradeMod
 import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
+import { TradeScreenshotModal } from '@/features/journal/components/TradeScreenshotModal';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
 import { TaxometerAlert } from '@/features/behavioral/components/TaxometerAlert';
@@ -132,6 +133,7 @@ export default function Journal() {
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [validatorTrade, setValidatorTrade] = useState<Trade | null>(null);
+  const [screenshotTrade, setScreenshotTrade] = useState<Trade | null>(null);
 
   // Alert Dialog states
   const [tradeToDelete, setTradeToDelete] = useState<string | null>(null);
@@ -939,7 +941,10 @@ export default function Journal() {
                 <Pencil className="lucide lucide-pencil h-3.5 w-3.5 text-justify" />
                 {t.journal.editTrade}
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2">
+              <DropdownMenuItem
+                className="gap-2"
+                onSelect={(e) => { e.preventDefault(); setScreenshotTrade(trade); }}
+              >
                 <Image className="h-4 w-4" />
                 {t.journal.addScreenshot}
               </DropdownMenuItem>
@@ -1701,6 +1706,15 @@ export default function Journal() {
             symbol: validatorTrade.symbol,
             direction: validatorTrade.direction as 'long' | 'short',
           }}
+        />
+      )}
+
+      {/* Screenshot Modal */}
+      {screenshotTrade && (
+        <TradeScreenshotModal
+          open={!!screenshotTrade}
+          onClose={() => setScreenshotTrade(null)}
+          trade={screenshotTrade}
         />
       )}
 
