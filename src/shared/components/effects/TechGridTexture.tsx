@@ -35,7 +35,7 @@ export function TechGridTexture() {
             <path
               d="M 32 0 L 0 0 0 32"
               fill="none"
-              stroke={`hsl(var(--primary) / ${isLight ? 0.18 : 0.05})`}
+              stroke={`hsl(var(--primary) / ${isLight ? 0.22 : 0.05})`}
               strokeWidth="1"
             />
           </pattern>
@@ -48,19 +48,19 @@ export function TechGridTexture() {
             <path
               d="M 128 0 L 0 0 0 128"
               fill="none"
-              stroke={`hsl(var(--primary) / ${isLight ? 0.28 : 0.08})`}
+              stroke={`hsl(var(--primary) / ${isLight ? 0.32 : 0.08})`}
               strokeWidth="1"
             />
             {/* Corner ticks */}
             <path
               d="M 0 0 L 6 0 M 0 0 L 0 6"
-              stroke={`hsl(var(--accent) / ${isLight ? 0.75 : 0.35})`}
+              stroke={`hsl(var(--accent) / ${isLight ? 0.80 : 0.35})`}
               strokeWidth="1"
             />
           </pattern>
           <radialGradient id="techgrid-vignette" cx="50%" cy="50%" r="70%">
             <stop offset="0%" stopColor="hsl(var(--background))" stopOpacity="0" />
-            <stop offset="100%" stopColor="hsl(var(--background))" stopOpacity={isLight ? 0.55 : 0.85} />
+            <stop offset="100%" stopColor="hsl(var(--background))" stopOpacity={isLight ? 0.45 : 0.85} />
           </radialGradient>
         </defs>
         <rect width="100%" height="100%" fill="url(#techgrid-fine)" />
@@ -73,8 +73,8 @@ export function TechGridTexture() {
         className="absolute inset-0"
         style={{
           background: `
-            radial-gradient(ellipse 70% 50% at 0% 0%, hsl(var(--primary) / ${isLight ? 0.14 : 0.06}) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 45% at 100% 100%, hsl(var(--accent) / ${isLight ? 0.13 : 0.05}) 0%, transparent 55%)
+            radial-gradient(ellipse 70% 50% at 0% 0%, hsl(var(--primary) / ${isLight ? 0.16 : 0.06}) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 45% at 100% 100%, hsl(var(--accent) / ${isLight ? 0.15 : 0.05}) 0%, transparent 55%)
           `,
         }}
       />
