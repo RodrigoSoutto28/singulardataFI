@@ -21,7 +21,7 @@ export function MentalStateCard({ disciplineScore, className }: MentalStateCardP
   const getDisciplineStatus = (score: number) => {
     if (score >= 8) return { label: t.common?.excellent ?? 'Excelente', color: 'text-success', emoji: '🔥' };
     if (score >= 6) return { label: t.common?.good ?? 'Bien', color: 'text-warning', emoji: '👍' };
-    return { label: t.common?.improvable ?? 'Mejorable', color: 'text-[hsl(28_95%_55%)]', emoji: '⚠️' };
+    return { label: t.common?.improvable ?? 'Mejorable', color: 'text-warning', emoji: '⚠️' };
   };
 
   const status = getDisciplineStatus(disciplineScore);
