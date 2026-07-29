@@ -84,6 +84,7 @@ import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
 import { TradeScreenshotModal } from '@/features/journal/components/TradeScreenshotModal';
+import { useTradeScreenshots } from '@/features/journal/hooks/useTradeScreenshots';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
 import { TaxometerAlert } from '@/features/behavioral/components/TaxometerAlert';
