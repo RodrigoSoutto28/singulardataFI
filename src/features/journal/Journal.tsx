@@ -1420,7 +1420,107 @@ export default function Journal() {
                     />
                     {formErrors.strategy && <p className="text-xs text-destructive">{formErrors.strategy}</p>}
                   </div>
+
+                  {/* Resultado manual de la operación */}
+                  {formData.status === 'closed' && (
+                    <div className="col-span-2 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.journal.resultSection ?? 'Resultado de la operación'} *
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {(t.journal.pnlManual ?? 'Resultado (P&L)')} ({accountCurrency})
+                          </Label>
+                          <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-mono text-muted-foreground">
+                              {currencySymbol}
+                            </span>
+                            <Input
+                              type="number"
+                              step="any"
+                              inputMode="decimal"
+                              placeholder="ej. -120.50"
+                              className={cn(
+                                'bg-muted/30 font-mono pl-7',
+                                Number.isFinite(parseFloat(formData.pnl)) &&
+                                  (parseFloat(formData.pnl) >= 0 ? 'text-profit' : 'text-loss'),
+                              )}
+                              value={formData.pnl}
+                              onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
+                              aria-invalid={!!formErrors.pnl}
+                            />
+                          </div>
+                          {formErrors.pnl && <p className="text-xs text-destructive">{formErrors.pnl}</p>}
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t.journal.pnlPercentManual ?? 'Resultado %'}
+                          </Label>
+                          <Input
+                            type="number"
+                            step="any"
+                            inputMode="decimal"
+                            placeholder={t.journal.optional ?? 'opcional'}
+                            className="bg-muted/30 font-mono"
+                            value={formData.pnl_percentage}
+                            onChange={(e) => setFormData(prev => ({ ...prev, pnl_percentage: e.target.value }))}
+                            aria-invalid={!!formErrors.pnl_percentage}
+                          />
+                          {formErrors.pnl_percentage && <p className="text-xs text-destructive">{formErrors.pnl_percentage}</p>}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {t.journal.pnlHint ?? 'Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Captura / imagen con vista previa */}
+                  <div className="col-span-2 space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {t.journal.attachImage ?? 'Captura / Imagen'}
+                    </Label>
+                    <input
+                      ref={tradeImageInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={handleTradeImageSelect}
+                    />
+                    {!tradeImageUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => tradeImageInputRef.current?.click()}
+                        className="w-full h-20 rounded-lg border border-dashed border-border bg-muted/20 text-xs text-muted-foreground flex flex-col items-center justify-center gap-1 hover:border-primary hover:text-primary transition-colors"
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                        <span>{t.journal.attachImageHint ?? 'PNG, JPG, WEBP o GIF — máx. 5MB'}</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-2">
+                        <button type="button" onClick={() => setTradeImageZoom(true)} className="shrink-0">
+                          <img
+                            src={tradeImageUrl}
+                            alt={tradeImageFile?.name ?? 'preview'}
+                            className="h-16 w-24 rounded-md object-cover border border-border"
+                          />
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium">{tradeImageFile?.name}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {((tradeImageFile?.size ?? 0) / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" onClick={clearTradeImage}>
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">{t.journal.removeImage ?? 'Quitar imagen'}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
 
                 {/* Panel de resultados reales (sólo visible al editar si el trade tiene datos) */}
                 {editingTrade && (() => {
