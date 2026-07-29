@@ -1874,6 +1874,18 @@ export default function Journal() {
         />
       )}
 
+      {/* Vista previa ampliada de la imagen adjunta */}
+      <Dialog open={tradeImageZoom && !!tradeImageUrl} onOpenChange={(o) => !o && setTradeImageZoom(false)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-sm">{tradeImageFile?.name}</DialogTitle>
+          </DialogHeader>
+          {tradeImageUrl && (
+            <img src={tradeImageUrl} alt={tradeImageFile?.name ?? 'preview'} className="w-full rounded-md" />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Screenshot Modal */}
       {screenshotTrade && (
         <TradeScreenshotModal
