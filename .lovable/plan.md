@@ -1,32 +1,44 @@
-## Plan: Realzar la cuadrícula técnica en modo claro
+## Problema detectado
 
-### Resumen
-Aumentar la visibilidad de la textura de grid técnico en modo claro sin alterar el ADN institucional ni tocar el modo oscuro.
+En `src/features/journal/Journal.tsx` (función de guardado) el P&L se calcula automáticamente como:
 
-### Cambios propuestos
+```text
+pnl = (salida - entrada) * cantidad     (long)
+pnl = (entrada - salida) * cantidad     (short)
+```
 
-1. **Detección de modo claro en `TechGridTexture.tsx`**
-   - Usar `useTheme()` para detectar `theme === 'light'` o, preferentemente, aplicar dos estilos vía una clase `is-light` para evitar hidratación inconsistente.
+Esa fórmula sólo es válida para acciones/cripto en unidades; para forex, índices, futuros o CFDs (donde importa el valor del punto/lote) el resultado es incorrecto. Además, el formulario **no tiene campos visibles de P&L**: `pnl` y `pnl_percentage` existen en el estado pero nunca se muestran, así que el usuario no puede corregir el número calculado.
 
-2. **Incrementar opacidades en modo claro**
-   - Grid fino: de `0.05` a `0.12`.
-   - Grid grueso: de `0.08` a `0.18`.
-   - Ticks de esquina: de `0.35` a `0.55`.
-   - Dejar las opacidades actuales para `.dark` sin cambios.
+También, al **agregar** una operación no hay forma de adjuntar imagen: la carga de capturas sólo existe en `TradeScreenshotModal`, que se abre desde la lista una vez que el trade ya está guardado.
 
-3. **Aumentar tintes de profundidad en modo claro**
-   - Radial primary: de `0.06` a `0.10`.
-   - Radial accent: de `0.05` a `0.09`.
-   - Máscara vignette: reducir ligeramente la opacidad del fade en modo claro para que el grid se mantenga legible cerca de los bordes.
+## Cambios propuestos
 
-4. **Verificación visual**
-   - Prender el preview en modo claro (`/auth`, `/dashboard`) y confirmar que la cuadrícula se lee claramente sin competir con el contenido.
-   - Capturar comparación dark vs light para asegurar que no se vuelva demasiado fuerte.
+### 1. Eliminar el cálculo automático de P&L
+- Quitar del guardado el bloque que deriva `pnl` y `pnl_percentage` a partir de entrada/salida/cantidad.
+- El valor guardado será exactamente el que el usuario escriba (o `null` si lo deja vacío).
 
-### Archivos a modificar
-- `src/shared/components/effects/TechGridTexture.tsx`
+### 2. Campos manuales de resultado en el formulario
+- Nuevo bloque "Resultado de la operación", visible cuando el estado es **Cerrada**:
+  - **P&L (moneda de la cuenta)**: numérico, admite negativos (pérdida) y positivos (ganancia), con el símbolo de moneda como prefijo, igual que el campo "Tamaño del Stop".
+  - **P&L %**: numérico opcional, también manual.
+- Coloreado en vivo: verde si es positivo, rojo si es negativo.
+- Texto de ayuda: "Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)".
+- Al cambiar el estado a **Abierta**, ambos campos se limpian y se deshabilitan.
+- Al editar una operación existente, los campos se precargan con el valor guardado.
+- Requisito para cerrar: el P&L pasa a ser obligatorio en operaciones cerradas (se suma a la barra de progreso y a la validación con mensaje inline).
 
-### Fuera de alcance
-- Cambiar el color de los tokens primarios/accento.
-- Alterar el modo oscuro.
-- Reemplazar la textura por otra.
+### 3. Vista previa de imagen al agregar la operación
+- En el diálogo de alta se agrega una sección "Captura / Imagen" con botón de selección de archivo.
+- Al seleccionar, se muestra **miniatura de vista previa inmediata** (object URL), con nombre de archivo, tamaño y botón para quitarla; clic en la miniatura para ampliarla.
+- Validación: sólo `jpg/jpeg/png/webp/gif` y límite de tamaño, misma lista permitida que ya usa el modal de capturas.
+- La imagen se sube **después** de guardar la operación (se necesita el `trade_id`), reutilizando `useTradeScreenshots.uploadScreenshot`. Si la subida falla, la operación queda igualmente guardada y se avisa con un toast.
+- Al editar una operación se mantiene el modal actual de capturas; la sección nueva del formulario permite añadir una imagen más.
+
+### 4. Traducciones
+- Nuevas claves i18n (EN/ES/PT) en `src/shared/lib/i18n/translations.ts` para las etiquetas, ayudas y errores anteriores. Sin textos hardcodeados.
+
+### Detalles técnicos
+- Archivos: `src/features/journal/Journal.tsx`, `src/shared/lib/validation.ts` (esquema del formulario: `pnl` numérico finito requerido si `status === 'closed'`, `pnl_percentage` opcional), `src/shared/lib/i18n/translations.ts`.
+- Sin cambios de base de datos: las columnas `pnl` y `pnl_percentage` ya existen en `trades`.
+- El balance de la cuenta sigue sincronizándose desde `useTrades` con el P&L guardado, ahora con el valor manual.
+- Se actualizan los tests afectados (`Journal.addTradeFlow.test.tsx`, `Journal.addTrade.test.ts`) para el flujo cerrado con P&L manual, y se verifica typecheck + suite de tests.
