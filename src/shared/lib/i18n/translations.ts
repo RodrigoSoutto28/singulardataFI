@@ -184,6 +184,15 @@ export interface Translations {
     stopLoss: string;
     stopSize?: string;
     stopSizeHint?: string;
+    resultSection?: string;
+    pnlManual?: string;
+    pnlPercentManual?: string;
+    pnlHint?: string;
+    pnlRequired?: string;
+    attachImage?: string;
+    attachImageHint?: string;
+    removeImage?: string;
+    imageUploadFailed?: string;
     risk?: string;
     takeProfit: string;
     strategy: string;
