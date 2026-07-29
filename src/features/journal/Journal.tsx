@@ -1319,7 +1319,7 @@ export default function Journal() {
                       >{t.journal.closedStatus ?? 'Cerrada'}</button>
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, status: 'open', exit_price: '', exit_date: '' }))}
+                        onClick={() => setFormData(prev => ({ ...prev, status: 'open', exit_price: '', exit_date: '', pnl: '', pnl_percentage: '' }))}
                         className={cn(
                           'h-10 rounded-md border text-sm font-medium transition-all',
                           formData.status === 'open'
