@@ -786,8 +786,23 @@ export default function Journal() {
       } else {
         savedTrade = await createTrade(payload);
       }
+      // Subir la imagen adjunta (requiere el id de la operación ya guardada)
+      const pendingImage = tradeImageFile;
       setIsAddTradeOpen(false);
       resetForm();
+
+      if (savedTrade && pendingImage) {
+        try {
+          const uploaded = await uploadScreenshot(savedTrade.id, pendingImage);
+          if (!uploaded) {
+            toast.error(t.journal.imageUploadFailed ?? 'La operación se guardó, pero la imagen no se pudo subir.');
+          }
+        } catch {
+          toast.error(t.journal.imageUploadFailed ?? 'La operación se guardó, pero la imagen no se pudo subir.');
+        }
+      }
+
+
 
       // Log psychological errors that were not prevented
       if (savedTrade && detected.length > 0 && user?.id) {
