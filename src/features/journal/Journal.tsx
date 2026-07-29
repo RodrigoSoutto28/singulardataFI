@@ -656,6 +656,7 @@ export default function Journal() {
         symbol: 'Símbolo', direction: 'Dirección', entry_price: 'Precio entrada',
         quantity: 'Cantidad', exit_price: 'Precio salida', exit_date: 'Fecha cierre',
         stop_loss: 'Stop Loss', stop_size: 'Tamaño del Stop', take_profit: 'Take Profit', commission: 'Comisión',
+        pnl: 'Resultado (P&L)', pnl_percentage: 'Resultado %',
         strategy: 'Estrategia', entry_date: 'Fecha apertura', notes: 'Notas',
       };
       const names = Object.keys(errs).map((k) => labelMap[k] ?? k).join(', ');
