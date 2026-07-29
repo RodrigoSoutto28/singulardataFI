@@ -227,6 +227,7 @@ export default function Journal() {
     entry_date: 'Fecha entrada',
     exit_price: 'Precio salida',
     exit_date: 'Fecha salida',
+    pnl: 'Resultado (P&L)',
   };
   const requiredChecks = [
     { key: 'symbol', ok: formData.symbol.trim().length > 0 },
@@ -238,6 +239,7 @@ export default function Journal() {
       ? [
           { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
           { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
+          { key: 'pnl', ok: Number.isFinite(parseFloat(formData.pnl)) },
         ]
       : []),
   ];
