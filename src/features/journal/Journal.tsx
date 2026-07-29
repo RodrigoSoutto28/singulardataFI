@@ -678,19 +678,9 @@ export default function Journal() {
     const isClosed = formData.status === 'closed';
     const status: 'open' | 'closed' = isClosed ? 'closed' : 'open';
 
-    // Auto-calc P&L when both prices are present
-    let pnl: number | null = num(formData.pnl);
-    let pnlPct: number | null = num(formData.pnl_percentage);
-    if (isClosed && exit !== null && pnl === null) {
-      const diff = formData.direction === 'long' ? exit - entry : entry - exit;
-      pnl = +(diff * qty).toFixed(2);
-    }
-    if (isClosed && exit !== null && pnlPct === null && Number.isFinite(entry) && entry !== 0) {
-      const pct = formData.direction === 'long'
-        ? ((exit - entry) / entry) * 100
-        : ((entry - exit) / entry) * 100;
-      pnlPct = Number.isFinite(pct) ? +pct.toFixed(2) : null;
-    }
+    // P&L 100% manual — sin cálculo automático a partir de precios/cantidad
+    const pnl: number | null = isClosed ? num(formData.pnl) : null;
+    const pnlPct: number | null = isClosed ? num(formData.pnl_percentage) : null;
 
     const payload = {
       symbol: formData.symbol.toUpperCase(),
