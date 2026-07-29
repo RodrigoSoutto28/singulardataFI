@@ -184,6 +184,15 @@ export interface Translations {
     stopLoss: string;
     stopSize?: string;
     stopSizeHint?: string;
+    resultSection?: string;
+    pnlManual?: string;
+    pnlPercentManual?: string;
+    pnlHint?: string;
+    pnlRequired?: string;
+    attachImage?: string;
+    attachImageHint?: string;
+    removeImage?: string;
+    imageUploadFailed?: string;
     risk?: string;
     takeProfit: string;
     strategy: string;
@@ -711,6 +720,15 @@ const baseTranslations: Record<Language, Translations> = {
       stopLoss: 'Stop Loss',
       stopSize: 'Tamaño del Stop',
       stopSizeHint: 'Cuánto dinero estás dispuesto a perder si se ejecuta el stop',
+      resultSection: 'Resultado de la operación',
+      pnlManual: 'Resultado (P&L)',
+      pnlPercentManual: 'Resultado %',
+      pnlHint: 'Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)',
+      pnlRequired: 'Ingresá el resultado de la operación cerrada',
+      attachImage: 'Captura / Imagen',
+      attachImageHint: 'PNG, JPG, WEBP o GIF — máx. 5MB',
+      removeImage: 'Quitar imagen',
+      imageUploadFailed: 'La operación se guardó, pero la imagen no se pudo subir.',
       risk: 'Riesgo',
       takeProfit: 'Take Profit',
       strategy: 'Estrategia',
@@ -1182,6 +1200,15 @@ const baseTranslations: Record<Language, Translations> = {
       stopLoss: 'Stop Loss',
       stopSize: 'Stop Size',
       stopSizeHint: 'How much money you are willing to lose if the stop is hit',
+      resultSection: 'Trade result',
+      pnlManual: 'Result (P&L)',
+      pnlPercentManual: 'Result %',
+      pnlHint: 'Enter the actual profit or loss of the trade (negative = loss)',
+      pnlRequired: 'Enter the result of the closed trade',
+      attachImage: 'Screenshot / Image',
+      attachImageHint: 'PNG, JPG, WEBP or GIF — max 5MB',
+      removeImage: 'Remove image',
+      imageUploadFailed: 'The trade was saved, but the image could not be uploaded.',
       risk: 'Risk',
       takeProfit: 'Take Profit',
       strategy: 'Strategy',
@@ -1653,6 +1680,15 @@ const baseTranslations: Record<Language, Translations> = {
       stopLoss: 'Stop Loss',
       stopSize: 'Tamanho do Stop',
       stopSizeHint: 'Quanto dinheiro está disposto a perder se o stop for atingido',
+      resultSection: 'Resultado da operação',
+      pnlManual: 'Resultado (P&L)',
+      pnlPercentManual: 'Resultado %',
+      pnlHint: 'Digite o ganho ou perda real da operação (negativo = perda)',
+      pnlRequired: 'Informe o resultado da operação fechada',
+      attachImage: 'Captura / Imagem',
+      attachImageHint: 'PNG, JPG, WEBP ou GIF — máx. 5MB',
+      removeImage: 'Remover imagem',
+      imageUploadFailed: 'A operação foi salva, mas a imagem não pôde ser enviada.',
       risk: 'Risco',
       takeProfit: 'Take Profit',
       strategy: 'Estratégia',

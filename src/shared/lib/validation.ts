@@ -39,6 +39,20 @@ export const tradeFormSchema = z
       .union([z.literal(''), z.coerce.number().min(0, 'La comisión no puede ser negativa')])
       .optional()
       .nullable(),
+    pnl: z
+      .union([
+        z.literal(''),
+        z.coerce.number().refine((v) => Number.isFinite(v), 'El resultado debe ser numérico'),
+      ])
+      .optional()
+      .nullable(),
+    pnl_percentage: z
+      .union([
+        z.literal(''),
+        z.coerce.number().refine((v) => Number.isFinite(v), 'El porcentaje debe ser numérico'),
+      ])
+      .optional()
+      .nullable(),
     strategy: z.string().trim().max(100, 'Máximo 100 caracteres').optional(),
     notes: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional(),
     entry_date: z.string().min(1, 'La fecha de apertura es requerida'),
@@ -52,6 +66,10 @@ export const tradeFormSchema = z
       data.exit_price === undefined ||
       typeof data.exit_price === 'number',
     { path: ['exit_price'], message: 'Precio de salida inválido' }
+  )
+  .refine(
+    (data) => data.status !== 'closed' || typeof data.pnl === 'number',
+    { path: ['pnl'], message: 'Ingresá el resultado (P&L) de la operación cerrada' }
   );
 
 export type TradeFormValues = z.infer<typeof tradeFormSchema>;

@@ -62,6 +62,8 @@ import {
   TrendingUp,
   BarChart3,
   DollarSign,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -84,6 +86,7 @@ import { tradeFormSchema } from '@/shared/lib/validation';
 import { ProcessValidatorModal } from '@/features/journal/components/ProcessValidatorModal';
 import { hasValidation } from '@/features/journal/hooks/useProcessValidation';
 import { TradeScreenshotModal } from '@/features/journal/components/TradeScreenshotModal';
+import { useTradeScreenshots } from '@/features/journal/hooks/useTradeScreenshots';
 import { useAuth } from '@/features/auth/hooks/AuthContext';
 import { useTradingAccounts } from '@/features/dashboard/hooks/useTradingAccounts';
 import { TaxometerAlert } from '@/features/behavioral/components/TaxometerAlert';
@@ -227,6 +230,7 @@ export default function Journal() {
     entry_date: 'Fecha entrada',
     exit_price: 'Precio salida',
     exit_date: 'Fecha salida',
+    pnl: 'Resultado (P&L)',
   };
   const requiredChecks = [
     { key: 'symbol', ok: formData.symbol.trim().length > 0 },
@@ -238,6 +242,7 @@ export default function Journal() {
       ? [
           { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
           { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
+          { key: 'pnl', ok: Number.isFinite(parseFloat(formData.pnl)) },
         ]
       : []),
   ];
@@ -266,10 +271,49 @@ export default function Journal() {
   const currencySymbol = CURRENCY_SYMBOLS[accountCurrency] ?? '$';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Imagen adjunta al alta de la operación (preview antes de guardar) ──
+  const tradeImageInputRef = useRef<HTMLInputElement>(null);
+  const [tradeImageFile, setTradeImageFile] = useState<File | null>(null);
+  const [tradeImageUrl, setTradeImageUrl] = useState<string | null>(null);
+  const [tradeImageZoom, setTradeImageZoom] = useState(false);
+  const { uploadScreenshot } = useTradeScreenshots();
+
+  const clearTradeImage = () => {
+    setTradeImageUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setTradeImageFile(null);
+    if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+  };
+
+  const handleTradeImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedExt.includes(ext) || !allowedMime.includes(file.type)) {
+      toast.error('Formato no permitido. Usá PNG, JPG, WEBP o GIF.');
+      if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no puede superar 5MB.');
+      if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+      return;
+    }
+    if (tradeImageUrl) URL.revokeObjectURL(tradeImageUrl);
+    setTradeImageFile(file);
+    setTradeImageUrl(URL.createObjectURL(file));
+    if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+  };
+
   const resetForm = () => {
     setFormData(emptyForm);
     setEditingTrade(null);
     setFormErrors({});
+    clearTradeImage();
   };
 
   const openEditTrade = (trade: Trade) => {
@@ -654,6 +698,7 @@ export default function Journal() {
         symbol: 'Símbolo', direction: 'Dirección', entry_price: 'Precio entrada',
         quantity: 'Cantidad', exit_price: 'Precio salida', exit_date: 'Fecha cierre',
         stop_loss: 'Stop Loss', stop_size: 'Tamaño del Stop', take_profit: 'Take Profit', commission: 'Comisión',
+        pnl: 'Resultado (P&L)', pnl_percentage: 'Resultado %',
         strategy: 'Estrategia', entry_date: 'Fecha apertura', notes: 'Notas',
       };
       const names = Object.keys(errs).map((k) => labelMap[k] ?? k).join(', ');
@@ -676,19 +721,9 @@ export default function Journal() {
     const isClosed = formData.status === 'closed';
     const status: 'open' | 'closed' = isClosed ? 'closed' : 'open';
 
-    // Auto-calc P&L when both prices are present
-    let pnl: number | null = num(formData.pnl);
-    let pnlPct: number | null = num(formData.pnl_percentage);
-    if (isClosed && exit !== null && pnl === null) {
-      const diff = formData.direction === 'long' ? exit - entry : entry - exit;
-      pnl = +(diff * qty).toFixed(2);
-    }
-    if (isClosed && exit !== null && pnlPct === null && Number.isFinite(entry) && entry !== 0) {
-      const pct = formData.direction === 'long'
-        ? ((exit - entry) / entry) * 100
-        : ((entry - exit) / entry) * 100;
-      pnlPct = Number.isFinite(pct) ? +pct.toFixed(2) : null;
-    }
+    // P&L 100% manual — sin cálculo automático a partir de precios/cantidad
+    const pnl: number | null = isClosed ? num(formData.pnl) : null;
+    const pnlPct: number | null = isClosed ? num(formData.pnl_percentage) : null;
 
     const payload = {
       symbol: formData.symbol.toUpperCase(),
@@ -753,8 +788,23 @@ export default function Journal() {
       } else {
         savedTrade = await createTrade(payload);
       }
+      // Subir la imagen adjunta (requiere el id de la operación ya guardada)
+      const pendingImage = tradeImageFile;
       setIsAddTradeOpen(false);
       resetForm();
+
+      if (savedTrade && pendingImage) {
+        try {
+          const uploaded = await uploadScreenshot(savedTrade.id, pendingImage);
+          if (!uploaded) {
+            toast.error(t.journal.imageUploadFailed ?? 'La operación se guardó, pero la imagen no se pudo subir.');
+          }
+        } catch {
+          toast.error(t.journal.imageUploadFailed ?? 'La operación se guardó, pero la imagen no se pudo subir.');
+        }
+      }
+
+
 
       // Log psychological errors that were not prevented
       if (savedTrade && detected.length > 0 && user?.id) {
@@ -1269,7 +1319,7 @@ export default function Journal() {
                       >{t.journal.closedStatus ?? 'Cerrada'}</button>
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, status: 'open', exit_price: '', exit_date: '' }))}
+                        onClick={() => setFormData(prev => ({ ...prev, status: 'open', exit_price: '', exit_date: '', pnl: '', pnl_percentage: '' }))}
                         className={cn(
                           'h-10 rounded-md border text-sm font-medium transition-all',
                           formData.status === 'open'
@@ -1372,7 +1422,107 @@ export default function Journal() {
                     />
                     {formErrors.strategy && <p className="text-xs text-destructive">{formErrors.strategy}</p>}
                   </div>
+
+                  {/* Resultado manual de la operación */}
+                  {formData.status === 'closed' && (
+                    <div className="col-span-2 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.journal.resultSection ?? 'Resultado de la operación'} *
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {(t.journal.pnlManual ?? 'Resultado (P&L)')} ({accountCurrency})
+                          </Label>
+                          <div className="relative">
+                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-mono text-muted-foreground">
+                              {currencySymbol}
+                            </span>
+                            <Input
+                              type="number"
+                              step="any"
+                              inputMode="decimal"
+                              placeholder="ej. -120.50"
+                              className={cn(
+                                'bg-muted/30 font-mono pl-7',
+                                Number.isFinite(parseFloat(formData.pnl)) &&
+                                  (parseFloat(formData.pnl) >= 0 ? 'text-profit' : 'text-loss'),
+                              )}
+                              value={formData.pnl}
+                              onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
+                              aria-invalid={!!formErrors.pnl}
+                            />
+                          </div>
+                          {formErrors.pnl && <p className="text-xs text-destructive">{formErrors.pnl}</p>}
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t.journal.pnlPercentManual ?? 'Resultado %'}
+                          </Label>
+                          <Input
+                            type="number"
+                            step="any"
+                            inputMode="decimal"
+                            placeholder={t.journal.optional ?? 'opcional'}
+                            className="bg-muted/30 font-mono"
+                            value={formData.pnl_percentage}
+                            onChange={(e) => setFormData(prev => ({ ...prev, pnl_percentage: e.target.value }))}
+                            aria-invalid={!!formErrors.pnl_percentage}
+                          />
+                          {formErrors.pnl_percentage && <p className="text-xs text-destructive">{formErrors.pnl_percentage}</p>}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {t.journal.pnlHint ?? 'Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Captura / imagen con vista previa */}
+                  <div className="col-span-2 space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {t.journal.attachImage ?? 'Captura / Imagen'}
+                    </Label>
+                    <input
+                      ref={tradeImageInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={handleTradeImageSelect}
+                    />
+                    {!tradeImageUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => tradeImageInputRef.current?.click()}
+                        className="w-full h-20 rounded-lg border border-dashed border-border bg-muted/20 text-xs text-muted-foreground flex flex-col items-center justify-center gap-1 hover:border-primary hover:text-primary transition-colors"
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                        <span>{t.journal.attachImageHint ?? 'PNG, JPG, WEBP o GIF — máx. 5MB'}</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-2">
+                        <button type="button" onClick={() => setTradeImageZoom(true)} className="shrink-0">
+                          <img
+                            src={tradeImageUrl}
+                            alt={tradeImageFile?.name ?? 'preview'}
+                            className="h-16 w-24 rounded-md object-cover border border-border"
+                          />
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium">{tradeImageFile?.name}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {((tradeImageFile?.size ?? 0) / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" onClick={clearTradeImage}>
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">{t.journal.removeImage ?? 'Quitar imagen'}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
 
                 {/* Panel de resultados reales (sólo visible al editar si el trade tiene datos) */}
                 {editingTrade && (() => {
@@ -1723,6 +1873,18 @@ export default function Journal() {
           }}
         />
       )}
+
+      {/* Vista previa ampliada de la imagen adjunta */}
+      <Dialog open={tradeImageZoom && !!tradeImageUrl} onOpenChange={(o) => !o && setTradeImageZoom(false)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-sm">{tradeImageFile?.name}</DialogTitle>
+          </DialogHeader>
+          {tradeImageUrl && (
+            <img src={tradeImageUrl} alt={tradeImageFile?.name ?? 'preview'} className="w-full rounded-md" />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Screenshot Modal */}
       {screenshotTrade && (
