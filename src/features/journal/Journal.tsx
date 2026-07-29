@@ -268,10 +268,49 @@ export default function Journal() {
   const currencySymbol = CURRENCY_SYMBOLS[accountCurrency] ?? '$';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Imagen adjunta al alta de la operación (preview antes de guardar) ──
+  const tradeImageInputRef = useRef<HTMLInputElement>(null);
+  const [tradeImageFile, setTradeImageFile] = useState<File | null>(null);
+  const [tradeImageUrl, setTradeImageUrl] = useState<string | null>(null);
+  const [tradeImageZoom, setTradeImageZoom] = useState(false);
+  const { uploadScreenshot } = useTradeScreenshots();
+
+  const clearTradeImage = () => {
+    setTradeImageUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setTradeImageFile(null);
+    if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+  };
+
+  const handleTradeImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedExt.includes(ext) || !allowedMime.includes(file.type)) {
+      toast.error('Formato no permitido. Usá PNG, JPG, WEBP o GIF.');
+      if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no puede superar 5MB.');
+      if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+      return;
+    }
+    if (tradeImageUrl) URL.revokeObjectURL(tradeImageUrl);
+    setTradeImageFile(file);
+    setTradeImageUrl(URL.createObjectURL(file));
+    if (tradeImageInputRef.current) tradeImageInputRef.current.value = '';
+  };
+
   const resetForm = () => {
     setFormData(emptyForm);
     setEditingTrade(null);
     setFormErrors({});
+    clearTradeImage();
   };
 
   const openEditTrade = (trade: Trade) => {
