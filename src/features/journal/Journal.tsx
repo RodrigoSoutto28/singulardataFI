@@ -62,6 +62,8 @@ import {
   TrendingUp,
   BarChart3,
   DollarSign,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import {
   DropdownMenu,
