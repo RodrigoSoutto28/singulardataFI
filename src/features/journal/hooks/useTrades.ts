@@ -11,51 +11,42 @@ export type Trade = Tables<'trades'>;
 export type TradeInsert = TablesInsert<'trades'>;
 export type TradeUpdate = TablesUpdate<'trades'>;
 
-// Helper: sync the active account balance based on P&L of closed trades in THAT account
-async function syncAccountBalance(userId: string, accountId: string | null) {
-  let accountQuery = supabase
+// Helper: sync active account balances based on P&L of closed trades in each account
+export async function syncAccountBalance(userId: string, targetAccountId?: string | null) {
+  const { data: accounts, error: accountsError } = await supabase
     .from('trading_accounts')
     .select('id, initial_balance')
     .eq('user_id', userId)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('created_at', { ascending: true });
 
-  if (accountId) {
-    accountQuery = accountQuery.eq('id', accountId);
-  } else {
-    accountQuery = accountQuery.order('created_at', { ascending: true }).limit(1);
-  }
+  if (accountsError || !accounts || accounts.length === 0) return;
 
-  const { data: account, error: accountError } = await accountQuery.maybeSingle();
-  if (accountError || !account) return;
-
-  // Solo incluir trades con account_id explícito de ESTA cuenta.
-  // Los trades legados (account_id = null) solo se atribuyen a la primera cuenta
-  // cuando no se seleccionó ninguna cuenta específica (accountId === null).
-  let tradesQuery = supabase
+  const { data: trades, error: tradesError } = await supabase
     .from('trades')
-    .select('pnl')
+    .select('account_id, pnl')
     .eq('user_id', userId)
     .eq('status', 'closed');
 
-  if (accountId) {
-    // Cuenta específica: solo sus trades explícitos + legados sin asignar
-    tradesQuery = tradesQuery.or(`account_id.eq.${account.id},account_id.is.null`);
-  } else {
-    // Sin cuenta seleccionada: solo los trades sin account_id (verdaderos legados)
-    tradesQuery = tradesQuery.is('account_id', null);
-  }
-
-  const { data: trades, error: tradesError } = await tradesQuery;
   if (tradesError) return;
 
-  const totalPnl = trades?.reduce((sum, t) => sum + (t.pnl ?? 0), 0) ?? 0;
-  const newBalance = (account.initial_balance ?? 0) + totalPnl;
+  const firstAccountId = accounts[0].id;
 
-  await supabase
-    .from('trading_accounts')
-    .update({ current_balance: newBalance })
-    .eq('id', account.id);
+  for (const account of accounts) {
+    const accountTrades = (trades ?? []).filter(
+      (t) => t.account_id === account.id || (!t.account_id && account.id === firstAccountId)
+    );
+
+    const totalPnl = accountTrades.reduce((sum, t) => sum + (t.pnl ?? 0), 0);
+    const newBalance = (account.initial_balance ?? 0) + totalPnl;
+
+    await supabase
+      .from('trading_accounts')
+      .update({ current_balance: newBalance })
+      .eq('id', account.id);
+  }
 }
+
 
 
 export function useTrades() {
@@ -92,13 +83,14 @@ export function useTrades() {
   });
 
   const invalidateAndSyncBalance = async () => {
-    // Invalida tanto la lista completa como la vista paginada del Journal
-    await queryClient.invalidateQueries({ queryKey: ['trades', user?.id] });
-    await queryClient.invalidateQueries({ queryKey: ['trades-infinite', user?.id] });
+    // Invalida la lista completa, vista paginada del Journal y snapshots de analíticas
+    await queryClient.invalidateQueries({ queryKey: ['trades'] });
+    await queryClient.invalidateQueries({ queryKey: ['trades-infinite'] });
+    await queryClient.invalidateQueries({ queryKey: ['analytics_snapshots'] });
     if (user?.id) {
       await syncAccountBalance(user.id, selectedAccountId);
-      await queryClient.invalidateQueries({ queryKey: ['trading_accounts', user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['trading_accounts'] });
+      await queryClient.invalidateQueries({ queryKey: ['trading_account'] });
     }
   };
 

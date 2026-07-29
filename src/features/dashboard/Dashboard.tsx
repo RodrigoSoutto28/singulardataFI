@@ -155,7 +155,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-4">
-              <EquityChart data={equityCurve} className="border-0 bg-transparent p-0" />
+              <EquityChart data={equityCurve} initialBalance={account?.initial_balance ?? 10000} className="border-0 bg-transparent p-0" />
             </CardContent>
           </Card>
 

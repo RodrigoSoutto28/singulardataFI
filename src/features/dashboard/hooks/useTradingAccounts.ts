@@ -6,6 +6,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/shared/types/database';
 import { toast } from 'sonner';
 import { getUserErrorMessage } from '@/shared/lib/errors';
 import { GUEST_MOCK_ACCOUNT } from '@/features/auth/utils/guestMockData';
+import { syncAccountBalance } from '@/features/journal/hooks/useTrades';
 
 export type TradingAccount = Tables<'trading_accounts'>;
 export type TradingAccountInsert = TablesInsert<'trading_accounts'>;
@@ -160,11 +161,14 @@ export function useTradingAccounts() {
         .select()
         .single();
       if (error) throw error;
+      if (user?.id) {
+        await syncAccountBalance(user.id, accountId);
+      }
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trading_accounts', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['trading_account', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['trading_accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['trading_account'] });
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       queryClient.invalidateQueries({ queryKey: ['analytics_snapshots'] });
       toast.success('Balance inicial actualizado');

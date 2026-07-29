@@ -19,6 +19,7 @@ interface EquityDataPoint {
 
 interface EquityChartProps {
   data: EquityDataPoint[];
+  initialBalance?: number;
   className?: string;
 }
 
@@ -60,13 +61,17 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   return null;
 };
 
-export function EquityChart({ data, className }: EquityChartProps) {
+export function EquityChart({ data, initialBalance, className }: EquityChartProps) {
   const { t } = useLanguage();
 
-  const currentEquity = data.length ? data[data.length - 1].equity : 0;
-  const startEquity = data.length ? data[0].equity : 0;
-  const minEquity = data.length ? Math.min(...data.map((d) => d.equity)) : 0;
-  const maxEquity = data.length ? Math.max(...data.map((d) => d.equity)) : 0;
+  const chartData = data.length && initialBalance !== undefined
+    ? [{ date: 'Inicio', equity: initialBalance, pnl: 0 }, ...data]
+    : data;
+
+  const currentEquity = data.length ? data[data.length - 1].equity : (initialBalance ?? 0);
+  const startEquity = initialBalance !== undefined ? initialBalance : (data.length ? data[0].equity : 0);
+  const minEquity = chartData.length ? Math.min(...chartData.map((d) => d.equity)) : 0;
+  const maxEquity = chartData.length ? Math.max(...chartData.map((d) => d.equity)) : 0;
   const isPositiveTrend = currentEquity >= startEquity;
   const isNegativeBalance = currentEquity < 0;
 
@@ -99,16 +104,16 @@ export function EquityChart({ data, className }: EquityChartProps) {
       </div>
 
       {/* Chart - altura adaptativa según haya datos o no */}
-      <div className={cn(data.length === 0 ? 'h-[120px] sm:h-[140px]' : 'h-[200px] sm:h-[240px]')}>
+      <div className={cn(chartData.length === 0 ? 'h-[120px] sm:h-[140px]' : 'h-[200px] sm:h-[240px]')}>
 
-        {data.length === 0 ? (
+        {chartData.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 rounded-md bg-muted/40 border border-dashed border-border">
             <TrendingUp className="h-7 w-7 text-muted-foreground/50 mb-1.5" aria-hidden />
             <p className="text-sm font-medium text-muted-foreground">{t.dashboard.noTrades}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop

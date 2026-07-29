@@ -95,4 +95,31 @@ describe('useAnalytics — mathematical and behavioral metrics logic', () => {
     expect(confidentEmotion?.winRate).toBe(100);
     expect(confidentEmotion?.pnl).toBe(2000);
   });
+
+  it('dynamically computes equity curve for sequential loss and win trades', () => {
+    const mockTrades = [
+      {
+        status: 'closed',
+        pnl: -800,
+        entry_date: '2025-06-01T10:00:00',
+        exit_date: '2025-06-01T11:00:00',
+        symbol: 'EURUSD',
+      },
+      {
+        status: 'closed',
+        pnl: 1500,
+        entry_date: '2025-06-02T10:00:00',
+        exit_date: '2025-06-02T11:00:00',
+        symbol: 'GBPUSD',
+      },
+    ] as unknown as Trade[];
+
+    const { result } = renderHook(() => useAnalytics(mockTrades, [], 5000));
+    const { equityCurve, stats } = result.current;
+
+    expect(equityCurve).toHaveLength(2);
+    expect(equityCurve[0].equity).toBe(4200); // 5000 - 800
+    expect(equityCurve[1].equity).toBe(5700); // 4200 + 1500
+    expect(stats.totalPnl).toBe(700);
+  });
 });
