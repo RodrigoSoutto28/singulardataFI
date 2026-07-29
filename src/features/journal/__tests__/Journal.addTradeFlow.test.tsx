@@ -229,6 +229,9 @@ describe('Journal — Add Trade flow', () => {
     ) as HTMLInputElement;
     await user.type(exitDate, '2026-06-09T10:00');
 
+    // Resultado manual (P&L) — requerido para operaciones cerradas
+    await user.type(d.getByPlaceholderText(/ej\. -120\.50/), '-25');
+
     // Now offending 0 Stop Size / Take Profit
     await user.type(d.getByPlaceholderText(/ej\. -50\.00/), '0');
     await user.type(d.getByPlaceholderText(/ej\. 100\.00/), '0');
