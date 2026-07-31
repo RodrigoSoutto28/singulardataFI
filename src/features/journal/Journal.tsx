@@ -242,7 +242,15 @@ export default function Journal() {
       ? [
           { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
           { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
-          { key: 'pnl', ok: Number.isFinite(parseFloat(formData.pnl)) },
+          {
+            key: 'pnl',
+            ok:
+              formData.pnl.trim() !== '' &&
+              Number.isFinite(Number(formData.pnl)) &&
+              Math.abs(Number(formData.pnl)) <= 1_000_000_000 &&
+              Math.round(Number(formData.pnl) * 100) ===
+                Number((Number(formData.pnl) * 100).toFixed(6)),
+          },
         ]
       : []),
   ];
@@ -257,6 +265,34 @@ export default function Journal() {
   const progressPct = Math.round(((requiredDone + recommendedDone) / totalChecks) * 100);
   const isPayloadReady = requiredDone === requiredChecks.length;
   const missingRequired = requiredChecks.filter((c) => !c.ok).map((c) => c.key);
+
+  // --- Validación en vivo del resultado manual (P&L) ---
+  const tooManyDecimals = (v: number) => Math.round(v * 100) !== Number((v * 100).toFixed(6));
+  const pnlLiveError = (() => {
+    if (formData.status !== 'closed') return null;
+    const raw = formData.pnl.trim();
+    if (raw === '') return 'Ingresá el resultado (P&L) de la operación cerrada';
+    const v = Number(raw);
+    if (!Number.isFinite(v)) return 'El resultado (P&L) debe ser numérico';
+    if (Math.abs(v) > 1_000_000_000) return 'El resultado (P&L) está fuera de rango';
+    if (tooManyDecimals(v)) return 'El resultado (P&L) admite como máximo 2 decimales';
+    return null;
+  })();
+  const pnlPctLiveError = (() => {
+    if (formData.status !== 'closed') return null;
+    const raw = formData.pnl_percentage.trim();
+    if (raw === '') return null;
+    const v = Number(raw);
+    if (!Number.isFinite(v)) return 'El porcentaje debe ser numérico';
+    if (v < -10_000 || v > 10_000) return 'El porcentaje debe estar entre -10000 y 10000';
+    if (tooManyDecimals(v)) return 'El porcentaje admite como máximo 2 decimales';
+    const p = Number(formData.pnl);
+    if (Number.isFinite(p) && p !== 0 && v !== 0 && Math.sign(p) !== Math.sign(v)) {
+      return 'El porcentaje debe tener el mismo signo que el P&L (negativo = pérdida)';
+    }
+    return null;
+  })();
+
 
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
@@ -1447,13 +1483,19 @@ export default function Journal() {
                                 'bg-muted/30 font-mono pl-7',
                                 Number.isFinite(parseFloat(formData.pnl)) &&
                                   (parseFloat(formData.pnl) >= 0 ? 'text-profit' : 'text-loss'),
+                                (formErrors.pnl || pnlLiveError) && 'border-destructive',
                               )}
                               value={formData.pnl}
                               onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
-                              aria-invalid={!!formErrors.pnl}
+                              aria-invalid={!!(formErrors.pnl || pnlLiveError)}
+                              aria-describedby="pnl-error"
                             />
                           </div>
-                          {formErrors.pnl && <p className="text-xs text-destructive">{formErrors.pnl}</p>}
+                          {(formErrors.pnl || pnlLiveError) && (
+                            <p id="pnl-error" className="text-xs text-destructive">
+                              {formErrors.pnl || pnlLiveError}
+                            </p>
+                          )}
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -1464,13 +1506,22 @@ export default function Journal() {
                             step="any"
                             inputMode="decimal"
                             placeholder={t.journal.optional ?? 'opcional'}
-                            className="bg-muted/30 font-mono"
+                            className={cn(
+                              'bg-muted/30 font-mono',
+                              (formErrors.pnl_percentage || pnlPctLiveError) && 'border-destructive',
+                            )}
                             value={formData.pnl_percentage}
                             onChange={(e) => setFormData(prev => ({ ...prev, pnl_percentage: e.target.value }))}
-                            aria-invalid={!!formErrors.pnl_percentage}
+                            aria-invalid={!!(formErrors.pnl_percentage || pnlPctLiveError)}
+                            aria-describedby="pnl-pct-error"
                           />
-                          {formErrors.pnl_percentage && <p className="text-xs text-destructive">{formErrors.pnl_percentage}</p>}
+                          {(formErrors.pnl_percentage || pnlPctLiveError) && (
+                            <p id="pnl-pct-error" className="text-xs text-destructive">
+                              {formErrors.pnl_percentage || pnlPctLiveError}
+                            </p>
+                          )}
                         </div>
+
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         {t.journal.pnlHint ?? 'Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)'}
