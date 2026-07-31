@@ -42,17 +42,32 @@ export const tradeFormSchema = z
     pnl: z
       .union([
         z.literal(''),
-        z.coerce.number().refine((v) => Number.isFinite(v), 'El resultado debe ser numérico'),
+        z.coerce
+          .number({ invalid_type_error: 'El resultado (P&L) debe ser numérico' })
+          .refine((v) => Number.isFinite(v), 'El resultado (P&L) debe ser numérico')
+          .refine((v) => Math.abs(v) <= 1_000_000_000, 'El resultado (P&L) está fuera de rango')
+          .refine(
+            (v) => Math.round(v * 100) === Number((v * 100).toFixed(6)),
+            'El resultado (P&L) admite como máximo 2 decimales'
+          ),
       ])
       .optional()
       .nullable(),
     pnl_percentage: z
       .union([
         z.literal(''),
-        z.coerce.number().refine((v) => Number.isFinite(v), 'El porcentaje debe ser numérico'),
+        z.coerce
+          .number({ invalid_type_error: 'El porcentaje debe ser numérico' })
+          .refine((v) => Number.isFinite(v), 'El porcentaje debe ser numérico')
+          .refine((v) => v >= -10_000 && v <= 10_000, 'El porcentaje debe estar entre -10000 y 10000')
+          .refine(
+            (v) => Math.round(v * 100) === Number((v * 100).toFixed(6)),
+            'El porcentaje admite como máximo 2 decimales'
+          ),
       ])
       .optional()
       .nullable(),
+
     strategy: z.string().trim().max(100, 'Máximo 100 caracteres').optional(),
     notes: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional(),
     entry_date: z.string().min(1, 'La fecha de apertura es requerida'),
