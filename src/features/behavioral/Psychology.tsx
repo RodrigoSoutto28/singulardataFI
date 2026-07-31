@@ -284,24 +284,50 @@ function TodayCheckInView() {
                   Esta semana
                 </h4>
                 <span className="text-[11px] font-mono text-muted-foreground">
-                  {checkedInThisWeek}/7
+                  {weekCompleted}/7
                 </span>
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-medium text-muted-foreground">{day}</span>
+                {weekDays.map((d) => (
+                  <div key={d.key} className="flex flex-col items-center gap-1">
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium',
+                        d.isToday ? 'text-foreground font-bold' : 'text-muted-foreground'
+                      )}
+                    >
+                      {d.label}
+                    </span>
                     <div
                       className={cn(
-                        'w-full h-6 rounded-sm transition-colors',
-                        i < checkedInThisWeek
-                          ? 'bg-success/80'
-                          : 'bg-muted border border-border/50'
+                        'w-full h-6 rounded-sm transition-colors border',
+                        d.state === 'completed' && 'bg-success/80 border-success/60',
+                        d.state === 'missed' && 'bg-destructive/15 border-destructive/60',
+                        d.state === 'today' && 'bg-muted border-primary ring-1 ring-primary/50',
+                        d.state === 'future' && 'bg-muted/50 border-border/50'
                       )}
-                      aria-label={i < checkedInThisWeek ? 'Check-in completado' : 'Sin check-in'}
+                      title={`${d.date.toLocaleDateString()} — ${
+                        d.state === 'completed'
+                          ? 'Check-in completado'
+                          : d.state === 'missed'
+                            ? 'Sin check-in'
+                            : d.state === 'today'
+                              ? 'Hoy: pendiente'
+                              : 'Próximo'
+                      }`}
+                      aria-label={`${d.date.toLocaleDateString()}: ${
+                        d.state === 'completed'
+                          ? 'Check-in completado'
+                          : d.state === 'missed'
+                            ? 'Sin check-in'
+                            : d.state === 'today'
+                              ? 'Hoy, pendiente'
+                              : 'Próximo'
+                      }`}
                     />
                   </div>
                 ))}
+
               </div>
             </div>
           </CardContent>
