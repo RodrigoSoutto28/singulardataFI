@@ -1483,13 +1483,19 @@ export default function Journal() {
                                 'bg-muted/30 font-mono pl-7',
                                 Number.isFinite(parseFloat(formData.pnl)) &&
                                   (parseFloat(formData.pnl) >= 0 ? 'text-profit' : 'text-loss'),
+                                (formErrors.pnl || pnlLiveError) && 'border-destructive',
                               )}
                               value={formData.pnl}
                               onChange={(e) => setFormData(prev => ({ ...prev, pnl: e.target.value }))}
-                              aria-invalid={!!formErrors.pnl}
+                              aria-invalid={!!(formErrors.pnl || pnlLiveError)}
+                              aria-describedby="pnl-error"
                             />
                           </div>
-                          {formErrors.pnl && <p className="text-xs text-destructive">{formErrors.pnl}</p>}
+                          {(formErrors.pnl || pnlLiveError) && (
+                            <p id="pnl-error" className="text-xs text-destructive">
+                              {formErrors.pnl || pnlLiveError}
+                            </p>
+                          )}
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -1500,13 +1506,22 @@ export default function Journal() {
                             step="any"
                             inputMode="decimal"
                             placeholder={t.journal.optional ?? 'opcional'}
-                            className="bg-muted/30 font-mono"
+                            className={cn(
+                              'bg-muted/30 font-mono',
+                              (formErrors.pnl_percentage || pnlPctLiveError) && 'border-destructive',
+                            )}
                             value={formData.pnl_percentage}
                             onChange={(e) => setFormData(prev => ({ ...prev, pnl_percentage: e.target.value }))}
-                            aria-invalid={!!formErrors.pnl_percentage}
+                            aria-invalid={!!(formErrors.pnl_percentage || pnlPctLiveError)}
+                            aria-describedby="pnl-pct-error"
                           />
-                          {formErrors.pnl_percentage && <p className="text-xs text-destructive">{formErrors.pnl_percentage}</p>}
+                          {(formErrors.pnl_percentage || pnlPctLiveError) && (
+                            <p id="pnl-pct-error" className="text-xs text-destructive">
+                              {formErrors.pnl_percentage || pnlPctLiveError}
+                            </p>
+                          )}
                         </div>
+
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         {t.journal.pnlHint ?? 'Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)'}
