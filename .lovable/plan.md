@@ -1,44 +1,28 @@
 ## Problema detectado
 
-En `src/features/journal/Journal.tsx` (función de guardado) el P&L se calcula automáticamente como:
+En `src/features/behavioral/Psychology.tsx` (tarjeta "Tu Progreso" → "Esta semana", líneas ~200-278):
 
-```text
-pnl = (salida - entrada) * cantidad     (long)
-pnl = (entrada - salida) * cantidad     (short)
-```
-
-Esa fórmula sólo es válida para acciones/cripto en unidades; para forex, índices, futuros o CFDs (donde importa el valor del punto/lote) el resultado es incorrecto. Además, el formulario **no tiene campos visibles de P&L**: `pnl` y `pnl_percentage` existen en el estado pero nunca se muestran, así que el usuario no puede corregir el número calculado.
-
-También, al **agregar** una operación no hay forma de adjuntar imagen: la carga de capturas sólo existe en `TradeScreenshotModal`, que se abre desde la lista una vez que el trade ya está guardado.
+- El cálculo actual sólo cuenta cuántos check-ins hubo en los últimos 7 días (`checkedInThisWeek`) y luego pinta las celdas con `i < checkedInThisWeek`. Es decir, rellena de izquierda a derecha (L, M, X…) sin importar en qué día real ocurrió el check-in. Por eso en la imagen aparecen L/M/X verdes cuando hoy es jueves.
+- No existe ninguna marcación para los días pasados sin check-in: se muestran iguales que los días futuros (gris).
 
 ## Cambios propuestos
 
-### 1. Eliminar el cálculo automático de P&L
-- Quitar del guardado el bloque que deriva `pnl` y `pnl_percentage` a partir de entrada/salida/cantidad.
-- El valor guardado será exactamente el que el usuario escriba (o `null` si lo deja vacío).
+### 1. Mapeo real de la semana (lunes a domingo)
+- Calcular el lunes de la **semana calendario actual** (usando la fecha local, no "últimos 7 días").
+- Construir un array de 7 fechas (L→D) con su string `YYYY-MM-DD` local.
+- Crear un `Set` de fechas con check-in a partir de `entries.entry_date` y marcar cada celda según si su fecha está en ese set.
+- El contador `x/7` pasa a contar los check-ins reales de la semana calendario actual.
 
-### 2. Campos manuales de resultado en el formulario
-- Nuevo bloque "Resultado de la operación", visible cuando el estado es **Cerrada**:
-  - **P&L (moneda de la cuenta)**: numérico, admite negativos (pérdida) y positivos (ganancia), con el símbolo de moneda como prefijo, igual que el campo "Tamaño del Stop".
-  - **P&L %**: numérico opcional, también manual.
-- Coloreado en vivo: verde si es positivo, rojo si es negativo.
-- Texto de ayuda: "Ingresá la ganancia o pérdida real de la operación (negativo = pérdida)".
-- Al cambiar el estado a **Abierta**, ambos campos se limpian y se deshabilitan.
-- Al editar una operación existente, los campos se precargan con el valor guardado.
-- Requisito para cerrar: el P&L pasa a ser obligatorio en operaciones cerradas (se suma a la barra de progreso y a la validación con mensaje inline).
-
-### 3. Vista previa de imagen al agregar la operación
-- En el diálogo de alta se agrega una sección "Captura / Imagen" con botón de selección de archivo.
-- Al seleccionar, se muestra **miniatura de vista previa inmediata** (object URL), con nombre de archivo, tamaño y botón para quitarla; clic en la miniatura para ampliarla.
-- Validación: sólo `jpg/jpeg/png/webp/gif` y límite de tamaño, misma lista permitida que ya usa el modal de capturas.
-- La imagen se sube **después** de guardar la operación (se necesita el `trade_id`), reutilizando `useTradeScreenshots.uploadScreenshot`. Si la subida falla, la operación queda igualmente guardada y se avisa con un toast.
-- Al editar una operación se mantiene el modal actual de capturas; la sección nueva del formulario permite añadir una imagen más.
-
-### 4. Traducciones
-- Nuevas claves i18n (EN/ES/PT) en `src/shared/lib/i18n/translations.ts` para las etiquetas, ayudas y errores anteriores. Sin textos hardcodeados.
+### 2. Estados visuales por celda
+- **Completado** (hay check-in ese día): verde (`bg-success/80`), como hoy.
+- **Hoy sin check-in**: neutro con borde de énfasis (anillo primario) para indicar "pendiente", no error.
+- **Día pasado sin check-in**: marcación roja (`bg-destructive/15` con borde `border-destructive/60`), tal como se pide.
+- **Día futuro**: gris neutro atenuado.
+- La etiqueta del día de hoy se resalta en negrita.
+- `aria-label` y `title` por celda describiendo fecha + estado (completado / sin check-in / hoy pendiente / próximo).
 
 ### Detalles técnicos
-- Archivos: `src/features/journal/Journal.tsx`, `src/shared/lib/validation.ts` (esquema del formulario: `pnl` numérico finito requerido si `status === 'closed'`, `pnl_percentage` opcional), `src/shared/lib/i18n/translations.ts`.
-- Sin cambios de base de datos: las columnas `pnl` y `pnl_percentage` ya existen en `trades`.
-- El balance de la cuenta sigue sincronizándose desde `useTrades` con el P&L guardado, ahora con el valor manual.
-- Se actualizan los tests afectados (`Journal.addTradeFlow.test.tsx`, `Journal.addTrade.test.ts`) para el flujo cerrado con P&L manual, y se verifica typecheck + suite de tests.
+- Archivo único: `src/features/behavioral/Psychology.tsx`.
+- Sólo cambia el `useMemo` de estadísticas semanales y el render del grid de 7 celdas; racha actual y mejor racha quedan igual.
+- Uso de fechas locales (mismo criterio que `localTodayStr` ya presente en el archivo) para evitar desfases UTC.
+- Sin cambios en base de datos ni en hooks.
