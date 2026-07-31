@@ -229,15 +229,10 @@ function TodayCheckInView() {
       }
     }
     if (sorted.length === 0) best = 0;
-    
-    // Check-ins esta semana
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    start.setHours(0, 0, 0, 0);
-    const week = entries.filter((e) => new Date(e.entry_date) >= start).length;
-    
-    return { currentStreak: cur, bestStreak: best, checkedInThisWeek: Math.min(week, 7) };
+
+    return { currentStreak: cur, bestStreak: best };
   }, [entries, localTodayStr]);
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
