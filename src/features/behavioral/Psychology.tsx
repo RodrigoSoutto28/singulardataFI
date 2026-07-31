@@ -146,8 +146,41 @@ function TodayCheckInView() {
   const hasCheckedIn = !!todayEntry;
 
   // Streak calculations
-  const { currentStreak, bestStreak, checkedInThisWeek } = useMemo(() => {
-    if (!entries.length) return { currentStreak: 0, bestStreak: 0, checkedInThisWeek: 0 };
+  // Semana calendario actual (lunes -> domingo) en fecha local
+  const weekDays = useMemo(() => {
+    const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    const dow = (base.getDay() + 6) % 7; // 0 = lunes
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - dow);
+
+    const done = new Set(entries.map((e) => e.entry_date));
+
+    return labels.map((label, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const isToday = key === localTodayStr;
+      const isPast = key < localTodayStr;
+      const completed = done.has(key);
+      const state: 'completed' | 'missed' | 'today' | 'future' = completed
+        ? 'completed'
+        : isToday
+          ? 'today'
+          : isPast
+            ? 'missed'
+            : 'future';
+      return { label, key, date: d, isToday, state };
+    });
+  }, [entries, localTodayStr]);
+
+  const weekCompleted = weekDays.filter((d) => d.state === 'completed').length;
+
+  // Streak calculations
+  const { currentStreak, bestStreak } = useMemo(() => {
+    if (!entries.length) return { currentStreak: 0, bestStreak: 0 };
+
     
     // Almacena todas las fechas "YYYY-MM-DD"
     const days = new Set(entries.map((e) => e.entry_date));
@@ -196,15 +229,10 @@ function TodayCheckInView() {
       }
     }
     if (sorted.length === 0) best = 0;
-    
-    // Check-ins esta semana
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    start.setHours(0, 0, 0, 0);
-    const week = entries.filter((e) => new Date(e.entry_date) >= start).length;
-    
-    return { currentStreak: cur, bestStreak: best, checkedInThisWeek: Math.min(week, 7) };
+
+    return { currentStreak: cur, bestStreak: best };
   }, [entries, localTodayStr]);
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 md:gap-6">
@@ -256,24 +284,50 @@ function TodayCheckInView() {
                   Esta semana
                 </h4>
                 <span className="text-[11px] font-mono text-muted-foreground">
-                  {checkedInThisWeek}/7
+                  {weekCompleted}/7
                 </span>
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-medium text-muted-foreground">{day}</span>
+                {weekDays.map((d) => (
+                  <div key={d.key} className="flex flex-col items-center gap-1">
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium',
+                        d.isToday ? 'text-foreground font-bold' : 'text-muted-foreground'
+                      )}
+                    >
+                      {d.label}
+                    </span>
                     <div
                       className={cn(
-                        'w-full h-6 rounded-sm transition-colors',
-                        i < checkedInThisWeek
-                          ? 'bg-success/80'
-                          : 'bg-muted border border-border/50'
+                        'w-full h-6 rounded-sm transition-colors border',
+                        d.state === 'completed' && 'bg-success/80 border-success/60',
+                        d.state === 'missed' && 'bg-destructive/15 border-destructive/60',
+                        d.state === 'today' && 'bg-muted border-primary ring-1 ring-primary/50',
+                        d.state === 'future' && 'bg-muted/50 border-border/50'
                       )}
-                      aria-label={i < checkedInThisWeek ? 'Check-in completado' : 'Sin check-in'}
+                      title={`${d.date.toLocaleDateString()} — ${
+                        d.state === 'completed'
+                          ? 'Check-in completado'
+                          : d.state === 'missed'
+                            ? 'Sin check-in'
+                            : d.state === 'today'
+                              ? 'Hoy: pendiente'
+                              : 'Próximo'
+                      }`}
+                      aria-label={`${d.date.toLocaleDateString()}: ${
+                        d.state === 'completed'
+                          ? 'Check-in completado'
+                          : d.state === 'missed'
+                            ? 'Sin check-in'
+                            : d.state === 'today'
+                              ? 'Hoy, pendiente'
+                              : 'Próximo'
+                      }`}
                     />
                   </div>
                 ))}
+
               </div>
             </div>
           </CardContent>
