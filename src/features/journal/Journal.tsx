@@ -258,6 +258,34 @@ export default function Journal() {
   const isPayloadReady = requiredDone === requiredChecks.length;
   const missingRequired = requiredChecks.filter((c) => !c.ok).map((c) => c.key);
 
+  // --- Validación en vivo del resultado manual (P&L) ---
+  const tooManyDecimals = (v: number) => Math.round(v * 100) !== Number((v * 100).toFixed(6));
+  const pnlLiveError = (() => {
+    if (formData.status !== 'closed') return null;
+    const raw = formData.pnl.trim();
+    if (raw === '') return 'Ingresá el resultado (P&L) de la operación cerrada';
+    const v = Number(raw);
+    if (!Number.isFinite(v)) return 'El resultado (P&L) debe ser numérico';
+    if (Math.abs(v) > 1_000_000_000) return 'El resultado (P&L) está fuera de rango';
+    if (tooManyDecimals(v)) return 'El resultado (P&L) admite como máximo 2 decimales';
+    return null;
+  })();
+  const pnlPctLiveError = (() => {
+    if (formData.status !== 'closed') return null;
+    const raw = formData.pnl_percentage.trim();
+    if (raw === '') return null;
+    const v = Number(raw);
+    if (!Number.isFinite(v)) return 'El porcentaje debe ser numérico';
+    if (v < -10_000 || v > 10_000) return 'El porcentaje debe estar entre -10000 y 10000';
+    if (tooManyDecimals(v)) return 'El porcentaje admite como máximo 2 decimales';
+    const p = Number(formData.pnl);
+    if (Number.isFinite(p) && p !== 0 && v !== 0 && Math.sign(p) !== Math.sign(v)) {
+      return 'El porcentaje debe tener el mismo signo que el P&L (negativo = pérdida)';
+    }
+    return null;
+  })();
+
+
   const { exportToExcel, exportToPDF, exportToHTML } = useExportTrades();
   const { importFromFile, importFromFiles } = useImportTrades();
   const { canUseFeature } = useSubscription();
