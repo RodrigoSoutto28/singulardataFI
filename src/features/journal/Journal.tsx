@@ -242,7 +242,15 @@ export default function Journal() {
       ? [
           { key: 'exit_price', ok: parseFloat(formData.exit_price) > 0 },
           { key: 'exit_date', ok: formData.exit_date.trim().length > 0 },
-          { key: 'pnl', ok: Number.isFinite(parseFloat(formData.pnl)) },
+          {
+            key: 'pnl',
+            ok:
+              formData.pnl.trim() !== '' &&
+              Number.isFinite(Number(formData.pnl)) &&
+              Math.abs(Number(formData.pnl)) <= 1_000_000_000 &&
+              Math.round(Number(formData.pnl) * 100) ===
+                Number((Number(formData.pnl) * 100).toFixed(6)),
+          },
         ]
       : []),
   ];
