@@ -146,8 +146,41 @@ function TodayCheckInView() {
   const hasCheckedIn = !!todayEntry;
 
   // Streak calculations
-  const { currentStreak, bestStreak, checkedInThisWeek } = useMemo(() => {
-    if (!entries.length) return { currentStreak: 0, bestStreak: 0, checkedInThisWeek: 0 };
+  // Semana calendario actual (lunes -> domingo) en fecha local
+  const weekDays = useMemo(() => {
+    const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    const dow = (base.getDay() + 6) % 7; // 0 = lunes
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - dow);
+
+    const done = new Set(entries.map((e) => e.entry_date));
+
+    return labels.map((label, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const isToday = key === localTodayStr;
+      const isPast = key < localTodayStr;
+      const completed = done.has(key);
+      const state: 'completed' | 'missed' | 'today' | 'future' = completed
+        ? 'completed'
+        : isToday
+          ? 'today'
+          : isPast
+            ? 'missed'
+            : 'future';
+      return { label, key, date: d, isToday, state };
+    });
+  }, [entries, localTodayStr]);
+
+  const weekCompleted = weekDays.filter((d) => d.state === 'completed').length;
+
+  // Streak calculations
+  const { currentStreak, bestStreak } = useMemo(() => {
+    if (!entries.length) return { currentStreak: 0, bestStreak: 0 };
+
     
     // Almacena todas las fechas "YYYY-MM-DD"
     const days = new Set(entries.map((e) => e.entry_date));
