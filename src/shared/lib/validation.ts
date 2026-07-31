@@ -85,7 +85,21 @@ export const tradeFormSchema = z
   .refine(
     (data) => data.status !== 'closed' || typeof data.pnl === 'number',
     { path: ['pnl'], message: 'Ingresá el resultado (P&L) de la operación cerrada' }
+  )
+  // Coherencia de signo: el % debe acompañar el signo del P&L
+  .refine(
+    (data) =>
+      typeof data.pnl !== 'number' ||
+      typeof data.pnl_percentage !== 'number' ||
+      data.pnl === 0 ||
+      data.pnl_percentage === 0 ||
+      Math.sign(data.pnl) === Math.sign(data.pnl_percentage),
+    {
+      path: ['pnl_percentage'],
+      message: 'El porcentaje debe tener el mismo signo que el P&L (negativo = pérdida)',
+    }
   );
+
 
 export type TradeFormValues = z.infer<typeof tradeFormSchema>;
 
