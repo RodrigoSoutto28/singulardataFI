@@ -149,18 +149,13 @@ function TodayCheckInView() {
   // Semana calendario actual (lunes -> domingo) en fecha local
   const weekDays = useMemo(() => {
     const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    const dow = (base.getDay() + 6) % 7; // 0 = lunes
-    const monday = new Date(base);
-    monday.setDate(base.getDate() - dow);
+    const monday = startOfWeek(new Date());
 
     const done = new Set(entries.map((e) => e.entry_date));
 
     return labels.map((label, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const d = addDays(monday, i);
+      const key = toDateKey(d);
       const isToday = key === localTodayStr;
       const isPast = key < localTodayStr;
       const completed = done.has(key);
@@ -178,60 +173,11 @@ function TodayCheckInView() {
   const weekCompleted = weekDays.filter((d) => d.state === 'completed').length;
 
   // Streak calculations
-  const { currentStreak, bestStreak } = useMemo(() => {
-    if (!entries.length) return { currentStreak: 0, bestStreak: 0 };
+  const { currentStreak, bestStreak } = useMemo(
+    () => calcStreaks(entries.map((e) => e.entry_date), localTodayStr),
+    [entries, localTodayStr]
+  );
 
-    
-    // Almacena todas las fechas "YYYY-MM-DD"
-    const days = new Set(entries.map((e) => e.entry_date));
-    
-    let cur = 0;
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
-    let checkDate = new Date();
-    
-    // Si no hizo check-in hoy, pero sí ayer, la racha actual continúa desde ayer
-    if (!days.has(localTodayStr)) {
-      if (days.has(yesterdayStr)) {
-        checkDate = yesterday;
-      } else {
-        checkDate = new Date(0); // rompe el loop de racha
-      }
-    }
-
-    // Calcular racha actual contando días consecutivos hacia atrás
-    while (checkDate.getTime() > 0) {
-      const cursorStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-      if (days.has(cursorStr)) {
-        cur++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-
-    // Mejor racha histórica
-    const sorted = [...days]
-      .map((d) => new Date(d).getTime())
-      .sort((a, b) => a - b);
-    let best = 1;
-    let run = 1;
-    for (let i = 1; i < sorted.length; i++) {
-      const diff = Math.round((sorted[i] - sorted[i - 1]) / 86400000);
-      if (diff === 1) {
-        run++;
-        best = Math.max(best, run);
-      } else if (diff > 1) {
-        run = 1;
-      }
-    }
-    if (sorted.length === 0) best = 0;
-
-    return { currentStreak: cur, bestStreak: best };
-  }, [entries, localTodayStr]);
 
 
   return (
