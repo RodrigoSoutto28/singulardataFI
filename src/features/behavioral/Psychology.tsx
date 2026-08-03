@@ -679,6 +679,30 @@ function CheckInFormCard() {
 function HistoryView() {
   const { t } = useLanguage();
   const { entries, isLoading } = usePsychologyEntries();
+  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+
+  const todayKey = toDateKey(new Date());
+
+  const { stats, periodEntries } = useMemo(() => {
+    const now = new Date();
+    const start = period === 'weekly' ? startOfWeek(now) : startOfMonth(now);
+    const end = period === 'weekly' ? addDays(startOfWeek(now), 6) : endOfMonth(now);
+    const startKey = toDateKey(start);
+    const endKey = toDateKey(end);
+    const keys = entries.map((e) => e.entry_date);
+
+    return {
+      stats: periodStats(keys, start, end, todayKey),
+      periodEntries: entries.filter(
+        (e) => e.entry_date >= startKey && e.entry_date <= endKey
+      ),
+    };
+  }, [entries, period, todayKey]);
+
+  const global = useMemo(
+    () => calcStreaks(entries.map((e) => e.entry_date), todayKey),
+    [entries, todayKey]
+  );
 
   return (
     <Card>
@@ -689,14 +713,73 @@ function HistoryView() {
         </CardTitle>
         <CardDescription>Tu evolución psicológica a lo largo del tiempo</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/* Métricas de racha */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.currentStreak}
+              </p>
+              <p className="font-bold text-sm flex items-center gap-1">
+                <Flame className="h-3.5 w-3.5 text-[hsl(28_95%_55%)]" aria-hidden />
+                {global.currentStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.bestStreak}
+              </p>
+              <p className="font-bold text-sm font-mono flex items-center gap-1">
+                <Trophy className="h-3.5 w-3.5 text-warning" aria-hidden />
+                {global.bestStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {period === 'weekly' ? t.psychology.weekly : t.psychology.monthly}
+              </p>
+              <p className="font-bold text-sm font-mono">
+                {stats.completed}/{stats.total}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.bestStreak} · {period === 'weekly' ? t.psychology.weekly : t.psychology.monthly}
+              </p>
+              <p className="font-bold text-sm font-mono">
+                {stats.bestStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+          </div>
+
+          <Tabs value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly')}>
+            <TabsList className="grid w-full max-w-xs grid-cols-2">
+              <TabsTrigger value="weekly">{t.psychology.weekly}</TabsTrigger>
+              <TabsTrigger value="monthly">{t.psychology.monthly}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div>
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">{t.psychology.completion}</span>
+              <span className="font-mono font-bold">
+                {stats.completionRate}% · {stats.completed} {t.psychology.completedCheckins}
+              </span>
+            </div>
+            <Progress value={stats.completionRate} className="h-1.5" />
+          </div>
+        </div>
+
+        <Separator />
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : entries.length > 0 ? (
+        ) : periodEntries.length > 0 ? (
           <div className="space-y-4">
-            {entries.map((entry) => (
+            {periodEntries.map((entry) => (
               <EntryCard key={entry.id} entry={entry} />
             ))}
           </div>
@@ -713,6 +796,7 @@ function HistoryView() {
     </Card>
   );
 }
+
 
 function EntryCard({ entry }: { entry: PsychologyEntry }) {
   const { t } = useLanguage();
