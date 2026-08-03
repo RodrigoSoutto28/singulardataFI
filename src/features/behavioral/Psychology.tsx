@@ -39,6 +39,16 @@ import { usePsychologyEntries, PsychologyEntry } from '@/features/behavioral/hoo
 import { toast } from 'sonner';
 import { psychologyEntrySchema } from '@/shared/lib/validation';
 import { Icon3D } from '@/shared/components/ui/Icon3D';
+import {
+  toDateKey,
+  addDays,
+  calcStreaks,
+  periodStats,
+  startOfWeek,
+  startOfMonth,
+  endOfMonth,
+} from '@/features/behavioral/utils/streak-metrics';
+
 
 type Emotion =
   | 'confident'
@@ -149,18 +159,13 @@ function TodayCheckInView() {
   // Semana calendario actual (lunes -> domingo) en fecha local
   const weekDays = useMemo(() => {
     const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    const dow = (base.getDay() + 6) % 7; // 0 = lunes
-    const monday = new Date(base);
-    monday.setDate(base.getDate() - dow);
+    const monday = startOfWeek(new Date());
 
     const done = new Set(entries.map((e) => e.entry_date));
 
     return labels.map((label, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const d = addDays(monday, i);
+      const key = toDateKey(d);
       const isToday = key === localTodayStr;
       const isPast = key < localTodayStr;
       const completed = done.has(key);
@@ -178,60 +183,11 @@ function TodayCheckInView() {
   const weekCompleted = weekDays.filter((d) => d.state === 'completed').length;
 
   // Streak calculations
-  const { currentStreak, bestStreak } = useMemo(() => {
-    if (!entries.length) return { currentStreak: 0, bestStreak: 0 };
+  const { currentStreak, bestStreak } = useMemo(
+    () => calcStreaks(entries.map((e) => e.entry_date), localTodayStr),
+    [entries, localTodayStr]
+  );
 
-    
-    // Almacena todas las fechas "YYYY-MM-DD"
-    const days = new Set(entries.map((e) => e.entry_date));
-    
-    let cur = 0;
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
-    let checkDate = new Date();
-    
-    // Si no hizo check-in hoy, pero sí ayer, la racha actual continúa desde ayer
-    if (!days.has(localTodayStr)) {
-      if (days.has(yesterdayStr)) {
-        checkDate = yesterday;
-      } else {
-        checkDate = new Date(0); // rompe el loop de racha
-      }
-    }
-
-    // Calcular racha actual contando días consecutivos hacia atrás
-    while (checkDate.getTime() > 0) {
-      const cursorStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-      if (days.has(cursorStr)) {
-        cur++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-
-    // Mejor racha histórica
-    const sorted = [...days]
-      .map((d) => new Date(d).getTime())
-      .sort((a, b) => a - b);
-    let best = 1;
-    let run = 1;
-    for (let i = 1; i < sorted.length; i++) {
-      const diff = Math.round((sorted[i] - sorted[i - 1]) / 86400000);
-      if (diff === 1) {
-        run++;
-        best = Math.max(best, run);
-      } else if (diff > 1) {
-        run = 1;
-      }
-    }
-    if (sorted.length === 0) best = 0;
-
-    return { currentStreak: cur, bestStreak: best };
-  }, [entries, localTodayStr]);
 
 
   return (
@@ -723,6 +679,30 @@ function CheckInFormCard() {
 function HistoryView() {
   const { t } = useLanguage();
   const { entries, isLoading } = usePsychologyEntries();
+  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+
+  const todayKey = toDateKey(new Date());
+
+  const { stats, periodEntries } = useMemo(() => {
+    const now = new Date();
+    const start = period === 'weekly' ? startOfWeek(now) : startOfMonth(now);
+    const end = period === 'weekly' ? addDays(startOfWeek(now), 6) : endOfMonth(now);
+    const startKey = toDateKey(start);
+    const endKey = toDateKey(end);
+    const keys = entries.map((e) => e.entry_date);
+
+    return {
+      stats: periodStats(keys, start, end, todayKey),
+      periodEntries: entries.filter(
+        (e) => e.entry_date >= startKey && e.entry_date <= endKey
+      ),
+    };
+  }, [entries, period, todayKey]);
+
+  const global = useMemo(
+    () => calcStreaks(entries.map((e) => e.entry_date), todayKey),
+    [entries, todayKey]
+  );
 
   return (
     <Card>
@@ -733,14 +713,73 @@ function HistoryView() {
         </CardTitle>
         <CardDescription>Tu evolución psicológica a lo largo del tiempo</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/* Métricas de racha */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.currentStreak}
+              </p>
+              <p className="font-bold text-sm flex items-center gap-1">
+                <Flame className="h-3.5 w-3.5 text-[hsl(28_95%_55%)]" aria-hidden />
+                {global.currentStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.bestStreak}
+              </p>
+              <p className="font-bold text-sm font-mono flex items-center gap-1">
+                <Trophy className="h-3.5 w-3.5 text-warning" aria-hidden />
+                {global.bestStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {period === 'weekly' ? t.psychology.weekly : t.psychology.monthly}
+              </p>
+              <p className="font-bold text-sm font-mono">
+                {stats.completed}/{stats.total}
+              </p>
+            </div>
+            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                {t.psychology.bestStreak} · {period === 'weekly' ? t.psychology.weekly : t.psychology.monthly}
+              </p>
+              <p className="font-bold text-sm font-mono">
+                {stats.bestStreak} {t.psychology.daysUnit}
+              </p>
+            </div>
+          </div>
+
+          <Tabs value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly')}>
+            <TabsList className="grid w-full max-w-xs grid-cols-2">
+              <TabsTrigger value="weekly">{t.psychology.weekly}</TabsTrigger>
+              <TabsTrigger value="monthly">{t.psychology.monthly}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div>
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">{t.psychology.completion}</span>
+              <span className="font-mono font-bold">
+                {stats.completionRate}% · {stats.completed} {t.psychology.completedCheckins}
+              </span>
+            </div>
+            <Progress value={stats.completionRate} className="h-1.5" />
+          </div>
+        </div>
+
+        <Separator />
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : entries.length > 0 ? (
+        ) : periodEntries.length > 0 ? (
           <div className="space-y-4">
-            {entries.map((entry) => (
+            {periodEntries.map((entry) => (
               <EntryCard key={entry.id} entry={entry} />
             ))}
           </div>
@@ -757,6 +796,7 @@ function HistoryView() {
     </Card>
   );
 }
+
 
 function EntryCard({ entry }: { entry: PsychologyEntry }) {
   const { t } = useLanguage();

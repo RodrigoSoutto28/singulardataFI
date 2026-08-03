@@ -1,28 +1,34 @@
-## Problema detectado
+## Objetivo
 
-En `src/features/behavioral/Psychology.tsx` (tarjeta "Tu Progreso" → "Esta semana", líneas ~200-278):
+Mostrar métricas de racha (actual y mejor racha) en el Historial de check-ins, con vista semanal y mensual, reutilizando la lógica que hoy vive dentro de `TodayCheckInView`.
 
-- El cálculo actual sólo cuenta cuántos check-ins hubo en los últimos 7 días (`checkedInThisWeek`) y luego pinta las celdas con `i < checkedInThisWeek`. Es decir, rellena de izquierda a derecha (L, M, X…) sin importar en qué día real ocurrió el check-in. Por eso en la imagen aparecen L/M/X verdes cuando hoy es jueves.
-- No existe ninguna marcación para los días pasados sin check-in: se muestran iguales que los días futuros (gris).
+## Estado actual (verificado)
+
+- `src/features/behavioral/Psychology.tsx` calcula `currentStreak` y `bestStreak` en un `useMemo` dentro de `TodayCheckInView` (líneas 181-234), a partir de `entries[].entry_date`.
+- `HistoryView` (líneas 723-759) solo lista `EntryCard` sin ninguna métrica agregada.
+- Existe `src/features/behavioral/utils/streak-manager.ts`, pero solo escribe en la tabla `user_streaks`; no se usa para el cálculo mostrado en la UI.
 
 ## Cambios propuestos
 
-### 1. Mapeo real de la semana (lunes a domingo)
-- Calcular el lunes de la **semana calendario actual** (usando la fecha local, no "últimos 7 días").
-- Construir un array de 7 fechas (L→D) con su string `YYYY-MM-DD` local.
-- Crear un `Set` de fechas con check-in a partir de `entries.entry_date` y marcar cada celda según si su fecha está en ese set.
-- El contador `x/7` pasa a contar los check-ins reales de la semana calendario actual.
+1. **Nuevo util `src/features/behavioral/utils/streak-metrics.ts`**
+   - `toDateKey(date)` → "YYYY-MM-DD" local (hoy duplicado en 4 lugares).
+   - `calcStreaks(dateKeys: string[], todayKey)` → `{ currentStreak, bestStreak }` (misma regla actual: la racha sigue viva si hay check-in hoy o ayer).
+   - `periodStats(dateKeys, start, end, todayKey)` → `{ completed, total, missed, currentStreak, bestStreak, completionRate }` para un rango.
 
-### 2. Estados visuales por celda
-- **Completado** (hay check-in ese día): verde (`bg-success/80`), como hoy.
-- **Hoy sin check-in**: neutro con borde de énfasis (anillo primario) para indicar "pendiente", no error.
-- **Día pasado sin check-in**: marcación roja (`bg-destructive/15` con borde `border-destructive/60`), tal como se pide.
-- **Día futuro**: gris neutro atenuado.
-- La etiqueta del día de hoy se resalta en negrita.
-- `aria-label` y `title` por celda describiendo fecha + estado (completado / sin check-in / hoy pendiente / próximo).
+2. **`TodayCheckInView`**: reemplazar el `useMemo` de rachas por llamadas al util (sin cambio visual).
 
-### Detalles técnicos
-- Archivo único: `src/features/behavioral/Psychology.tsx`.
-- Sólo cambia el `useMemo` de estadísticas semanales y el render del grid de 7 celdas; racha actual y mejor racha quedan igual.
-- Uso de fechas locales (mismo criterio que `localTodayStr` ya presente en el archivo) para evitar desfases UTC.
-- Sin cambios en base de datos ni en hooks.
+3. **`HistoryView`**: agregar una barra de métricas arriba de la lista con:
+   - Racha actual y Mejor racha (global), con icono `Flame`/`Trophy`, mismo estilo de tarjetas `bg-muted/40` usado en "Tu Progreso".
+   - Selector semanal/mensual (`Tabs` o `ToggleGroup` shadcn ya disponible).
+   - Según la selección: check-ins completados / días del período, % de cumplimiento (`Progress`), y mejor racha dentro del período.
+   - Semanal = semana calendario lunes-domingo actual; Mensual = mes calendario actual. Los días futuros no cuentan como fallados.
+   - Lista de entradas filtrada al período seleccionado, agrupada por encabezado de semana/mes.
+
+4. **i18n**: agregar claves en `src/shared/lib/i18n/translations.ts` (EN/ES/PT) para "Racha actual", "Mejor racha", "Semanal", "Mensual", "Cumplimiento", "check-ins completados". Sin strings hardcodeados nuevos.
+
+5. **Test**: `src/features/behavioral/utils/__tests__/streak-metrics.test.ts` cubriendo racha rota, racha viva desde ayer, día único, y conteo por período con días futuros excluidos.
+
+## Notas técnicas
+
+- Todo se calcula en cliente desde `usePsychologyEntries().entries`; no hay cambios de base de datos ni de la tabla `user_streaks`.
+- Las fechas se comparan siempre como claves "YYYY-MM-DD" locales para evitar el desfase UTC de `new Date("YYYY-MM-DD")`.

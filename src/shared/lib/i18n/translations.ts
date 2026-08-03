@@ -295,6 +295,14 @@ export interface Translations {
     saveEntry: string;
     recentEntries: string;
     journalHistory: string;
+    currentStreak: string;
+    bestStreak: string;
+    weekly: string;
+    monthly: string;
+    completion: string;
+    completedCheckins: string;
+    daysUnit: string;
+
     emotions: {
       confident: string;
       calm: string;
@@ -827,6 +835,14 @@ const baseTranslations: Record<Language, Translations> = {
       saveEntry: 'Guardar Entrada',
       recentEntries: 'Entradas Recientes',
       journalHistory: 'Historial de tu diario psicológico',
+      currentStreak: 'Racha actual',
+      bestStreak: 'Mejor racha',
+      weekly: 'Semanal',
+      monthly: 'Mensual',
+      completion: 'Cumplimiento',
+      completedCheckins: 'check-ins completados',
+      daysUnit: 'días',
+
       emotions: {
         confident: 'Confiado',
         calm: 'Calmado',
@@ -1307,6 +1323,14 @@ const baseTranslations: Record<Language, Translations> = {
       saveEntry: 'Save Entry',
       recentEntries: 'Recent Entries',
       journalHistory: 'Your psychology journal history',
+      currentStreak: 'Current streak',
+      bestStreak: 'Best streak',
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      completion: 'Completion',
+      completedCheckins: 'check-ins completed',
+      daysUnit: 'days',
+
       emotions: {
         confident: 'Confident',
         calm: 'Calm',
@@ -1787,6 +1811,14 @@ const baseTranslations: Record<Language, Translations> = {
       saveEntry: 'Salvar Entrada',
       recentEntries: 'Entradas Recentes',
       journalHistory: 'Histórico do seu diário psicológico',
+      currentStreak: 'Sequência atual',
+      bestStreak: 'Melhor sequência',
+      weekly: 'Semanal',
+      monthly: 'Mensal',
+      completion: 'Cumprimento',
+      completedCheckins: 'check-ins concluídos',
+      daysUnit: 'dias',
+
       emotions: {
         confident: 'Confiante',
         calm: 'Calmo',
