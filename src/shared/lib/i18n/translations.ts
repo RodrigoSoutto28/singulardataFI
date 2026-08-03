@@ -835,6 +835,14 @@ const baseTranslations: Record<Language, Translations> = {
       saveEntry: 'Guardar Entrada',
       recentEntries: 'Entradas Recientes',
       journalHistory: 'Historial de tu diario psicológico',
+      currentStreak: 'Racha actual',
+      bestStreak: 'Mejor racha',
+      weekly: 'Semanal',
+      monthly: 'Mensual',
+      completion: 'Cumplimiento',
+      completedCheckins: 'check-ins completados',
+      daysUnit: 'días',
+
       emotions: {
         confident: 'Confiado',
         calm: 'Calmado',
