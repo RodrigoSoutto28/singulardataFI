@@ -295,6 +295,14 @@ export interface Translations {
     saveEntry: string;
     recentEntries: string;
     journalHistory: string;
+    currentStreak: string;
+    bestStreak: string;
+    weekly: string;
+    monthly: string;
+    completion: string;
+    completedCheckins: string;
+    daysUnit: string;
+
     emotions: {
       confident: string;
       calm: string;
