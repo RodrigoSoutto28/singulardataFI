@@ -1323,6 +1323,14 @@ const baseTranslations: Record<Language, Translations> = {
       saveEntry: 'Save Entry',
       recentEntries: 'Recent Entries',
       journalHistory: 'Your psychology journal history',
+      currentStreak: 'Current streak',
+      bestStreak: 'Best streak',
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      completion: 'Completion',
+      completedCheckins: 'check-ins completed',
+      daysUnit: 'days',
+
       emotions: {
         confident: 'Confident',
         calm: 'Calm',
