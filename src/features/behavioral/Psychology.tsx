@@ -39,6 +39,16 @@ import { usePsychologyEntries, PsychologyEntry } from '@/features/behavioral/hoo
 import { toast } from 'sonner';
 import { psychologyEntrySchema } from '@/shared/lib/validation';
 import { Icon3D } from '@/shared/components/ui/Icon3D';
+import {
+  toDateKey,
+  addDays,
+  calcStreaks,
+  periodStats,
+  startOfWeek,
+  startOfMonth,
+  endOfMonth,
+} from '@/features/behavioral/utils/streak-metrics';
+
 
 type Emotion =
   | 'confident'
