@@ -302,6 +302,13 @@ export interface Translations {
     completion: string;
     completedCheckins: string;
     daysUnit: string;
+    periodGoal: string;
+    weeklyGoal: string;
+    monthlyGoal: string;
+    goalReached: string;
+    remainingCheckins: string;
+    goalAtRisk: string;
+    goalProgress: string;
 
     emotions: {
       confident: string;
@@ -842,6 +849,13 @@ const baseTranslations: Record<Language, Translations> = {
       completion: 'Cumplimiento',
       completedCheckins: 'check-ins completados',
       daysUnit: 'días',
+      periodGoal: 'Meta del período',
+      weeklyGoal: 'Meta semanal',
+      monthlyGoal: 'Meta mensual',
+      goalReached: 'Meta cumplida',
+      remainingCheckins: 'check-ins restantes',
+      goalAtRisk: 'Meta en riesgo',
+      goalProgress: 'Progreso vs meta',
 
       emotions: {
         confident: 'Confiado',
@@ -1330,6 +1344,13 @@ const baseTranslations: Record<Language, Translations> = {
       completion: 'Completion',
       completedCheckins: 'check-ins completed',
       daysUnit: 'days',
+      periodGoal: 'Period goal',
+      weeklyGoal: 'Weekly goal',
+      monthlyGoal: 'Monthly goal',
+      goalReached: 'Goal reached',
+      remainingCheckins: 'check-ins to go',
+      goalAtRisk: 'Goal at risk',
+      goalProgress: 'Progress vs goal',
 
       emotions: {
         confident: 'Confident',
@@ -1818,6 +1839,13 @@ const baseTranslations: Record<Language, Translations> = {
       completion: 'Cumprimento',
       completedCheckins: 'check-ins concluídos',
       daysUnit: 'dias',
+      periodGoal: 'Meta do período',
+      weeklyGoal: 'Meta semanal',
+      monthlyGoal: 'Meta mensal',
+      goalReached: 'Meta cumprida',
+      remainingCheckins: 'check-ins restantes',
+      goalAtRisk: 'Meta em risco',
+      goalProgress: 'Progresso vs meta',
 
       emotions: {
         confident: 'Confiante',
