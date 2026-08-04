@@ -680,6 +680,7 @@ function HistoryView() {
   const { t } = useLanguage();
   const { entries, isLoading } = usePsychologyEntries();
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const { weeklyGoal, monthlyGoal, setWeeklyGoal, setMonthlyGoal } = useCheckinGoals();
 
   const todayKey = toDateKey(new Date());
 
@@ -703,6 +704,13 @@ function HistoryView() {
     () => calcStreaks(entries.map((e) => e.entry_date), todayKey),
     [entries, todayKey]
   );
+
+  const activeGoal = period === 'weekly' ? weeklyGoal : monthlyGoal;
+  const goal = useMemo(() => goalProgress(stats, activeGoal), [stats, activeGoal]);
+  const goalOptions =
+    period === 'weekly'
+      ? Array.from({ length: 7 }, (_, i) => i + 1)
+      : Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
     <Card>
@@ -743,22 +751,86 @@ function HistoryView() {
                 {stats.completed}/{stats.total}
               </p>
             </div>
-            <div className="rounded-md bg-muted/40 border border-border px-3 py-2">
+            <div
+              className={cn(
+                'rounded-md border px-3 py-2',
+                goal.reached
+                  ? 'bg-profit/10 border-profit/40'
+                  : goal.atRisk
+                    ? 'bg-warning/10 border-warning/40'
+                    : 'bg-muted/40 border-border'
+              )}
+            >
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
-                {t.psychology.bestStreak} · {period === 'weekly' ? t.psychology.weekly : t.psychology.monthly}
+                {t.psychology.periodGoal}
               </p>
-              <p className="font-bold text-sm font-mono">
-                {stats.bestStreak} {t.psychology.daysUnit}
+              <p className="font-bold text-sm font-mono flex items-center gap-1">
+                {goal.reached ? (
+                  <CheckCircle className="h-3.5 w-3.5 text-profit" aria-hidden />
+                ) : (
+                  <Target
+                    className={cn('h-3.5 w-3.5', goal.atRisk ? 'text-warning' : 'text-primary')}
+                    aria-hidden
+                  />
+                )}
+                {stats.completed}/{goal.goal}
               </p>
             </div>
           </div>
 
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly')}>
-            <TabsList className="grid w-full max-w-xs grid-cols-2">
-              <TabsTrigger value="weekly">{t.psychology.weekly}</TabsTrigger>
-              <TabsTrigger value="monthly">{t.psychology.monthly}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex flex-wrap items-center gap-3">
+            <Tabs value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly')}>
+              <TabsList className="grid w-full max-w-xs grid-cols-2">
+                <TabsTrigger value="weekly">{t.psychology.weekly}</TabsTrigger>
+                <TabsTrigger value="monthly">{t.psychology.monthly}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="flex items-center gap-2">
+              <Label htmlFor="checkin-goal" className="text-xs text-muted-foreground">
+                {period === 'weekly' ? t.psychology.weeklyGoal : t.psychology.monthlyGoal}
+              </Label>
+              <Select
+                value={String(activeGoal)}
+                onValueChange={(v) =>
+                  period === 'weekly' ? setWeeklyGoal(Number(v)) : setMonthlyGoal(Number(v))
+                }
+              >
+                <SelectTrigger id="checkin-goal" className="h-8 w-[130px] text-xs font-mono">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {goalOptions.map((n) => (
+                    <SelectItem key={n} value={String(n)} className="font-mono text-xs">
+                      {n}/{stats.total} {t.psychology.daysUnit}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">{t.psychology.goalProgress}</span>
+              <span
+                className={cn(
+                  'font-mono font-bold',
+                  goal.reached ? 'text-profit' : goal.atRisk ? 'text-warning' : undefined
+                )}
+              >
+                {goal.percent}% ·{' '}
+                {goal.reached
+                  ? t.psychology.goalReached
+                  : `${goal.remaining} ${t.psychology.remainingCheckins}`}
+                {!goal.reached && goal.atRisk ? ` · ${t.psychology.goalAtRisk}` : ''}
+              </span>
+            </div>
+            <Progress
+              value={goal.percent}
+              className={cn('h-1.5', goal.reached && '[&>div]:bg-profit', !goal.reached && goal.atRisk && '[&>div]:bg-warning')}
+            />
+          </div>
 
           <div>
             <div className="flex justify-between text-xs mb-1.5">
@@ -770,6 +842,7 @@ function HistoryView() {
             <Progress value={stats.completionRate} className="h-1.5" />
           </div>
         </div>
+
 
         <Separator />
 
