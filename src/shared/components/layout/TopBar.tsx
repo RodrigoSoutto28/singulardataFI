@@ -57,10 +57,7 @@ export function TopBar({ onMenuClick, sectionTitle }: TopBarProps) {
             <LogoMindOn size="sm" showSubtitle={false} />
           </div>
 
-          {/* Desktop brand line */}
-          <h1 className="hidden md:block text-sm font-light text-muted-foreground tracking-[0.08em] truncate">
-            {t.topbar.title}
-          </h1>
+          {/* Desktop brand placeholder removed */}
         </div>
 
         {/* Center: section title (mobile only) */}
