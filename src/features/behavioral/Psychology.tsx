@@ -40,14 +40,24 @@ import { toast } from 'sonner';
 import { psychologyEntrySchema } from '@/shared/lib/validation';
 import { Icon3D } from '@/shared/components/ui/Icon3D';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
+import { useCheckinGoals } from '@/features/behavioral/hooks/useCheckinGoals';
+import {
   toDateKey,
   addDays,
   calcStreaks,
   periodStats,
+  goalProgress,
   startOfWeek,
   startOfMonth,
   endOfMonth,
 } from '@/features/behavioral/utils/streak-metrics';
+
 
 
 type Emotion =
