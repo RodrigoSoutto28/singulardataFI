@@ -138,3 +138,28 @@ export function startOfMonth(date: Date): Date {
 export function endOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0);
 }
+
+export interface GoalProgress {
+  goal: number;
+  percent: number;
+  remaining: number;
+  reached: boolean;
+  atRisk: boolean;
+}
+
+/**
+ * Progreso frente a una meta de check-ins dentro de un período.
+ * `atRisk` = los días que quedan del período ya no alcanzan para cumplir la meta.
+ */
+export function goalProgress(stats: PeriodStats, goal: number): GoalProgress {
+  const safeGoal = Math.max(1, Math.round(goal));
+  const remaining = Math.max(0, safeGoal - stats.completed);
+  const daysLeft = Math.max(0, stats.total - stats.elapsed);
+  return {
+    goal: safeGoal,
+    percent: Math.min(100, Math.round((stats.completed / safeGoal) * 100)),
+    remaining,
+    reached: stats.completed >= safeGoal,
+    atRisk: stats.completed < safeGoal && remaining > daysLeft,
+  };
+}

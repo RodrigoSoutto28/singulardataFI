@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   calcStreaks,
   periodStats,
+  goalProgress,
   toDateKey,
   startOfWeek,
   startOfMonth,
@@ -80,5 +81,34 @@ describe('date helpers', () => {
   it('month bounds', () => {
     expect(toDateKey(startOfMonth(new Date(2026, 7, 15)))).toBe('2026-08-01');
     expect(toDateKey(endOfMonth(new Date(2026, 7, 15)))).toBe('2026-08-31');
+  });
+});
+
+describe('goalProgress', () => {
+  const base = { completed: 0, total: 7, elapsed: 4, missed: 0, completionRate: 0, currentStreak: 0, bestStreak: 0 };
+
+  it('marks goal as reached', () => {
+    const g = goalProgress({ ...base, completed: 5 }, 5);
+    expect(g.reached).toBe(true);
+    expect(g.percent).toBe(100);
+    expect(g.remaining).toBe(0);
+    expect(g.atRisk).toBe(false);
+  });
+
+  it('reports partial progress', () => {
+    const g = goalProgress({ ...base, completed: 2 }, 5);
+    expect(g.percent).toBe(40);
+    expect(g.remaining).toBe(3);
+    expect(g.atRisk).toBe(false);
+  });
+
+  it('flags at risk when days left are insufficient', () => {
+    const g = goalProgress({ ...base, completed: 1, elapsed: 6 }, 5);
+    expect(g.atRisk).toBe(true);
+  });
+
+  it('caps percent when goal exceeded', () => {
+    const g = goalProgress({ ...base, completed: 7 }, 5);
+    expect(g.percent).toBe(100);
   });
 });
