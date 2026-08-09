@@ -18,6 +18,7 @@ const AnalyticsHub = lazy(() => import("@/features/analytics/AnalyticsHub"));
 const Settings = lazy(() => import("@/features/settings/Settings"));
 const Profile = lazy(() => import("@/features/settings/Profile"));
 const NotFound = lazy(() => import("@/app/NotFound"));
+const MarketBrain = lazy(() => import("@/features/brain/MarketBrain"));
 const StudyAdmin = lazy(() => import("@/features/study/StudyAdmin"));
 
 export const AppRoutes = () => {
@@ -46,6 +47,7 @@ export const AppRoutes = () => {
         <Route path="journal" element={<Journal />} />
         <Route path="psychology" element={<Psychology />} />
         <Route path="analytics" element={<AnalyticsHub />} />
+        <Route path="brain" element={<MarketBrain />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<Profile />} />
         <Route

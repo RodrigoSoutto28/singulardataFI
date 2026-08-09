@@ -36,6 +36,7 @@ export interface Translations {
     journal: string;
     analytics: string;
     psychology: string;
+    brain: string;
     insights: string;
     settings: string;
     logout: string;
@@ -659,6 +660,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Registro de Operaciones',
       analytics: 'Centro de Análisis',
       psychology: 'Métricas Conductuales',
+      brain: 'Market Brain',
       insights: 'Motor de Insights',
       settings: 'Configuración',
       logout: 'Cerrar Sesión',
@@ -1172,6 +1174,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Trade Ledger',
       analytics: 'Analytics Hub',
       psychology: 'Behavioral Metrics',
+      brain: 'Market Brain',
       insights: 'Insight Engine',
       settings: 'Settings',
       logout: 'Logout',
@@ -1685,6 +1688,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Registro de Operações',
       analytics: 'Centro de Análise',
       psychology: 'Métricas Comportamentais',
+      brain: 'Market Brain',
       insights: 'Motor de Insights',
       settings: 'Configurações',
       logout: 'Sair',
