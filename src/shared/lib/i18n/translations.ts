@@ -36,6 +36,7 @@ export interface Translations {
     journal: string;
     analytics: string;
     psychology: string;
+    brain: string;
     insights: string;
     settings: string;
     logout: string;
@@ -468,6 +469,67 @@ export interface Translations {
     };
   };
 
+  brain: {
+    title: string;
+    subtitle: string;
+    addSample: string;
+    editSample: string;
+    sampleImage: string;
+    pickImage: string;
+    session: string;
+    sessionAsia: string;
+    sessionLondon: string;
+    sessionNewYork: string;
+    sessionOverlap: string;
+    symbol: string;
+    timeframe: string;
+    occurredAt: string;
+    structure: string;
+    tagTrend: string;
+    tagRange: string;
+    tagLiquiditySweep: string;
+    tagFvg: string;
+    tagOrderBlock: string;
+    tagFalseBreakout: string;
+    tagHighVolatility: string;
+    tagLowVolatility: string;
+    tagNews: string;
+    outcome: string;
+    outcomeWin: string;
+    outcomeStop: string;
+    rMultiple: string;
+    setupType: string;
+    notes: string;
+    notesPlaceholder: string;
+    save: string;
+    saving: string;
+    analyzing: string;
+    aiAnalysis: string;
+    reanalyze: string;
+    aiPending: string;
+    aiError: string;
+    qualityScore: string;
+    patterns: string;
+    library: string;
+    empty: string;
+    emptyDesc: string;
+    filterSession: string;
+    filterOutcome: string;
+    all: string;
+    search: string;
+    searchPlaceholder: string;
+    totalSamples: string;
+    winsVsStops: string;
+    bySession: string;
+    topPatterns: string;
+    saved: string;
+    deleted: string;
+    deleteConfirm: string;
+    errorImage: string;
+    errorRequired: string;
+    detail: string;
+  };
+
   welcomeModal?: {
     sampleLoaded: string;
     sampleLoadedDesc: string;
@@ -598,6 +660,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Registro de Operaciones',
       analytics: 'Centro de Análisis',
       psychology: 'Métricas Conductuales',
+      brain: 'Market Brain',
       insights: 'Motor de Insights',
       settings: 'Configuración',
       logout: 'Cerrar Sesión',
@@ -1059,6 +1122,24 @@ const baseTranslations: Record<Language, Translations> = {
       symbol: 'Símbolo', direction: 'Dirección', entryCol: 'Entrada', exitCol: 'Salida',
       volume: 'Volumen', dateCol: 'Fecha', sourceCol: 'Origen',
     },
+    brain: {
+      title: 'Market Brain', subtitle: 'Alimentá el cerebro con capturas y contexto para detectar patrones institucionales.',
+      addSample: 'Nueva muestra', editSample: 'Editar muestra', sampleImage: 'Imagen del gráfico', pickImage: 'Seleccionar imagen',
+      session: 'Sesión', sessionAsia: 'Asia', sessionLondon: 'Londres', sessionNewYork: 'Nueva York', sessionOverlap: 'Solape',
+      symbol: 'Activo', timeframe: 'Temporalidad', occurredAt: 'Fecha y hora', structure: 'Estructura de mercado',
+      tagTrend: 'Tendencia', tagRange: 'Rango', tagLiquiditySweep: 'Barrido de liquidez', tagFvg: 'FVG',
+      tagOrderBlock: 'Order block', tagFalseBreakout: 'Ruptura falsa', tagHighVolatility: 'Alta volatilidad',
+      tagLowVolatility: 'Baja volatilidad', tagNews: 'Noticias',
+      outcome: 'Resultado', outcomeWin: 'Ganadora', outcomeStop: 'Stop loss', rMultiple: 'R obtenido', setupType: 'Tipo de setup',
+      notes: 'Contexto operativo', notesPlaceholder: 'Describí el contexto y tu hipótesis institucional...',
+      save: 'Guardar muestra', saving: 'Guardando...', analyzing: 'Analizando...', aiAnalysis: 'Análisis IA', reanalyze: 'Re-analizar',
+      aiPending: 'Pendiente de análisis', aiError: 'No se pudo analizar', qualityScore: 'Calidad del setup', patterns: 'Patrones',
+      library: 'Biblioteca de muestras', empty: 'Sin muestras todavía', emptyDesc: 'Subí tu primera captura para empezar a entrenar el cerebro.',
+      filterSession: 'Sesión', filterOutcome: 'Resultado', all: 'Todas', search: 'Buscar', searchPlaceholder: 'Activo, patrón o nota...',
+      totalSamples: 'Muestras', winsVsStops: 'Ganadoras / Stops', bySession: 'Por sesión', topPatterns: 'Patrones frecuentes',
+      saved: 'Muestra guardada', deleted: 'Muestra eliminada', deleteConfirm: '¿Eliminar esta muestra?',
+      errorImage: 'Subí una imagen del gráfico', errorRequired: 'Completá los campos obligatorios', detail: 'Detalle de la muestra',
+    },
   },
   EN: {
     common: {
@@ -1093,6 +1174,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Trade Ledger',
       analytics: 'Analytics Hub',
       psychology: 'Behavioral Metrics',
+      brain: 'Market Brain',
       insights: 'Insight Engine',
       settings: 'Settings',
       logout: 'Logout',
@@ -1554,6 +1636,24 @@ const baseTranslations: Record<Language, Translations> = {
       symbol: 'Symbol', direction: 'Direction', entryCol: 'Entry', exitCol: 'Exit',
       volume: 'Volume', dateCol: 'Date', sourceCol: 'Source',
     },
+    brain: {
+      title: 'Market Brain', subtitle: 'Feed the brain with chart captures and context to detect institutional patterns.',
+      addSample: 'New sample', editSample: 'Edit sample', sampleImage: 'Chart image', pickImage: 'Select image',
+      session: 'Session', sessionAsia: 'Asia', sessionLondon: 'London', sessionNewYork: 'New York', sessionOverlap: 'Overlap',
+      symbol: 'Asset', timeframe: 'Timeframe', occurredAt: 'Date and time', structure: 'Market structure',
+      tagTrend: 'Trend', tagRange: 'Range', tagLiquiditySweep: 'Liquidity sweep', tagFvg: 'FVG',
+      tagOrderBlock: 'Order block', tagFalseBreakout: 'False breakout', tagHighVolatility: 'High volatility',
+      tagLowVolatility: 'Low volatility', tagNews: 'News',
+      outcome: 'Outcome', outcomeWin: 'Winner', outcomeStop: 'Stop loss', rMultiple: 'R achieved', setupType: 'Setup type',
+      notes: 'Trading context', notesPlaceholder: 'Describe the context and your institutional hypothesis...',
+      save: 'Save sample', saving: 'Saving...', analyzing: 'Analyzing...', aiAnalysis: 'AI analysis', reanalyze: 'Re-analyze',
+      aiPending: 'Analysis pending', aiError: 'Could not analyze', qualityScore: 'Setup quality', patterns: 'Patterns',
+      library: 'Sample library', empty: 'No samples yet', emptyDesc: 'Upload your first capture to start training the brain.',
+      filterSession: 'Session', filterOutcome: 'Outcome', all: 'All', search: 'Search', searchPlaceholder: 'Asset, pattern or note...',
+      totalSamples: 'Samples', winsVsStops: 'Winners / Stops', bySession: 'By session', topPatterns: 'Frequent patterns',
+      saved: 'Sample saved', deleted: 'Sample deleted', deleteConfirm: 'Delete this sample?',
+      errorImage: 'Upload a chart image', errorRequired: 'Complete the required fields', detail: 'Sample detail',
+    },
   },
   PT: {
     common: {
@@ -1588,6 +1688,7 @@ const baseTranslations: Record<Language, Translations> = {
       journal: 'Registro de Operações',
       analytics: 'Centro de Análise',
       psychology: 'Métricas Comportamentais',
+      brain: 'Market Brain',
       insights: 'Motor de Insights',
       settings: 'Configurações',
       logout: 'Sair',
@@ -2048,6 +2149,24 @@ const baseTranslations: Record<Language, Translations> = {
       ignored: 'Ignoradas', missing: 'Faltantes', unmapped: 'Não mapeadas',
       symbol: 'Símbolo', direction: 'Direção', entryCol: 'Entrada', exitCol: 'Saída',
       volume: 'Volume', dateCol: 'Data', sourceCol: 'Origem',
+    },
+    brain: {
+      title: 'Market Brain', subtitle: 'Alimente o cérebro com capturas e contexto para detectar padrões institucionais.',
+      addSample: 'Nova amostra', editSample: 'Editar amostra', sampleImage: 'Imagem do gráfico', pickImage: 'Selecionar imagem',
+      session: 'Sessão', sessionAsia: 'Ásia', sessionLondon: 'Londres', sessionNewYork: 'Nova York', sessionOverlap: 'Sobreposição',
+      symbol: 'Ativo', timeframe: 'Tempo gráfico', occurredAt: 'Data e hora', structure: 'Estrutura de mercado',
+      tagTrend: 'Tendência', tagRange: 'Lateral', tagLiquiditySweep: 'Varrida de liquidez', tagFvg: 'FVG',
+      tagOrderBlock: 'Order block', tagFalseBreakout: 'Rompimento falso', tagHighVolatility: 'Alta volatilidade',
+      tagLowVolatility: 'Baixa volatilidade', tagNews: 'Notícias',
+      outcome: 'Resultado', outcomeWin: 'Vencedora', outcomeStop: 'Stop loss', rMultiple: 'R obtido', setupType: 'Tipo de setup',
+      notes: 'Contexto operacional', notesPlaceholder: 'Descreva o contexto e sua hipótese institucional...',
+      save: 'Salvar amostra', saving: 'Salvando...', analyzing: 'Analisando...', aiAnalysis: 'Análise IA', reanalyze: 'Reanalisar',
+      aiPending: 'Análise pendente', aiError: 'Não foi possível analisar', qualityScore: 'Qualidade do setup', patterns: 'Padrões',
+      library: 'Biblioteca de amostras', empty: 'Ainda sem amostras', emptyDesc: 'Envie sua primeira captura para começar a treinar o cérebro.',
+      filterSession: 'Sessão', filterOutcome: 'Resultado', all: 'Todas', search: 'Buscar', searchPlaceholder: 'Ativo, padrão ou nota...',
+      totalSamples: 'Amostras', winsVsStops: 'Vencedoras / Stops', bySession: 'Por sessão', topPatterns: 'Padrões frequentes',
+      saved: 'Amostra salva', deleted: 'Amostra excluída', deleteConfirm: 'Excluir esta amostra?',
+      errorImage: 'Envie uma imagem do gráfico', errorRequired: 'Preencha os campos obrigatórios', detail: 'Detalhe da amostra',
     },
   },
 };

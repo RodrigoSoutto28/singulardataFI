@@ -26,7 +26,7 @@ import { LogoMindOn } from '@/shared/components/ui/logo-mindon';
 
 
 interface NavItem {
-  titleKey: 'dashboard' | 'journal' | 'analytics' | 'psychology';
+  titleKey: 'dashboard' | 'journal' | 'analytics' | 'psychology' | 'brain';
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
@@ -36,6 +36,7 @@ const navItems: NavItem[] = [
   { titleKey: 'journal', href: '/journal', icon: BookOpen },
   { titleKey: 'analytics', href: '/analytics', icon: BarChart3 },
   { titleKey: 'psychology', href: '/psychology', icon: Brain },
+  { titleKey: 'brain', href: '/brain', icon: Brain },
 ];
 
 interface SidebarProps {

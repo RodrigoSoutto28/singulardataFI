@@ -1,0 +1,4 @@
+CREATE POLICY "Users can view own brain sample images" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'brain-samples' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can upload own brain sample images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'brain-samples' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can update own brain sample images" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'brain-samples' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can delete own brain sample images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'brain-samples' AND auth.uid()::text = (storage.foldername(name))[1]);

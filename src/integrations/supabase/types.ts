@@ -145,6 +145,72 @@ export type Database = {
           },
         ]
       }
+      brain_samples: {
+        Row: {
+          ai_patterns: string[]
+          ai_quality_score: number | null
+          ai_raw: Json | null
+          ai_status: string
+          ai_summary: string | null
+          created_at: string
+          id: string
+          image_path: string
+          notes: string | null
+          occurred_at: string
+          outcome: string
+          r_multiple: number | null
+          session: string
+          setup_type: string | null
+          structure_tags: string[]
+          symbol: string
+          timeframe: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_patterns?: string[]
+          ai_quality_score?: number | null
+          ai_raw?: Json | null
+          ai_status?: string
+          ai_summary?: string | null
+          created_at?: string
+          id?: string
+          image_path: string
+          notes?: string | null
+          occurred_at?: string
+          outcome: string
+          r_multiple?: number | null
+          session: string
+          setup_type?: string | null
+          structure_tags?: string[]
+          symbol: string
+          timeframe?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_patterns?: string[]
+          ai_quality_score?: number | null
+          ai_raw?: Json | null
+          ai_status?: string
+          ai_summary?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string
+          notes?: string | null
+          occurred_at?: string
+          outcome?: string
+          r_multiple?: number | null
+          session?: string
+          setup_type?: string | null
+          structure_tags?: string[]
+          symbol?: string
+          timeframe?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feature_flags: {
         Row: {
           created_at: string | null
