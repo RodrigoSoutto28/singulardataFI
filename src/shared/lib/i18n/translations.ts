@@ -1153,6 +1153,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Muestras', winsVsStops: 'Ganadoras / Stops', bySession: 'Por sesión', topPatterns: 'Patrones frecuentes',
       saved: 'Muestra guardada', deleted: 'Muestra eliminada', deleteConfirm: '¿Eliminar esta muestra?',
       errorImage: 'Subí una imagen del gráfico', errorRequired: 'Completá los campos obligatorios', detail: 'Detalle de la muestra',
+      dropImage: 'Arrastrá la captura acá', dropHint: 'o pegá con Ctrl+V · PNG, JPG o WEBP',
+      sectionCapture: 'Captura y contexto', sectionResult: 'Resultado y estructura',
+      formProgress: 'Completitud', uploading: 'Subiendo captura...',
+      avgQuality: 'Calidad promedio', sessionBreakdown: 'Distribución por sesión',
+      patternWinRate: 'Efectividad por patrón', winRateShort: 'Aciertos',
+      contextBlock: 'Contexto del operador', zoomHint: 'Click para ampliar', tagsSelected: 'seleccionadas',
+
     },
   },
   EN: {
