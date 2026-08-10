@@ -1674,6 +1674,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Samples', winsVsStops: 'Winners / Stops', bySession: 'By session', topPatterns: 'Frequent patterns',
       saved: 'Sample saved', deleted: 'Sample deleted', deleteConfirm: 'Delete this sample?',
       errorImage: 'Upload a chart image', errorRequired: 'Complete the required fields', detail: 'Sample detail',
+      dropImage: 'Drop the capture here', dropHint: 'or paste with Ctrl+V · PNG, JPG or WEBP',
+      sectionCapture: 'Capture and context', sectionResult: 'Outcome and structure',
+      formProgress: 'Completion', uploading: 'Uploading capture...',
+      avgQuality: 'Average quality', sessionBreakdown: 'Session breakdown',
+      patternWinRate: 'Pattern effectiveness', winRateShort: 'Win rate',
+      contextBlock: 'Trader context', zoomHint: 'Click to enlarge', tagsSelected: 'selected',
+
     },
   },
   PT: {
