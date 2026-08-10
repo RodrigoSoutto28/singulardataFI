@@ -528,7 +528,21 @@ export interface Translations {
     errorImage: string;
     errorRequired: string;
     detail: string;
+    dropImage: string;
+    dropHint: string;
+    sectionCapture: string;
+    sectionResult: string;
+    formProgress: string;
+    uploading: string;
+    avgQuality: string;
+    sessionBreakdown: string;
+    patternWinRate: string;
+    winRateShort: string;
+    contextBlock: string;
+    zoomHint: string;
+    tagsSelected: string;
   };
+
 
   welcomeModal?: {
     sampleLoaded: string;
