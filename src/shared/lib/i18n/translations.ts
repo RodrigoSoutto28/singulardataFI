@@ -528,7 +528,21 @@ export interface Translations {
     errorImage: string;
     errorRequired: string;
     detail: string;
+    dropImage: string;
+    dropHint: string;
+    sectionCapture: string;
+    sectionResult: string;
+    formProgress: string;
+    uploading: string;
+    avgQuality: string;
+    sessionBreakdown: string;
+    patternWinRate: string;
+    winRateShort: string;
+    contextBlock: string;
+    zoomHint: string;
+    tagsSelected: string;
   };
+
 
   welcomeModal?: {
     sampleLoaded: string;
@@ -1139,6 +1153,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Muestras', winsVsStops: 'Ganadoras / Stops', bySession: 'Por sesión', topPatterns: 'Patrones frecuentes',
       saved: 'Muestra guardada', deleted: 'Muestra eliminada', deleteConfirm: '¿Eliminar esta muestra?',
       errorImage: 'Subí una imagen del gráfico', errorRequired: 'Completá los campos obligatorios', detail: 'Detalle de la muestra',
+      dropImage: 'Arrastrá la captura acá', dropHint: 'o pegá con Ctrl+V · PNG, JPG o WEBP',
+      sectionCapture: 'Captura y contexto', sectionResult: 'Resultado y estructura',
+      formProgress: 'Completitud', uploading: 'Subiendo captura...',
+      avgQuality: 'Calidad promedio', sessionBreakdown: 'Distribución por sesión',
+      patternWinRate: 'Efectividad por patrón', winRateShort: 'Aciertos',
+      contextBlock: 'Contexto del operador', zoomHint: 'Click para ampliar', tagsSelected: 'seleccionadas',
+
     },
   },
   EN: {
@@ -1653,6 +1674,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Samples', winsVsStops: 'Winners / Stops', bySession: 'By session', topPatterns: 'Frequent patterns',
       saved: 'Sample saved', deleted: 'Sample deleted', deleteConfirm: 'Delete this sample?',
       errorImage: 'Upload a chart image', errorRequired: 'Complete the required fields', detail: 'Sample detail',
+      dropImage: 'Drop the capture here', dropHint: 'or paste with Ctrl+V · PNG, JPG or WEBP',
+      sectionCapture: 'Capture and context', sectionResult: 'Outcome and structure',
+      formProgress: 'Completion', uploading: 'Uploading capture...',
+      avgQuality: 'Average quality', sessionBreakdown: 'Session breakdown',
+      patternWinRate: 'Pattern effectiveness', winRateShort: 'Win rate',
+      contextBlock: 'Trader context', zoomHint: 'Click to enlarge', tagsSelected: 'selected',
+
     },
   },
   PT: {
@@ -2167,6 +2195,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Amostras', winsVsStops: 'Vencedoras / Stops', bySession: 'Por sessão', topPatterns: 'Padrões frequentes',
       saved: 'Amostra salva', deleted: 'Amostra excluída', deleteConfirm: 'Excluir esta amostra?',
       errorImage: 'Envie uma imagem do gráfico', errorRequired: 'Preencha os campos obrigatórios', detail: 'Detalhe da amostra',
+      dropImage: 'Arraste a captura aqui', dropHint: 'ou cole com Ctrl+V · PNG, JPG ou WEBP',
+      sectionCapture: 'Captura e contexto', sectionResult: 'Resultado e estrutura',
+      formProgress: 'Preenchimento', uploading: 'Enviando captura...',
+      avgQuality: 'Qualidade média', sessionBreakdown: 'Distribuição por sessão',
+      patternWinRate: 'Eficácia por padrão', winRateShort: 'Acertos',
+      contextBlock: 'Contexto do operador', zoomHint: 'Clique para ampliar', tagsSelected: 'selecionadas',
+
     },
   },
 };
