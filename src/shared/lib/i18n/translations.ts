@@ -2195,6 +2195,13 @@ const baseTranslations: Record<Language, Translations> = {
       totalSamples: 'Amostras', winsVsStops: 'Vencedoras / Stops', bySession: 'Por sessão', topPatterns: 'Padrões frequentes',
       saved: 'Amostra salva', deleted: 'Amostra excluída', deleteConfirm: 'Excluir esta amostra?',
       errorImage: 'Envie uma imagem do gráfico', errorRequired: 'Preencha os campos obrigatórios', detail: 'Detalhe da amostra',
+      dropImage: 'Arraste a captura aqui', dropHint: 'ou cole com Ctrl+V · PNG, JPG ou WEBP',
+      sectionCapture: 'Captura e contexto', sectionResult: 'Resultado e estrutura',
+      formProgress: 'Preenchimento', uploading: 'Enviando captura...',
+      avgQuality: 'Qualidade média', sessionBreakdown: 'Distribuição por sessão',
+      patternWinRate: 'Eficácia por padrão', winRateShort: 'Acertos',
+      contextBlock: 'Contexto do operador', zoomHint: 'Clique para ampliar', tagsSelected: 'selecionadas',
+
     },
   },
 };
