@@ -13,6 +13,8 @@ import { BrainSampleForm } from './components/BrainSampleForm';
 import { BrainSampleCard } from './components/BrainSampleCard';
 import { BrainSampleDetailModal } from './components/BrainSampleDetailModal';
 import { BrainSummary } from './components/BrainSummary';
+import { BrainPatternInsights } from './components/BrainPatternInsights';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { BRAIN_SESSIONS, type BrainSample } from './types';
 import { sessionLabel } from './utils/labels';
 import { toast } from 'sonner';
@@ -20,6 +22,7 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
 const Brain3D = createIcon3DComponent('brain', true);
+
 
 export default function MarketBrain() {
   const { t } = useLanguage();
