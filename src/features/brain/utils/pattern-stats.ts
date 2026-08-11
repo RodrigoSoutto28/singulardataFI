@@ -14,7 +14,7 @@ export interface PatternStat {
 }
 
 export interface SessionPatternGroup {
-  session: string;
+  session: (typeof BRAIN_SESSIONS)[number];
   sampleCount: number;
   winRate: number;
   avgR: number | null;
