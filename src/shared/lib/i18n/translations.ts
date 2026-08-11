@@ -541,6 +541,23 @@ export interface Translations {
     contextBlock: string;
     zoomHint: string;
     tagsSelected: string;
+    tabLibrary: string;
+    tabPatterns: string;
+    patternsTitle: string;
+    patternsSubtitle: string;
+    patternsEmpty: string;
+    patternsEmptyDesc: string;
+    confidence: string;
+    confidenceHigh: string;
+    confidenceMedium: string;
+    confidenceLow: string;
+    confidenceInsufficient: string;
+    confidenceNote: string;
+    occurrences: string;
+    avgR: string;
+    featuredExamples: string;
+    minOccurrences: string;
+    sessionSamples: string;
   };
 
 
