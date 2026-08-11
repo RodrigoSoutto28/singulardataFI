@@ -541,6 +541,23 @@ export interface Translations {
     contextBlock: string;
     zoomHint: string;
     tagsSelected: string;
+    tabLibrary: string;
+    tabPatterns: string;
+    patternsTitle: string;
+    patternsSubtitle: string;
+    patternsEmpty: string;
+    patternsEmptyDesc: string;
+    confidence: string;
+    confidenceHigh: string;
+    confidenceMedium: string;
+    confidenceLow: string;
+    confidenceInsufficient: string;
+    confidenceNote: string;
+    occurrences: string;
+    avgR: string;
+    featuredExamples: string;
+    minOccurrences: string;
+    sessionSamples: string;
   };
 
 
@@ -1159,6 +1176,17 @@ const baseTranslations: Record<Language, Translations> = {
       avgQuality: 'Calidad promedio', sessionBreakdown: 'Distribución por sesión',
       patternWinRate: 'Efectividad por patrón', winRateShort: 'Aciertos',
       contextBlock: 'Contexto del operador', zoomHint: 'Click para ampliar', tagsSelected: 'seleccionadas',
+      tabLibrary: 'Biblioteca', tabPatterns: 'Patrones por sesión',
+      patternsTitle: 'Patrones consolidados por sesión',
+      patternsSubtitle: 'Agrupación de patrones detectados por la IA, con métricas de confianza y ejemplos destacados.',
+      patternsEmpty: 'Todavía no hay patrones consolidados',
+      patternsEmptyDesc: 'Cargá muestras y esperá el análisis IA para ver patrones por sesión.',
+      confidence: 'Confianza', confidenceHigh: 'Alta', confidenceMedium: 'Media',
+      confidenceLow: 'Baja', confidenceInsufficient: 'Insuficiente',
+      confidenceNote: 'Los patrones con pocas muestras no son estadísticamente concluyentes.',
+      occurrences: 'apariciones', avgR: 'R medio',
+      featuredExamples: 'Ejemplos destacados', minOccurrences: 'Mínimo de apariciones',
+      sessionSamples: 'muestras',
 
     },
   },
@@ -1680,6 +1708,17 @@ const baseTranslations: Record<Language, Translations> = {
       avgQuality: 'Average quality', sessionBreakdown: 'Session breakdown',
       patternWinRate: 'Pattern effectiveness', winRateShort: 'Win rate',
       contextBlock: 'Trader context', zoomHint: 'Click to enlarge', tagsSelected: 'selected',
+      tabLibrary: 'Library', tabPatterns: 'Patterns by session',
+      patternsTitle: 'Consolidated patterns by session',
+      patternsSubtitle: 'AI-detected patterns grouped by market session, with confidence metrics and featured examples.',
+      patternsEmpty: 'No consolidated patterns yet',
+      patternsEmptyDesc: 'Upload samples and wait for the AI analysis to see patterns by session.',
+      confidence: 'Confidence', confidenceHigh: 'High', confidenceMedium: 'Medium',
+      confidenceLow: 'Low', confidenceInsufficient: 'Insufficient',
+      confidenceNote: 'Patterns with few samples are not statistically conclusive.',
+      occurrences: 'occurrences', avgR: 'Avg R',
+      featuredExamples: 'Featured examples', minOccurrences: 'Minimum occurrences',
+      sessionSamples: 'samples',
 
     },
   },
@@ -2201,6 +2240,17 @@ const baseTranslations: Record<Language, Translations> = {
       avgQuality: 'Qualidade média', sessionBreakdown: 'Distribuição por sessão',
       patternWinRate: 'Eficácia por padrão', winRateShort: 'Acertos',
       contextBlock: 'Contexto do operador', zoomHint: 'Clique para ampliar', tagsSelected: 'selecionadas',
+      tabLibrary: 'Biblioteca', tabPatterns: 'Padrões por sessão',
+      patternsTitle: 'Padrões consolidados por sessão',
+      patternsSubtitle: 'Padrões detectados pela IA agrupados por sessão de mercado, com métricas de confiança e exemplos destacados.',
+      patternsEmpty: 'Ainda não há padrões consolidados',
+      patternsEmptyDesc: 'Carregue amostras e aguarde a análise de IA para ver padrões por sessão.',
+      confidence: 'Confiança', confidenceHigh: 'Alta', confidenceMedium: 'Média',
+      confidenceLow: 'Baixa', confidenceInsufficient: 'Insuficiente',
+      confidenceNote: 'Padrões com poucas amostras não são estatisticamente conclusivos.',
+      occurrences: 'ocorrências', avgR: 'R médio',
+      featuredExamples: 'Exemplos destacados', minOccurrences: 'Mínimo de ocorrências',
+      sessionSamples: 'amostras',
 
     },
   },

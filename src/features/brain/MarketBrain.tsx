@@ -13,6 +13,8 @@ import { BrainSampleForm } from './components/BrainSampleForm';
 import { BrainSampleCard } from './components/BrainSampleCard';
 import { BrainSampleDetailModal } from './components/BrainSampleDetailModal';
 import { BrainSummary } from './components/BrainSummary';
+import { BrainPatternInsights } from './components/BrainPatternInsights';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { BRAIN_SESSIONS, type BrainSample } from './types';
 import { sessionLabel } from './utils/labels';
 import { toast } from 'sonner';
@@ -20,6 +22,7 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { createIcon3DComponent } from '@/shared/components/ui/Icon3D';
 
 const Brain3D = createIcon3DComponent('brain', true);
+
 
 export default function MarketBrain() {
   const { t } = useLanguage();
@@ -66,68 +69,82 @@ export default function MarketBrain() {
 
       <BrainSummary samples={samples} />
 
-      <BrainSampleForm
-        isSubmitting={createSample.isPending}
-        onSubmit={(input) =>
-          createSample.mutate(input, {
-            onSuccess: () => toast.success(t.brain.saved),
-          })
-        }
-      />
+      <Tabs defaultValue="library" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="library">{t.brain.tabLibrary}</TabsTrigger>
+          <TabsTrigger value="patterns">{t.brain.tabPatterns}</TabsTrigger>
+        </TabsList>
 
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t.brain.searchPlaceholder}
-            className="sm:max-w-xs"
+        <TabsContent value="library" className="space-y-6">
+          <BrainSampleForm
+            isSubmitting={createSample.isPending}
+            onSubmit={(input) =>
+              createSample.mutate(input, {
+                onSuccess: () => toast.success(t.brain.saved),
+              })
+            }
           />
-          <Select value={sessionFilter} onValueChange={setSessionFilter}>
-            <SelectTrigger className="sm:w-44">
-              <SelectValue placeholder={t.brain.filterSession} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t.brain.all}</SelectItem>
-              {BRAIN_SESSIONS.map((s) => (
-                <SelectItem key={s} value={s}>{sessionLabel(t, s)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={outcomeFilter} onValueChange={setOutcomeFilter}>
-            <SelectTrigger className="sm:w-44">
-              <SelectValue placeholder={t.brain.filterOutcome} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t.brain.all}</SelectItem>
-              <SelectItem value="win">{t.brain.outcomeWin}</SelectItem>
-              <SelectItem value="stop">{t.brain.outcomeStop}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">{t.common.loading}</p>
-        ) : filtered.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 flex flex-col items-center text-center gap-2">
-              <div className="h-12 w-12"><Brain3D className="h-full w-full opacity-70" /></div>
-              <p className="text-sm font-medium">{t.brain.empty}</p>
-              <p className="text-xs text-muted-foreground">{t.brain.emptyDesc}</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((sample) => (
-              <BrainSampleCard
-                key={sample.id}
-                sample={sample}
-                onClick={() => setSelected(sample)}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t.brain.searchPlaceholder}
+                className="sm:max-w-xs"
               />
-            ))}
+              <Select value={sessionFilter} onValueChange={setSessionFilter}>
+                <SelectTrigger className="sm:w-44">
+                  <SelectValue placeholder={t.brain.filterSession} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.brain.all}</SelectItem>
+                  {BRAIN_SESSIONS.map((s) => (
+                    <SelectItem key={s} value={s}>{sessionLabel(t, s)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={outcomeFilter} onValueChange={setOutcomeFilter}>
+                <SelectTrigger className="sm:w-44">
+                  <SelectValue placeholder={t.brain.filterOutcome} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.brain.all}</SelectItem>
+                  <SelectItem value="win">{t.brain.outcomeWin}</SelectItem>
+                  <SelectItem value="stop">{t.brain.outcomeStop}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">{t.common.loading}</p>
+            ) : filtered.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 flex flex-col items-center text-center gap-2">
+                  <div className="h-12 w-12"><Brain3D className="h-full w-full opacity-70" /></div>
+                  <p className="text-sm font-medium">{t.brain.empty}</p>
+                  <p className="text-xs text-muted-foreground">{t.brain.emptyDesc}</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filtered.map((sample) => (
+                  <BrainSampleCard
+                    key={sample.id}
+                    sample={sample}
+                    onClick={() => setSelected(sample)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="patterns">
+          <BrainPatternInsights samples={samples} onSelectSample={setSelected} />
+        </TabsContent>
+      </Tabs>
+
 
       <BrainSampleDetailModal
         sample={current}
